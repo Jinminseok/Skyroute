@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}">
+<head>
+	<title>회원가입</title>
+	<link rel="stylesheet" th:href="@{/assets/css/member.css}"> 
+	<script type="text/javascript" th:src="@{/assets/js/jquery-3.7.1.min.js}"></script>
+	<script type="text/javascript" th:src="@{/assets/js/member.login.js}"></script>
+</head>  
+<body>	
+<div layout:fragment="content" class="page-main">
+	<h2>회원로그인</h2>
+	<!--/* th:action + method="post" 형식으로 명시할 경우 CSRF 토큰 자동 생성 */-->
+	<!-- /* 
+	action="login" 경우 수동 명시
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+	*/ -->
+	<form th:action="@{login}" id="member_login" method="post">
+		<div class="align-center error-invalid error-color" th:if="${error == 'error'}">아이디 또는 비밀번호 불일치</div>
+		<div class="align-center error-invalid error-color"  th:if="${error == 'error_suspended'}">정지회원입니다.</div>
+		<ul>
+			<li class="floating-label">
+				<input type="text" id="id" name="id" placeholder="아이디" autocomplete="off" class="form-input">
+				<label for="id">아이디</label>
+				<div id="error_id" class="error-color"></div>
+			</li>
+			<li class="floating-label">
+				<input type="password" id="passwd" name="passwd" placeholder="비밀번호" class="form-input">
+				<label for="passwd">비밀번호</label>
+				<div id="error_passwd" class="error-color"></div>
+			</li>
+			<li>
+				<label for="remember-me"><input type="checkbox" name="remember-me" id="remember-me">로그인상태유지</label>
+			</li>
+		</ul>			
+		<div>
+			<input type="submit" class="login-btn" value="로그인">
+		</div>
+	</form>
+</div>
+</body>
+</html>
+
+	
+	
+	
+
+
+
