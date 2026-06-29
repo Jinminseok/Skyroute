@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout_basic}">
 <head>
@@ -7,10 +8,21 @@
 	<link rel="stylesheet" th:href="@{/assets/css/main.css}"> 
 </head>  
 <body>
+
 <div layout:fragment="content" class="page-main">
-	<h3>메인</h3>
+
+	<div sec:authorize="isAnonymous()">
+		<h3>사용자 비로그인</h3>
+	</div>
+
+	<div sec:authorize="isAuthenticated()">
+		<h3>메인 화면</h3>
+		
+		<p><span sec:authentication="principal.memberVO.id"></span>님 환영합니다!</p>
+		
+		<p><span sec:authentication="principal.memberVO.userName"></span>님 환영합니다!</p>
+	</div>
+
 </div>
 </body>
 </html>
-
-

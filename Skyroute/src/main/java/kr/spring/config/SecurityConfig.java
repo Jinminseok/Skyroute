@@ -77,16 +77,18 @@ public class SecurityConfig{
 						)
 				// 일반 로그인 설정
 				.formLogin(login -> login 
-						// 사용자 정의 로그인 페이지 주소
-						.loginPage("/member/login")
-						// 로그인 성공 시 처리
-						.successHandler(authenticationSuccessHandler)
-						// 로그인 실패 시 처리
-						.failureHandler(authenticationFailureHandler)
-						 // 로그인 폼의 아이디 input name
-						.usernameParameter("id")
-						// 로그인 폼의 비밀번호 input name
-						.passwordParameter("passwd"))
+				        // 사용자 정의 로그인 페이지 주소
+				        .loginPage("/member/login")
+				        
+				        // ★ 여기를 원상복구 시켜줍니다! (CustomSuccessHandler 사용) ★
+				        .successHandler(authenticationSuccessHandler)
+				        
+				        // 로그인 실패 시 처리
+				        .failureHandler(authenticationFailureHandler)
+				         // 로그인 폼의 아이디 input name
+				        .usernameParameter("id")
+				        // 로그인 폼의 비밀번호 input name
+				        .passwordParameter("passwd"))
 				// 로그아웃 설정
 				.logout(logout -> logout 
 						// 로그아웃 요청 URL

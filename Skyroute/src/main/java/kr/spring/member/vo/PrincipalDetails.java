@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -39,13 +40,7 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
 	@Override 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Collection<GrantedAuthority> collect = new ArrayList<>(); // ArrayList는 Collection의 자식 타입이다.
-		collect.add(new GrantedAuthority() {
-			@Override
-			public String getAuthority() {
-				log.debug("memberVO : " + memberVO);
-				return memberVO.getAuthority();
-			}
-		});
+		collect.add(new SimpleGrantedAuthority(memberVO.getAuthority()));
 		return collect;
 	}
 	@Override 

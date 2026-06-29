@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      
+<head>
+    <link rel="stylesheet" th:href="@{/assets/css/member.css}"> 
+    <script type="text/javascript" th:src="@{/assets/js/jquery-3.7.1.min.js}"></script>
+    <script type="text/javascript" th:src="@{/assets/js/member.login.js}"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+
+    <style>
+      :root {
+        /* [오트밀 모노톤 웜톤 테마] */
+        --primary: #78716C; 
+        --primary-dark: #57534E;
+        --primary-light: rgba(120, 113, 108, 0.08);
+        --text-dark: #1C1917; 
+        --text-gray: #57534E;
+        --text-light: #A8A29E;
+        
+        --gradient-bg: linear-gradient(180deg, #F5F5F4 0%, #FAF9F6 45%, #FDFDFB 80%, #FFFFFF 100%);
+        --bg-white: rgba(255, 255, 255, 0.85); 
+        --border: rgba(120, 113, 108, 0.2); 
+        
+        --shadow-sm: 0 4px 14px rgba(120, 113, 108, 0.03); 
+        --shadow-lg: 0 20px 40px rgba(120, 113, 108, 0.08);
+      }
+
+      /* layout_basic 구조 내에서 화면 전체를 채우기 위한 래퍼 클래스 */
+      .login-wrapper {
+        background: var(--gradient-bg); 
+        color: var(--text-dark); 
+        font-family: 'Noto Sans KR', sans-serif; 
+        font-size: 13.5px; 
+        line-height: 1.5; 
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+      
+      /* 로그인 컨테이너 */
+      .login-container {
+        width: 100%;
+        max-width: 420px;
+        background: var(--bg-white);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 48px 40px;
+        box-shadow: var(--shadow-lg);
+        animation: slideUp 0.4s ease-out forwards;
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      @keyframes slideUp {
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* 로고 영역 */
+      .logo-wrap { text-align: center; margin-bottom: 32px; }
+      .logo-wrap .material-symbols-outlined { font-size: 48px; color: var(--primary); margin-bottom: 8px; }
+      .logo-wrap h2 { font-size: 22px; font-weight: 700; color: var(--text-dark); letter-spacing: -0.5px; margin: 0; }
+      .logo-wrap p { color: var(--text-gray); font-size: 13px; margin-top: 4px; font-weight: 500; }
+
+      /* 입력 폼 영역 */
+      .form-group { margin-bottom: 20px; }
+      .form-group label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-gray); margin-bottom: 6px; text-align: left; }
+      
+      .input-wrap { position: relative; }
+      .input-wrap .material-symbols-outlined { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-light); font-size: 20px; }
+      .input {
+        width: 100%; padding: 12px 14px 12px 42px; border: 1px solid var(--border); border-radius: 8px;
+        font-family: inherit; font-size: 13.5px; outline: none; transition: all 0.2s;
+        background: rgba(255, 255, 255, 0.9); color: var(--text-dark); box-sizing: border-box;
+      }
+      .input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px var(--primary-light); }
+      .input::placeholder { color: var(--text-light); }
+
+      /* 버튼 및 보조 링크 */
+      .btn-submit {
+        width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 8px;
+        font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 12px;
+        box-shadow: 0 4px 12px rgba(120, 113, 108, 0.25); box-sizing: border-box;
+      }
+      .btn-submit:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(120, 113, 108, 0.35); }
+      .btn-submit:active { transform: translateY(1px); }
+
+      .options { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; font-size: 12.5px; }
+      .options label { display: flex; align-items: center; gap: 6px; color: var(--text-gray); font-weight: 500; cursor: pointer; }
+      
+      /* 에러 메시지 스타일 세팅 */
+      .error-color { color: #DC2626; font-size: 12px; margin-top: 6px; text-align: left; }
+      .error-invalid { 
+        text-align: center; margin-bottom: 20px; font-weight: 600; padding: 12px; 
+        background: #FEF2F2; border-radius: 8px; border: 1px solid #FCA5A5; font-size: 13px;
+      }
+
+      /* 푸터 카피라이트 */
+      .footer-copy { margin-top: 32px; text-align: center; color: var(--text-light); font-size: 12px; }
+    </style>
+</head>  
+<body>	
+
+<div layout:fragment="content" class="page-main login-wrapper">
+    
+    <div class="login-container">
+        <div class="logo-wrap">
+            <span class="material-symbols-outlined">admin_panel_settings</span>
+            <h2>관리자 시스템</h2>
+            <p>관리자 전용 시스템</p>
+        </div>
+
+        <form th:action="@{/member/login}" id="member_login" method="post">
+            <div class="align-center error-invalid error-color" th:if="${error == 'error'}">아이디 또는 비밀번호 불일치</div>
+            <div class="align-center error-invalid error-color" th:if="${error == 'error_suspended'}">정지회원입니다.</div>
+            
+            <div class="form-group">
+                <label for="id">아이디</label>
+                <div class="input-wrap">
+                    <span class="material-symbols-outlined">shield_person</span>
+                    <input type="text" id="id" name="id" placeholder="아이디를 입력하세요" autocomplete="off" class="input form-input">
+                </div>
+                <div id="error_id" class="error-color"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="passwd">비밀번호</label>
+                <div class="input-wrap">
+                    <span class="material-symbols-outlined">lock</span>
+                    <input type="password" id="passwd" name="passwd" placeholder="비밀번호를 입력하세요" class="input form-input">
+                </div>
+                <div id="error_passwd" class="error-color"></div>
+            </div>
+
+            <button type="submit" class="btn-submit login-btn">로그인</button>
+
+            <div class="options">
+                <label for="remember-me">
+                    <input type="checkbox" name="remember-me" id="remember-me" style="accent-color: var(--primary);"> 로그인상태유지
+                </label>
+            </div>
+        </form>
+    </div>
+
+    <div class="footer-copy">
+        &copy; 2026 Air Nuri System. All rights reserved.
+    </div>
+    
+</div>
+</body>
+</html>
