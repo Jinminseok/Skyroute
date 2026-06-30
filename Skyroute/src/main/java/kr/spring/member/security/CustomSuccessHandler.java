@@ -32,8 +32,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
        
 		if(auth != null && auth.contains("ADMIN")) { 			
             // 1. 관리자인 경우 강제 이동 후 return
-			log.info("🚀 [SuccessHandler] 관리자 로그인! /admin/home 으로 보냅니다."); // 추가
-            response.sendRedirect("/admin/home");
+			log.info("🚀 [SuccessHandler] 관리자 로그인! /admin/base1 으로 보냅니다."); // 추가
+            response.sendRedirect("/admin/base1");
             return;
             
 		} else if(auth != null && auth.contains("SUSPENDED")) { 	

@@ -8,12 +8,30 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 public class AdminController {
 
-
-	@GetMapping("/admin/home")
+	@GetMapping("/admin/base1")
 	public String adminMain() {
-		log.info("🎯 [AdminController] 관리자 메인 페이지 진입 성공!"); // 추가
-		
-	    return "thviews/admin_main/admin_main"; 
+	    
+	    return "thviews/admin_main/admin_base1"; 
 	}
+	
+	
+	@GetMapping("/admin/base2")
+	public String adminBase2() {
+	    
+	    return "thviews/admin_main/admin_base2"; 
+	}
+
+
+    // 3. 계정/회원 관리 페이지
+    @GetMapping("/accounts")
+    public String accounts() {
+        return "thviews/admin_main/admin_accounts";
+    }
+
+    // 4. 전사 운영 통계 페이지
+    @GetMapping("/statistics")
+    public String statistics() {
+        return "thviews/admin_main/admin_statistics";
+    }
 	
 }

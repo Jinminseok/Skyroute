@@ -27,7 +27,7 @@ public class MainController {
 			
 		
 			if (auth != null && auth.contains("ADMIN")) {
-				return "redirect:/admin/home";
+				return "redirect:/admin/base1";
 			}
 		}
 		return "redirect:/main/home";
