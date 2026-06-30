@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에어누리 - 총괄 관리자 메인</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+
+<link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+</head>
+<body>
+
+ <header th:replace="~{fragments/admin_header :: headerFragment('statistics')}"></header>
+<main class="main">
+    <div>
+      <h1>전사 통합 운영 통계 대시보드</h1>
+      <p class="desc">매출·예약·환불·탑승객·운영현황 지표를 기간 조건으로 조회하고 차트로 시각화합니다.</p>
+
+      <div style="display: flex; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 20px;">
+        <button class="tab-btn active" onclick="switchTab('revenue', this)" style="padding: 10px 20px; background: none; border: none; font-size: 14px; font-weight: 700; color: var(--primary); border-bottom: 2px solid var(--primary); cursor: pointer;">매출 통계</button>
+        <button class="tab-btn" onclick="switchTab('booking', this)" style="padding: 10px 20px; background: none; border: none; font-size: 14px; font-weight: 500; color: var(--text-gray); border-bottom: 2px solid transparent; cursor: pointer;">예약 통계</button>
+      </div>
+
+      <div id="tab-revenue" class="sub-page" style="display: block;">
+        
+        <div class="card">
+          <div class="toolbar">
+            <label style="font-size:12.5px; font-weight:600; color:var(--text-gray);">조회기간</label>
+            <input type="date" style="padding:6px; border:1px solid var(--border); border-radius:6px;">
+            <span style="color:var(--text-light);">~</span>
+            <input type="date" style="padding:6px; border:1px solid var(--border); border-radius:6px;">
+            <button class="btn btn-primary btn-sm" style="margin-left:8px;">조회</button>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; padding:40px;">
+            <span class="material-symbols-outlined" style="font-size:36px; color:var(--text-light); margin-bottom:12px;">payments</span>
+            <h3 style="font-size:24px; font-weight:700;">148,500,000 원</h3>
+            <p style="color:var(--text-gray); font-size:13px;">조회기간 누적 매출</p>
+          </div>
+          
+          <div class="card">
+            <h3 style="font-size:16px; font-weight:700; margin-bottom:16px;">노선별 매출 비중</h3>
+            <div class="table-wrap">
+              <table class="data">
+                <thead><tr><th>노선</th><th>매출액</th></tr></thead>
+                <tbody>
+                  <tr><td>ICN → JFK</td><td style="font-weight:600;">88,000,000 원</td></tr>
+                  <tr><td>GMP → CJU</td><td style="font-weight:600;">32,000,000 원</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-booking" class="sub-page" style="display: none;">
+        <div class="grid grid-2">
+           <div class="card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; padding:40px;">
+            <span class="material-symbols-outlined" style="font-size:36px; color:var(--text-light); margin-bottom:12px;">receipt_long</span>
+            <h3 style="font-size:24px; font-weight:700;">1,982 건</h3>
+            <p style="color:var(--text-gray); font-size:13px;">조회기간 전체 예약 건수</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // 내부 탭 전환 스크립트
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.style.color = 'var(--text-gray)';
+        btn.style.fontWeight = '500';
+        btn.style.borderBottomColor = 'transparent';
+      });
+      el.style.color = 'var(--primary)';
+      el.style.fontWeight = '700';
+      el.style.borderBottomColor = 'var(--primary)';
+
+      document.querySelectorAll('.sub-page').forEach(page => page.style.display = 'none');
+      document.getElementById('tab-' + tabId).style.display = 'block';
+    }
+  </script>
+</body>
+  
+</html>

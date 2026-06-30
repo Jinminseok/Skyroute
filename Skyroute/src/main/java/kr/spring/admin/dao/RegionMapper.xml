@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="kr.spring.admin.dao.RegionMapper"> 
+	 <select id="selectRegionList" resultType="kr.spring.admin.vo.RegionVO">
+        SELECT 
+            region_id AS regionId,
+            region_name AS regionName,
+            is_active AS isActive
+        FROM REGION
+        ORDER BY region_id ASC
+    </select>
+
+    <select id="selectRegion" parameterType="int" resultType="kr.spring.admin.vo.RegionVO">
+        SELECT 
+            region_id AS regionId,
+            region_name AS regionName,
+            is_active AS isActive
+        FROM REGION
+        WHERE region_id = #{regionId}
+    </select>
+
+    <insert id="insertRegion" parameterType="kr.spring.admin.vo.RegionVO">
+        INSERT INTO REGION (
+        region_name, 
+        is_active
+    ) VALUES (
+        #{regionName}, 
+        NVL(#{isActive, jdbcType=VARCHAR}, 'Y') 
+    )
+    </insert>
+
+    <update id="updateRegion" parameterType="kr.spring.admin.vo.RegionVO">
+        UPDATE REGION
+        SET 
+            region_name = #{regionName},
+            is_active = #{isActive}
+        WHERE region_id = #{regionId}
+    </update>
+
+    <delete id="deleteRegion" parameterType="int">
+        DELETE FROM REGION
+        WHERE region_id = #{regionId}
+    </delete>
+    
+    <update id="updateRegionStatus">
+   		 UPDATE REGION
+   		 SET is_active = #{isActive}
+  		  WHERE region_id = #{regionId}
+	</update>
+</mapper>
+
+
+
+
+
+
+

@@ -80,8 +80,8 @@ public class SecurityConfig{
 				        // 사용자 정의 로그인 페이지 주소
 				        .loginPage("/member/login")
 				        
-				        // ★ 여기를 원상복구 시켜줍니다! (CustomSuccessHandler 사용) ★
-				        .successHandler(authenticationSuccessHandler)
+				        // ★ 수정된 부분: MainController의 "/" 경로로 무조건 이동하게 설정 (권한별 분기 정상 작동) ★
+				        .defaultSuccessUrl("/", true)
 				        
 				        // 로그인 실패 시 처리
 				        .failureHandler(authenticationFailureHandler)
@@ -132,9 +132,9 @@ public class SecurityConfig{
 	 * series :  사용자의 로그인 세션을 식별하는 고유한 값
 	 * username: 로그인한 사용자의 ID
 	 * token: 사용자의 브라우저에 저장되는 토큰 값(쿠키에 저장되는 암호화된 토큰 값)
-	 *        이 토큰을 통해 시스템은 사용자를 인증
-	 *        매번 로그인이 유지될 때마다 갱신
-	 *        토큰이 일치하지 않으면 Remember-Me 세션이 무효화
+	 * 이 토큰을 통해 시스템은 사용자를 인증
+	 * 매번 로그인이 유지될 때마다 갱신
+	 * 토큰이 일치하지 않으면 Remember-Me 세션이 무효화
 	 * last_used: 토큰이 마지막으로 사용된 시각. 토큰의 유효 기간을 관리하는 데 사용
 	 */
 	@Bean
@@ -146,8 +146,3 @@ public class SecurityConfig{
 		return repo;
 	}
 }
-
-
-
-
-
