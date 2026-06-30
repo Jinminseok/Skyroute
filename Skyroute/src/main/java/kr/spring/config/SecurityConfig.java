@@ -63,7 +63,7 @@ public class SecurityConfig{
 				.authorizeHttpRequests(authorize-> authorize
 						//롤 설정을 먼저 하고 permitAll()를 호출해야 정상적으로 롤이 지정됨
 						// /admin/**: ROLE_ADMIN 권한 필요 지정
-						.requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+						.requestMatchers("/admin/**").hasAuthority("ADMIN")
 						//기타 경로: 누구나 접근 가능
 						.requestMatchers(
 						        "/assets/**",

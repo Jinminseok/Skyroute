@@ -111,6 +111,8 @@ public class MemberVO{
 			return UserRole.USER.ordinal();//2
 		}else if(authority.equals(UserRole.ADMIN.getValue())) {
 			return UserRole.ADMIN.ordinal();//3
+		}else if(authority.equals(UserRole.STAFF.getValue())) {
+			return UserRole.STAFF.ordinal();//4
 		}else {
 			return -1;
 		}
