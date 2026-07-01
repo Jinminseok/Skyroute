@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>에어 - 공지·콘텐츠 관리</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
+
+<link rel="stylesheet" th:href="@{/assets/css/staff.css}">
+</head>
+
+<body>
+
+	<div th:replace="~{fragments/staff_header :: staffHeader('content')}"></div>
+
+	<main class="main">
+
+		<h1>사용자 노출 정보 및 콘텐츠 관리</h1>
+		<p class="desc">
+			사용자 페이지에 노출되는 공지사항, 이벤트, FAQ 데이터를 관리합니다.
+			현재는 하드코딩 화면 뼈대 단계이며, 추후 NOTICE / EVENT / FAQ 테이블과 연결합니다.
+		</p>
+
+		<div class="grid grid-4" style="margin-bottom:24px">
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px">
+						campaign
+					</span>
+					공지사항
+				</div>
+				<div class="value">
+					1<span class="unit">건</span>
+				</div>
+			</div>
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px; color:var(--primary)">
+						local_activity
+					</span>
+					이벤트
+				</div>
+				<div class="value" style="color:var(--primary)">
+					1<span class="unit">건</span>
+				</div>
+			</div>
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px; color:var(--ok)">
+						help
+					</span>
+					FAQ
+				</div>
+				<div class="value" style="color:var(--ok)">
+					1<span class="unit">건</span>
+				</div>
+			</div>
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px; color:var(--warn)">
+						visibility
+					</span>
+					사용자 노출 콘텐츠
+				</div>
+				<div class="value" style="color:var(--warn)">
+					3<span class="unit">건</span>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="tabs">
+			<button type="button"
+			        class="active"
+			        onclick="subTab('content', 'notice', this)">
+				공지사항 관리 (NOTICE)
+			</button>
+
+			<button type="button"
+			        onclick="subTab('content', 'event', this)">
+				이벤트 배너 관리 (EVENT)
+			</button>
+
+			<button type="button"
+			        onclick="subTab('content', 'faq', this)">
+				자주 묻는 질문 관리 (FAQ)
+			</button>
+		</div>
+
+		<!-- 공지사항 탭 -->
+		<div id="tab-c-notice" class="sub-page active">
+
+			<div class="toolbar">
+				<button type="button"
+				        class="btn btn-primary"
+				        onclick="openContentModal('notice', '등록')">
+					<span class="material-symbols-outlined" style="font-size:18px">
+						edit_document
+					</span>
+					새 공지사항 등록
+				</button>
+
+				<div class="grow"></div>
+
+				<span class="badge badge-scheduled">
+					NOTICE
+				</span>
+			</div>
+
+			<div class="card">
+				<div class="table-wrap">
+					<table class="data">
+						<thead>
+							<tr>
+								<th>공지 ID</th>
+								<th>공지 제목</th>
+								<th>본문 내용</th>
+								<th>공개 여부</th>
+								<th>등록 지상직</th>
+								<th>등록 일시</th>
+								<th>콘텐츠 편집</th>
+							</tr>
+						</thead>
+
+						<tbody id="noticeContentTable">
+							<!-- staff.js에서 하드코딩 데이터 바인딩 -->
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+		</div>
+
+		<!-- 이벤트 탭 -->
+		<div id="tab-c-event" class="sub-page">
+
+			<div class="toolbar">
+				<button type="button"
+				        class="btn btn-primary"
+				        onclick="openContentModal('event', '등록')">
+					<span class="material-symbols-outlined" style="font-size:18px">
+						add
+					</span>
+					새 이벤트 등록
+				</button>
+
+				<div class="grow"></div>
+
+				<span class="badge badge-scheduled">
+					EVENT
+				</span>
+			</div>
+
+			<div class="card">
+				<div class="table-wrap">
+					<table class="data">
+						<thead>
+							<tr>
+								<th>이벤트 ID</th>
+								<th>이벤트명</th>
+								<th>시작일</th>
+								<th>종료일</th>
+								<th>이미지 URL</th>
+								<th>노출 여부</th>
+								<th>종료 여부</th>
+								<th>콘텐츠 편집</th>
+							</tr>
+						</thead>
+
+						<tbody id="eventContentTable">
+							<!-- staff.js에서 하드코딩 데이터 바인딩 -->
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+		</div>
+
+		<!-- FAQ 탭 -->
+		<div id="tab-c-faq" class="sub-page">
+
+			<div class="toolbar">
+				<button type="button"
+				        class="btn btn-primary"
+				        onclick="openContentModal('faq', '등록')">
+					<span class="material-symbols-outlined" style="font-size:18px">
+						add
+					</span>
+					새 FAQ 등록
+				</button>
+
+				<div class="grow"></div>
+
+				<span class="badge badge-scheduled">
+					FAQ
+				</span>
+			</div>
+
+			<div class="card">
+				<div class="table-wrap">
+					<table class="data">
+						<thead>
+							<tr>
+								<th>FAQ ID</th>
+								<th>문의 카테고리</th>
+								<th>질문 내용</th>
+								<th>답변 내용</th>
+								<th>노출 여부</th>
+								<th>콘텐츠 편집</th>
+							</tr>
+						</thead>
+
+						<tbody id="faqContentTable">
+							<!-- staff.js에서 하드코딩 데이터 바인딩 -->
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+		</div>
+
+	</main>
+
+	<!-- 통합 동적 제어 편집 모달 -->
+	<div class="modal-overlay" id="globalModal">
+		<div class="modal">
+
+			<div class="modal-head">
+				<div>
+					<h3 id="globalModalTitle">콘텐츠 등록/수정</h3>
+				</div>
+
+				<button type="button"
+				        class="modal-close"
+				        onclick="closeModal()">
+					<span class="material-symbols-outlined">close</span>
+				</button>
+			</div>
+
+			<div class="modal-body" id="globalModalBody">
+				<!-- staff.js에서 등록/수정 폼 동적 생성 -->
+			</div>
+
+			<div class="modal-foot">
+				<button type="button"
+				        class="btn btn-ghost"
+				        onclick="closeModal()">
+					취소
+				</button>
+
+				<button type="button"
+				        class="btn btn-primary"
+				        id="globalModalSubmitBtn"
+				        onclick="saveGlobalModalData()">
+					데이터 저장
+				</button>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="toast-wrap" id="toasts"></div>
+
+	<script th:src="@{/assets/js/staff.js}"></script>
+
+</body>
+</html>

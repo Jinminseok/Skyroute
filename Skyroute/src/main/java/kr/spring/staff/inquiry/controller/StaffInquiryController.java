@@ -1,4 +1,4 @@
-package kr.spring.staff.operation.controller;
+package kr.spring.staff.inquiry.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -6,18 +6,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/staff/operation/checkin")
-public class StaffCheckinController {
+@RequestMapping("/staff/inquiry")
+public class StaffInquiryController {
 
 	@GetMapping("/list")
 	public String list(Model model) {
-		model.addAttribute("activeMenu", "operation");
-		return "thviews/staff_main/operation/passenger/passenger_list";
+		model.addAttribute("activeMenu", "inquiry");
+		return "thviews/staff_main/inquiry/inquiry_list";
 	}
 
 	@GetMapping("/detail")
 	public String detail(Model model) {
-		model.addAttribute("activeMenu", "operation");
-		return "thviews/staff_main/operation/passenger/passenger_list";
+		model.addAttribute("activeMenu", "inquiry");
+		return "thviews/staff_main/inquiry/inquiry_list";
 	}
 }

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<header th:fragment="staffHeader(activeMenu)"
+        class="header"
+        th:with="member=${#authentication != null 
+                         and #authentication.principal != 'anonymousUser' 
+                         ? #authentication.principal.memberVO 
+                         : null}">
+
+	<div class="logo">
+		<span class="material-symbols-outlined">airlines</span>
+		에어 지상직 콘솔
+	</div>
+
+	<nav class="top-nav">
+
+		<a th:href="@{/staff/schedule/today}"
+		   class="nav-link"
+		   th:classappend="${activeMenu == 'today'} ? ' active' : ''">
+			<span class="material-symbols-outlined">flight_takeoff</span>
+			오늘 항공편
+		</a>
+
+		<a th:href="@{/staff/schedule/list}"
+		   class="nav-link"
+		   th:classappend="${activeMenu == 'schedule'} ? ' active' : ''">
+			<span class="material-symbols-outlined">calendar_month</span>
+			운항 스케줄
+		</a>
+
+		<a th:href="@{/staff/operation/passenger/list}"
+		   class="nav-link"
+		   th:classappend="${activeMenu == 'operation'} ? ' active' : ''">
+			<span class="material-symbols-outlined">luggage</span>
+			탑승 관리
+		</a>
+
+		<a th:href="@{/staff/delay/list}"
+		   class="nav-link"
+		   th:classappend="${activeMenu == 'delay'} ? ' active' : ''">
+			<span class="material-symbols-outlined">warning</span>
+			지연·결항 관리
+		</a>
+
+		<a th:href="@{/staff/inquiry/list}"
+		   class="nav-link"
+		   th:classappend="${activeMenu == 'inquiry'} ? ' active' : ''">
+			<span class="material-symbols-outlined">forum</span>
+			고객 문의
+		</a>
+
+		<a th:href="@{/staff/content/list}"
+		   class="nav-link"
+		   th:classappend="${activeMenu == 'content'} ? ' active' : ''">
+			<span class="material-symbols-outlined">campaign</span>
+			공지·콘텐츠
+		</a>
+
+		<a th:href="@{/staff/basedata/airport/list}"
+		   class="nav-link"
+		   th:classappend="${activeMenu == 'base'} ? ' active' : ''">
+			<span class="material-symbols-outlined">database</span>
+			운영 기준 정보
+		</a>
+
+	</nav>
+
+	<div class="user-menu">
+
+		<div class="user-chip">
+			<div class="avatar"
+			     th:text="${member != null 
+			               and not #strings.isEmpty(member.name)
+			               ? #strings.substring(member.name, 0, 1)
+			               : 'S'}">
+				S
+			</div>
+
+			<div class="meta">
+				<div class="n"
+				     th:text="${member != null 
+				               and not #strings.isEmpty(member.name)
+				               ? member.name
+				               : '지상직 담당자'}">
+					지상직 담당자
+				</div>
+				<div class="r">운항 현장 지상직 (STAFF)</div>
+			</div>
+		</div>
+
+		<form th:action="@{/member/logout}" method="post" style="margin:0;">
+			<input type="hidden"
+			       th:if="${_csrf != null}"
+			       th:name="${_csrf.parameterName}"
+			       th:value="${_csrf.token}">
+
+			<button type="submit" class="btn-logout">
+				<span class="material-symbols-outlined">logout</span>
+				로그아웃
+			</button>
+		</form>
+
+	</div>
+
+</header>
+
+</html>

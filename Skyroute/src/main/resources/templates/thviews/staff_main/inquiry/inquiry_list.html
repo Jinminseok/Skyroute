@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>에어 - 고객 문의 관리</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
+
+<link rel="stylesheet" th:href="@{/assets/css/staff.css}">
+</head>
+
+<body>
+
+	<div th:replace="~{fragments/staff_header :: staffHeader('inquiry')}"></div>
+
+	<main class="main">
+
+		<h1>사용자 1:1 채팅 문의 및 자동 배정 관리</h1>
+		<p class="desc">
+			사용자가 등록한 1:1 채팅 문의를 조회하고, 담당 지상직이 답변 및 처리 상태 변경을 수행합니다.
+			추후 WebSocket/STOMP 기반 실시간 채팅과 연결합니다.
+		</p>
+
+		<div class="grid grid-4" style="margin-bottom:24px">
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px">
+						forum
+					</span>
+					전체 문의
+				</div>
+				<div class="value">
+					2<span class="unit">건</span>
+				</div>
+			</div>
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px; color:var(--warn)">
+						pending
+					</span>
+					처리중 문의
+				</div>
+				<div class="value" style="color:var(--warn)">
+					1<span class="unit">건</span>
+				</div>
+			</div>
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px; color:var(--ok)">
+						check_circle
+					</span>
+					해결 완료
+				</div>
+				<div class="value" style="color:var(--ok)">
+					1<span class="unit">건</span>
+				</div>
+			</div>
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px; color:var(--primary)">
+						support_agent
+					</span>
+					내 배정 문의
+				</div>
+				<div class="value" style="color:var(--primary)">
+					2<span class="unit">건</span>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="toolbar">
+			<input class="input"
+			       id="searchInquiryKeyword"
+			       placeholder="회원명 또는 문의 ID 검색"
+			       style="width:260px; flex-grow:0;">
+
+			<select class="select"
+			        id="searchInquiryStatus"
+			        style="width:180px; flex-grow:0;">
+				<option value="">전체 상태</option>
+				<option value="IN_PROGRESS">처리중</option>
+				<option value="RESOLVED">해결 완료</option>
+			</select>
+
+			<div class="grow"></div>
+
+			<span class="badge badge-scheduled">
+				CHAT_INQUIRY / CHAT_MESSAGE
+			</span>
+		</div>
+
+		<div class="card">
+
+			<div class="table-wrap">
+				<table class="data">
+					<thead>
+						<tr>
+							<th>문의 ID</th>
+							<th>회원 정보</th>
+							<th>담당 지상직 ID</th>
+							<th>현재 처리 상태</th>
+							<th>최초 접수 일시</th>
+							<th>문의 관리 제어</th>
+						</tr>
+					</thead>
+
+					<tbody id="inquiryTableBody">
+						<!-- staff.js에서 하드코딩 데이터 바인딩 -->
+					</tbody>
+				</table>
+			</div>
+
+		</div>
+
+	</main>
+
+	<!-- 채팅 답변 모달 -->
+	<div class="modal-overlay" id="globalModal">
+		<div class="modal">
+
+			<div class="modal-head">
+				<div>
+					<h3 id="globalModalTitle">1:1 채팅 답변</h3>
+				</div>
+
+				<button type="button"
+				        class="modal-close"
+				        onclick="closeModal()">
+					<span class="material-symbols-outlined">close</span>
+				</button>
+			</div>
+
+			<div class="modal-body" id="globalModalBody">
+				<!-- staff.js에서 채팅 답변 폼 동적 생성 -->
+			</div>
+
+			<div class="modal-foot">
+				<button type="button"
+				        class="btn btn-ghost"
+				        onclick="closeModal()">
+					취소
+				</button>
+
+				<button type="button"
+				        class="btn btn-primary"
+				        id="globalModalSubmitBtn"
+				        onclick="saveGlobalModalData()">
+					답변 저장
+				</button>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="toast-wrap" id="toasts"></div>
+
+	<script th:src="@{/assets/js/staff.js}"></script>
+
+</body>
+</html>

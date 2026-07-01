@@ -31,7 +31,7 @@ public class MainController {
 			}
 			
 			if (auth != null && auth.contains("STAFF")) {
-				return "redirect:/staff/schedule/today";
+				return "redirect:/staff/main";
 			}
 		}
 		return "redirect:/main/home";
@@ -46,6 +46,13 @@ public class MainController {
 	public String Admin_login(Model model) {
 		return "thviews/member/Admin_login";
 	}
+	
+	//지상직 메인 진입 주소(오늘 항공편 화면)
+	@GetMapping("/staff/main")
+	public String staffMain() {
+		return "redirect:/staff/schedule/today";
+	}
+	
 	@GetMapping("/accessDenied")
 	public String accessDenied(Model model) {
 		log.info("🚫 [AccessDenied] 권한 부족! 메인으로 쫓겨납니다."); // 추가
@@ -53,8 +60,4 @@ public class MainController {
 	    return "redirect:/main/home"; // 일단 에러 나면 일반 메인으로 튕기게 설정
 	}
 	
-	@GetMapping("/staff/main")
-	   public String staffMain() {
-	      return "thviews/staff_main/staff_main";
-	   }
 }
