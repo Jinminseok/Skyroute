@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
 import kr.spring.admin.vo.GateAreaVO;
-import kr.spring.admin.vo.RegionVO;
 
 @Mapper
 public interface GateAreaMapper {

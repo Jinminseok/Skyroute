@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.spring.admin.dao.SeasonMapper">
+
+	<select id="selectSeasonList" resultType="kr.spring.admin.vo.SeasonVO">
+		SELECT
+			season_id AS seasonId,
+			season_name AS seasonName,
+			TO_CHAR(start_date, 'YYYY-MM-DD') AS startDate,
+			TO_CHAR(end_date, 'YYYY-MM-DD') AS endDate,
+			is_active AS isActive
+		FROM SEASON
+		ORDER BY season_id ASC
+	</select>
+
+	<select id="selectSeason" parameterType="int" resultType="kr.spring.admin.vo.SeasonVO">
+		SELECT
+			season_id AS seasonId,
+			season_name AS seasonName,
+			TO_CHAR(start_date, 'YYYY-MM-DD') AS startDate,
+			TO_CHAR(end_date, 'YYYY-MM-DD') AS endDate,
+			is_active AS isActive
+		FROM SEASON
+		WHERE season_id = #{seasonId}
+	</select>
+
+	<insert id="insertSeason" parameterType="kr.spring.admin.vo.SeasonVO">
+		INSERT INTO SEASON (
+			season_name,
+			start_date,
+			end_date,
+			is_active
+		) VALUES (
+			#{seasonName},
+			TO_DATE(#{startDate}, 'YYYY-MM-DD'),
+			TO_DATE(#{endDate}, 'YYYY-MM-DD'),
+			NVL(#{isActive, jdbcType=VARCHAR}, 'Y')
+		)
+	</insert>
+
+	<update id="updateSeason" parameterType="kr.spring.admin.vo.SeasonVO">
+		UPDATE SEASON
+		SET
+			season_name = #{seasonName},
+			start_date = TO_DATE(#{startDate}, 'YYYY-MM-DD'),
+			end_date = TO_DATE(#{endDate}, 'YYYY-MM-DD'),
+			is_active = #{isActive}
+		WHERE season_id = #{seasonId}
+	</update>
+
+	<delete id="deleteSeason" parameterType="int">
+		DELETE FROM SEASON
+		WHERE season_id = #{seasonId}
+	</delete>
+
+	<update id="updateSeasonStatus">
+		UPDATE SEASON
+		SET is_active = #{isActive}
+		WHERE season_id = #{seasonId}
+	</update>
+
+</mapper>

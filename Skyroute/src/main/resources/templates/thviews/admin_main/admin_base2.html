@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>에어누리 - 총괄 관리자 메인</title>
+
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,24 +28,9 @@
       <div class="card" style="margin-bottom: 24px;">
         <div class="toolbar">
           <h3 style="font-size:16px; font-weight:700;">항공기 운영 상태 (AIRCRAFT_STATUS)</h3>
-          <div class="grow"></div>
-          <button class="btn btn-primary btn-sm">상태 등록</button>
         </div>
-        <div class="table-wrap">
-          <table class="data">
-            <thead>
-              <tr><th>운영상태 ID</th><th>상태명</th><th>사용 여부</th><th>비고</th><th>관리</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td><span style="color:#0D9488; font-weight:600; background:rgba(13,148,136,0.1); padding:4px 10px; border-radius:99px; font-size:11.5px;">운항가능 (ACTIVE)</span></td>
-                <td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td>
-                <td>배정 가능</td>
-                <td><button class="btn btn-ghost btn-sm">수정</button></td>
-              </tr>
-            </tbody>
-          </table>
+        <div style="text-align: center; padding: 40px 0; color: #64748b; font-weight: 500;">
+          구현 예정
         </div>
       </div>
 
@@ -50,21 +39,9 @@
         <div class="card">
           <div class="toolbar">
             <h3 style="font-size:16px; font-weight:700;">좌석 등급 구성 (SEAT_CLASS)</h3>
-            <div class="grow"></div>
-            <button class="btn btn-primary btn-sm">좌석 등급 생성</button>
           </div>
-          <div class="table-wrap">
-            <table class="data">
-              <thead><tr><th>등급명</th><th>배열 형태</th><th>사용 여부</th><th>관리</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td>비즈니스 (Business)</td>
-                  <td>행당 6열</td>
-                  <td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td>
-                  <td><button class="btn btn-ghost btn-sm">수정</button></td>
-                </tr>
-              </tbody>
-            </table>
+          <div style="text-align: center; padding: 40px 0; color: #64748b; font-weight: 500;">
+            구현 예정
           </div>
         </div>
 
@@ -72,17 +49,24 @@
           <div class="toolbar">
             <h3 style="font-size:16px; font-weight:700;">운임 시즌 (SEASON)</h3>
             <div class="grow"></div>
-            <button class="btn btn-primary btn-sm">시즌 등록</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="openSeasonModal()">전체 조회 및 관리</button>
           </div>
           <div class="table-wrap">
             <table class="data">
-              <thead><tr><th>시즌명</th><th>기간</th><th>사용 여부</th><th>관리</th></tr></thead>
+              <thead><tr><th>시즌명</th><th>기간</th><th>사용 여부</th></tr></thead>
               <tbody>
-                <tr>
-                  <td>2026 하계 성수기</td>
-                  <td>2026-07-20 ~ 08-15</td>
-                  <td><div class="toggle on" onclick="this.classList.toggle('on')"></div></td>
-                  <td><button class="btn btn-ghost btn-sm">수정</button></td>
+                <tr th:each="season, stat : ${seasonList}" th:if="${stat.index < 3}">
+                  <td th:text="${season.seasonName}"></td>
+                  <td th:text="|${season.startDate} ~ ${season.endDate}|"></td>
+                  <td>
+                    <div class="toggle" 
+                         th:classappend="${season.isActive == 'Y'} ? 'on' : ''"
+                         th:attr="onclick=|toggleSeasonActiveStatus(this, ${season.seasonId}, '${season.isActive}')|">
+                    </div>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(seasonList)}">
+                  <td colspan="3" style="text-align: center; padding: 20px;">등록된 운임 시즌이 없습니다.</td>
                 </tr>
               </tbody>
             </table>
@@ -92,5 +76,161 @@
       </div>
     </div>
   </main>
+
+  <div id="seasonModal" class="modal-overlay" style="display: none;">
+		<div class="modal-content-large">
+			<div class="modal-header">
+				<h2 class="modal-title">운임 시즌 데이터 전체 관리</h2>
+				<button type="button" class="btn btn-ghost btn-sm" onclick="closeSeasonModal()">닫기 ✕</button>
+			</div>
+
+			<form th:action="@{/admin/season/insert}" method="post" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px;">
+				<div style="display: flex; gap: 10px;">
+					<input type="text" name="seasonName" class="form-input" placeholder="시즌명 입력 (예: 2026 하계 성수기)" required style="flex: 2; margin-bottom: 0;">
+					<input type="date" name="startDate" class="form-input" required style="flex: 1; margin-bottom: 0;">
+					<input type="date" name="endDate" class="form-input" required style="flex: 1; margin-bottom: 0;">
+					<button type="submit" class="btn btn-primary" style="white-space: nowrap;">시즌 등록</button>
+				</div>
+			</form>
+
+			<div class="table-wrap scrollable-wrap">
+				<table class="data">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>시즌명</th>
+							<th>기간</th>
+							<th>상태</th>
+							<th>관리</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="season : ${seasonList}">
+							<td th:text="${season.seasonId}"></td>
+							<td th:text="${season.seasonName}"></td>
+							<td th:text="|${season.startDate} ~ ${season.endDate}|"></td>
+							<td th:id="'modal-season-status-' + ${season.seasonId}" th:text="${season.isActive == 'Y' ? '사용 (Y)' : '미사용 (N)'}"></td>
+							<td style="display: flex; gap: 5px;">
+								<button type="button" class="btn btn-ghost btn-sm"
+									th:id="'modal-season-edit-btn-' + ${season.seasonId}"
+									th:data-name="${season.seasonName}"
+									th:data-start="${season.startDate}"
+									th:data-end="${season.endDate}"
+									th:attr="onclick=|openEditSeasonModal('${season.seasonId}', this.getAttribute('data-name'), this.getAttribute('data-start'), this.getAttribute('data-end'), '${season.isActive}')|">
+									수정
+								</button>
+								<button type="button" class="btn btn-ghost btn-sm" style="color: #ef4444; border-color: #fca5a5;"
+									th:attr="onclick=|if(confirm('정말 삭제하시겠습니까?')) location.href='/admin/season/delete?seasonId=${season.seasonId}'|">
+									삭제
+								</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<div id="editSeasonModal" class="modal-overlay" style="display: none;">
+		<div class="modal-content-small">
+			<div class="modal-header">
+				<h2 class="modal-title">운임 시즌 정보 수정</h2>
+				<button type="button" class="close-btn" onclick="closeEditSeasonModal()">✕</button>
+			</div>
+			<form th:action="@{/admin/season/update}" method="post">
+				<input type="hidden" id="editSeasonId" name="seasonId"> 
+				
+				<label for="editSeasonName" class="input-label">시즌명</label> 
+				<input type="text" id="editSeasonName" name="seasonName" class="form-input" required> 
+				
+				<label for="editStartDate" class="input-label">시작일</label> 
+				<input type="date" id="editStartDate" name="startDate" class="form-input" required> 
+				
+				<label for="editEndDate" class="input-label">종료일</label> 
+				<input type="date" id="editEndDate" name="endDate" class="form-input" required> 
+
+				<label for="editSeasonIsActive" class="input-label">사용 여부</label> 
+				<select id="editSeasonIsActive" name="isActive" class="form-input">
+					<option value="Y">사용 (Y)</option>
+					<option value="N">미사용 (N)</option>
+				</select>
+				
+				<div class="modal-footer">
+					<button type="button" class="btn btn-ghost" onclick="closeEditSeasonModal()">취소</button>
+					<button type="submit" class="btn btn-primary">저장</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<script>
+		// ====== 운임 시즌 모달 제어 함수 ======
+		function openSeasonModal() { document.getElementById('seasonModal').style.display = 'flex'; }
+		function closeSeasonModal() { document.getElementById('seasonModal').style.display = 'none'; }
+		
+		function openEditSeasonModal(id, name, start, end, isActive) {
+			document.getElementById('editSeasonId').value = id;
+			document.getElementById('editSeasonName').value = name;
+			document.getElementById('editStartDate').value = start;
+			document.getElementById('editEndDate').value = end;
+			document.getElementById('editSeasonIsActive').value = isActive;
+			document.getElementById('editSeasonModal').style.display = 'flex';
+		}
+		function closeEditSeasonModal() { document.getElementById('editSeasonModal').style.display = 'none'; }
+
+		// ====== 운임 시즌 비동기 상태 변경(토글) 함수 ======
+		function toggleSeasonActiveStatus(element, seasonId, currentStatus) {
+			const newStatus = (currentStatus === 'Y') ? 'N' : 'Y';
+			const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+			const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+			const formData = new URLSearchParams();
+			
+			formData.append("seasonId", seasonId);
+			formData.append("isActive", newStatus);
+
+			fetch('/admin/season/toggleStatus', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					[csrfHeader]: csrfToken
+				},
+				body: formData
+			})
+			.then(response => {
+				if (!response.ok) throw new Error("네트워크 응답 오류");
+				return response.text();
+			})
+			.then(result => {
+				if (result === "success") {
+					// 메인 화면 UI 토글 클래스 변경
+					if (newStatus === 'Y') element.classList.add('on');
+					else element.classList.remove('on');
+					
+					// 메인 화면 함수 인자 업데이트
+					element.setAttribute("onclick", `toggleSeasonActiveStatus(this, ${seasonId}, '${newStatus}')`);
+
+					// 관리 대형 모달 내 내부 텍스트 노드 상태 실시간 업데이트
+					const modalStatusTd = document.getElementById('modal-season-status-' + seasonId);
+					if (modalStatusTd) modalStatusTd.innerText = (newStatus === 'Y') ? '사용 (Y)' : '미사용 (N)';
+
+					// 관리 대형 모달 내 수정 버튼 바인딩 파라미터 갱신
+					const modalEditBtn = document.getElementById('modal-season-edit-btn-' + seasonId);
+					if (modalEditBtn) {
+						const name = modalEditBtn.getAttribute('data-name');
+						const start = modalEditBtn.getAttribute('data-start');
+						const end = modalEditBtn.getAttribute('data-end');
+						modalEditBtn.setAttribute('onclick', `openEditSeasonModal('${seasonId}', '${name}', '${start}', '${end}', '${newStatus}')`);
+					}
+				} else {
+					alert("상태 변경 처리에 실패했습니다.");
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				alert("통신 중 오류가 발생했습니다.");
+			});
+		}
+	</script>
+
 </body>
 </html>

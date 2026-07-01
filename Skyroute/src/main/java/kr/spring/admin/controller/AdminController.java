@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import kr.spring.admin.dao.GateAreaMapper;
 import kr.spring.admin.dao.RegionMapper;
 import kr.spring.admin.dao.RouteTypeMapper;
+import kr.spring.admin.dao.SeasonMapper;
 import kr.spring.admin.vo.GateAreaVO;
 import kr.spring.admin.vo.RegionVO;
 import kr.spring.admin.vo.RouteTypeVO;
+import kr.spring.admin.vo.SeasonVO;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -30,6 +32,9 @@ public class AdminController {
 	
 	@Autowired
 	private RouteTypeMapper routeTypeMapper; // 노선
+	
+	@Autowired
+	private SeasonMapper seasonMapper; //시즌
 
 	@GetMapping("/admin/base1")
 	public String adminMain(Model model) {
@@ -42,14 +47,18 @@ public class AdminController {
         // 노선
         List<RouteTypeVO> routeTypeList = routeTypeMapper.selectRouteTypeList();
         model.addAttribute("routeTypeList", routeTypeList);
-
+        
+        
 		return "thviews/admin_main/admin_base1"; 
 	}
 
 
 	@GetMapping("/admin/base2")
-	public String adminBase2() {
-
+	public String adminBase2(Model model) {
+		//시즌
+        List<SeasonVO> seasonList = seasonMapper.selectSeasonList();
+        model.addAttribute("seasonList", seasonList);
+        
 		return "thviews/admin_main/admin_base2"; 
 	}
 
@@ -173,6 +182,36 @@ public class AdminController {
 	        return "fail";
 	    } catch (Exception e) {
 	        log.error("노선 유형 상태 토글 중 오류 발생", e);
+	        return "error";
+	    }
+	}
+	// ====== 시즌 처리 로직 ======
+	@PostMapping("/admin/season/insert")
+	public String insertSeason(SeasonVO seasonVO) {
+	    seasonMapper.insertSeason(seasonVO);
+	    return "redirect:/admin/base2";
+	}
+
+	@PostMapping("/admin/season/update")
+	public String updateSeason(SeasonVO seasonVO) {
+	    seasonMapper.updateSeason(seasonVO);
+	    return "redirect:/admin/base2";
+	}
+
+	@GetMapping("/admin/season/delete")
+	public String deleteSeason(@RequestParam int seasonId) {
+	    seasonMapper.deleteSeason(seasonId);
+	    return "redirect:/admin/base2";
+	}
+
+	@PostMapping("/admin/season/toggleStatus")
+	@ResponseBody // AJAX 비동기 처리
+	public String toggleSeasonStatus(@RequestParam int seasonId, @RequestParam String isActive) {
+	    try {
+	        seasonMapper.updateSeasonStatus(seasonId, isActive);
+	        return "success";
+	    } catch (Exception e) {
+	        log.error("운임 시즌 상태 토글 중 오류 발생", e);
 	        return "error";
 	    }
 	}
