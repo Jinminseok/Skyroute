@@ -64,12 +64,33 @@
 				<div class="card">
 					<div class="toolbar">
 						<h3 style="font-size: 16px; font-weight: 700;">게이트 구역 (GATE_AREA)</h3>
+						<div class="grow"></div>
+						<button type="button" class="btn btn-ghost btn-sm" onclick="openGateModal()">전체 조회 및 관리</button>
 					</div>
 					<div class="table-wrap">
 						<table class="data">
-							<tr>
-								<td style="text-align: center; padding: 20px;">추후 작업 예정</td>
-							</tr>
+							<thead>
+								<tr>
+									<th>구역 ID</th>
+									<th>구역명</th>
+									<th>사용 여부</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="gate, stat : ${gateAreaList}" th:if="${stat.index < 3}">
+									<td th:text="${gate.gateAreaId}"></td>
+									<td th:text="${gate.areaName}"></td>
+									<td>
+										<div class="toggle"
+											th:classappend="${gate.isActive == 'Y'} ? 'on' : ''"
+											th:attr="onclick=|toggleGateActiveStatus(this, ${gate.gateAreaId}, '${gate.isActive}')|">
+										</div>
+									</td>
+								</tr>
+								<tr th:if="${#lists.isEmpty(gateAreaList)}">
+									<td colspan="3" style="text-align: center; padding: 20px;">등록된 게이트 구역이 없습니다.</td>
+								</tr>
+							</tbody>
 						</table>
 					</div>
 				</div>
@@ -78,7 +99,7 @@
 		</div>
 	</main>
 
-	<div id="regionModal" class="modal-overlay">
+	<div id="regionModal" class="modal-overlay" style="display: none;">
 		<div class="modal-content-large">
 			<div class="modal-header">
 				<h2 class="modal-title">권역 데이터 전체 관리</h2>
@@ -124,7 +145,7 @@
 		</div>
 	</div>
 
-	<div id="editRegionModal" class="modal-overlay">
+	<div id="editRegionModal" class="modal-overlay" style="display: none;">
 		<div class="modal-content-small">
 			<div class="modal-header">
 				<h2 class="modal-title">권역명 수정</h2>
@@ -147,10 +168,83 @@
 		</div>
 	</div>
 
+	<div id="gateModal" class="modal-overlay" style="display: none;">
+		<div class="modal-content-large">
+			<div class="modal-header">
+				<h2 class="modal-title">게이트 구역 데이터 전체 관리</h2>
+				<button type="button" class="btn btn-ghost btn-sm" onclick="closeGateModal()">닫기 ✕</button>
+			</div>
+
+			<form th:action="@{/admin/gate/insert}" method="post" style="display: flex; gap: 10px; margin-bottom: 20px;">
+				<input type="text" name="areaName" class="form-input" placeholder="새로운 게이트 구역명 입력" required style="margin-bottom: 0;">
+				<button type="submit" class="btn btn-primary" style="white-space: nowrap;">등록 추가</button>
+			</form>
+
+			<div class="table-wrap scrollable-wrap">
+				<table class="data">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>구역명</th>
+							<th>상태</th>
+							<th>관리</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="gate : ${gateAreaList}">
+							<td th:text="${gate.gateAreaId}"></td>
+							<td th:text="${gate.areaName}"></td>
+							<td th:id="'modal-gate-status-' + ${gate.gateAreaId}" th:text="${gate.isActive == 'Y' ? '사용 (Y)' : '미사용 (N)'}"></td>
+							<td style="display: flex; gap: 5px;">
+								<button type="button" class="btn btn-ghost btn-sm"
+									th:id="'modal-gate-edit-btn-' + ${gate.gateAreaId}"
+									th:data-name="${gate.areaName}"
+									th:attr="onclick=|openEditGateModal('${gate.gateAreaId}', this.getAttribute('data-name'), '${gate.isActive}')|">
+									수정</button>
+
+								<button type="button" class="btn btn-ghost btn-sm"
+									style="color: #ef4444; border-color: #fca5a5;"
+									th:attr="onclick=|if(confirm('정말 삭제하시겠습니까?')) location.href='/admin/gate/delete?gateAreaId=${gate.gateAreaId}'|">
+									삭제</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<div id="editGateModal" class="modal-overlay" style="display: none;">
+		<div class="modal-content-small">
+			<div class="modal-header">
+				<h2 class="modal-title">게이트 구역명 수정</h2>
+				<button type="button" class="close-btn" onclick="closeEditGateModal()">✕</button>
+			</div>
+			<form th:action="@{/admin/gate/update}" method="post">
+				<input type="hidden" id="editGateId" name="gateAreaId">
+				
+				<label for="editAreaName" class="input-label">구역명</label>
+				<input type="text" id="editAreaName" name="areaName" class="form-input" required>
+				
+				<label for="editGateIsActive" class="input-label">사용 여부</label>
+				<select id="editGateIsActive" name="isActive" class="form-input">
+					<option value="Y">사용 (Y)</option>
+					<option value="N">미사용 (N)</option>
+				</select>
+				
+				<div class="modal-footer">
+					<button type="button" class="btn btn-ghost" onclick="closeEditGateModal()">취소</button>
+					<button type="submit" class="btn btn-primary">저장</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	
 	<script>
-		// 1. 모달 제어 함수
+		// ====== 권역 모달 제어 함수 ======
 		function openModal() { document.getElementById('regionModal').style.display = 'flex'; }
 		function closeModal() { document.getElementById('regionModal').style.display = 'none'; }
+		
 		function openEditModal(id, name, isActive) {
 			document.getElementById('editRegionId').value = id;
 			document.getElementById('editRegionName').value = name;
@@ -159,7 +253,7 @@
 		}
 		function closeEditModal() { document.getElementById('editRegionModal').style.display = 'none'; }
 
-		// 2. 비동기 상태 변경 함수
+		// ====== 권역 비동기 상태 변경 함수 ======
 	    function toggleActiveStatus(element, regionId, currentStatus) {
 	        const newStatus = (currentStatus === 'Y') ? 'N' : 'Y';
 	        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
@@ -206,6 +300,65 @@
 	            console.error('Error:', error);
 	            alert("통신 중 오류가 발생했습니다.");
 	        });
+	    }
+		
+	    // ====== 게이트 구역 모달 제어 함수 ======
+	    function openGateModal() { document.getElementById('gateModal').style.display = 'flex'; }
+	    function closeGateModal() { document.getElementById('gateModal').style.display = 'none'; }
+
+	    function openEditGateModal(id, name, isActive) {
+	    	document.getElementById('editGateId').value = id;
+	    	document.getElementById('editAreaName').value = name;
+	    	document.getElementById('editGateIsActive').value = isActive;
+	    	document.getElementById('editGateModal').style.display = 'flex';
+	    }
+	    function closeEditGateModal() { document.getElementById('editGateModal').style.display = 'none'; }
+
+	    // ====== 게이트 구역 비동기 상태 변경(토글) 함수 ======
+	    function toggleGateActiveStatus(element, gateAreaId, currentStatus) {
+	    	const newStatus = (currentStatus === 'Y') ? 'N' : 'Y';
+	    	const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	    	const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+	    	const formData = new URLSearchParams();
+	    	
+	    	formData.append("gateAreaId", gateAreaId);
+	    	formData.append("isActive", newStatus);
+
+	    	fetch('/admin/gate/toggleStatus', {
+	    		method: 'POST',
+	    		headers: {
+	    			'Content-Type': 'application/x-www-form-urlencoded',
+	    			[csrfHeader]: csrfToken
+	    		},
+	    		body: formData
+	    	})
+	    	.then(response => {
+	    		if (!response.ok) throw new Error("네트워크 응답 오류");
+	    		return response.text();
+	    	})
+	    	.then(result => {
+	    		if (result === "success") {
+	    			if (newStatus === 'Y') element.classList.add('on');
+	    			else element.classList.remove('on');
+	    			
+	    			element.setAttribute("onclick", `toggleGateActiveStatus(this, ${gateAreaId}, '${newStatus}')`);
+
+	    			const modalStatusTd = document.getElementById('modal-gate-status-' + gateAreaId);
+	    			if (modalStatusTd) modalStatusTd.innerText = (newStatus === 'Y') ? '사용 (Y)' : '미사용 (N)';
+
+	    			const modalEditBtn = document.getElementById('modal-gate-edit-btn-' + gateAreaId);
+	    			if (modalEditBtn) {
+	    				const areaName = modalEditBtn.getAttribute('data-name');
+	    				modalEditBtn.setAttribute('onclick', `openEditGateModal('${gateAreaId}', '${areaName}', '${newStatus}')`);
+	    			}
+	    		} else {
+	    			alert("상태 변경 처리에 실패했습니다. (서버 내부 오류)");
+	    		}
+	    	})
+	    	.catch(error => {
+	    		console.error('Error:', error);
+	    		alert("통신 중 오류가 발생했습니다.");
+	    	});
 	    }
 	</script>
 

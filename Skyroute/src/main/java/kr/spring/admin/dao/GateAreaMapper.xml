@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.spring.admin.dao.GateAreaMapper">
+
+	<select id="selectGateAreaList" resultType="kr.spring.admin.vo.GateAreaVO">
+		SELECT
+			gate_area_id AS gateAreaId,
+			area_name AS areaName,
+			is_active AS isActive
+		FROM GATE_AREA
+		ORDER BY gate_area_id ASC
+	</select>
+
+	<select id="selectGateArea" parameterType="int" resultType="kr.spring.admin.vo.GateAreaVO">
+		SELECT
+			gate_area_id AS gateAreaId,
+			area_name AS areaName,
+			is_active AS isActive
+		FROM GATE_AREA
+		WHERE gate_area_id = #{gateAreaId}
+	</select>
+
+	<insert id="insertGateArea" parameterType="kr.spring.admin.vo.GateAreaVO">
+		INSERT INTO GATE_AREA (
+			area_name,
+			is_active
+		) VALUES (
+			#{areaName},
+			NVL(#{isActive, jdbcType=VARCHAR}, 'Y')
+		)
+	</insert>
+
+	<update id="updateGateArea" parameterType="kr.spring.admin.vo.GateAreaVO">
+		UPDATE GATE_AREA
+		SET
+			area_name = #{areaName},
+			is_active = #{isActive}
+		WHERE gate_area_id = #{gateAreaId}
+	</update>
+
+	<delete id="deleteGateArea" parameterType="int">
+		DELETE FROM GATE_AREA
+		WHERE gate_area_id = #{gateAreaId}
+	</delete>
+
+</mapper>

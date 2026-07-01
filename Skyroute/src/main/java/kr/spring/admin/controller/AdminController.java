@@ -7,9 +7,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import kr.spring.admin.dao.GateAreaMapper;
 import kr.spring.admin.dao.RegionMapper;
+import kr.spring.admin.vo.GateAreaVO;
 import kr.spring.admin.vo.RegionVO;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,13 +22,18 @@ public class AdminController {
 
 	@Autowired
 	private RegionMapper regionMapper;
+	
+	@Autowired
+    private GateAreaMapper gateAreaMapper;
 
 	@GetMapping("/admin/base1")
 	public String adminMain(Model model) {
 
 		List<RegionVO> regionList = regionMapper.selectRegionList();
-
 		model.addAttribute("regionList", regionList);
+		
+		List<GateAreaVO> gateAreaList = gateAreaMapper.selectGateAreaList();
+        model.addAttribute("gateAreaList", gateAreaList);
 
 		return "thviews/admin_main/admin_base1"; 
 	}
@@ -87,6 +95,43 @@ public class AdminController {
 			log.error("권역 상태 토글 변경 중 오류 발생", e);
 			return "fail";
 		}
+	}
+	
+	// ====== 게이트 구역 (GATE_AREA) 처리 로직 ======
+	@PostMapping("/admin/gate/insert")
+	public String insertGateArea(GateAreaVO gateAreaVO) {
+	    gateAreaMapper.insertGateArea(gateAreaVO);
+	    return "redirect:/admin/base1"; // 본인의 메인 페이지 URL에 맞게 수정
+	}
+
+	@PostMapping("/admin/gate/update")
+	public String updateGateArea(GateAreaVO gateAreaVO) {
+	    gateAreaMapper.updateGateArea(gateAreaVO);
+	    return "redirect:/admin/base1";
+	}
+
+	@GetMapping("/admin/gate/delete")
+	public String deleteGateArea(@RequestParam int gateAreaId) {
+	    gateAreaMapper.deleteGateArea(gateAreaId);
+	    return "redirect:/admin/base1";
+	}
+
+	@PostMapping("/admin/gate/toggleStatus")
+	@ResponseBody // AJAX 요청이므로 값만 반환
+	public String toggleGateStatus(@RequestParam int gateAreaId, @RequestParam String isActive) {
+	    try {
+	        // 기존 데이터를 불러와서 상태만 변경 후 업데이트
+	        GateAreaVO gateArea = gateAreaMapper.selectGateArea(gateAreaId);
+	        if (gateArea != null) {
+	            gateArea.setIsActive(isActive);
+	            gateAreaMapper.updateGateArea(gateArea);
+	            return "success";
+	        }
+	        return "fail";
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return "error";
+	    }
 	}
 
 
