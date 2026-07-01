@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">	
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+</head>
+<body>
+<div layout:fragment="panel" class="panel on" id="status">
+  <section class="block wrap">
+    <div class="eyebrow">FLIGHT STATUS</div><h2 style="margin:6px 0 22px">운항 조회</h2>
+    <div class="results">
+      <div class="flight">
+        <div class="carrier"><div class="ci">NU</div><div><b>NU 101</b><div class="fno">12.20</div></div></div>
+        <div class="route">
+          <div class="tnode"><div class="t">10:30</div><div class="ap">ICN 인천 · 게이트 A12</div></div>
+          <div class="leg"><div class="dur">14시간 20분</div><div class="bar"></div></div>
+          <div class="tnode r"><div class="t">11:50</div><div class="ap">JFK 뉴욕</div></div>
+        </div>
+        <div class="fare"><span class="seats ok">정시 출발 예정</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

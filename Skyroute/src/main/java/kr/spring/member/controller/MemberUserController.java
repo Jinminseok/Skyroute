@@ -69,6 +69,48 @@ public class MemberUserController {
 		return "thviews/common/resultView";
 	}
 	
+	//예약 조회변경 폼 호출
+	@GetMapping("/member_booking")
+	public String bookingForm() {	    
+	    return "thviews/member/member_booking"; 
+	}
+	
+	
+	
+	
+	//체크인 폼 호출
+	@GetMapping("/member_checkin")
+	public String checkinForm() {
+		return "thviews/member/member_checkin";
+	}
+	
+	
+	
+	
+	//운항스케쥴 조회
+	@GetMapping("/member_schedule")
+	public String scheduleForm() {
+		return "thviews/member/member_schedule";
+	}
+	
+	
+	
+	
+	//기능 모아보기 폼 호출
+	@GetMapping("/member_functions")
+	public String functionsForm() {
+		return "thviews/member/member_functions";
+	}
+	
+	
+	
+	//마이페이지 폼 호출
+	@GetMapping("/member_mypage")
+	public String mypageForm() {
+		return "thviews/member/member_mypage";
+	}
+	
+	
 	//MY페이지
 		/*
 		 * @PreAuthorize

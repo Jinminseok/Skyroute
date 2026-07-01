@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}">
+<head>
+<meta charset="UTF-8">
+<title>에어누리 - 예약 조회 · 변경</title>
+<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">	
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+</head>
+<body>
+    <div layout:fragment="panel" class="panel on" id="book">
+        
+        <div class="panel on" id="lookup" style="display: block;">
+            <section class="block wrap">
+                <div class="eyebrow">MANAGE BOOKING</div>
+                <h2 style="margin:6px 0 22px; font-weight: 500;">예약 조회 · 변경</h2>
+                
+                <div class="searchcard" style="margin-top:0; padding-bottom:24px">
+                    <div class="fields" style="grid-template-columns:1fr 1fr 1fr">
+                        <div class="field">
+                            <label>예약번호 (PNR)</label>
+                            <div class="big" style="font-family: var(--mono); font-weight: 500;">NUX4K9</div>
+                        </div>
+                        <div class="field">
+                            <label>탑승객 영문 성</label>
+                            <div class="big" style="font-weight: 500;">HONG</div>
+                        </div>
+                        <div class="field" style="border-right:0">
+                            <label>이름</label>
+                            <div class="big" style="font-weight: 500;">GILDONG</div>
+                        </div>
+                    </div>
+                    <div class="searchrow">
+                        <div class="opts"><span>이메일로 예약번호 찾기</span></div>
+                        <button class="btn">예약 조회</button>
+                    </div>
+                </div>
+            
+                <div style="margin-top:24px" class="trip">
+                    <div>
+                        <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px">
+                            <span class="stat soon">결제완료 · 발권</span>
+                            <span class="pnr" style="font-weight: 500;">PNR NUX4K9</span>
+                        </div>
+                        <div class="rt" style="font-weight: 500;">ICN 인천 → JFK 뉴욕</div>
+                        <div class="dt" style="font-weight: 300;">NU101 · 2025.12.20 (토) 10:30 · 이코노미 23A</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn ghost sm">일정 변경</button>
+                        <button class="btn ghost sm">좌석 변경</button>
+                        <button class="btn ghost sm">환불 요청</button>
+                        <button class="btn sm">e-티켓 보기</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+    </div>
+</body>
+</html>

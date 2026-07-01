@@ -151,3 +151,205 @@ button:hover {
 	margin-left:50px;
 	cursor: pointer;
 }
+
+
+
+
+
+/* memberLogin */
+
+:root {
+    /* [source: 3] B2C 오리지널 컬러 명세 */
+    --ink: #1F2937; 
+    --ink-700: #0F172A; 
+    --ink-500: #4B5563;
+    --line: #E5E7EB; 
+    --accent: #0066E2; /* 사진과 일치하는 쨍한 블루 브랜드 컬러 */
+    --accent-700: #004BA3; 
+    --accent-soft: #F0F6FF;
+    --mut: #6B7280; 
+    --text-light: #9CA3AF;
+    
+    /* [source: 3] 사용자 화면 115도 사선 파스텔 그라데이션 */
+    --gradient-hero: linear-gradient(115deg, #EBF5FF 0%, #E8F0FE 35%, #FBF0F3 70%, #F5F9FF 100%);
+    
+    /* 사진 속 부드러운 박스 그림자 효과 */
+    --shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body { 
+    background: var(--gradient-hero); /* [source: 3] */
+    background-attachment: fixed;
+    color: var(--ink); 
+    font-family: 'Pretendard', sans-serif; 
+    font-weight: 400;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  /* [개편] image_15c35e.png 사진처럼 완벽하게 분리된 순백색 로그인 박스 */
+  .login-container {
+    width: 100%;
+    max-width: 440px;
+    background: #FFFFFF; /* 반투명 걷어내고 순도 100% 화이트 적용 */
+    border: 1px solid rgba(0, 102, 226, 0.08);
+    border-radius: 18px; /* 사진처럼 둥글고 정갈한 라운딩 */
+    padding: 56px 40px;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.35s ease-out forwards;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 로고 및 상단 헤더 타이틀 */
+  .logo-wrap {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .logo-wrap .logo-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    background: var(--accent);
+    display: grid;
+    place-items: center;
+    font-family: 'JetBrains Mono', monospace; /* [source: 3] */
+    font-weight: 500;
+    font-size: 16px;
+    color: #fff;
+    margin: 0 auto 12px;
+    transform: rotate(-8deg); /* [source: 3] 브랜드 아이덴티티 */
+  }
+  .logo-wrap h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink-700);
+    letter-spacing: -0.6px;
+  }
+  .logo-wrap p {
+    color: var(--mut);
+    font-size: 13px;
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  /* 입력 필드 레이아웃 (사진 구조 100% 반영) */
+  .form-group {
+    margin-bottom: 22px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-700);
+    margin-bottom: 8px;
+  }
+  
+  .input-wrap {
+    position: relative;
+  }
+  .input-wrap .material-symbols-outlined {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: 18px;
+  }
+  .input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+    background: #FFFFFF;
+    color: var(--ink);
+  }
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 102, 226, 0.1);
+  }
+  .input::placeholder {
+    color: #A3AED0; /* 사진 속 가이드 텍스트 색상 최적화 */
+  }
+
+  /* 하단 유틸리티 옵션 */
+  .options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 16px 0 24px 0;
+    font-size: 13px;
+  }
+  .options label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink-500);
+    cursor: pointer;
+  }
+  .options label input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+  }
+  .options .find-links {
+    display: flex;
+    gap: 8px;
+    color: var(--line);
+  }
+  .options a {
+    color: var(--ink-500);
+    text-decoration: none;
+  }
+  .options a:hover {
+    color: var(--accent);
+  }
+
+  /* 사진 속과 똑같이 꽉 차는 쨍한 버튼 스타일 */
+  .btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    box-shadow: 0 4px 14px rgba(0, 102, 226, 0.15);
+  }
+  .btn-submit:hover {
+    background: var(--accent-700);
+  }
+
+  .join-prompt {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--ink-500);
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
+  }
+  .join-prompt a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  .join-prompt a:hover {
+    text-decoration: underline;
+  }

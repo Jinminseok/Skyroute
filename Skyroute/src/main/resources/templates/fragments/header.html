@@ -1,48 +1,85 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <th:block th:fragment="header">
-	<div class="menu-title">
-	  	<h2 class="site-logo" sec:authorize="!isAuthenticated() || principal.memberVO.roleOrdinal < 3"><a th:href="@{/main/home}">SpringPage</a>
-		</h2>
-		<h2 class="site-logo" sec:authorize="hasAuthority('ADMIN')"><a th:href="@{/admin/home}">SpringPage 관리자 전용</a>
-		</h2>
-	</div>
-	<div class="menu-login">
-	  	<th:block sec:authorize="isAuthenticated() && principal.memberVO.roleOrdinal < 3">
-			<div class="menu-item">	
-				<a th:href="@{/member/myPage}"><img th:src="@{/assets/images/mypage.png}" width="20" height="20">MY페이지</a>
+	<header>
+		<div class="wrap">
+			<div class="toprow">
+
+				<div class="brand">
+					<div class="logo">SR</div>
+
+					<div sec:authorize="!isAuthenticated() || hasAuthority('USER')">
+						SkyRoute<small>SKYROUTE · 하늘을 누리다</small>
+					</div>
+
+				</div>
+
+				<div class="util">
+					<span>마일리지</span> <span>고객센터</span> <span>ENG</span>
+
+					<th:block sec:authorize="!isAuthenticated()">
+						<span th:onclick="|location.href='@{/member/registerUser}'|">회원가입</span>
+						<span class="login"
+							th:onclick="|location.href='@{/member/login}'|">로그인</span>
+					</th:block>
+
+					<th:block sec:authorize="isAuthenticated()">
+						<span style="display: inline-flex; align-items: center; gap: 5px;">
+							<img th:src="@{/member/photoView}" width="20" height="20"
+							class="my-photo" style="border-radius: 50%;"> <b
+							th:text="${#authentication.principal.memberVO != null ? #authentication.principal.memberVO.name : #authentication.name}"></b>님
+						</span>
+
+						<span class="login" id="logout" style="cursor: pointer;">로그아웃</span>
+						<form th:action="@{/member/logout}" method="post"
+							style="display: none;" id="frm_logout"></form>
+						<script type="text/javascript">
+                            document.getElementById('logout').onclick = function(event) {
+                                document.getElementById('frm_logout').submit();
+                                event.preventDefault();
+                            }
+                        </script>
+					</th:block>
+				</div>
+
 			</div>
-		</th:block>
-		<th:block sec:authorize="isAuthenticated()">
-		    <div class="menu-item">
-				<img th:src="@{/member/photoView}" width="20" height="20" class="my-photo">
-			    <span class="user-name" th:text="${#authentication.principal.memberVO.name}"></span>
-			</div>
-			<div class="menu-item">
-				<a href="#" id="logout"><img th:src="@{/assets/images/logout.png}" width="20" height="20">로그아웃</a><form th:action="@{/member/logout}" method="post" style="display:none;" id="frm_logout"></form>
-				<script type="text/javascript">
-					const logout = document.getElementById('logout');
-					logout.onclick=function(event){
-						document.getElementById('frm_logout').submit();
-						event.preventDefault();
-					}
-				</script>
-			</div>
-		</th:block>
-		<th:block sec:authorize="!isAuthenticated()">
-			<div class="menu-item">
-				<a th:href="@{/member/registerUser}">회원가입</a>
-			</div>
-			<div class="menu-item">
-				<a th:href="@{/member/login}"><img th:src="@{/assets/images/login.png}" width="20" height="20">로그인</a>
-			</div>
-		</th:block>
-		</div>	
-	<div class="menu-list">
-		<th:block sec:authorize="!isAuthenticated() || principal.memberVO.roleOrdinal < 3">
-			<div class="menu-main-item"><a th:href="@{/board/list}">게시판</a></div>
-		</th:block>
+
+			<nav>
+				<th:block sec:authorize="!isAuthenticated() || hasAuthority('USER')">
+					<a th:href="@{/main/home}"
+						th:classappend="${activeMenu == 'book'} ? 'on'"> <span
+						class="material-symbols-outlined">flight_takeoff</span> 항공권 예약
+					</a>
+
+					<a th:href="@{/member/member_booking}"
+						th:classappend="${activeMenu == 'lookup'} ? 'on'"> <span
+						class="material-symbols-outlined">edit_calendar</span> 예약 조회 · 변경
+					</a>
+
+					<a th:href="@{/member/member_checkin}"
+						th:classappend="${activeMenu == 'checkin'} ? 'on'"> <span
+						class="material-symbols-outlined">how_to_reg</span> 온라인 체크인
+					</a>
+
+					<a th:href="@{/member/member_schedule}"
+						th:classappend="${activeMenu == 'status'} ? 'on'"> <span
+						class="material-symbols-outlined">schedule</span> 운항 조회
+					</a>
+					
+					<a th:href="@{/member/member_functions}"
+						th:classappend="${activeMenu == 'feat'} ? 'on'"> <span
+						class="material-symbols-outlined">apps</span> 기능 한눈에 보기
+					</a>
+					
+					<a th:href="@{/member/member_mypage}" sec:authorize="isAuthenticated()"
+						th:classappend="${activeMenu == 'my'} ? 'on'"> <span
+						class="material-symbols-outlined">person</span> 마이페이지
+					</a>
+				</th:block>
+			</nav>
+
 		</div>
+	</header>
 </th:block>
 </html>
