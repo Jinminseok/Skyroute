@@ -82,16 +82,20 @@ public class MemberVO{
 	public int getRoleOrdinal() {
 		if(role == null) return -1;
 		
-		if(role.equals(UserRole.INACTIVE.getValue())) {
-			return UserRole.INACTIVE.ordinal();//0
+		if(role.equals(UserRole.ACTIVE.getValue())) {
+			return UserRole.ACTIVE.ordinal();//0
 		}else if(role.equals(UserRole.SUSPENDED.getValue())) {
 			return UserRole.SUSPENDED.ordinal();//1
+		}else if(role.equals(UserRole.DELETED.getValue())) {
+			return UserRole.DELETED.ordinal();//2
+		}else if(role.equals(UserRole.INACTIVE.getValue())) {
+			return UserRole.INACTIVE.ordinal();//3
 		}else if(role.equals(UserRole.USER.getValue())) {
-			return UserRole.USER.ordinal();//2
+			return UserRole.USER.ordinal();//4
 		}else if(role.equals(UserRole.ADMIN.getValue())) {
-			return UserRole.ADMIN.ordinal();//3
+			return UserRole.ADMIN.ordinal();//5
 		}else if(role.equals(UserRole.STAFF.getValue())) {
-			return UserRole.STAFF.ordinal();//4
+			return UserRole.STAFF.ordinal();//6
 		}else {
 			return -1;
 		}

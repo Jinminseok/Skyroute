@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum UserRole {
 	//탈퇴,정지,회원,관리자
-	INACTIVE("INACTIVE"), SUSPENDED("SUSPENDED"), USER("USER"), ADMIN("ADMIN"), STAFF("STAFF");
+	ACTIVE("ACTIVE"), SUSPENDED("SUSPENDED"), DELETED("DELETED"), INACTIVE("INACTIVE"), USER("USER"), ADMIN("ADMIN"), STAFF("STAFF");
 
 	private String value;
 

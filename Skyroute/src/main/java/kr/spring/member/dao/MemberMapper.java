@@ -17,7 +17,7 @@ public interface MemberMapper {
     public MemberVO selectMember(Long member_id);
 	// 회원가입
 	@Insert("INSERT INTO member (login_id, password, name, phone, email, zipcode, address1, address2) "
-	          + "VALUES (#{id}, #{passwd}, #{name}, #{phone}, #{email}, #{zipcode}, #{address1}, #{address2})")
+	          + "VALUES (#{id}, #{password}, #{name}, #{phone}, #{email}, #{zipcode}, #{address1}, #{address2})")
 	public void insertMember(MemberVO member);
 	
 }
