@@ -10,20 +10,25 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+<link
+	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
 
 <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
 
 </head>
 <body>
 
-	<header th:replace="~{fragments/admin_header :: headerFragment('base1')}"></header>
+	<header
+		th:replace="~{fragments/admin_header :: headerFragment('base1')}"></header>
 
 	<main class="main">
 		<div>
 			<h1>공항 권역, 게이트 및 노선 기준 정보</h1>
-			<p class="desc">지상직(STAFF)이 노선 및 게이트를 등록할 때 참조하는 대분류 마스터 데이터를 관리합니다.</p>
+			<p class="desc">지상직(STAFF)이 노선 및 게이트를 등록할 때 참조하는 대분류 마스터 데이터를
+				관리합니다.</p>
 
 			<div class="grid grid-2" style="margin-bottom: 24px;">
 
@@ -31,7 +36,8 @@
 					<div class="toolbar">
 						<h3 style="font-size: 16px; font-weight: 700;">공항 권역 (REGION)</h3>
 						<div class="grow"></div>
-						<button type="button" class="btn btn-ghost btn-sm" onclick="openModal()">전체 조회 및 관리</button>
+						<button type="button" class="btn btn-ghost btn-sm"
+							onclick="openModal()">전체 조회 및 관리</button>
 					</div>
 					<div class="table-wrap">
 						<table class="data">
@@ -43,7 +49,8 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr th:each="region, stat : ${regionList}" th:if="${stat.index < 3}">
+								<tr th:each="region, stat : ${regionList}"
+									th:if="${stat.index < 3}">
 									<td th:text="${region.regionId}"></td>
 									<td th:text="${region.regionName}"></td>
 									<td>
@@ -54,7 +61,8 @@
 									</td>
 								</tr>
 								<tr th:if="${#lists.isEmpty(regionList)}">
-									<td colspan="3" style="text-align: center; padding: 20px;">등록된 권역이 없습니다.</td>
+									<td colspan="3" style="text-align: center; padding: 20px;">등록된
+										권역이 없습니다.</td>
 								</tr>
 							</tbody>
 						</table>
@@ -63,9 +71,11 @@
 
 				<div class="card">
 					<div class="toolbar">
-						<h3 style="font-size: 16px; font-weight: 700;">게이트 구역 (GATE_AREA)</h3>
+						<h3 style="font-size: 16px; font-weight: 700;">게이트 구역
+							(GATE_AREA)</h3>
 						<div class="grow"></div>
-						<button type="button" class="btn btn-ghost btn-sm" onclick="openGateModal()">전체 조회 및 관리</button>
+						<button type="button" class="btn btn-ghost btn-sm"
+							onclick="openGateModal()">전체 조회 및 관리</button>
 					</div>
 					<div class="table-wrap">
 						<table class="data">
@@ -77,7 +87,8 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr th:each="gate, stat : ${gateAreaList}" th:if="${stat.index < 3}">
+								<tr th:each="gate, stat : ${gateAreaList}"
+									th:if="${stat.index < 3}">
 									<td th:text="${gate.gateAreaId}"></td>
 									<td th:text="${gate.areaName}"></td>
 									<td>
@@ -88,7 +99,45 @@
 									</td>
 								</tr>
 								<tr th:if="${#lists.isEmpty(gateAreaList)}">
-									<td colspan="3" style="text-align: center; padding: 20px;">등록된 게이트 구역이 없습니다.</td>
+									<td colspan="3" style="text-align: center; padding: 20px;">등록된
+										게이트 구역이 없습니다.</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="card" style="grid-column: span 2; margin-bottom: 24px;">
+					<div class="toolbar">
+						<h3 style="font-size: 16px; font-weight: 700;">노선 유형 분류
+							(ROUTE_TYPE)</h3>
+						<div class="grow"></div>
+						<button type="button" class="btn btn-ghost btn-sm"
+							onclick="openRouteTypeModal()">유형 등록 및 관리</button>
+					</div>
+					<div class="table-wrap">
+						<table class="data">
+							<thead>
+								<tr>
+									<th>노선유형 ID</th>
+									<th>유형명</th>
+									<th>사용 여부</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="routeType, stat : ${routeTypeList}"
+									th:if="${stat.index < 3}">
+									<td th:text="${routeType.routeTypeId}"></td>
+									<td th:text="${routeType.typeName}"></td>
+									<td>
+										<div class="toggle"
+											th:classappend="${routeType.isActive == 'Y'} ? 'on' : ''"
+											th:attr="onclick=|toggleRouteTypeActiveStatus(this, ${routeType.routeTypeId}, '${routeType.isActive}')|">
+										</div>
+									</td>
+								</tr>
+								<tr th:if="${#lists.isEmpty(routeTypeList)}">
+									<td colspan="3" style="text-align: center; padding: 20px;">등록된
+										노선 유형이 없습니다.</td>
 								</tr>
 							</tbody>
 						</table>
@@ -103,12 +152,16 @@
 		<div class="modal-content-large">
 			<div class="modal-header">
 				<h2 class="modal-title">권역 데이터 전체 관리</h2>
-				<button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">닫기 ✕</button>
+				<button type="button" class="btn btn-ghost btn-sm"
+					onclick="closeModal()">닫기 ✕</button>
 			</div>
 
-			<form th:action="@{/admin/region/insert}" method="post" style="display: flex; gap: 10px; margin-bottom: 20px;">
-				<input type="text" name="regionName" class="form-input" placeholder="새로운 권역명 입력" required style="margin-bottom: 0;">
-				<button type="submit" class="btn btn-primary" style="white-space: nowrap;">등록 추가</button>
+			<form th:action="@{/admin/region/insert}" method="post"
+				style="display: flex; gap: 10px; margin-bottom: 20px;">
+				<input type="text" name="regionName" class="form-input"
+					placeholder="새로운 권역명 입력" required style="margin-bottom: 0;">
+				<button type="submit" class="btn btn-primary"
+					style="white-space: nowrap;">등록 추가</button>
 			</form>
 
 			<div class="table-wrap scrollable-wrap">
@@ -125,7 +178,8 @@
 						<tr th:each="region : ${regionList}">
 							<td th:text="${region.regionId}"></td>
 							<td th:text="${region.regionName}"></td>
-							<td th:id="'modal-status-' + ${region.regionId}" th:text="${region.isActive == 'Y' ? '사용 (Y)' : '미사용 (N)'}"></td>
+							<td th:id="'modal-status-' + ${region.regionId}"
+								th:text="${region.isActive == 'Y' ? '사용 (Y)' : '미사용 (N)'}"></td>
 							<td style="display: flex; gap: 5px;">
 								<button type="button" class="btn btn-ghost btn-sm"
 									th:id="'modal-edit-btn-' + ${region.regionId}"
@@ -152,32 +206,116 @@
 				<button type="button" class="close-btn" onclick="closeEditModal()">✕</button>
 			</div>
 			<form th:action="@{/admin/region/update}" method="post">
-				<input type="hidden" id="editRegionId" name="regionId">
-				<label for="editRegionName" class="input-label">권역명</label>
-				<input type="text" id="editRegionName" name="regionName" class="form-input" required>
-				<label for="editIsActive" class="input-label">사용 여부</label>
-				<select id="editIsActive" name="isActive" class="form-input">
+				<input type="hidden" id="editRegionId" name="regionId"> <label
+					for="editRegionName" class="input-label">권역명</label> <input
+					type="text" id="editRegionName" name="regionName"
+					class="form-input" required> <label for="editIsActive"
+					class="input-label">사용 여부</label> <select id="editIsActive"
+					name="isActive" class="form-input">
 					<option value="Y">사용 (Y)</option>
 					<option value="N">미사용 (N)</option>
 				</select>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-ghost" onclick="closeEditModal()">취소</button>
+					<button type="button" class="btn btn-ghost"
+						onclick="closeEditModal()">취소</button>
 					<button type="submit" class="btn btn-primary">저장</button>
 				</div>
 			</form>
 		</div>
 	</div>
+	<div id="routeTypeModal" class="modal-overlay" style="display: none;">
+		<div class="modal-content-large">
+			<div class="modal-header">
+				<h2 class="modal-title">노선 유형 데이터 전체 관리</h2>
+				<button type="button" class="btn btn-ghost btn-sm"
+					onclick="closeRouteTypeModal()">닫기 ✕</button>
+			</div>
 
+			<form th:action="@{/admin/routeType/insert}" method="post"
+				style="display: flex; gap: 10px; margin-bottom: 20px;">
+				<input type="text" name="typeName" class="form-input"
+					placeholder="새로운 노선 유형명 입력" required style="margin-bottom: 0;">
+				<button type="submit" class="btn btn-primary"
+					style="white-space: nowrap;">유형 등록</button>
+			</form>
+
+			<div class="table-wrap scrollable-wrap">
+				<table class="data">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>유형명</th>
+							<th>상태</th>
+							<th>관리</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="routeType : ${routeTypeList}">
+							<td th:text="${routeType.routeTypeId}"></td>
+							<td th:text="${routeType.typeName}"></td>
+							<td th:id="'modal-route-status-' + ${routeType.routeTypeId}"
+								th:text="${routeType.isActive == 'Y' ? '사용 (Y)' : '미사용 (N)'}"></td>
+							<td style="display: flex; gap: 5px;">
+								<button type="button" class="btn btn-ghost btn-sm"
+									th:id="'modal-route-edit-btn-' + ${routeType.routeTypeId}"
+									th:data-name="${routeType.typeName}"
+									th:attr="onclick=|openEditRouteTypeModal('${routeType.routeTypeId}', this.getAttribute('data-name'), '${routeType.isActive}')|">
+									수정</button>
+
+								<button type="button" class="btn btn-ghost btn-sm"
+									style="color: #ef4444; border-color: #fca5a5;"
+									th:attr="onclick=|if(confirm('정말 삭제하시겠습니까?')) location.href='/admin/routeType/delete?routeTypeId=${routeType.routeTypeId}'|">
+									삭제</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<div id="editRouteTypeModal" class="modal-overlay"
+		style="display: none;">
+		<div class="modal-content-small">
+			<div class="modal-header">
+				<h2 class="modal-title">노선 유형명 수정</h2>
+				<button type="button" class="close-btn"
+					onclick="closeEditRouteTypeModal()">✕</button>
+			</div>
+			<form th:action="@{/admin/routeType/update}" method="post">
+				<input type="hidden" id="editRouteTypeId" name="routeTypeId">
+
+				<label for="editTypeName" class="input-label">유형명</label> <input
+					type="text" id="editTypeName" name="typeName" class="form-input"
+					required> <label for="editRouteIsActive"
+					class="input-label">사용 여부</label> <select id="editRouteIsActive"
+					name="isActive" class="form-input">
+					<option value="Y">사용 (Y)</option>
+					<option value="N">미사용 (N)</option>
+				</select>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-ghost"
+						onclick="closeEditRouteTypeModal()">취소</button>
+					<button type="submit" class="btn btn-primary">저장</button>
+				</div>
+			</form>
+		</div>
+	</div>
 	<div id="gateModal" class="modal-overlay" style="display: none;">
 		<div class="modal-content-large">
 			<div class="modal-header">
 				<h2 class="modal-title">게이트 구역 데이터 전체 관리</h2>
-				<button type="button" class="btn btn-ghost btn-sm" onclick="closeGateModal()">닫기 ✕</button>
+				<button type="button" class="btn btn-ghost btn-sm"
+					onclick="closeGateModal()">닫기 ✕</button>
 			</div>
 
-			<form th:action="@{/admin/gate/insert}" method="post" style="display: flex; gap: 10px; margin-bottom: 20px;">
-				<input type="text" name="areaName" class="form-input" placeholder="새로운 게이트 구역명 입력" required style="margin-bottom: 0;">
-				<button type="submit" class="btn btn-primary" style="white-space: nowrap;">등록 추가</button>
+			<form th:action="@{/admin/gate/insert}" method="post"
+				style="display: flex; gap: 10px; margin-bottom: 20px;">
+				<input type="text" name="areaName" class="form-input"
+					placeholder="새로운 게이트 구역명 입력" required style="margin-bottom: 0;">
+				<button type="submit" class="btn btn-primary"
+					style="white-space: nowrap;">등록 추가</button>
 			</form>
 
 			<div class="table-wrap scrollable-wrap">
@@ -194,7 +332,8 @@
 						<tr th:each="gate : ${gateAreaList}">
 							<td th:text="${gate.gateAreaId}"></td>
 							<td th:text="${gate.areaName}"></td>
-							<td th:id="'modal-gate-status-' + ${gate.gateAreaId}" th:text="${gate.isActive == 'Y' ? '사용 (Y)' : '미사용 (N)'}"></td>
+							<td th:id="'modal-gate-status-' + ${gate.gateAreaId}"
+								th:text="${gate.isActive == 'Y' ? '사용 (Y)' : '미사용 (N)'}"></td>
 							<td style="display: flex; gap: 5px;">
 								<button type="button" class="btn btn-ghost btn-sm"
 									th:id="'modal-gate-edit-btn-' + ${gate.gateAreaId}"
@@ -218,28 +357,28 @@
 		<div class="modal-content-small">
 			<div class="modal-header">
 				<h2 class="modal-title">게이트 구역명 수정</h2>
-				<button type="button" class="close-btn" onclick="closeEditGateModal()">✕</button>
+				<button type="button" class="close-btn"
+					onclick="closeEditGateModal()">✕</button>
 			</div>
 			<form th:action="@{/admin/gate/update}" method="post">
-				<input type="hidden" id="editGateId" name="gateAreaId">
-				
-				<label for="editAreaName" class="input-label">구역명</label>
-				<input type="text" id="editAreaName" name="areaName" class="form-input" required>
-				
-				<label for="editGateIsActive" class="input-label">사용 여부</label>
-				<select id="editGateIsActive" name="isActive" class="form-input">
+				<input type="hidden" id="editGateId" name="gateAreaId"> <label
+					for="editAreaName" class="input-label">구역명</label> <input
+					type="text" id="editAreaName" name="areaName" class="form-input"
+					required> <label for="editGateIsActive" class="input-label">사용
+					여부</label> <select id="editGateIsActive" name="isActive" class="form-input">
 					<option value="Y">사용 (Y)</option>
 					<option value="N">미사용 (N)</option>
 				</select>
-				
+
 				<div class="modal-footer">
-					<button type="button" class="btn btn-ghost" onclick="closeEditGateModal()">취소</button>
+					<button type="button" class="btn btn-ghost"
+						onclick="closeEditGateModal()">취소</button>
 					<button type="submit" class="btn btn-primary">저장</button>
 				</div>
 			</form>
 		</div>
 	</div>
-	
+
 	<script>
 		// ====== 권역 모달 제어 함수 ======
 		function openModal() { document.getElementById('regionModal').style.display = 'flex'; }
@@ -359,6 +498,68 @@
 	    		console.error('Error:', error);
 	    		alert("통신 중 오류가 발생했습니다.");
 	    	});
+	    }
+	 // ====== 노선 유형 모달 제어 함수 ======
+	    function openRouteTypeModal() { document.getElementById('routeTypeModal').style.display = 'flex'; }
+	    function closeRouteTypeModal() { document.getElementById('routeTypeModal').style.display = 'none'; }
+
+	    function openEditRouteTypeModal(id, name, isActive) {
+	        document.getElementById('editRouteTypeId').value = id;
+	        document.getElementById('editTypeName').value = name;
+	        document.getElementById('editRouteIsActive').value = isActive;
+	        document.getElementById('editRouteTypeModal').style.display = 'flex';
+	    }
+	    function closeEditRouteTypeModal() { document.getElementById('editRouteTypeModal').style.display = 'none'; }
+
+	    // ====== 노선 유형 비동기 상태 변경(토글) 함수 ======
+	    function toggleRouteTypeActiveStatus(element, routeTypeId, currentStatus) {
+	        const newStatus = (currentStatus === 'Y') ? 'N' : 'Y';
+	        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+	        const formData = new URLSearchParams();
+	        
+	        formData.append("routeTypeId", routeTypeId);
+	        formData.append("isActive", newStatus);
+
+	        fetch('/admin/routeType/toggleStatus', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/x-www-form-urlencoded',
+	                [csrfHeader]: csrfToken
+	            },
+	            body: formData
+	        })
+	        .then(response => {
+	            if (!response.ok) throw new Error("네트워크 응답 오류");
+	            return response.text();
+	        })
+	        .then(result => {
+	            if (result === "success") {
+	                // UI 토글 상태 업데이트
+	                if (newStatus === 'Y') element.classList.add('on');
+	                else element.classList.remove('on');
+	                
+	                // 토글 onClick 속성 업데이트
+	                element.setAttribute("onclick", `toggleRouteTypeActiveStatus(this, ${routeTypeId}, '${newStatus}')`);
+
+	                // 모달 내 텍스트 상태 업데이트
+	                const modalStatusTd = document.getElementById('modal-route-status-' + routeTypeId);
+	                if (modalStatusTd) modalStatusTd.innerText = (newStatus === 'Y') ? '사용 (Y)' : '미사용 (N)';
+
+	                // 모달 내 수정 버튼 속성 업데이트
+	                const modalEditBtn = document.getElementById('modal-route-edit-btn-' + routeTypeId);
+	                if (modalEditBtn) {
+	                    const typeName = modalEditBtn.getAttribute('data-name');
+	                    modalEditBtn.setAttribute('onclick', `openEditRouteTypeModal('${routeTypeId}', '${typeName}', '${newStatus}')`);
+	                }
+	            } else {
+	                alert("상태 변경 처리에 실패했습니다. (서버 내부 오류)");
+	            }
+	        })
+	        .catch(error => {
+	            console.error('Error:', error);
+	            alert("통신 중 오류가 발생했습니다.");
+	        });
 	    }
 	</script>
 

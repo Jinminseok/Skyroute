@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.spring.admin.dao.RouteTypeMapper">
+	<select id="selectRouteTypeList" resultType="kr.spring.admin.vo.RouteTypeVO">
+        SELECT
+            route_type_id AS routeTypeId,
+            type_name AS typeName,
+            is_active AS isActive
+        FROM ROUTE_TYPE
+        ORDER BY route_type_id ASC
+    </select>
+
+    <select id="selectRouteType" parameterType="int" resultType="kr.spring.admin.vo.RouteTypeVO">
+        SELECT
+            route_type_id AS routeTypeId,
+            type_name AS typeName,
+            is_active AS isActive
+        FROM ROUTE_TYPE
+        WHERE route_type_id = #{routeTypeId}
+    </select>
+
+    <insert id="insertRouteType" parameterType="kr.spring.admin.vo.RouteTypeVO">
+        INSERT INTO ROUTE_TYPE (
+            type_name,
+            is_active
+        ) VALUES (
+            #{typeName},
+            NVL(#{isActive, jdbcType=VARCHAR}, 'Y')
+        )
+    </insert>
+
+    <update id="updateRouteType" parameterType="kr.spring.admin.vo.RouteTypeVO">
+        UPDATE ROUTE_TYPE
+        SET
+            type_name = #{typeName},
+            is_active = #{isActive}
+        WHERE route_type_id = #{routeTypeId}
+    </update>
+
+    <delete id="deleteRouteType" parameterType="int">
+        DELETE FROM ROUTE_TYPE
+        WHERE route_type_id = #{routeTypeId}
+    </delete>
+	
+
+</mapper>

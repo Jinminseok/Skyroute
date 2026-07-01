@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import kr.spring.admin.dao.GateAreaMapper;
 import kr.spring.admin.dao.RegionMapper;
+import kr.spring.admin.dao.RouteTypeMapper;
 import kr.spring.admin.vo.GateAreaVO;
 import kr.spring.admin.vo.RegionVO;
+import kr.spring.admin.vo.RouteTypeVO;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -21,19 +23,25 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminController {
 
 	@Autowired
-	private RegionMapper regionMapper;
+	private RegionMapper regionMapper; // 권역
 	
 	@Autowired
-    private GateAreaMapper gateAreaMapper;
+    private GateAreaMapper gateAreaMapper; //게이트
+	
+	@Autowired
+	private RouteTypeMapper routeTypeMapper; // 노선
 
 	@GetMapping("/admin/base1")
 	public String adminMain(Model model) {
-
+		// 권역
 		List<RegionVO> regionList = regionMapper.selectRegionList();
 		model.addAttribute("regionList", regionList);
-		
+		//게이트
 		List<GateAreaVO> gateAreaList = gateAreaMapper.selectGateAreaList();
         model.addAttribute("gateAreaList", gateAreaList);
+        // 노선
+        List<RouteTypeVO> routeTypeList = routeTypeMapper.selectRouteTypeList();
+        model.addAttribute("routeTypeList", routeTypeList);
 
 		return "thviews/admin_main/admin_base1"; 
 	}
@@ -133,6 +141,39 @@ public class AdminController {
 	        return "error";
 	    }
 	}
+	// ====== 노선 처리 로직 ======
+	@PostMapping("/admin/routeType/insert")
+	public String insertRouteType(RouteTypeVO routeTypeVO) {
+	    routeTypeMapper.insertRouteType(routeTypeVO);
+	    return "redirect:/admin/base1";
+	}
 
+	@PostMapping("/admin/routeType/update")
+	public String updateRouteType(RouteTypeVO routeTypeVO) {
+	    routeTypeMapper.updateRouteType(routeTypeVO);
+	    return "redirect:/admin/base1";
+	}
 
+	@GetMapping("/admin/routeType/delete")
+	public String deleteRouteType(@RequestParam int routeTypeId) {
+	    routeTypeMapper.deleteRouteType(routeTypeId);
+	    return "redirect:/admin/base1";
+	}
+
+	@PostMapping("/admin/routeType/toggleStatus")
+	@ResponseBody
+	public String toggleRouteTypeStatus(@RequestParam int routeTypeId, @RequestParam String isActive) {
+	    try {
+	        RouteTypeVO routeType = routeTypeMapper.selectRouteType(routeTypeId);
+	        if (routeType != null) {
+	            routeType.setIsActive(isActive);
+	            routeTypeMapper.updateRouteType(routeType);
+	            return "success";
+	        }
+	        return "fail";
+	    } catch (Exception e) {
+	        log.error("노선 유형 상태 토글 중 오류 발생", e);
+	        return "error";
+	    }
+	}
 }
