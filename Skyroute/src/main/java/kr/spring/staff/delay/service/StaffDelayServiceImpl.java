@@ -1,5 +1,8 @@
 package kr.spring.staff.delay.service;
 
-public class StaffDelayServiceImpl {
+import org.springframework.stereotype.Service;
+
+@Service
+public class StaffDelayServiceImpl implements StaffDelayService{
 
 }

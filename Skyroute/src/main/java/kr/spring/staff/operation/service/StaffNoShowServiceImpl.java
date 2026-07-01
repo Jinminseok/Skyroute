@@ -1,5 +1,8 @@
 package kr.spring.staff.operation.service;
 
-public class StaffNoShowServiceImpl {
+import org.springframework.stereotype.Service;
+
+@Service
+public class StaffNoShowServiceImpl implements StaffNoShowService{
 
 }

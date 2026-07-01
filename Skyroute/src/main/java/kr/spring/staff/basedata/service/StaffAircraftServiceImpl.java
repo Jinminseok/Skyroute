@@ -1,5 +1,8 @@
 package kr.spring.staff.basedata.service;
 
-public class StaffAircraftServiceImpl {
+import org.springframework.stereotype.Service;
+
+@Service
+public class StaffAircraftServiceImpl implements StaffAircraftService{
 
 }

@@ -1,5 +1,8 @@
 package kr.spring.staff.operation.service;
 
-public class StaffCheckinServiceImpl {
+import org.springframework.stereotype.Service;
+
+@Service
+public class StaffCheckinServiceImpl implements StaffCheckinService{
 
 }

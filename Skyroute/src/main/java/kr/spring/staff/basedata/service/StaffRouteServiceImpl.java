@@ -1,5 +1,8 @@
 package kr.spring.staff.basedata.service;
 
-public class StaffRouteServiceImpl {
+import org.springframework.stereotype.Service;
+
+@Service
+public class StaffRouteServiceImpl implements StaffRouteService{
 
 }
