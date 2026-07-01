@@ -48,4 +48,9 @@ public class MainController {
 	    model.addAttribute("message", "접근 권한이 없습니다.");
 	    return "redirect:/main/home"; // 일단 에러 나면 일반 메인으로 튕기게 설정
 	}
+	
+	@GetMapping("/staff/main")
+	   public String staffMain() {
+	      return "thviews/staff_main/staff_main";
+	   }
 }
