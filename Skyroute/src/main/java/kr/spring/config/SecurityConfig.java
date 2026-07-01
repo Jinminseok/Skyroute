@@ -79,6 +79,7 @@ public class SecurityConfig{
 						.usernameParameter("id")
 						// 로그인 폼의 비밀번호 input name (이전 단계에서 password로 맞춤)
 						.passwordParameter("password"))
+				
 				// 로그아웃 설정
 				.logout(logout -> logout 
 						// 로그아웃 요청 URL

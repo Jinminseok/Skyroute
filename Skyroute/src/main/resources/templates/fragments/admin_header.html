@@ -1,66 +1,142 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <header th:fragment="headerFragment(activeMenu)" class="header">
-<style>
-		.header { 
-			background: rgba(245, 245, 244, 0.85); 
-			backdrop-filter: blur(12px); 
-			border-bottom: 1px solid rgba(120, 113, 108, 0.15); 
-			display: flex; 
-			align-items: center; 
-			padding: 0 40px; 
-			height: 72px; 
-			position: sticky; 
-			top: 0; 
-			z-index: 1000; /* 다른 모달창 등에 안 가려지도록 z-index 조정 */
-		}
-		.header .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-right: 48px; }
-		.header .logo .material-symbols-outlined { font-size: 28px; color: var(--primary, #78716C); } 
-		.header .top-nav { display: flex; gap: 4px; height: 100%; }
-		.header .nav-link { display: flex; align-items: center; gap: 6px; padding: 0 14px; color: var(--text-gray, #57534E); font-weight: 500; cursor: pointer; height: 100%; border-bottom: 3px solid transparent; text-decoration: none; }
-		.header .nav-link.active { color: var(--text-dark, #1C1917); border-bottom-color: var(--primary, #78716C); font-weight: 700; background: rgba(255, 255, 255, 0.3); }
-		.header .user-menu { margin-left: auto; display: flex; align-items: center; gap: 20px; }
-		.header .user-chip { display: flex; align-items: center; gap: 10px; }
-		.header .user-chip .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--primary, #78716C); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-		.header .user-chip .meta .n { font-weight: 700; font-size: 13.5px; }
-		.header .user-chip .meta .r { font-size: 11px; color: var(--text-gray, #57534E); }
-		.header .btn-logout { background: none; border: none; color: var(--text-gray, #57534E); cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 500; }
-	</style>
-	<div class="logo">
-		<span class="material-symbols-outlined">admin_panel_settings</span> 에어
-		어드민
-	</div>
+	<style>
+.header {
+	background: rgba(245, 245, 244, 0.85);
+	backdrop-filter: blur(12px);
+	border-bottom: 1px solid rgba(120, 113, 108, 0.15);
+	display: flex;
+	align-items: center;
+	padding: 0 40px;
+	height: 72px;
+	position: sticky;
+	top: 0;
+	z-index: 1000; /* 다른 모달창 등에 안 가려지도록 z-index 조정 */
+}
+
+.header .logo {
+	font-size: 20px;
+	font-weight: 700;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-right: 48px;
+}
+
+.header .logo .material-symbols-outlined {
+	font-size: 28px;
+	color: var(--primary, #78716C);
+}
+
+.header .top-nav {
+	display: flex;
+	gap: 4px;
+	height: 100%;
+}
+
+.header .nav-link {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0 14px;
+	color: var(--text-gray, #57534E);
+	font-weight: 500;
+	cursor: pointer;
+	height: 100%;
+	border-bottom: 3px solid transparent;
+	text-decoration: none;
+}
+
+.header .nav-link.active {
+	color: var(--text-dark, #1C1917);
+	border-bottom-color: var(--primary, #78716C);
+	font-weight: 700;
+	background: rgba(255, 255, 255, 0.3);
+}
+
+.header .user-menu {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 20px;
+}
+
+.header .user-chip {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.header .user-chip .avatar {
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background: var(--primary, #78716C);
+	color: #FFFFFF;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+}
+
+.header .user-chip .meta .n {
+	font-weight: 700;
+	font-size: 13.5px;
+}
+
+.header .user-chip .meta .r {
+	font-size: 11px;
+	color: var(--text-gray, #57534E);
+}
+
+.header .btn-logout {
+	background: none;
+	border: none;
+	color: var(--text-gray, #57534E);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-weight: 500;
+}
+</style>
+	<a th:href="@{/admin/base1}" class="logo"
+		style="text-decoration: none; color: inherit; cursor: pointer;"> <span
+		class="material-symbols-outlined">admin_panel_settings</span> 에어 어드민
+	</a>
 
 	<nav class="top-nav">
 		<a th:href="@{/admin/base1}" class="nav-link"
-			th:classappend="${activeMenu == 'base1'} ? 'active'"> 
-			<span class="material-symbols-outlined">domain</span> 공항·게이트·노선
-		</a> 
-		<a th:href="@{/admin/base2}" class="nav-link"
-			th:classappend="${activeMenu == 'base2'} ? 'active'"> 
-			<span class="material-symbols-outlined">flight</span> 기재·좌석·운임시즌
-		</a> 
-		<a th:href="@{/admin/accounts}" class="nav-link"
-			th:classappend="${activeMenu == 'accounts'} ? 'active'"> 
-			<span class="material-symbols-outlined">manage_accounts</span> 계정·회원 관리
-		</a> 
-		<a th:href="@{/admin/statistics}" class="nav-link"
-			th:classappend="${activeMenu == 'statistics'} ? 'active'"> 
-			<span class="material-symbols-outlined">trending_up</span> 전사 운영 통계
+			th:classappend="${activeMenu == 'base1'} ? 'active'"> <span
+			class="material-symbols-outlined">domain</span> 공항·게이트·노선
+		</a> <a th:href="@{/admin/base2}" class="nav-link"
+			th:classappend="${activeMenu == 'base2'} ? 'active'"> <span
+			class="material-symbols-outlined">flight</span> 기재·좌석·운임시즌
+		</a> <a th:href="@{/admin/accounts}" class="nav-link"
+			th:classappend="${activeMenu == 'accounts'} ? 'active'"> <span
+			class="material-symbols-outlined">manage_accounts</span> 계정·회원 관리
+		</a> <a th:href="@{/admin/statistics}" class="nav-link"
+			th:classappend="${activeMenu == 'statistics'} ? 'active'"> <span
+			class="material-symbols-outlined">trending_up</span> 전사 운영 통계
 		</a>
 	</nav>
 
-	<div class="user-menu">
-		<div class="user-chip">
-			<div class="avatar">M</div>
-			<div class="meta">
-				<div class="n">최고관리자 (Master)</div>
-				<div class="r">SYSTEM ADMIN</div>
-			</div>
-		</div>
-		<button class="btn-logout">
-			<span class="material-symbols-outlined">logout</span> 로그아웃
-		</button>
-	</div>
+	<div class="user-menu" sec:authorize="isAuthenticated()">
+    <div class="user-chip">
+        <div class="avatar" th:text="${#strings.substring(#authentication.principal.memberVO.name, 0, 1)}"></div>
+        
+        <div class="meta">
+           <div class="n" th:text="${#authentication.principal.memberVO.name}"></div>
+            
+            <div class="r" th:text="${#authentication.principal.memberVO.role}"></div>
+        </div>
+    </div>
+    <form th:action="@{/logout}" method="post" style="margin: 0;">
+        <button type="submit" class="btn-logout">
+            <span class="material-symbols-outlined">logout</span> 로그아웃
+        </button>
+    </form>
+</div>
 </header>
 </html>
