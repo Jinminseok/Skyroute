@@ -40,12 +40,12 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
 	@Override 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Collection<GrantedAuthority> collect = new ArrayList<>(); // ArrayList는 Collection의 자식 타입이다.
-		collect.add(new SimpleGrantedAuthority(memberVO.getAuthority()));
+		collect.add(new SimpleGrantedAuthority(memberVO.getRole()));
 		return collect;
 	}
 	@Override 
 	public String getPassword() {
-		return memberVO.getPasswd();
+		return memberVO.getPassword();
 	}
 	
 	//사용자의 아이디(username) 반환

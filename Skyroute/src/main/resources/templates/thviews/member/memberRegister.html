@@ -27,15 +27,9 @@
             <span th:errors="*{name}"></span>
          </li>
          <li>
-            <label for="nick_name">별명</label>
-            <input type="text" th:field="*{nick_name}" th:errorclass="field-error">            
-            <input type="button" id="confirm_nick" value="중복체크" class="default-btn" style="display:none;">
-            <span id="message_nick"></span>
-         </li>
-         <li>
-            <label for="passwd">비밀번호</label>
-            <input type="password" th:field="*{passwd}" th:errorclass="field-error">            
-            <span th:errors="*{passwd}"></span>
+            <label for="password">비밀번호</label>
+            <input type="password" th:field="*{password}" th:errorclass="field-error">            
+            <span th:errors="*{password}"></span>
          </li>
          <li>
             <label for="phone">전화번호</label>
@@ -52,8 +46,7 @@
             <input type="text" th:field="*{zipcode}" th:errorclass="field-error">            
             <input type="button" onclick="execDaumPostcode()" value="우편번호 찾기" class="default-btn">
             <span th:errors="*{zipcode}"></span>
-         </li>
-         <li>
+         </li>         <li>
             <label for="address1">주소</label>
             <input type="text" th:field="*{address1}" th:errorclass="field-error">            
             <span th:errors="*{address1}"></span>
@@ -63,6 +56,7 @@
             <input type="text" th:field="*{address2}" th:errorclass="field-error">            
             <span th:errors="*{address2}"></span>
          </li>
+
       </ul>
       <div class="align-center">
          <input type="submit" class="default-btn" value="전송">

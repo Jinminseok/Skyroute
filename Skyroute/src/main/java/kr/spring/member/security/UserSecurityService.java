@@ -25,7 +25,7 @@ public class UserSecurityService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException{
 		log.debug("[Login Check 1 - UserSecurityService] 로그인 아이디 :" + id);
 		MemberVO member = memberService.selectCheckMember(id);
-		if (member==null || member.getAuthority().equals(UserRole.INACTIVE.getValue())) {
+		if (member==null || member.getRole().equals(UserRole.INACTIVE.getValue())) {
 			log.debug("[Login Check 1] 로그인 아이디가 없거나 탈퇴회원");
 			throw new UsernameNotFoundException("UserNotFound");
 		}

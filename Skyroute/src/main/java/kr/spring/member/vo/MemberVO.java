@@ -45,35 +45,29 @@ import lombok.ToString;
 public class MemberVO{
 
 	public MemberVO() {}
-	private long mem_num;
+	private long member_id;
 	@Pattern(regexp="^[A-Za-z0-9]{4,14}$")
 	private String id;
-	private String nick_name;
-	private String authority;
-	private String social_name;
+	@Pattern(regexp="^[A-Za-z0-9]{4,12}$")
+	private String password;
 	@NotBlank
 	private String name;
-	//@Pattern(regexp="^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&])[A-Za-z\\d!@#$%^&]{4,10}$")
-	@Pattern(regexp="^[A-Za-z0-9]{4,12}$")
-	private String passwd;
-	@NotBlank
-	private String phone;
 	@Email
 	@NotBlank
 	private String email;
+	@NotBlank
+	private String phone;
+	private String role;
 	@Size(min=5,max=5)
 	private String zipcode;
 	@NotBlank
 	private String address1;
 	@NotBlank
 	private String address2;
-	private String hobby;
-	//외래키 제약 조건이 있을 경우 Integer (null 처리) 아닐 경우 int (0처리)
-	private Integer gender;
-	private byte[] photo;
-	private String photo_name;
-	private Date reg_date;
-	private Date modify_date;
+	private String status;
+	private String suspend_reason;
+	private Date created_at;
+	private Date update_at;
 
 	//비밀번호 변경시에만 조건체크
 	@Pattern(regexp="^[A-Za-z0-9]+$")
@@ -85,33 +79,18 @@ public class MemberVO{
 	@Pattern(regexp="^[A-Za-z0-9]{4,12}$")
 	private String now_passwd;
 	
-	//답글(대댓글) 작성시 부모글 아이디/별명
-	private String parent_id;
-	private String pnick_name;
-	
-	public String getParentName() {
-		if(pnick_name==null) return parent_id;
-		return pnick_name;
-	}
-
-	//별명이 미등록되어 있으면 id 반환하고 별명이 등록되어 있으면 별명 반환
-	public String getUserName() {
-		if(nick_name==null) return id;
-		return nick_name;
-	}
-	
-	public int getAuthorityOrdinal() {
-		if(authority == null) return -1;
+	public int getRoleOrdinal() {
+		if(role == null) return -1;
 		
-		if(authority.equals(UserRole.INACTIVE.getValue())) {
+		if(role.equals(UserRole.INACTIVE.getValue())) {
 			return UserRole.INACTIVE.ordinal();//0
-		}else if(authority.equals(UserRole.SUSPENDED.getValue())) {
+		}else if(role.equals(UserRole.SUSPENDED.getValue())) {
 			return UserRole.SUSPENDED.ordinal();//1
-		}else if(authority.equals(UserRole.USER.getValue())) {
+		}else if(role.equals(UserRole.USER.getValue())) {
 			return UserRole.USER.ordinal();//2
-		}else if(authority.equals(UserRole.ADMIN.getValue())) {
+		}else if(role.equals(UserRole.ADMIN.getValue())) {
 			return UserRole.ADMIN.ordinal();//3
-		}else if(authority.equals(UserRole.STAFF.getValue())) {
+		}else if(role.equals(UserRole.STAFF.getValue())) {
 			return UserRole.STAFF.ordinal();//4
 		}else {
 			return -1;
@@ -120,34 +99,7 @@ public class MemberVO{
 	
 	//===========비밀번호 일치 여부 체크====================//
 
-	//============이미지 BLOB 처리=====================//
-	//(주의)폼에서 파일업로드 파라미터네임은 반드시 upload로 지정해야 함
-	public void setUpload(MultipartFile upload) throws IOException {
-		//MultipartFile -> byte[]
-		setPhoto(upload.getBytes());
-		//파일 이름
-		setPhoto_name(upload.getOriginalFilename());
-	}
-	//============이미지 BLOB 처리=====================//
-
-	//===================checkbox===========================//
-	//form:checkbox에서 사용할 수 있도록 String -> String[]로 변환 
-	public String[] getF_hobby() {
-		String[] f_hobby = null;
-		if(hobby!=null) f_hobby = hobby.split(",");
-		return f_hobby;
-	}
-	//String[] -> String
-	public void setF_hobby(String[] f_hobby) {
-		if(f_hobby!=null) {
-			this.hobby = "";
-			for(int i=0;i<f_hobby.length;i++) {
-				if(i>0) this.hobby += ",";
-				this.hobby += f_hobby[i];
-			}
-		}
-	}
-	//===================checkbox===========================//
+	
 
 
 }

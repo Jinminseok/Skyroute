@@ -3,31 +3,24 @@
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <th:block th:fragment="header">
 	<div class="menu-title">
-	  	<h2 class="site-logo" sec:authorize="!isAuthenticated() || principal.memberVO.authorityOrdinal < 3"><!--/* 사용자 화면 링크 */-->
-			<a th:href="@{/main/home}">SpringPage</a>
+	  	<h2 class="site-logo" sec:authorize="!isAuthenticated() || principal.memberVO.roleOrdinal < 3"><a th:href="@{/main/home}">SpringPage</a>
 		</h2>
-		<h2 class="site-logo" sec:authorize="hasAuthority('ROLE_ADMIN')"><!--/* 관리자 화면 링크 */-->
-			<a th:href="@{/admin/home}">SpringPage 관리자 전용</a>
+		<h2 class="site-logo" sec:authorize="hasAuthority('ADMIN')"><a th:href="@{/admin/home}">SpringPage 관리자 전용</a>
 		</h2>
 	</div>
 	<div class="menu-login">
-	  	<!--/* ==========================================사용자 로그인 영역 시작======================================== */-->
-		<th:block sec:authorize="isAuthenticated() && principal.memberVO.authorityOrdinal < 3">
+	  	<th:block sec:authorize="isAuthenticated() && principal.memberVO.roleOrdinal < 3">
 			<div class="menu-item">	
 				<a th:href="@{/member/myPage}"><img th:src="@{/assets/images/mypage.png}" width="20" height="20">MY페이지</a>
 			</div>
 		</th:block>
-		<!--/* ==========================================사용자 로그인 영역 끝========================================== */-->
-		<!--/* ==========================================사용자,관리자 공통 로그인 영역 시작================================ */-->
 		<th:block sec:authorize="isAuthenticated()">
 		    <div class="menu-item">
 				<img th:src="@{/member/photoView}" width="20" height="20" class="my-photo">
-			    <span class="user-name" th:text="${#authentication.principal.memberVO.userName}"></span>
+			    <span class="user-name" th:text="${#authentication.principal.memberVO.name}"></span>
 			</div>
 			<div class="menu-item">
-				<a href="#" id="logout"><img th:src="@{/assets/images/logout.png}" width="20" height="20">로그아웃</a><!--/* a 링크에서 submit 기능을 얻기위해 아래 스크립트 활용 */-->
-				<!--/* 아래와 같이 폼을 만들고 post 방식으로 전달해야 스프링 시큐리티가 지원하는 로그아웃 기능을 사용할 수 있음 */-->
-				<form th:action="@{/member/logout}" method="post" style="display:none;" id="frm_logout"></form>
+				<a href="#" id="logout"><img th:src="@{/assets/images/logout.png}" width="20" height="20">로그아웃</a><form th:action="@{/member/logout}" method="post" style="display:none;" id="frm_logout"></form>
 				<script type="text/javascript">
 					const logout = document.getElementById('logout');
 					logout.onclick=function(event){
@@ -37,8 +30,6 @@
 				</script>
 			</div>
 		</th:block>
-		<!--/* ==========================================사용자,관리자 공통 로그인 영역 끝================================ */-->
-		<!--/* ==========================================사용자 비로그인 영역 시작======================================= */-->
 		<th:block sec:authorize="!isAuthenticated()">
 			<div class="menu-item">
 				<a th:href="@{/member/registerUser}">회원가입</a>
@@ -47,14 +38,11 @@
 				<a th:href="@{/member/login}"><img th:src="@{/assets/images/login.png}" width="20" height="20">로그인</a>
 			</div>
 		</th:block>
-		<!--/* ==========================================사용자 비로그인 영역 끝======================================== */-->
-	</div>	
+		</div>	
 	<div class="menu-list">
-		<!--/* ==========================================사용자 비로그인 영역 시작======================================= */-->
-		<th:block sec:authorize="!isAuthenticated() || principal.memberVO.authorityOrdinal < 3">
+		<th:block sec:authorize="!isAuthenticated() || principal.memberVO.roleOrdinal < 3">
 			<div class="menu-main-item"><a th:href="@{/board/list}">게시판</a></div>
 		</th:block>
-		<!--/* ==========================================사용자 비로그인 영역 끝======================================== */-->
-	</div>
+		</div>
 </th:block>
 </html>

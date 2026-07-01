@@ -20,7 +20,7 @@ public class MainController {
 	@GetMapping("/")
 	public String init(@AuthenticationPrincipal PrincipalDetails principal) {
 		if (principal != null && principal.getMemberVO() != null) {
-			String auth = principal.getMemberVO().getAuthority();
+			String auth = principal.getMemberVO().getRole();
 			
 		
 			log.info("====== [MainController] 넘어온 권한 값: [{}] ======", auth);

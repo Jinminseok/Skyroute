@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout_basic}">
 <head>
@@ -13,14 +13,15 @@
 
 	<div sec:authorize="isAnonymous()">
 		<h3>사용자 비로그인</h3>
+		<p>SpringPage에 오신 것을 환영합니다. 로그인을 해주세요.</p>
 	</div>
 
 	<div sec:authorize="isAuthenticated()">
 		<h3>메인 화면</h3>
 		
-		<p><span sec:authentication="principal.memberVO.id"></span>님 환영합니다!</p>
+		<p>접속 아이디: <span sec:authentication="principal.memberVO.id"></span></p>
 		
-		<p><span sec:authentication="principal.memberVO.userName"></span>님 환영합니다!</p>
+		<p><span sec:authentication="principal.memberVO.name" style="font-weight:bold; color:blue;"></span>님 환영합니다!</p>
 	</div>
 
 </div>

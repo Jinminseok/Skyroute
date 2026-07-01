@@ -26,7 +26,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
     		HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         
         MemberVO user = ((PrincipalDetails)authentication.getPrincipal()).getMemberVO();
-        String auth = user.getAuthority();
+        String auth = user.getRole();
         
         log.info("====== [CustomSuccessHandler] 로그인 성공! 권한 값: [{}] ======", auth);
        

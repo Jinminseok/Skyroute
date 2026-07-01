@@ -6,15 +6,19 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import kr.spring.member.service.MemberService;
 import kr.spring.member.vo.MemberVO;
 import kr.spring.member.vo.PrincipalDetails;
 import kr.spring.util.FileUtil;
+import kr.spring.util.ValidationUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -23,12 +27,48 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberUserController {
 	@Autowired
 	private MemberService memberService;
-
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	//자바빈(VO) 초기화
 	@ModelAttribute
 	public MemberVO initCommand() {
 		return new MemberVO();
 	}
+	
+	//회원 가입 폼 호출
+	@GetMapping("/registerUser")
+	public String form() {
+		return "thviews/member/memberRegister";
+	}
+	//회원 가입 데이터 처리
+	@PostMapping("/registerUser")
+	public String submit(@Valid MemberVO memberVO, BindingResult result, Model model, HttpServletRequest request) {
+		log.debug("<<회원 가입>> : " + memberVO);
+		
+		//유효성 체크 결과 오류가 있으면 폼 호출
+		if(result.hasErrors()) {
+			//유효성 체크 결과 오류 필드 출력
+			ValidationUtil.printErrorFields(result);
+			return form();
+		}
+		
+		//비밀번호 암호화
+		memberVO.setPassword(passwordEncoder.encode(memberVO.getPassword()));
+		
+		//회원 가입
+		memberService.insertMember(memberVO);
+		
+		//결과 메시지 처리
+		model.addAttribute("accessTitle", "회원 가입");
+		model.addAttribute("accessMsg", "회원 가입이 완료되었습니다.");
+		model.addAttribute("accessBtn", "홈으로");
+		model.addAttribute("accessUrl", request.getContextPath()+"/main/home");
+		
+		return "thviews/common/resultView";
+	}
+	
 	//MY페이지
 		/*
 		 * @PreAuthorize
@@ -58,44 +98,10 @@ public class MemberUserController {
 	/*============================================
 	 * 프로필 사진 출력
 	 *===========================================*/
-	//프로필 사진 출력(로그인 전용)
-	@PreAuthorize("isAuthenticated()")
-	@GetMapping("/photoView")
-	public String getProfile(@AuthenticationPrincipal PrincipalDetails principal,HttpServletRequest request,Model model) {
-		try {
-			MemberVO user = principal.getMemberVO();
-			log.debug("<<photoView>> : {}", user);
-			MemberVO memberVO = memberService.selectMember(user.getMem_num());
-			viewProfile(memberVO,request,model);
-		}catch(Exception e) {
-			getBasicProfileImage(request,model);
-		}
-		return "imageView";
-	}
 
-	//프로필 사진 출력(회원번호 지정)
-	@GetMapping("/viewProfile")
-	public String getProfileByMem_num(long mem_num,
-			HttpServletRequest request,
-			Model model) {
-		MemberVO memberVO = memberService.selectMember(mem_num);
+	
 
-		viewProfile(memberVO,request,model);
-
-		return "imageView";
-	}
-
-	//프로필 사진 처리를 위한 공통 코드
-	public void viewProfile(MemberVO memberVO,HttpServletRequest request, Model model) {
-		if(memberVO==null || memberVO.getPhoto_name()==null) {
-			//DB에 저장된 프로필 이미지가 없기 때문에 기본 이미지 호출
-			getBasicProfileImage(request,model);
-		}else {//업로드한 프로필 이미지 읽기
-			//속성명       속성값(byte[]의 데이터)
-			model.addAttribute("imageFile", memberVO.getPhoto());
-			model.addAttribute("filename", memberVO.getPhoto_name());
-		}
-	}
+	
 	//기본 이미지 읽기
 	public void getBasicProfileImage(HttpServletRequest request,Model model) {
 		byte[] readbyte = FileUtil.getBytes(request.getServletContext().getRealPath("/assets/image_bundle/face.png"));
