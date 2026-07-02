@@ -111,12 +111,22 @@ public class MemberUserController {
 	}
 	
 	
-	//항공권 검색
+	
+	
+	//항공권 세부 검색 폼 호출
 	@GetMapping("/member_flight_list")
 	public String flightListForm() {
 		return "thviews/member/member_flight_list";
 	}
 	
+	
+	
+	
+	//항공권 예매 폼 호출
+	@GetMapping("/member_booking_passenger")
+	public String bookingPassengerForm() {
+		return "thviews/member/member_booking_passenger";
+	}
 	
 	
 	//MY페이지

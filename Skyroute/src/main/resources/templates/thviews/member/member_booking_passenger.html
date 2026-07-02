@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout_basic}">
+<head>
+<meta charset="UTF-8">
+<title>에어누리 - 탑승객 정보 입력</title>
+<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+</head>
+<body>
+
+	<div layout:fragment="panel">
+		<div class="wrap">
+			<div class="seatwrap" style="margin-top: 25px;">
+
+				<div class="cabin" style="padding: 0; border: none; background: none;">
+                    
+                    <div class="htitle" style="margin-bottom: 16px;">
+                        <div>
+                            <div class="eyebrow">PASSENGER INFO</div>
+                            <h2 style="font-size: 22px; font-weight: 600; margin-top: 5px;">탑승객 정보 입력 (탑승객당 입력폼 출력되어야 함.)</h2>
+                        </div>
+                    </div>                    
+                    <form id="passengerForm">                        
+                        <div class="summary" style="margin-bottom: 20px; width: 100%;">
+                            <h3 style="display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 10px;">
+                                <span class="material-symbols-outlined" style="color: var(--accent);">person</span>
+                                탑승객 1 <span style="font-size: 12px; color: var(--mut); font-weight: 400;">(성인 / 대인)</span>
+                            </h3>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">영문 성 (Last Name)</label>
+                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px;" placeholder="EX) HONG" value="HONG">
+                                </div>
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">영문 이름 (First Name)</label>
+                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px;" placeholder="EX) GILDONG" value="GILDONG">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">생년월일 (8자리)</label>
+                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px; font-family: var(--mono);" placeholder="EX) 19900515" value="19900515">
+                                </div>
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">성별</label>
+                                    <select class="mini-search select f-input" style="height: 40px; margin-bottom: 0;">
+                                        <option value="M" selected>남자 (Male)</option>
+                                        <option value="F">여자 (Female)</option>
+                                    </select>
+                                </div>
+                            </div>                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">여권번호</label>
+                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px; font-family: var(--mono);" placeholder="여권번호 9자리 입력" value="M12345678">
+                                </div>
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">여권 만료일</label>
+                                    <input type="date" class="chat-side-input" style="width:100%; height: 40px; font-family: var(--sans-eng);" value="2032-10-10">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+							    <div style="grid-column: span 2;">
+							        <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">휴대폰 번호</label>
+							        <input type="text" class="chat-side-input" style="width:100%; height: 40px; font-family: var(--mono);" placeholder="EX) 01012345678" value="01011111111">
+							    </div>
+							</div>
+                        </div>
+
+                        <div class="summary" style="margin-bottom: 20px; width: 100%;" th:each="stat : ${#numbers.sequence(1, session.passengerCount ?: 1)}" th:if="${false}">
+                            <h3 style="display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 10px;">
+                                <span class="material-symbols-outlined" style="color: var(--accent);">person</span>
+                                탑승객 <span th:text="${stat}">1</span>
+                            </h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">영문 성 (Last Name)</label>
+                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px;" placeholder="EX) HONG">
+                                </div>
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">영문 이름 (First Name)</label>
+                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px;" placeholder="EX) GILDONG">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">생년월일 (8자리)</label>
+                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px;" placeholder="EX) 19900515">
+                                </div>
+                                <div>
+                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">성별</label>
+                                    <select class="mini-search select f-input" style="height: 40px; margin-bottom: 0;">
+                                        <option value="M">남자 (Male)</option>
+                                        <option value="F">여자 (Female)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+				</div>
+
+				<aside class="summary" style="margin-top: 40px;">
+					<h3>선택 여정 요약</h3>
+					
+                    <div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span class="stat soon" style="background: var(--accent-soft); color: var(--accent); font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600;">가는 편</span>
+                            <b style="font-family: var(--sans-eng); font-size: 13px; color: var(--mut);" th:text="${flightNo} ?: 'NU101'">NU101</b>
+                        </div>
+                        <div class="sl" style="border-bottom: none; padding: 4px 0;"><span class="k">구간</span><b th:text="${routeDetail} ?: 'ICN 인천 → JFK 뉴욕'">ICN 인천 → JFK 뉴욕</b></div>
+                        <div class="sl" style="border-bottom: none; padding: 4px 0;"><span class="k">일자</span><b th:text="${departureDate} ?: '2026.12.20 (토)'">2026.12.20 (토)</b></div>
+                        <div class="sl" style="border-bottom: none; padding: 4px 0;"><span class="k">시간</span><b>10:30 — 11:50</b></div>
+                        <div class="sl" style="border-bottom: none; padding: 4px 0;"><span class="k">좌석 등급</span><b th:text="${seatClass} ?: '이코노미'">이코노미</b></div>
+                    </div>
+
+					<div class="sl"><span class="k">항공 운임 (1인)</span><b th:text="${#numbers.formatInteger(fareAmount ?: 1284000, 3, 'COMMA')} + ' 원'">1,284,000 원</b></div>
+					<div class="sl"><span class="k">시즌별 요금 (동계성수기)</span><b th:text="${#numbers.formatInteger(seasonPrice ?: 312400, 3, 'COMMA')} + ' 원'">312,400 원</b></div>
+					<div class="sl"><span class="k">선택 인원</span><b>성인 <span th:text="${passengerCount} ?: '1'">1</span>명</b></div>
+					
+                    <div class="total">
+						<span class="k">총 결제금액</span>
+						<span class="v" id="seattotal" th:text="${#numbers.formatInteger(totalAmount ?: 1596400, 3, 'COMMA')} + '원'">1,596,400원</span>
+					</div>
+					
+                    <a th:href="@{/booking/payment}" class="btn" style="width: 100%; margin-top: 16px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">
+                        결제하기 (카카오페이 · 카드)
+                    </a>
+				</aside>
+
+			</div>
+
+		</div>
+	</div>
+
+</body>
+</html>

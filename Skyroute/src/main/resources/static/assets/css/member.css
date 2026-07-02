@@ -204,16 +204,13 @@ footer { background: #F9FAFB; border-top: 1px solid var(--line); color: var(--mu
 
 
 /* ===== flight_list ===== */
-/* =============================================================================
-   ===== flight_list 전용 레이아웃 및 좌측 챗봇 확장 스타일 =====
-   ============================================================================= */
 
-/* 1. 레이아웃 구조 (형님의 .wrap 내부에서 2단 분할을 전담) */
+/* 1. 레이아웃 구조  */
 .booking-container { 
     display: flex; 
     gap: 30px; 
-    margin-top: 25px; 
     align-items: flex-start; 
+    width: 100%;
 }
 
 /* 좌측 전체 사이드바 패널 (필터 영역 + 챗봇 영역 통합) */
@@ -292,10 +289,10 @@ footer { background: #F9FAFB; border-top: 1px solid var(--line); color: var(--mu
 /* 3. 우측 리스트 전용 가변 폭 지정 */
 .results-area { 
     flex-grow: 1; 
-    width: 100%; 
+    width: calc(100% - 350px); 
 }
 
-/* 4. 타임리프 전용 a태그 링크 버튼화 (형님의 .btn 클래스와 결합) */
+/* 4. 타임리프 전용 a태그 링크 버튼화  */
 .results-area .fare .btn,
 .mini-search .btn-search-apply {
     display: inline-flex !important;
@@ -385,4 +382,192 @@ footer { background: #F9FAFB; border-top: 1px solid var(--line); color: var(--mu
     width: 55px;
     height: 34px;
     font-size: 13px;
+}
+/* 1. 데이터리스트 및 셀렉트 박스 스타일 정의 */
+.mini-search select.f-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    background: #f8fafc;
+    color: var(--ink);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236B7280'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+}
+
+/* 2. 승객 인원 수량 조절기 레이아웃 */
+.passenger-counter-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+}
+.passenger-type-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+.passenger-type-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+}
+.counter-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-count-ctrl {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background: #f1f5f9;
+    color: var(--ink-700);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-count-ctrl:hover { 
+    background: #e2e8f0; 
+}
+.count-display {
+    font-family: var(--sans-eng);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    min-width: 14px;
+    text-align: center;
+}
+
+/* 3. 타임리프 호환용 버튼 배치 보정 */
+.mini-search .btn-search-apply {
+    width: 100%;
+    height: 42px;
+    margin-top: 8px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+}
+
+/* 4. 좌측 하단 세션 격리형 챗봇 스타일 인터페이스 */
+.chatbot-sidebar-window { 
+    width: 100%; 
+    height: 440px; 
+    background: #ffffff; 
+    border: 1px solid var(--line); 
+    border-radius: var(--r); 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
+    box-sizing: border-box;
+}
+.chat-side-header { 
+    background: var(--ink-700); 
+    color: #ffffff; 
+    padding: 14px 16px; 
+    font-weight: 500; 
+    font-size: 14px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+}
+.chat-side-body { 
+    flex-grow: 1; 
+    padding: 16px; 
+    background: #f8fafc; 
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+}
+.chat-side-msg { 
+    max-width: 85%; 
+    padding: 10px 14px; 
+    border-radius: 14px; 
+    font-size: 13px; 
+    line-height: 1.4; 
+}
+.chat-side-msg.bot { 
+    background: #ffffff; 
+    align-self: flex-start; 
+    border-top-left-radius: 2px; 
+    border: 1px solid var(--line); 
+    color: var(--ink); 
+}
+.chat-side-msg.user { 
+    background: var(--accent); 
+    color: #ffffff; 
+    align-self: flex-end; 
+    border-top-right-radius: 2px; 
+}
+.chat-side-foot { 
+    padding: 12px; 
+    border-top: 1px solid var(--line); 
+    display: flex; 
+    gap: 8px; 
+    background: #ffffff; 
+}
+.chat-side-input { 
+    flex-grow: 1; 
+    border: 1px solid var(--line); 
+    border-radius: 8px; 
+    padding: 8px 12px; 
+    font-size: 13px; 
+    outline: none; 
+}
+
+.chat-side-send {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    width: auto !important;
+    min-width: 60px !important;
+    padding: 0 12px !important;
+    height: 34px;
+    font-size: 13px;
+    white-space: nowrap !important; /* 글자 줄바꿈 강제 차단 */
+}
+
+
+/* member_booking_passenger */
+#passengerForm select.mini-search {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 13px;
+    box-sizing: border-box;
+    background: #f8fafc;
+    color: var(--ink);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236B7280'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+}
+aside.summary {
+    box-sizing: border-box;
+}
+aside.summary .total {
+    align-items: center;
 }
