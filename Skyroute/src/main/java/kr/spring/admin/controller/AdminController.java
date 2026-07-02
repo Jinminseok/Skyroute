@@ -249,10 +249,18 @@ public class AdminController {
 	//지상직 계정 생성
 	@PostMapping("/admin/staff/insert")
 	public String insertStaff(MemberVO memberVO) {
-		// ※ 주의: Spring Security를 사용 중이므로 실제 서비스에서는 
-		// 여기서 passwordEncoder.encode(memberVO.getPassword()) 처리를 해주어야 로그인이 가능합니다.
-
-		adminMemberMapper.insertStaff(memberVO);
-		return "redirect:/admin/accounts";
+	    try {
+	       
+	        adminMemberMapper.insertStaff(memberVO);
+	    } catch (org.springframework.dao.DuplicateKeyException e) {
+	        log.error("계정 생성 실패 - 중복된 데이터(아이디/이메일/연락처) 존재");
+	        
+	        return "redirect:/admin/accounts?error=duplicate";
+	    } catch (Exception e) {
+	        log.error("계정 생성 중 알 수 없는 오류 발생", e);
+	        return "redirect:/admin/accounts?error=true";
+	    }
+	    
+	    return "redirect:/admin/accounts";
 	}
 }
