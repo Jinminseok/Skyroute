@@ -193,13 +193,14 @@ h1 {
 
 /* 전체 리스트 모달창 */
 .modal-content-large {
-	width: 600px;
-	max-height: 80vh;
-	overflow-y: auto;
+	width: 850px; 
+	max-height: 85vh; 
 	background: #fff;
 	padding: 30px;
 	border-radius: 12px;
 	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+	display: flex;
+	flex-direction: column; /* 내부 요소 세로 정렬 */
 }
 
 /* 수정 전용 작은 모달창 */
@@ -217,6 +218,7 @@ h1 {
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 20px;
+	flex-shrink: 0; /* 헤더 영역 축소 방지 */
 }
 
 .modal-title {
@@ -268,12 +270,13 @@ h1 {
 
 /* --- 모달창 내부 스크롤 테이블 전용 --- */
 .scrollable-wrap {
-	max-height: 280px; 
+	max-height: 400px;
 	overflow-y: auto;
+	flex-grow: 1; /* 모달창 크기에 맞춰 테이블 영역이 꽉 차도록 확장 */
 }
 
 .scrollable-wrap .data th {
-	position: sticky;
+	position: sticky; /* 스크롤 내려도 제목줄 고정 */
 	top: 0;
 	z-index: 10;
 	background: #F5F5F4; 
