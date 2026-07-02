@@ -28,18 +28,18 @@ public class AdminController {
 
 	@Autowired
 	private RegionMapper regionMapper; // 권역
-	
+
 	@Autowired
-    private GateAreaMapper gateAreaMapper; //게이트
-	
+	private GateAreaMapper gateAreaMapper; //게이트
+
 	@Autowired
 	private RouteTypeMapper routeTypeMapper; // 노선
-	
+
 	@Autowired
 	private SeasonMapper seasonMapper; //시즌
-	
+
 	@Autowired
-    private AdminMemberMapper adminMemberMapper; //회원 관리
+	private AdminMemberMapper adminMemberMapper; //회원 관리
 
 	@GetMapping("/admin/base1")
 	public String adminMain(Model model) {
@@ -48,12 +48,12 @@ public class AdminController {
 		model.addAttribute("regionList", regionList);
 		//게이트
 		List<GateAreaVO> gateAreaList = gateAreaMapper.selectGateAreaList();
-        model.addAttribute("gateAreaList", gateAreaList);
-        // 노선
-        List<RouteTypeVO> routeTypeList = routeTypeMapper.selectRouteTypeList();
-        model.addAttribute("routeTypeList", routeTypeList);
-        
-        
+		model.addAttribute("gateAreaList", gateAreaList);
+		// 노선
+		List<RouteTypeVO> routeTypeList = routeTypeMapper.selectRouteTypeList();
+		model.addAttribute("routeTypeList", routeTypeList);
+
+
 		return "thviews/admin_main/admin_base1"; 
 	}
 
@@ -61,14 +61,14 @@ public class AdminController {
 	@GetMapping("/admin/base2")
 	public String adminBase2(Model model) {
 		//시즌
-        List<SeasonVO> seasonList = seasonMapper.selectSeasonList();
-        model.addAttribute("seasonList", seasonList);
-        
+		List<SeasonVO> seasonList = seasonMapper.selectSeasonList();
+		model.addAttribute("seasonList", seasonList);
+
 		return "thviews/admin_main/admin_base2"; 
 	}
 
 
-	
+
 
 	// 4. 전사 운영 통계 페이지
 	@GetMapping("/admin/statistics")
@@ -106,7 +106,7 @@ public class AdminController {
 	@ResponseBody
 	public String toggleRegionStatus(int regionId, String isActive) {
 		try {
-			
+
 			regionMapper.updateRegionStatus(regionId, isActive);
 			return "success";
 		} catch (Exception e) { 
@@ -114,134 +114,145 @@ public class AdminController {
 			return "fail";
 		}
 	}
-	
+
 	// ====== 게이트 구역 (GATE_AREA) 처리 로직 ======
 	@PostMapping("/admin/gate/insert")
 	public String insertGateArea(GateAreaVO gateAreaVO) {
-	    gateAreaMapper.insertGateArea(gateAreaVO);
-	    return "redirect:/admin/base1"; // 본인의 메인 페이지 URL에 맞게 수정
+		gateAreaMapper.insertGateArea(gateAreaVO);
+		return "redirect:/admin/base1"; // 본인의 메인 페이지 URL에 맞게 수정
 	}
 
 	@PostMapping("/admin/gate/update")
 	public String updateGateArea(GateAreaVO gateAreaVO) {
-	    gateAreaMapper.updateGateArea(gateAreaVO);
-	    return "redirect:/admin/base1";
+		gateAreaMapper.updateGateArea(gateAreaVO);
+		return "redirect:/admin/base1";
 	}
 
 	@GetMapping("/admin/gate/delete")
 	public String deleteGateArea(@RequestParam int gateAreaId) {
-	    gateAreaMapper.deleteGateArea(gateAreaId);
-	    return "redirect:/admin/base1";
+		gateAreaMapper.deleteGateArea(gateAreaId);
+		return "redirect:/admin/base1";
 	}
 
 	@PostMapping("/admin/gate/toggleStatus")
 	@ResponseBody // AJAX 요청이므로 값만 반환
 	public String toggleGateStatus(@RequestParam int gateAreaId, @RequestParam String isActive) {
-	    try {
-	        // 기존 데이터를 불러와서 상태만 변경 후 업데이트
-	        GateAreaVO gateArea = gateAreaMapper.selectGateArea(gateAreaId);
-	        if (gateArea != null) {
-	            gateArea.setIsActive(isActive);
-	            gateAreaMapper.updateGateArea(gateArea);
-	            return "success";
-	        }
-	        return "fail";
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return "error";
-	    }
+		try {
+			// 기존 데이터를 불러와서 상태만 변경 후 업데이트
+			GateAreaVO gateArea = gateAreaMapper.selectGateArea(gateAreaId);
+			if (gateArea != null) {
+				gateArea.setIsActive(isActive);
+				gateAreaMapper.updateGateArea(gateArea);
+				return "success";
+			}
+			return "fail";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "error";
+		}
 	}
 	// ====== 노선 처리 로직 ======
 	@PostMapping("/admin/routeType/insert")
 	public String insertRouteType(RouteTypeVO routeTypeVO) {
-	    routeTypeMapper.insertRouteType(routeTypeVO);
-	    return "redirect:/admin/base1";
+		routeTypeMapper.insertRouteType(routeTypeVO);
+		return "redirect:/admin/base1";
 	}
 
 	@PostMapping("/admin/routeType/update")
 	public String updateRouteType(RouteTypeVO routeTypeVO) {
-	    routeTypeMapper.updateRouteType(routeTypeVO);
-	    return "redirect:/admin/base1";
+		routeTypeMapper.updateRouteType(routeTypeVO);
+		return "redirect:/admin/base1";
 	}
 
 	@GetMapping("/admin/routeType/delete")
 	public String deleteRouteType(@RequestParam int routeTypeId) {
-	    routeTypeMapper.deleteRouteType(routeTypeId);
-	    return "redirect:/admin/base1";
+		routeTypeMapper.deleteRouteType(routeTypeId);
+		return "redirect:/admin/base1";
 	}
 
 	@PostMapping("/admin/routeType/toggleStatus")
 	@ResponseBody
 	public String toggleRouteTypeStatus(@RequestParam int routeTypeId, @RequestParam String isActive) {
-	    try {
-	        RouteTypeVO routeType = routeTypeMapper.selectRouteType(routeTypeId);
-	        if (routeType != null) {
-	            routeType.setIsActive(isActive);
-	            routeTypeMapper.updateRouteType(routeType);
-	            return "success";
-	        }
-	        return "fail";
-	    } catch (Exception e) {
-	        log.error("노선 유형 상태 토글 중 오류 발생", e);
-	        return "error";
-	    }
+		try {
+			RouteTypeVO routeType = routeTypeMapper.selectRouteType(routeTypeId);
+			if (routeType != null) {
+				routeType.setIsActive(isActive);
+				routeTypeMapper.updateRouteType(routeType);
+				return "success";
+			}
+			return "fail";
+		} catch (Exception e) {
+			log.error("노선 유형 상태 토글 중 오류 발생", e);
+			return "error";
+		}
 	}
 	// ====== 시즌 처리 로직 ======
 	@PostMapping("/admin/season/insert")
 	public String insertSeason(SeasonVO seasonVO) {
-	    seasonMapper.insertSeason(seasonVO);
-	    return "redirect:/admin/base2";
+		seasonMapper.insertSeason(seasonVO);
+		return "redirect:/admin/base2";
 	}
 
 	@PostMapping("/admin/season/update")
 	public String updateSeason(SeasonVO seasonVO) {
-	    seasonMapper.updateSeason(seasonVO);
-	    return "redirect:/admin/base2";
+		seasonMapper.updateSeason(seasonVO);
+		return "redirect:/admin/base2";
 	}
 
 	@GetMapping("/admin/season/delete")
 	public String deleteSeason(@RequestParam int seasonId) {
-	    seasonMapper.deleteSeason(seasonId);
-	    return "redirect:/admin/base2";
+		seasonMapper.deleteSeason(seasonId);
+		return "redirect:/admin/base2";
 	}
 
 	@PostMapping("/admin/season/toggleStatus")
 	@ResponseBody // AJAX 비동기 처리
 	public String toggleSeasonStatus(@RequestParam int seasonId, @RequestParam String isActive) {
-	    try {
-	        seasonMapper.updateSeasonStatus(seasonId, isActive);
-	        return "success";
-	    } catch (Exception e) {
-	        log.error("운임 시즌 상태 토글 중 오류 발생", e);
-	        return "error";
-	    }
+		try {
+			seasonMapper.updateSeasonStatus(seasonId, isActive);
+			return "success";
+		} catch (Exception e) {
+			log.error("운임 시즌 상태 토글 중 오류 발생", e);
+			return "error";
+		}
 	}
-	
+
 	// 시스템 계정 및 가입 회원 관리 페이지 매핑
 	@GetMapping("/admin/accounts")
-    public String accountsManage(Model model) {
-        // USER 권한을 가진 일반 회원 목록 조회
-        List<MemberVO> userList = adminMemberMapper.selectMemberListByRole("USER");
-        // STAFF 권한을 가진 지상직 회원 목록 조회
-        List<MemberVO> staffList = adminMemberMapper.selectMemberListByRole("STAFF");
-        
-        // 모델에 데이터 담기
-        model.addAttribute("userList", userList);
-        model.addAttribute("staffList", staffList);
-        
-        return "thviews/admin_main/admin_accounts";
-    }
+	public String accountsManage(@RequestParam(required = false) String keyword,Model model) {
+		// USER 권한을 가진 일반 회원 목록 조회
+		List<MemberVO> userList = adminMemberMapper.selectMemberListByRoleAndKeyword("USER", keyword);
+		// STAFF 권한을 가진 지상직 회원 목록 조회
+		List<MemberVO> staffList = adminMemberMapper.selectMemberListByRoleAndKeyword("STAFF", keyword);
+
+		// 모델에 데이터 담기
+		model.addAttribute("userList", userList);
+		model.addAttribute("staffList", staffList);
+		model.addAttribute("keyword", keyword);
+
+		return "thviews/admin_main/admin_accounts";
+	}
+
 	@GetMapping("/admin/member/detail")
 	@ResponseBody
 	public MemberVO getMemberDetail(@RequestParam long memberId) {
-	    return adminMemberMapper.selectMemberById(memberId);
+		return adminMemberMapper.selectMemberById(memberId);
 	}
 
 	// 회원 정보 수정 (상태 및 권한 변경)
 	@PostMapping("/admin/member/update")
 	public String updateMemberStatusAndRole(MemberVO memberVO) {
-	    adminMemberMapper.updateMemberStatusAndRole(memberVO);
-	    // 처리가 완료되면 다시 계정 관리 페이지로 리다이렉트
-	    return "redirect:/admin/accounts";
+		adminMemberMapper.updateMemberStatusAndRole(memberVO);
+		// 처리가 완료되면 다시 계정 관리 페이지로 리다이렉트
+		return "redirect:/admin/accounts";
+	}
+	//지상직 계정 생성
+	@PostMapping("/admin/staff/insert")
+	public String insertStaff(MemberVO memberVO) {
+		// ※ 주의: Spring Security를 사용 중이므로 실제 서비스에서는 
+		// 여기서 passwordEncoder.encode(memberVO.getPassword()) 처리를 해주어야 로그인이 가능합니다.
+
+		adminMemberMapper.insertStaff(memberVO);
+		return "redirect:/admin/accounts";
 	}
 }

@@ -50,6 +50,52 @@
 		updated_at = SYSTIMESTAMP
 		WHERE member_id = #{member_id}
 	</update>
+	
+	<select id="selectMemberListByRoleAndKeyword" resultType="kr.spring.member.vo.MemberVO">
+    SELECT
+        member_id,
+        login_id AS id,
+        name,
+        email,
+        phone,
+        status,
+        role,
+        created_at
+    FROM MEMBER
+    WHERE role = #{role}
+    <!-- 검색어(keyword)가 넘어왔을 경우에만 실행되는 구문 -->
+    <if test="keyword != null and keyword != ''">
+        AND (login_id LIKE '%' || #{keyword} || '%' OR name LIKE '%' || #{keyword} || '%')
+    </if>
+    ORDER BY created_at DESC
+</select>
+
+<!-- 지상직 계정 생성 쿼리 추가 -->
+<insert id="insertStaff" parameterType="kr.spring.member.vo.MemberVO">
+    INSERT INTO MEMBER (
+        login_id, 
+        password, 
+        name, 
+        email, 
+        phone, 
+        zipcode, 
+        address1, 
+        address2, 
+        role, 
+        status
+    ) VALUES (
+        #{id}, 
+        #{password}, 
+        #{name}, 
+        #{email}, 
+        #{phone}, 
+        #{zipcode}, 
+        #{address1}, 
+        #{address2}, 
+        'STAFF', 
+        'ACTIVE'
+    )
+</insert>
 
 </mapper>
 
