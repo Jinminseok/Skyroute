@@ -200,3 +200,189 @@ footer { background: #F9FAFB; border-top: 1px solid var(--line); color: var(--mu
     .flight { grid-template-columns: 1fr; gap: 14px; } .route { max-width: none; }
 }
 
+
+
+
+/* ===== flight_list ===== */
+/* =============================================================================
+   ===== flight_list 전용 레이아웃 및 좌측 챗봇 확장 스타일 =====
+   ============================================================================= */
+
+/* 1. 레이아웃 구조 (형님의 .wrap 내부에서 2단 분할을 전담) */
+.booking-container { 
+    display: flex; 
+    gap: 30px; 
+    margin-top: 25px; 
+    align-items: flex-start; 
+}
+
+/* 좌측 전체 사이드바 패널 (필터 영역 + 챗봇 영역 통합) */
+.left-sidebar { 
+    width: 320px; 
+    flex-shrink: 0; 
+    display: flex;
+    flex-direction: column;
+    gap: 24px; 
+}
+
+/* 2. 좌측 상세 필터 카드 박스 */
+.filter-sidebar { 
+    background: #ffffff; 
+    border: 1px solid var(--line); 
+    border-radius: var(--r); 
+    padding: 24px; 
+    box-sizing: border-box; 
+}
+
+.filter-group { 
+    margin-bottom: 28px; 
+    border-bottom: 1px solid #f1f5f9; 
+    padding-bottom: 20px; 
+}
+.filter-group:last-child { 
+    border-bottom: none; 
+    padding-bottom: 0; 
+    margin-bottom: 0; 
+}
+.filter-title { 
+    font-size: 15px; 
+    font-weight: 600; 
+    color: var(--ink-700); 
+    margin-bottom: 12px; 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+}
+
+/* 간편 재검색 입력 폼 */
+.mini-search .f-input { 
+    width: 100%; 
+    padding: 10px 12px; 
+    border: 1px solid var(--line); 
+    border-radius: 8px; 
+    font-size: 13px; 
+    margin-bottom: 10px; 
+    box-sizing: border-box; 
+    background: #f8fafc; 
+}
+.mini-search label { 
+    font-size: 13px; 
+    color: var(--ink); 
+    font-weight: 500; 
+    margin-right: 10px; 
+    cursor: pointer; 
+}
+
+/* 필터 체크박스 라인 */
+.filter-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    margin-bottom: 8px; 
+    font-size: 13px; 
+    color: var(--ink); 
+    cursor: pointer; 
+}
+.filter-item input { 
+    cursor: pointer; 
+    width: 16px; 
+    height: 16px; 
+}
+
+/* 3. 우측 리스트 전용 가변 폭 지정 */
+.results-area { 
+    flex-grow: 1; 
+    width: 100%; 
+}
+
+/* 4. 타임리프 전용 a태그 링크 버튼화 (형님의 .btn 클래스와 결합) */
+.results-area .fare .btn,
+.mini-search .btn-search-apply {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+}
+.mini-search .btn-search-apply {
+    width: 100%;
+    height: 42px;
+    margin-top: 8px;
+}
+
+/* 5. 🤖 [위치 이동] 좌측 하단 고정형 챗봇 컴포넌트 */
+.chatbot-sidebar-window { 
+    width: 100%; 
+    height: 440px; 
+    background: #ffffff; 
+    border: 1px solid var(--line); 
+    border-radius: var(--r); 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
+    box-sizing: border-box;
+}
+.chat-side-header { 
+    background: var(--ink-700); 
+    color: #ffffff; 
+    padding: 14px 16px; 
+    font-weight: 500; 
+    font-size: 14px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+}
+.chat-side-body { 
+    flex-grow: 1; 
+    padding: 16px; 
+    background: #f8fafc; 
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+}
+.chat-side-msg { 
+    max-width: 85%; 
+    padding: 10px 14px; 
+    border-radius: 14px; 
+    font-size: 13px; 
+    line-height: 1.4; 
+}
+.chat-side-msg.bot { 
+    background: #ffffff; 
+    align-self: flex-start; 
+    border-top-left-radius: 2px; 
+    border: 1px solid var(--line); 
+    color: var(--ink); 
+}
+.chat-side-msg.user { 
+    background: var(--accent); 
+    color: #ffffff; 
+    align-self: flex-end; 
+    border-top-right-radius: 2px; 
+}
+.chat-side-foot { 
+    padding: 12px; 
+    border-top: 1px solid var(--line); 
+    display: flex; 
+    gap: 8px; 
+    background: #ffffff; 
+}
+.chat-side-input { 
+    flex-grow: 1; 
+    border: 1px solid var(--line); 
+    border-radius: 8px; 
+    padding: 8px 12px; 
+    font-size: 13px; 
+    outline: none; 
+}
+.chat-side-send {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    width: 55px;
+    height: 34px;
+    font-size: 13px;
+}

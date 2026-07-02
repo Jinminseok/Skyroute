@@ -111,6 +111,14 @@ public class MemberUserController {
 	}
 	
 	
+	//항공권 검색
+	@GetMapping("/member_flight_list")
+	public String flightListForm() {
+		return "thviews/member/member_flight_list";
+	}
+	
+	
+	
 	//MY페이지
 		/*
 		 * @PreAuthorize

@@ -7,6 +7,16 @@
 	<title>메인</title>
 	<link rel="stylesheet" th:href="@{/assets/css/member.css}"> 
 	<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+    <style>
+        /* 🌟 a 태그 버튼화로 인한 정렬 흐름 깨짐 방지용 스타일 추가 */
+        .searchrow .btn, .summary .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            text-align: center;
+        }
+    </style>
 </head>  
 <body>
 
@@ -51,8 +61,8 @@
             <span>직항만 <b>OFF</b></span>
             <span>최저가 달력</span>
             <span>마일리지로 예약</span>
-          </div>
-          <button class="btn" onclick="go('book')">항공권 검색</button>
+          </div>          
+          <a th:href="@{/member/member_flight_list}" class="btn">항공권 검색</a>
         </div>
       </div>
 
@@ -119,7 +129,8 @@
         <div class="sl"><span class="k">기본 운임</span><b>1,284,000</b></div>
         <div class="sl"><span class="k">유류할증·세금</span><b>312,400</b></div>
         <div class="total"><span class="k">총 결제금액</span><span class="v" id="seattotal">1,596,400원</span></div>
-        <button class="btn" style="width:100%;margin-top:16px; border-radius: 12px;">결제하기 (카카오페이 · 카드)</button>
+        <!-- 🌟 [수정] 하단 결제하기 버튼도 명확한 링크 전송을 위해 a 태그로 변경 -->
+        <a th:href="@{/booking/payment}" class="btn" style="width:100%; margin-top:16px; border-radius: 12px; box-sizing: border-box;">결제하기 (카카오페이 · 카드)</a>
       </div>
     </div>
   </section>
