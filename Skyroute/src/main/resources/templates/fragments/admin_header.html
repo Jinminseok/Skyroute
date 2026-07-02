@@ -132,11 +132,13 @@
             <div class="r" th:text="${#authentication.principal.memberVO.role}"></div>
         </div>
     </div>
-    <form th:action="@{/logout}" method="post" style="margin: 0;">
-        <button type="submit" class="btn-logout">
-            <span class="material-symbols-outlined">logout</span> 로그아웃
-        </button>
-    </form>
+    
+
+	<form th:action="@{/member/logout}" method="post" style="margin: 0;">
+    <button type="submit" class="btn-logout">
+        <span class="material-symbols-outlined">logout</span> 로그아웃
+    </button>
+</form>
 </div>
 </header>
 </html>

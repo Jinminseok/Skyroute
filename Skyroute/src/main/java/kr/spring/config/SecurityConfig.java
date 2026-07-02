@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import kr.spring.member.security.CustomAccessDeniedHandler;
+import kr.spring.member.security.CustomLogoutSuccessHandler;
 import kr.spring.member.security.UserSecurityService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,7 +39,8 @@ public class SecurityConfig{
 	//로그인 실패 시 처리를 담당하는 클래스
 	@Autowired
 	private AuthenticationFailureHandler authenticationFailureHandler;
-	
+	@Autowired
+	private CustomLogoutSuccessHandler customLogoutSuccessHandler;
 	// 권한이 없을 때 처리하는 클래스
 	@Autowired
 	private CustomAccessDeniedHandler customAccessDeniedHandler;
@@ -85,7 +87,7 @@ public class SecurityConfig{
 						// 로그아웃 요청 URL
 						.logoutUrl("/member/logout")
 						 // 로그아웃 후 이동 페이지
-						.logoutSuccessUrl("/")
+						.logoutSuccessHandler(customLogoutSuccessHandler)
 						 // 세션 제거
 						.invalidateHttpSession(true)
 						 // 쿠키 삭제 (remember-me는 사용하지 않으므로 JSESSIONID만 삭제)
