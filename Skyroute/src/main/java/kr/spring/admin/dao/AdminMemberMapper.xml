@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.spring.admin.dao.AdminMemberMapper">
+	<select id="selectMemberListByRole" parameterType="string"
+		resultType="kr.spring.member.vo.MemberVO">
+		SELECT
+		member_id,
+		login_id AS id,
+		name,
+		email,
+		phone,
+		status,
+		role,
+		created_at
+		FROM MEMBER
+		WHERE role = #{role}
+		ORDER BY created_at DESC
+	</select>
+	
+	<!-- 회원 상세 정보 조회 -->
+	<select id="selectMemberById" parameterType="long"
+		resultType="kr.spring.member.vo.MemberVO">
+		SELECT
+		member_id,
+		login_id AS id,
+		name,
+		email,
+		phone,
+		zipcode,
+		address1,
+		address2,
+		role,
+		status,
+		suspend_reason,
+		created_at
+		FROM MEMBER
+		WHERE member_id = #{member_id}
+	</select>
+
+	<!-- 회원 상태 및 권한 업데이트 -->
+	<update id="updateMemberStatusAndRole"
+		parameterType="kr.spring.member.vo.MemberVO">
+		UPDATE MEMBER
+		SET
+		status = #{status},
+		role = #{role},
+		suspend_reason = #{suspend_reason},
+		updated_at = SYSTIMESTAMP
+		WHERE member_id = #{member_id}
+	</update>
+
+</mapper>
+
+
+
+
+
+
+

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import kr.spring.admin.dao.AdminMemberMapper;
 import kr.spring.admin.dao.GateAreaMapper;
 import kr.spring.admin.dao.RegionMapper;
 import kr.spring.admin.dao.RouteTypeMapper;
@@ -18,6 +19,7 @@ import kr.spring.admin.vo.GateAreaVO;
 import kr.spring.admin.vo.RegionVO;
 import kr.spring.admin.vo.RouteTypeVO;
 import kr.spring.admin.vo.SeasonVO;
+import kr.spring.member.vo.MemberVO;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,6 +37,9 @@ public class AdminController {
 	
 	@Autowired
 	private SeasonMapper seasonMapper; //시즌
+	
+	@Autowired
+    private AdminMemberMapper adminMemberMapper; //회원 관리
 
 	@GetMapping("/admin/base1")
 	public String adminMain(Model model) {
@@ -63,11 +68,7 @@ public class AdminController {
 	}
 
 
-	// 3. 계정/회원 관리 페이지
-	@GetMapping("/admin/accounts")
-	public String accounts() {
-		return "thviews/admin_main/admin_accounts";
-	}
+	
 
 	// 4. 전사 운영 통계 페이지
 	@GetMapping("/admin/statistics")
@@ -214,5 +215,33 @@ public class AdminController {
 	        log.error("운임 시즌 상태 토글 중 오류 발생", e);
 	        return "error";
 	    }
+	}
+	
+	// 시스템 계정 및 가입 회원 관리 페이지 매핑
+	@GetMapping("/admin/accounts")
+    public String accountsManage(Model model) {
+        // USER 권한을 가진 일반 회원 목록 조회
+        List<MemberVO> userList = adminMemberMapper.selectMemberListByRole("USER");
+        // STAFF 권한을 가진 지상직 회원 목록 조회
+        List<MemberVO> staffList = adminMemberMapper.selectMemberListByRole("STAFF");
+        
+        // 모델에 데이터 담기
+        model.addAttribute("userList", userList);
+        model.addAttribute("staffList", staffList);
+        
+        return "thviews/admin_main/admin_accounts";
+    }
+	@GetMapping("/admin/member/detail")
+	@ResponseBody
+	public MemberVO getMemberDetail(@RequestParam long memberId) {
+	    return adminMemberMapper.selectMemberById(memberId);
+	}
+
+	// 회원 정보 수정 (상태 및 권한 변경)
+	@PostMapping("/admin/member/update")
+	public String updateMemberStatusAndRole(MemberVO memberVO) {
+	    adminMemberMapper.updateMemberStatusAndRole(memberVO);
+	    // 처리가 완료되면 다시 계정 관리 페이지로 리다이렉트
+	    return "redirect:/admin/accounts";
 	}
 }
