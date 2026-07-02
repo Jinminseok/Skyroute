@@ -571,3 +571,73 @@ aside.summary {
 aside.summary .total {
     align-items: center;
 }
+
+
+/* member_select_seat */
+.pay-methods {
+	display: flex;
+	gap: 10px;
+	margin: 16px 0;
+}
+
+.pay-method {
+	flex: 1;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	padding: 14px 0;
+	text-align: center;
+	cursor: pointer;
+	background: #fff;
+	transition: 0.2s;
+}
+
+.pay-method input {
+	display: none;
+}
+
+.pay-method .txt {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--mut);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+
+.pay-method:has(input:checked) {
+	border-color: var(--accent);
+	background: var(--accent-soft);
+}
+
+.pay-method:has(input:checked) .txt {
+	color: var(--accent);
+	font-weight: 600;
+}
+
+.class-divider {
+	text-align: center;
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--mut);
+	margin: 24px 0 16px;
+	position: relative;
+	letter-spacing: 2px;
+}
+
+.class-divider::before, .class-divider::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	width: 35%;
+	height: 1px;
+	background: var(--line);
+}
+
+.class-divider::before {
+	left: 0;
+}
+
+.class-divider::after {
+	right: 0;
+}

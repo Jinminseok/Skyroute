@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout_basic}">
+<head>
+<meta charset="UTF-8">
+<title>에어누리 - 좌석 선택 및 결제</title>
+<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+<style>
+    /* 결제 수단 라디오 버튼 전용 스타일 */
+    .pay-methods { display: flex; gap: 10px; margin: 16px 0; }
+    .pay-method { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 14px 0; text-align: center; cursor: pointer; background: #fff; transition: 0.2s; }
+    .pay-method input { display: none; }
+    .pay-method .txt { font-size: 13px; font-weight: 500; color: var(--mut); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .pay-method:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    .pay-method:has(input:checked) .txt { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+
+	<div layout:fragment="panel">
+		<div class="wrap" style="padding-top: 40px; padding-bottom: 60px;">
+
+			<div class="htitle" style="margin-bottom: 24px;">
+				<div>
+					<div class="eyebrow">SEAT SELECTION</div>
+					<h2 style="font-size: 22px; font-weight: 600; margin-top: 5px;">좌석 선택 및 결제</h2>
+				</div>
+			</div>
+
+			<div class="seatwrap">
+
+				<div class="cabin">
+					
+					<div class="legend" style="margin-top: 0; margin-bottom: 20px;">
+						<span><i style="border-color:#CBD6E4;background:#fff"></i>선택가능</span>
+						<span><i style="border-color:#E2E8F0;background:#F1F5F9"></i>판매완료</span>
+						<span><i style="border-color:var(--accent);background:var(--accent)"></i>선택좌석</span>
+					</div>
+
+					<div class="plane" id="plane">
+                        <div style="width: 60px; height: 16px; background: #e2e8f0; border-radius: 20px 20px 0 0; margin: 0 auto 30px;"></div>
+
+                        <div class="row" th:each="row : ${#numbers.sequence(1, 2)}" th:if="${totalSeats >= (row * 4)}">
+                            <div class="rn" th:text="${row}">1</div>
+                            <div class="seat">A</div><div class="seat">B</div><div></div>
+                            <div></div><div></div><div class="seat">E</div><div class="seat">F</div>
+                        </div>
+
+                        <div class="row" th:each="row : ${#numbers.sequence(3, 6)}" th:if="${totalSeats >= (8 + (row - 2) * 4)}">
+                            <div class="rn" th:text="${row}">3</div>
+                            <div class="seat">A</div><div class="seat">B</div><div></div>
+                            <div></div><div></div><div class="seat">E</div><div class="seat">F</div>
+                        </div>
+
+                        <div class="row" th:each="row : ${#numbers.sequence(7, 27)}" th:if="${totalSeats >= (24 + (row - 6) * 6)}">
+                            <div class="rn" th:text="${row}">7</div>
+                            <div class="seat">A</div><div class="seat taken">B</div><div class="seat">C</div>
+                            <div></div><div class="seat">D</div><div class="seat">E</div><div class="seat">F</div>
+                        </div>
+					</div>
+				</div>
+
+				<aside class="summary">
+					<h3>선택 여정 요약</h3>
+					
+					<div style="background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+							<span class="stat soon" style="background: var(--accent-soft); color: var(--accent); font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600;">가는 편</span>
+							<b style="font-family: var(--sans-eng); font-size: 13px; color: var(--mut);">NU101</b>
+						</div>
+						<div class="sl" style="border-bottom: none; padding: 4px 0;"><span class="k">구간</span><b>ICN 인천 → JFK 뉴욕</b></div>
+						<div class="sl" style="border-bottom: none; padding: 4px 0;"><span class="k">일자</span><b>2026.12.20 (토) 10:30</b></div>
+						<div class="sl" style="border-bottom: none; padding: 4px 0;">
+                            <span class="k">선택 좌석</span>
+                            <b id="selectedSeatDisplay" style="color: var(--accent); font-size: 16px;">미선택</b>
+                        </div>
+					</div>
+
+					<div class="sl"><span class="k">기본 항공 운임</span><b>1,284,000 원</b></div>
+					<div class="sl"><span class="k">시즌별 요금 (동계성수기)</span><b>312,400 원</b></div>
+					<div class="sl"><span class="k">선택 인원</span><b>성인 1명</b></div>
+					
+					<div class="total" style="border-top: 1px dashed var(--line); padding-top: 16px;">
+						<span class="k">총 결제금액</span>
+						<span class="v">1,596,400원</span>
+					</div>
+
+                    <div style="margin-top: 24px;">
+                        <h4 style="font-size: 13px; color: var(--mut); margin: 0 0 8px; font-weight: 500;">결제 수단 선택</h4>
+                        <div class="pay-methods">
+                            <label class="pay-method">
+                                <input type="radio" name="pay_type" value="CARD" checked>
+                                <div class="txt">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">credit_card</span>
+                                    신용/체크카드
+                                </div>
+                            </label>
+                            <label class="pay-method">
+                                <input type="radio" name="pay_type" value="BANK">
+                                <div class="txt">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">account_balance</span>
+                                    무통장 입금
+                                </div>
+                            </label>
+                            <label class="pay-method">
+                                <input type="radio" name="pay_type" value="KAKAOPAY">
+                                <div class="txt">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">chat_bubble</span>
+                                    카카오페이
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+					
+					<a th:href="@{/main/home}" 
+					   id="btnPaymentSubmit" 
+					   onclick="return handlePayment(this, event);"
+					   class="btn" 
+					   style="width: 100%; margin-top: 16px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: 15px; height: 50px;">
+					    결제하기
+					</a>
+				</aside>
+
+			</div>
+		</div>
+	</div>
+
+    <script th:inline="javascript">
+    // 1. 결제 제어 및 알림창 처리 전역 함수
+    function handlePayment(element, event) {
+        // 브라우저의 즉시 이동 성향을 원천 차단
+        event.preventDefault();
+        event.stopPropagation();
+
+        const display = document.getElementById('selectedSeatDisplay');
+        
+        // 좌석 선택 여부 검증
+        if (!display || display.innerText === '미선택') {
+            alert('원하시는 항공기 좌석을 먼저 선택해 주세요.');
+            return false;
+        }
+
+        // 라디오 버튼 선택 값 추출
+        const selectedPayType = document.querySelector('input[name="pay_type"]:checked').value;
+        
+        // 안전하게 파싱된 타임리프 오리지널 href 주소 추출
+        const mainHomeUrl = element.getAttribute('href'); 
+
+        // 분기문 실행 후 자바스크립트로 리다이렉트 실행
+        if (selectedPayType === 'CARD') {
+            alert('신용/체크카드 결제가 정상적으로 승인 및 완료되었습니다.\n메인 화면으로 이동합니다.');
+            window.location.href = mainHomeUrl;
+        } else if (selectedPayType === 'BANK') {
+            alert('무통장 가상계좌 발급이 완료되었습니다.\n예약 유지를 위해 금일 자정까지 입금을 완료해 주세요.');
+            window.location.href = mainHomeUrl;
+        } else if (selectedPayType === 'KAKAOPAY') {
+            alert('카카오페이 간편결제 창으로 연동합니다.');
+            window.location.href = mainHomeUrl;
+        }
+        
+        return false;
+    }
+
+    // 2. 좌석 동적 선택 로직
+    document.addEventListener('DOMContentLoaded', function() {
+        const seats = document.querySelectorAll('.seat:not(.taken)');
+        const display = document.getElementById('selectedSeatDisplay');
+
+        seats.forEach(seat => {
+            seat.addEventListener('click', function() {
+                document.querySelectorAll('.seat.pick').forEach(s => s.classList.remove('pick'));
+                this.classList.add('pick');
+                const rowNum = this.closest('.row').querySelector('.rn').innerText;
+                const seatLetter = this.innerText;
+                display.innerText = rowNum + seatLetter;
+            });
+        });
+    });
+</script>
+</body>
+</html>

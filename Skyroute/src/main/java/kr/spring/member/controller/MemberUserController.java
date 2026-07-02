@@ -129,6 +129,15 @@ public class MemberUserController {
 	}
 	
 	
+	
+	//좌석 선택 폼 호출
+	@GetMapping("/member_select_seat")
+	public String selectSeatForm() {
+		return "thviews/member/member_select_seat";
+	}
+	
+	
+	
 	//MY페이지
 		/*
 		 * @PreAuthorize
