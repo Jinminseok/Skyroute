@@ -9,4 +9,5 @@ import kr.spring.admin.vo.AirCraftVO;
 public interface AirCraftService {
 	public void insertAircraft(AirCraftVO aircraft);
     public List<AirCraftVO> selectListAircraft();
+    public void updateAircraftStatus(int aircraft_id, String is_active);
 }

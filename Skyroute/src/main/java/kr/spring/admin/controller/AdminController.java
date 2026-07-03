@@ -44,9 +44,8 @@ public class AdminController {
 	@Autowired
 	private AdminMemberMapper adminMemberMapper; //회원 관리
 	
-	// 항공기 관리 
 	@Autowired
-	private AirCraftService airCraftService;
+	private AirCraftService airCraftService;	// 항공기 관리
 
 	@GetMapping("/admin/base1")
 	public String adminMain(Model model) {
@@ -201,6 +200,19 @@ public class AdminController {
 		log.debug("<<항공기 등록 시도>> : " + airCraftVO);
 		airCraftService.insertAircraft(airCraftVO);
 		return "redirect:/admin/base2";
+	}
+	
+	// ====== 항공기 사용여부 토글 비동기 처리 ======
+	@PostMapping("/admin/aircraft/toggleStatus")
+	@ResponseBody
+	public String toggleAircraftStatus(@RequestParam("aircraft_id") int aircraft_id, @RequestParam("is_active") String is_active) {
+	    try {
+	        airCraftService.updateAircraftStatus(aircraft_id, is_active);
+	        return "success";
+	    } catch (Exception e) {
+	        log.error("항공기 상태 토글 중 오류 발생", e);
+	        return "error";
+	    }
 	}
 	
 	// ====== 시즌 처리 로직 ======

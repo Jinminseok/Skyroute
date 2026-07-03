@@ -26,4 +26,9 @@ public class AirCraftServiceImpl implements AirCraftService{
         return airCraftMapper.selectListAircraft();
     }
 
+	@Override
+	public void updateAircraftStatus(int aircraft_id, String is_active) {
+		airCraftMapper.updateAircraftStatus(aircraft_id, is_active);
+	}
+
 }

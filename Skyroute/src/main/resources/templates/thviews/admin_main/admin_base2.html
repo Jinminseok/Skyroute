@@ -36,15 +36,26 @@
           </div>
           <div class="table-wrap">
             <table class="data">
-              <thead><tr><th>등록번호</th><th>모델명</th><th>총 좌석</th></tr></thead>
+              <thead><tr><th>등록번호</th><th>모델명</th><th>총 좌석</th><th>현재 상태</th><th>사용 여부</th></tr></thead>
               <tbody>
                 <tr th:each="aircraft, stat : ${aircraftList}" th:if="${stat.index < 3}">
                   <td th:text="${aircraft.reg_no}"></td>
                   <td th:text="${aircraft.model_name}"></td>
                   <td th:text="${aircraft.total_seats}"></td>
+                  <td>
+                    <span th:text="${aircraft.status_name}" 
+                          th:style="${aircraft.status_name == '정비중'} ? 'color:#ef4444; font-weight:600;' : 'color:#10b981;'">
+                    </span>
+                  </td>
+                  <td>
+                    <div class="toggle" 
+                         th:classappend="${aircraft.is_active == 'Y'} ? 'on' : ''"
+                         th:attr="onclick=|toggleAircraftActiveStatus(this, ${aircraft.aircraft_id}, '${aircraft.is_active}')|">
+                    </div>
+                  </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(aircraftList)}">
-                  <td colspan="3" style="text-align: center; padding: 20px;">등록된 기재가 없습니다.</td>
+                  <td colspan="5" style="text-align: center; padding: 20px;">등록된 기재가 없습니다.</td>
                 </tr>
               </tbody>
             </table>
@@ -81,7 +92,7 @@
         </div>
 
       </div>
-      </div>
+    </div>
   </main>
 
   <!-- ====== 항공기 전체 조회 대형 모달 ====== -->
@@ -134,13 +145,12 @@
                             <td th:text="${aircraft.reg_no}" style="font-weight:600; color:#0f172a;"></td>
                             <td th:text="${aircraft.model_name}"></td>
                             <td th:text="${aircraft.total_seats}"></td>
-                            <!-- 지상직이 관리하는 상태값 노출 -->
                             <td>
                                 <span th:text="${aircraft.status_name}" 
                                       th:style="${aircraft.status_name == '정비중'} ? 'color:#ef4444; font-weight:600;' : 'color:#10b981;'">
                                 </span>
                             </td>
-                            <td th:text="${aircraft.is_active == 'Y' ? '사용 (Y)' : '비활성 (N)'}"></td>
+                            <td th:id="'modal-aircraft-status-' + ${aircraft.aircraft_id}" th:text="${aircraft.is_active == 'Y' ? '사용 (Y)' : '비활성 (N)'}"></td>
                             <td style="display: flex; gap: 5px;">
                                 <button type="button" class="btn btn-ghost btn-sm" style="color: #ef4444; border-color: #fca5a5;"
                                     th:attr="onclick=|if(confirm('이 기재를 정말 삭제하시겠습니까? (연결된 스케줄이 있으면 실패합니다)')) location.href='/admin/aircraft/delete?aircraftId=${aircraft.aircraft_id}'|">
@@ -156,7 +166,6 @@
             </div>
         </div>
     </div>
-
 
   <!-- ====== 운임 시즌 모달 영역 ====== -->
   <div id="seasonModal" class="modal-overlay" style="display: none;">
@@ -245,10 +254,51 @@
 		</div>
 	</div>
 
-	<script>
+<script>
 	    // ====== 기재(항공기) 모달 제어 함수 ======
 	    function openAircraftModal() { document.getElementById('aircraftModal').style.display = 'flex'; }
         function closeAircraftModal() { document.getElementById('aircraftModal').style.display = 'none'; }
+        
+        // ====== 항공기 비동기 상태 변경(토글) 함수 ======
+        function toggleAircraftActiveStatus(element, aircraftId, currentStatus) {
+            const newStatus = (currentStatus === 'Y') ? 'N' : 'Y';
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            const formData = new URLSearchParams();
+            
+            formData.append("aircraft_id", aircraftId);
+            formData.append("is_active", newStatus);
+
+            fetch('/admin/aircraft/toggleStatus', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [csrfHeader]: csrfToken
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("네트워크 응답 오류");
+                return response.text();
+            })
+            .then(result => {
+                if (result === "success") {
+                    if (newStatus === 'Y') element.classList.add('on');
+                    else element.classList.remove('on');
+                    
+                    element.setAttribute("onclick", `toggleAircraftActiveStatus(this, ${aircraftId}, '${newStatus}')`);
+
+                    const modalStatusTd = document.getElementById('modal-aircraft-status-' + aircraftId);
+                    if (modalStatusTd) modalStatusTd.innerText = (newStatus === 'Y') ? '사용 (Y)' : '비활성 (N)';
+                } else {
+                    alert("상태 변경 처리에 실패했습니다.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("통신 중 오류가 발생했습니다.");
+            });
+        }
         
 		// ====== 운임 시즌 모달 제어 함수 ======
 		function openSeasonModal() { document.getElementById('seasonModal').style.display = 'flex'; }
