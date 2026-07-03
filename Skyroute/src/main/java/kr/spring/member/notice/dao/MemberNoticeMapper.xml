@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.spring.member.notice.dao.MemberNoticeMapper">
+	
+	<resultMap type="kr.spring.member.notice.vo.MemberNoticeVO" id="memberNoticeMap">
+		<id property="notice_id" column="notice_id"/>
+		<result property="title" column="title"/>
+		<result property="content" column="content"/>
+		<result property="is_public" column="is_public"/>
+		<result property="created_by" column="created_by"/>
+		<result property="created_at" column="created_ad"/>
+		<result property="updated_at" column="updated_at"/>
+		<result property="memberVO.name" column="name"/>
+	</resultMap>
+	
+	<!-- 검색 조건 -->
+	<sql id="noticeSearch">
+		<where>
+			n.is_public = 'Y'
+			
+			<if test="keyword != null and keyword != ''">
+				<if test="keyfield == 1">
+					AND n.title LIKE '%' || #{keyword} || '%'
+				</if>
+				
+				<if test="keyfield == 2">
+					AND DBMS_LOB.INSTR(n.content, #{keyword}) > 0	
+				</if>
+				
+				<if test="keyfield == 3">
+					AND (
+						n.title LIKE '%' || #{keyword} || '%'
+						OR DBMS_LOB.INSTR(n.content, #{keyword}) > 0
+					)
+				</if>
+			</if>
+		</where>
+	</sql>
+	
+	<!-- 공지사항 전체/검색 레코드 수 -->
+	<select id="selectRowCount" parameterType="map" resultType="integer">
+		SELECT COUNT(*)
+		FROM NOTICE n
+		JOIN MEMBER m ON n.created_by = m.member_id
+		<include refid="noticeSearch"/>	
+	</select>
+	
+	<!-- 공지사항 목록 -->
+	<select id="selectList" parameterType="map" resultMap="memberNoticeMap">
+		SELECT
+			n.notice_id,
+			<![CDATA[REPLACE(REPLACE(n.title, '<', '&lt;'), '>', '&gt;') title,]]>
+			DBMS_LOB.SUBSTR(n.content, 120, 1) content,
+			n.is_public,
+			n.created_by,
+			TO_CHAR(n.created_at, 'YYYY-MM-DD') created_at,
+			TO_CHAR(n.updated_at, 'YYYY-MM-DD') updated_at,
+			m.name
+		FROM NOTICE n
+		JOIN MEMBER m ON n.created_by = m.member_id
+		<include refid="noticeSearch"/>
+		ORDER BY n.notice_id DESC
+		OFFSET #{skip} ROWS FETCH NEXT #{limit} ROWS ONLY
+	</select>
+	
+	<!-- 공지사항 상세 -->
+	<select id="selectNotice" parameterType="long" resultMap="memberNoticeMap">
+		SELECT
+			n.notice_id,
+			n.title,
+			n.content,
+			n.is_public,
+			n.created_by,
+			TO_CHAR(n.created_at, 'YYYY-MM-DD HH24:MI') created_at,
+			TO_CHAR(n.updated_at, 'YYYY-MM-DD HH24:MI') updated_at,
+			m.name
+		FROM NOTICE n
+		JOIN MEMBER m ON n.created_by = m.member_id
+		WHERE n.notice_id = #{notice_id}
+			AND n.is_public = 'Y'
+	</select>
+
+</mapper>
+
+
+
+
+
+
+
