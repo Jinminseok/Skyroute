@@ -15,11 +15,14 @@ import kr.spring.admin.dao.GateAreaMapper;
 import kr.spring.admin.dao.RegionMapper;
 import kr.spring.admin.dao.RouteTypeMapper;
 import kr.spring.admin.dao.SeasonMapper;
+import kr.spring.admin.service.AirCraftService;
 import kr.spring.admin.vo.GateAreaVO;
 import kr.spring.admin.vo.RegionVO;
 import kr.spring.admin.vo.RouteTypeVO;
 import kr.spring.admin.vo.SeasonVO;
 import kr.spring.member.vo.MemberVO;
+import kr.spring.admin.vo.AirCraftVO;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -40,6 +43,10 @@ public class AdminController {
 
 	@Autowired
 	private AdminMemberMapper adminMemberMapper; //회원 관리
+	
+	// 항공기 관리 
+	@Autowired
+	private AirCraftService airCraftService;
 
 	@GetMapping("/admin/base1")
 	public String adminMain(Model model) {
@@ -53,22 +60,22 @@ public class AdminController {
 		List<RouteTypeVO> routeTypeList = routeTypeMapper.selectRouteTypeList();
 		model.addAttribute("routeTypeList", routeTypeList);
 
-
 		return "thviews/admin_main/admin_base1"; 
 	}
 
-
 	@GetMapping("/admin/base2")
 	public String adminBase2(Model model) {
+		
+		// 항공기 목록 조회
+		List<AirCraftVO> aircraftList = airCraftService.selectListAircraft();
+		model.addAttribute("aircraftList", aircraftList);
+		
 		//시즌
 		List<SeasonVO> seasonList = seasonMapper.selectSeasonList();
 		model.addAttribute("seasonList", seasonList);
 
 		return "thviews/admin_main/admin_base2"; 
 	}
-
-
-
 
 	// 4. 전사 운영 통계 페이지
 	@GetMapping("/admin/statistics")
@@ -151,6 +158,7 @@ public class AdminController {
 			return "error";
 		}
 	}
+	
 	// ====== 노선 처리 로직 ======
 	@PostMapping("/admin/routeType/insert")
 	public String insertRouteType(RouteTypeVO routeTypeVO) {
@@ -186,6 +194,15 @@ public class AdminController {
 			return "error";
 		}
 	}
+	
+	// ====== 항공기 처리 ======
+	@PostMapping("/admin/aircraft/insert")
+	public String insertAircraft(AirCraftVO airCraftVO) {
+		log.debug("<<항공기 등록 시도>> : " + airCraftVO);
+		airCraftService.insertAircraft(airCraftVO);
+		return "redirect:/admin/base2";
+	}
+	
 	// ====== 시즌 처리 로직 ======
 	@PostMapping("/admin/season/insert")
 	public String insertSeason(SeasonVO seasonVO) {
@@ -246,21 +263,20 @@ public class AdminController {
 		// 처리가 완료되면 다시 계정 관리 페이지로 리다이렉트
 		return "redirect:/admin/accounts";
 	}
+	
 	//지상직 계정 생성
 	@PostMapping("/admin/staff/insert")
 	public String insertStaff(MemberVO memberVO) {
-	    try {
-	       
-	        adminMemberMapper.insertStaff(memberVO);
-	    } catch (org.springframework.dao.DuplicateKeyException e) {
-	        log.error("계정 생성 실패 - 중복된 데이터(아이디/이메일/연락처) 존재");
-	        
-	        return "redirect:/admin/accounts?error=duplicate";
-	    } catch (Exception e) {
-	        log.error("계정 생성 중 알 수 없는 오류 발생", e);
-	        return "redirect:/admin/accounts?error=true";
-	    }
-	    
-	    return "redirect:/admin/accounts";
+		try {
+			adminMemberMapper.insertStaff(memberVO);
+		} catch (org.springframework.dao.DuplicateKeyException e) {
+			log.error("계정 생성 실패 - 중복된 데이터(아이디/이메일/연락처) 존재");
+			return "redirect:/admin/accounts?error=duplicate";
+		} catch (Exception e) {
+			log.error("계정 생성 중 알 수 없는 오류 발생", e);
+			return "redirect:/admin/accounts?error=true";
+		}
+		
+		return "redirect:/admin/accounts";
 	}
 }
