@@ -1,5 +1,7 @@
 package kr.spring.staff.basedata.service;
 
-public interface StaffSeatService {
+import kr.spring.staff.basedata.vo.SeatClassVO;
 
+public interface StaffSeatService {
+    public void generateSeats(SeatClassVO seatClassVO, int startRow);
 }

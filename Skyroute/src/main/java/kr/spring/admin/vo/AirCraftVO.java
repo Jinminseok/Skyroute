@@ -1,8 +1,12 @@
 package kr.spring.admin.vo;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@ToString
 public class AirCraftVO {
 	private int aircraft_id;	// 항공기 ID (PK)
 	private String reg_no;		// 등록기호 (예: HL1234)
