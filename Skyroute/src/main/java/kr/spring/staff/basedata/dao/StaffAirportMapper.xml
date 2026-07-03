@@ -1,9 +1,77 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper   
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
-<mapper namespace="kr.spring.staff.basedata.dao.StaffAirportMapper"> 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.spring.staff.basedata.dao.StaffAirportMapper">
+	<select id="selectAirportList"
+		resultType="kr.spring.staff.basedata.vo.AirportVO">
+		SELECT
+		A.airport_id AS airportId,
+		A.iata_code AS iataCode,
+		A.airport_name AS airportName,
+		A.country AS country,
+		A.timezone AS timezone,
+		A.region_id AS regionId,
+		R.region_name AS regionName,
+		A.flight_type AS flightType,
+		A.is_active AS isActive
+		FROM AIRPORT A
+		LEFT JOIN REGION R ON A.region_id = R.region_id
+		ORDER BY A.airport_id ASC
+	</select>
+	<select id="selectAirport" parameterType="int"
+		resultType="kr.spring.staff.basedata.vo.AirportVO">
+		SELECT
+		airport_id AS airportId,
+		iata_code AS iataCode,
+		airport_name AS airportName,
+		country,
+		timezone,
+		region_id AS regionId,
+		flight_type AS flightType,
+		is_active AS isActive
+		FROM AIRPORT
+		WHERE airport_id = #{airportId}
+	</select>
+
+	<!-- 공항 등록 (airport_id는 자동 생성되므로 제외) -->
+	<insert id="insertAirport"
+		parameterType="kr.spring.staff.basedata.vo.AirportVO">
+		INSERT INTO AIRPORT (
+		iata_code, airport_name, country, timezone, region_id, flight_type, is_active
+		) VALUES (
+		#{iataCode}, #{airportName}, #{country}, #{timezone}, #{regionId}, #{flightType},
+		NVL(#{isActive}, 'Y')
+		)
+	</insert>
+
+	<!-- 공항 수정 -->
+	<update id="updateAirport"
+		parameterType="kr.spring.staff.basedata.vo.AirportVO">
+		UPDATE AIRPORT
+		SET
+		iata_code = #{iataCode},
+		airport_name = #{airportName},
+		country = #{country},
+		timezone = #{timezone},
+		region_id = #{regionId},
+		flight_type = #{flightType},
+		is_active = #{isActive}
+		WHERE airport_id = #{airportId}
+	</update>
+
+	<!-- 공항 삭제 -->
+	<delete id="deleteAirport" parameterType="int">
+		DELETE FROM AIRPORT
+		WHERE airport_id = #{airportId}
+	</delete>
 	
+	<update id="updateAirportActive" parameterType="kr.spring.staff.basedata.vo.AirportVO">
+    UPDATE AIRPORT
+    SET is_active = #{isActive}
+    WHERE airport_id = #{airportId}
+</update>
 </mapper>
 
 
