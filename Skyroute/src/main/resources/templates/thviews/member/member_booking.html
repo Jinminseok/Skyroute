@@ -16,50 +16,120 @@
     <div layout:fragment="panel" class="panel on" id="book">
         
         <div class="panel on" id="lookup" style="display: block;">
-            <section class="block wrap">
+            <div class="wrap" style="padding-top: 40px; padding-bottom: 60px;">
                 <div class="eyebrow">MANAGE BOOKING</div>
-                <h2 style="margin:6px 0 22px; font-weight: 500;">예약 조회 · 변경</h2>
+                <h2 style="margin:6px 0 22px; font-weight: 600; font-size: 22px;">나의 항공권 예약 조회</h2>
                 
                 <div class="searchcard" style="margin-top:0; padding-bottom:24px">
-                    <div class="fields" style="grid-template-columns:1fr 1fr 1fr">
+                    <div class="fields" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+                        <div class="field">
+                            <label>탑승객 영문명</label>
+                            <input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px;" placeholder="EX) GILDONG">
+                        </div>
                         <div class="field">
                             <label>예약번호 (PNR)</label>
-                            <div class="big" style="font-family: var(--mono); font-weight: 500;">NUX4K9</div>
+                            <input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--mono);" placeholder="6자리 입력">
                         </div>
                         <div class="field">
-                            <label>탑승객 영문 성</label>
-                            <div class="big" style="font-weight: 500;">HONG</div>
+                            <label>도착지</label>
+                            <input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px;" placeholder="EX) JFK 또는 뉴욕">
                         </div>
                         <div class="field" style="border-right:0">
-                            <label>이름</label>
-                            <div class="big" style="font-weight: 500;">GILDONG</div>
+                            <label>출발 탑승일자</label>
+                            <input type="date" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--sans-eng);">
                         </div>
                     </div>
                     <div class="searchrow">
-                        <div class="opts"><span>이메일로 예약번호 찾기</span></div>
-                        <button class="btn">예약 조회</button>
+                        <div class="opts"><span style="font-size: 13px; color: var(--mut);">* 조건 설정 후 검색 버튼을 누르면 해당 예약 건만 필터링됩니다.</span></div>
+                        <a th:href="@{/booking/lookup}" class="btn" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; height: 42px;">조건 검색</a>
                     </div>
                 </div>
             
-                <div style="margin-top:24px" class="trip">
-                    <div>
-                        <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px">
-                            <span class="stat soon">결제완료 · 발권</span>
-                            <span class="pnr" style="font-weight: 500;">PNR NUX4K9</span>
+                <div style="margin-top:24px" class="results">
+                    
+                    <div class="trip" style="margin-bottom: 0;">
+                        <div>
+                            <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px">
+                                <span class="stat soon" style="background: var(--accent-soft); color: var(--accent);">결제완료 · 발권</span>
+                                <span class="pnr" style="font-weight: 500; font-family: var(--mono);">PNR NUX4K9</span>
+                            </div>
+                            <div class="rt" style="font-weight: 500; font-size: 17px;">ICN 인천 → JFK 뉴욕</div>
+                            <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut);">NU101 · 2026.12.20 (토) 10:30</div>
                         </div>
-                        <div class="rt" style="font-weight: 500;">ICN 인천 → JFK 뉴욕</div>
-                        <div class="dt" style="font-weight: 300;">NU101 · 2025.12.20 (토) 10:30 · 이코노미 23A</div>
+                        <div class="actions" style="display: flex; gap: 8px;">
+                            <a href="javascript:void(0);" onclick="openModal('detailModal')" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">상세보기</a>
+                            <a href="javascript:void(0);" onclick="openModal('cancelModal')" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: var(--bad);">예약취소</a>
+                        </div>
                     </div>
-                    <div class="actions">
-                        <button class="btn ghost sm">일정 변경</button>
-                        <button class="btn ghost sm">좌석 변경</button>
-                        <button class="btn ghost sm">환불 요청</button>
-                        <button class="btn sm">e-티켓 보기</button>
-                    </div>
+
                 </div>
-            </section>
+
+                <div class="note" style="margin-top: 24px; width: 100%; display: block; box-sizing: border-box;">
+                    💡 <b>안내사항:</b> 예약 내용(날짜/좌석)의 변경이 필요하신 경우, 기존 예약을 완전히 <b>[예약취소]</b> 하신 후 새로운 항공권을 다시 예매해 주셔야 합니다.
+                </div>
+            </div>
         </div>
         
     </div>
+
+    <div id="detailModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div class="summary" style="background:#fff; width:500px; padding:30px; border-radius:16px; box-shadow: var(--sh); position:relative;">
+            <h3 style="margin-top:0; border-bottom:1px solid var(--line); padding-bottom:12px; font-size:18px;">항공권 상세 정보</h3>
+            <div style="margin:20px 0; display:flex; flex-direction:column; gap:10px;">
+                <div class="sl" style="border:none; padding:2px 0;"><span class="k">예약번호</span><b>NUX4K9</b></div>
+                <div class="sl" style="border:none; padding:2px 0;"><span class="k">탑승객명</span><b>HONG GILDONG</b></div>
+                <div class="sl" style="border:none; padding:2px 0;"><span class="k">항공편</span><b>에어누리 NU101</b></div>
+                <div class="sl" style="border:none; padding:2px 0;"><span class="k">여정구간</span><b>ICN 인천 → JFK 뉴욕</b></div>
+                <div class="sl" style="border:none; padding:2px 0;"><span class="k">탑승일시</span><b>2026.12.20 (토) 10:30</b></div>
+                <div class="sl" style="border:none; padding:2px 0;"><span class="k">선택좌석</span><b>이코노미 클래스 · 23A</b></div>
+                <div class="sl" style="border:none; padding:2px 0;"><span class="k">결제금액</span><b style="color:var(--accent);">1,596,400 원</b></div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+                <a href="javascript:void(0);" onclick="closeModal('detailModal')" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; width:100px;">닫기</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="cancelModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div class="summary" style="background:#fff; width:450px; padding:30px; border-radius:16px; box-shadow: var(--sh); position:relative; border-top: 4px solid var(--bad);">
+            <h3 style="margin-top:0; color:var(--bad); font-size:18px;">항공권 예약 취소</h3>
+            <p style="font-size:14px; color:var(--ink-500); line-height:1.6; margin:20px 0;">
+                정말로 해당 항공권 예약을 취소하시겠습니까?<br>
+                취소 완료 시 즉시 <b>환불(반환) 절차</b>가 진행되며, 취소된 좌석은 다시 복구할 수 없습니다. 변경을 원하시면 취소 후 재예약 바랍니다.
+            </p>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <a href="javascript:void(0);" onclick="closeModal('cancelModal')" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; width:90px;">돌아가기</a>
+                <a th:href="@{/booking/refundProcess(pnr='NUX4K9')}" onclick="executeCancel(this, event);" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background:var(--bad); width:110px;">취소 승인</a>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // 모달창 열기 함수
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if(modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        // 모달창 닫기 함수
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if(modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // 취소 확정 및 백엔드 전송 핸들러
+        function executeCancel(element, event) {
+            event.preventDefault();
+            const actionUrl = element.getAttribute('href');
+            
+            alert('예약 취소 및 환불 접수가 완료되었습니다.\n메인 화면으로 이동합니다.');
+            closeModal('cancelModal');
+            window.location.href = actionUrl;
+        }
+    </script>
 </body>
 </html>
