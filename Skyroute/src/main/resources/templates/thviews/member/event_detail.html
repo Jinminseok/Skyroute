@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}">
+<head>
+<meta charset="UTF-8">
+<title th:text="${event.title} + ' - 이벤트'">이벤트</title>
+<link rel="stylesheet" th:href="@{/assets/css/member.css}">
+
+<style>
+.event-detail-wrap {
+	max-width: 980px;
+	margin: 0 auto;
+	padding: 54px 0 80px;
+}
+
+.event-detail-card {
+	overflow: hidden;
+	background: #fff;
+	border: 1px solid var(--line);
+	border-radius: 18px;
+	box-shadow: var(--sh);
+}
+
+.event-detail-image {
+	display: block;
+	width: 100%;
+	height: 430px;
+	object-fit: cover;
+}
+
+.event-detail-body {
+	padding: 38px 42px 42px;
+}
+
+.event-detail-label {
+	display: inline-flex;
+	align-items: center;
+	height: 28px;
+	padding: 0 12px;
+	border-radius: 999px;
+	background: var(--accent-soft);
+	color: var(--accent);
+	font-family: var(--sans-eng);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 1.2px;
+}
+
+.event-detail-title {
+	margin: 16px 0 12px;
+	color: var(--ink-700);
+	font-size: 34px;
+	font-weight: 600;
+	letter-spacing: -1px;
+}
+
+.event-detail-period {
+	display: flex;
+	gap: 8px;
+	color: var(--mut);
+	font-family: var(--sans-eng);
+	font-size: 14px;
+}
+
+.event-detail-content {
+	min-height: 180px;
+	margin-top: 32px;
+	padding-top: 30px;
+	border-top: 1px solid var(--line);
+	color: var(--ink);
+	font-size: 16px;
+	line-height: 1.9;
+	white-space: pre-wrap;
+}
+
+.event-detail-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 34px;
+}
+
+.event-message {
+	margin-bottom: 20px;
+	padding: 13px 16px;
+	border-radius: 10px;
+	background: var(--accent-soft);
+	color: var(--accent);
+	font-size: 14px;
+}
+
+@media (max-width: 860px) {
+	.event-detail-wrap {
+		padding: 36px 0 56px;
+	}
+
+	.event-detail-image {
+		height: 280px;
+	}
+
+	.event-detail-body {
+		padding: 28px 24px;
+	}
+
+	.event-detail-title {
+		font-size: 27px;
+	}
+}
+</style>
+</head>
+
+<body>
+
+<div layout:fragment="panel" class="panel on">
+
+	<section class="wrap event-detail-wrap">
+
+		<div th:if="${message}" class="event-message" th:text="${message}"></div>
+
+		<div class="event-detail-card">
+
+			<img th:src="@{/assets/upload/{file}(file=${event.image_url})}"
+			     th:alt="${event.title}"
+			     class="event-detail-image">
+
+			<div class="event-detail-body">
+
+				<span class="event-detail-label">EVENT</span>
+
+				<h1 class="event-detail-title" th:text="${event.title}"></h1>
+
+				<div class="event-detail-period">
+					<span th:text="${#dates.format(event.start_date, 'yyyy.MM.dd')}"></span>
+					<span>~</span>
+					<span th:text="${#dates.format(event.end_date, 'yyyy.MM.dd')}"></span>
+				</div>
+
+				<div class="event-detail-content" th:text="${event.content}"></div>
+
+				<div class="event-detail-actions">
+
+					<a th:href="@{/main/home}" class="btn ghost">
+						메인으로
+					</a>
+
+					<form sec:authorize="isAuthenticated()"
+					      th:action="@{/member/event/participate}"
+					      method="post">
+
+						<input type="hidden" name="event_id" th:value="${event.event_id}">
+						<input type="hidden"
+						       th:if="${_csrf != null}"
+						       th:name="${_csrf.parameterName}"
+						       th:value="${_csrf.token}">
+
+						<button type="submit" class="btn">
+							이벤트 참여하기
+						</button>
+					</form>
+
+					<a sec:authorize="isAnonymous()"
+					   th:href="@{/member/login}"
+					   class="btn">
+						로그인 후 참여하기
+					</a>
+
+				</div>
+
+			</div>
+		</div>
+
+	</section>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.spring.staff.content.dao.StaffEventMapper">
+
+	<select id="selectEventList"
+			resultType="kr.spring.staff.content.vo.EventVO">
+		SELECT EVENT_ID,
+			   TITLE,
+			   START_DATE,
+			   END_DATE,
+			   IMAGE_URL,
+			   IS_VISIBLE,
+			   IS_ENDED,
+			   CREATED_BY,
+			   CREATED_AT,
+			   DISPLAY_ORDER,
+			   (
+			   		SELECT COUNT(*)
+			   		FROM EVENT_PARTICIPATION
+			   		WHERE EVENT_PARTICIPATION.EVENT_ID = EVENT.EVENT_ID
+			   ) AS PARTICIPATION_COUNT
+		FROM EVENT
+		ORDER BY CREATED_AT DESC
+	</select>
+	
+	
+	<select id="selectEvent"
+			parameterType="long"
+			resultType="kr.spring.staff.content.vo.EventVO">
+		SELECT EVENT_ID,
+			   TITLE,
+			   CONTENT,
+			   START_DATE,
+			   END_DATE,
+			   IMAGE_URL,
+			   IS_VISIBLE,
+			   IS_ENDED,
+			   CREATED_BY,
+			   CREATED_AT,
+			   DISPLAY_ORDER
+		FROM EVENT
+		WHERE EVENT_ID = #{event_id}
+	</select>
+	
+	
+	<insert id="insertEvent"
+			parameterType="kr.spring.staff.content.vo.EventVO">
+		INSERT INTO EVENT (
+			TITLE,
+			CONTENT,
+			START_DATE,
+			END_DATE,
+			IMAGE_URL,
+			IS_VISIBLE,
+			IS_ENDED,
+			CREATED_BY,
+			DISPLAY_ORDER
+		) VALUES (
+			#{title},
+			#{content},
+			#{start_date},
+			#{end_date},
+			#{image_url},
+			NVL(#{is_visible}, 'Y'),
+			NVL(#{is_ended}, 'N'),
+			#{created_by},
+			#{display_order}
+		)
+	</insert>
+	
+	
+	<update id="updateEvent"
+			parameterType="kr.spring.staff.content.vo.EventVO">
+		UPDATE EVENT
+		<set>
+			TITLE = #{title},
+			CONTENT = #{content},
+			START_DATE = #{start_date},
+			END_DATE = #{end_date},
+			IS_VISIBLE = #{is_visible},
+			DISPLAY_ORDER = #{display_order},
+			
+			<if test="image_url != null and image_url != ''">
+				IMAGE_URL = #{image_url},
+			</if>
+		</set>
+		WHERE EVENT_ID = #{event_id}
+	</update>
+	
+	
+	<update id="hideEvent"
+			parameterType="long">
+		UPDATE EVENT
+		SET IS_VISIBLE = 'N'
+		WHERE EVENT_ID = #{event_id}
+	</update>
+	
+	
+	<update id="endEvent"
+			parameterType="long">
+		UPDATE EVENT
+		SET IS_VISIBLE = 'N',
+			IS_ENDED = 'Y'
+		WHERE EVENT_ID = #{event_id}
+	</update>
+	
+	
+	<select id="selectActiveEventList"
+			resultType="kr.spring.staff.content.vo.EventVO">
+		SELECT EVENT_ID,
+			   TITLE,
+			   CONTENT,
+			   START_DATE,
+			   END_DATE,
+			   IMAGE_URL,
+			   DISPLAY_ORDER
+		FROM EVENT
+		WHERE IS_VISIBLE = 'Y'
+		  AND IS_ENDED = 'N'
+		  AND SYSDATE >= START_DATE
+		  AND SYSDATE &lt; END_DATE + 1
+		ORDER BY DISPLAY_ORDER ASC, CREATED_AT DESC
+	</select>
+	
+	
+	<select id="selectParticipationList"
+			parameterType="long"
+			resultType="kr.spring.staff.content.vo.EventParticipationVO">
+		SELECT EP.PARTICIPATION_ID,
+			   EP.EVENT_ID,
+			   EP.MEMBER_ID,
+			   EP.PARTICIPATED_AT,
+			   E.TITLE,
+			   M.NAME,
+			   M.LOGIN_ID,
+			   M.EMAIL
+		FROM EVENT_PARTICIPATION EP
+		JOIN EVENT E
+		  ON EP.EVENT_ID = E.EVENT_ID
+		JOIN MEMBER M
+		  ON EP.MEMBER_ID = M.MEMBER_ID
+		WHERE EP.EVENT_ID = #{event_id}
+		ORDER BY EP.PARTICIPATED_AT DESC
+	</select>
+	
+	
+	<select id="selectParticipationCount"
+			parameterType="map"
+			resultType="int">
+		SELECT COUNT(*)
+		FROM EVENT_PARTICIPATION
+		WHERE EVENT_ID = #{event_id}
+		  AND MEMBER_ID = #{member_id}
+	</select>
+	
+	
+	<insert id="insertParticipation"
+			parameterType="kr.spring.staff.content.vo.EventParticipationVO">
+		INSERT INTO EVENT_PARTICIPATION (
+			EVENT_ID,
+			MEMBER_ID
+		) VALUES (
+			#{event_id},
+			#{member_id}
+		)
+	</insert>
+	
+	
+	<select id="selectMyParticipationList"
+			parameterType="long"
+			resultType="kr.spring.staff.content.vo.EventParticipationVO">
+		SELECT EP.PARTICIPATION_ID,
+			   EP.EVENT_ID,
+			   EP.MEMBER_ID,
+			   EP.PARTICIPATED_AT,
+			   E.TITLE,
+			   E.IMAGE_URL,
+			   E.START_DATE,
+			   E.END_DATE
+		FROM EVENT_PARTICIPATION EP
+		JOIN EVENT E
+		  ON EP.EVENT_ID = E.EVENT_ID
+		WHERE EP.MEMBER_ID = #{member_id}
+		ORDER BY EP.PARTICIPATED_AT DESC
+	</select>
+
+
+	<select id="selectActiveEvent"
+	        parameterType="long"
+	        resultType="kr.spring.staff.content.vo.EventVO">
+	    SELECT EVENT_ID,
+	           TITLE,
+	           CONTENT,
+	           START_DATE,
+	           END_DATE,
+	           IMAGE_URL,
+	           IS_VISIBLE,
+	           IS_ENDED,
+	           DISPLAY_ORDER
+	    FROM EVENT
+	    WHERE EVENT_ID = #{event_id}
+	      AND IS_VISIBLE = 'Y'
+	      AND IS_ENDED = 'N'
+	      AND SYSDATE >= START_DATE
+	      AND SYSDATE &lt; END_DATE + 1
+	</select>
+</mapper>

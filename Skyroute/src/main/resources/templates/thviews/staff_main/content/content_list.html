@@ -23,7 +23,6 @@
 		<h1>사용자 노출 정보 및 콘텐츠 관리</h1>
 		<p class="desc">
 			사용자 페이지에 노출되는 공지사항, 이벤트, FAQ 데이터를 관리합니다.
-			현재는 하드코딩 화면 뼈대 단계이며, 추후 NOTICE / EVENT / FAQ 테이블과 연결합니다.
 		</p>
 
 		<div class="grid grid-4" style="margin-bottom:24px">
@@ -48,7 +47,7 @@
 					이벤트
 				</div>
 				<div class="value" style="color:var(--primary)">
-					1<span class="unit">건</span>
+					<span th:text="${#lists.size(eventList)}">0</span><span class="unit">건</span>
 				</div>
 			</div>
 
@@ -80,24 +79,27 @@
 
 		<div class="tabs">
 			<button type="button"
-			        class="active"
+			        th:classappend="${activeTab == 'notice'} ? 'active' : ''"
 			        onclick="subTab('content', 'notice', this)">
 				공지사항 관리 (NOTICE)
 			</button>
 
 			<button type="button"
-			        onclick="subTab('content', 'event', this)">
+			        th:classappend="${activeTab == 'event'} ? 'active' : ''"
+			        onclick="location.href='/staff/content/event'">
 				이벤트 배너 관리 (EVENT)
 			</button>
 
 			<button type="button"
+			        th:classappend="${activeTab == 'faq'} ? 'active' : ''"
 			        onclick="subTab('content', 'faq', this)">
 				자주 묻는 질문 관리 (FAQ)
 			</button>
 		</div>
 
-		<!-- 공지사항 탭 -->
-		<div id="tab-c-notice" class="sub-page active">
+		<div id="tab-c-notice"
+		     class="sub-page"
+		     th:classappend="${activeTab == 'notice'} ? 'active' : ''">
 
 			<div class="toolbar">
 				<button type="button"
@@ -132,7 +134,6 @@
 						</thead>
 
 						<tbody id="noticeContentTable">
-							<!-- staff.js에서 하드코딩 데이터 바인딩 -->
 						</tbody>
 					</table>
 				</div>
@@ -140,18 +141,17 @@
 
 		</div>
 
-		<!-- 이벤트 탭 -->
-		<div id="tab-c-event" class="sub-page">
+		<div id="tab-c-event"
+		     class="sub-page"
+		     th:classappend="${activeTab == 'event'} ? 'active' : ''">
 
 			<div class="toolbar">
-				<button type="button"
-				        class="btn btn-primary"
-				        onclick="openContentModal('event', '등록')">
+				<a th:href="@{/staff/content/event/write}" class="btn btn-primary">
 					<span class="material-symbols-outlined" style="font-size:18px">
 						add
 					</span>
 					새 이벤트 등록
-				</button>
+				</a>
 
 				<div class="grow"></div>
 
@@ -166,18 +166,81 @@
 						<thead>
 							<tr>
 								<th>이벤트 ID</th>
+								<th>배너 이미지</th>
 								<th>이벤트명</th>
-								<th>시작일</th>
-								<th>종료일</th>
-								<th>이미지 URL</th>
+								<th>진행 기간</th>
+								<th>노출 순서</th>
 								<th>노출 여부</th>
 								<th>종료 여부</th>
+								<th>참여자 수</th>
 								<th>콘텐츠 편집</th>
 							</tr>
 						</thead>
 
-						<tbody id="eventContentTable">
-							<!-- staff.js에서 하드코딩 데이터 바인딩 -->
+						<tbody>
+							<tr th:if="${#lists.isEmpty(eventList)}">
+								<td colspan="9">등록된 이벤트가 없습니다.</td>
+							</tr>
+
+							<tr th:each="event : ${eventList}">
+								<td class="mono" th:text="${event.event_id}"></td>
+
+								<td>
+									<img th:if="${event.image_url != null and !#strings.isEmpty(event.image_url)}"
+									    th:src="@{/assets/upload/{file}(file=${event.image_url})}"
+									    alt="이벤트 배너"
+									    style="width:120px; height:56px; object-fit:cover; border-radius:6px;">
+
+									<span th:unless="${event.image_url != null and !#strings.isEmpty(event.image_url)}"
+										  style="color:var(--text-light);">
+										이미지 없음
+									</span>
+								</td>
+
+								<td>
+									<strong th:text="${event.title}"></strong>
+								</td>
+
+								<td class="mono">
+									<span th:text="${#dates.format(event.start_date, 'yyyy-MM-dd')}"></span>
+									~
+									<span th:text="${#dates.format(event.end_date, 'yyyy-MM-dd')}"></span>
+								</td>
+
+								<td class="mono" th:text="${event.display_order}"></td>
+
+								<td>
+									<span class="badge"
+										  th:classappend="${event.is_visible == 'Y'} ? 'badge-ok' : 'badge-muted'"
+										  th:text="${event.is_visible == 'Y'} ? '노출' : '비노출'">
+									</span>
+								</td>
+
+								<td>
+									<span class="badge"
+										  th:classappend="${event.is_ended == 'Y'} ? 'badge-muted' : 'badge-scheduled'"
+										  th:text="${event.is_ended == 'Y'} ? '종료됨' : '진행 가능'">
+									</span>
+								</td>
+
+								<td class="mono">
+									<span th:text="${event.participation_count}"></span>명
+								</td>
+
+								<td>
+									<div class="btn-action-group">
+										<a th:href="@{/staff/content/event/detail(event_id=${event.event_id})}"
+										   class="btn btn-ghost btn-sm">
+											상세
+										</a>
+
+										<a th:href="@{/staff/content/event/update(event_id=${event.event_id})}"
+										   class="btn btn-primary btn-sm">
+											수정
+										</a>
+									</div>
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
@@ -185,8 +248,9 @@
 
 		</div>
 
-		<!-- FAQ 탭 -->
-		<div id="tab-c-faq" class="sub-page">
+		<div id="tab-c-faq"
+		     class="sub-page"
+		     th:classappend="${activeTab == 'faq'} ? 'active' : ''">
 
 			<div class="toolbar">
 				<button type="button"
@@ -220,7 +284,6 @@
 						</thead>
 
 						<tbody id="faqContentTable">
-							<!-- staff.js에서 하드코딩 데이터 바인딩 -->
 						</tbody>
 					</table>
 				</div>
@@ -230,7 +293,6 @@
 
 	</main>
 
-	<!-- 통합 동적 제어 편집 모달 -->
 	<div class="modal-overlay" id="globalModal">
 		<div class="modal">
 
@@ -247,7 +309,6 @@
 			</div>
 
 			<div class="modal-body" id="globalModalBody">
-				<!-- staff.js에서 등록/수정 폼 동적 생성 -->
 			</div>
 
 			<div class="modal-foot">

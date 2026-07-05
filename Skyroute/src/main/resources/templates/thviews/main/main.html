@@ -4,138 +4,363 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout_basic}">
 <head>
+	<meta charset="UTF-8">
 	<title>메인</title>
-	<link rel="stylesheet" th:href="@{/assets/css/member.css}"> 
+	<link rel="stylesheet" th:href="@{/assets/css/member.css}">
 	<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
-    <style>
-        /* 🌟 a 태그 버튼화로 인한 정렬 흐름 깨짐 방지용 스타일 추가 */
-        .searchrow .btn, .summary .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            text-align: center;
-        }
-    </style>
-</head>  
+	<style>
+		.searchrow .btn,
+		.summary .btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			text-decoration: none;
+			text-align: center;
+		}
+	</style>
+</head>
 <body>
 
 <div layout:fragment="panel" class="panel on" id="book">
-  <div class="hero">
-    <div class="wrap">
-      <div class="eyebrow">BOOK YOUR FLIGHT</div>
-      <h1>어디로 떠나시나요?</h1>
-      <p>출발지·도착지와 날짜를 선택하면 운항편과 운임을 한눈에 비교할 수 있어요.</p>
 
-      <div class="searchcard">
-        <div class="triptabs">
-          <label><input type="radio" name="trip" checked><span>왕복</span></label>
-          <label><input type="radio" name="trip"><span>편도</span></label>
-          <label><input type="radio" name="trip"><span>다구간</span></label>
-        </div>
-        <div class="fields">
-          <div class="field">
-            <label>출발</label>
-            <div class="big">ICN 서울/인천</div>
-            <div class="sub">Incheon Intl</div>
-            <div class="swap" onclick="triggerSwapEffect()">⇄</div>
-          </div>
-          <div class="field">
-            <label>도착</label>
-            <div class="big">JFK 뉴욕</div>
-            <div class="sub">John F. Kennedy</div>
-          </div>
-          <div class="field">
-            <label>여정</label>
-            <div class="big">12.20 — 12.27</div>
-            <div class="sub">금요일 출발 · 7박</div>
-          </div>
-          <div class="field">
-            <label>인원 · 좌석</label>
-            <div class="big">성인 1</div>
-            <div class="sub">이코노미</div>
-          </div>
-        </div>
-        <div class="searchrow">
-          <div class="opts">
-            <span>직항만 <b>OFF</b></span>
-            <span>최저가 달력</span>
-            <span>마일리지로 예약</span>
-          </div>          
-          <a th:href="@{/member/member_flight_list}" class="btn">항공권 검색</a>
-        </div>
-      </div>
+	<div class="hero">
+		<div class="wrap">
+			<div class="eyebrow">BOOK YOUR FLIGHT</div>
+			<h1>어디로 떠나시나요?</h1>
+			<p>출발지·도착지와 날짜를 선택하면 운항편과 운임을 한눈에 비교할 수 있어요.</p>
 
-      <div class="quick">
-        <a>인천 → 도쿄 NRT</a><a>김포 → 제주 CJU</a><a>인천 → 방콕 BKK</a>
-        <a>인천 → 파리 CDG</a><a>인천 → 다낭 DAD</a>
-      </div>
-    </div>
-  </div>
+			<div class="searchcard">
+				<div class="triptabs">
+					<label><input type="radio" name="trip" checked><span>왕복</span></label>
+					<label><input type="radio" name="trip"><span>편도</span></label>
+					<label><input type="radio" name="trip"><span>다구간</span></label>
+				</div>
 
-  <section class="block wrap">
-    <div class="htitle">
-      <div><div class="eyebrow">SEARCH RESULTS</div><h2>인천 → 뉴욕 · 12월 20일</h2></div>
-      <div class="more">운임 규정 비교 →</div>
-    </div>
-    <div class="results">
-      <div class="flight">
-        <div class="carrier"><div class="ci">NU</div><div><b>에어누리</b><div class="fno">NU 101</div></div></div>
-        <div class="route">
-          <div class="tnode"><div class="t">10:30</div><div class="ap">ICN 인천</div></div>
-          <div class="leg"><div class="dur">14시간 20분</div><div class="bar"></div><div class="ns">직항</div></div>
-          <div class="tnode r"><div class="t">11:50</div><div class="ap">JFK 뉴욕</div></div>
-        </div>
-        <div class="fare">
-          <div class="price">1,284,000<small>원</small></div>
-          <div class="cls">이코노미 · Y클래스</div>
-          <div class="seats ok">잔여 9석</div>
-        </div>
-      </div>
-      <div class="flight">
-        <div class="carrier"><div class="ci">NU</div><div><b>에어누리</b><div class="fno">NU 103</div></div></div>
-        <div class="route">
-          <div class="tnode"><div class="t">19:05</div><div class="ap">ICN 인천</div></div>
-          <div class="leg"><div class="dur">14시간 35분</div><div class="bar"></div><div class="ns">직항</div></div>          <div class="tnode r"><div class="t">20:40</div><div class="ap">JFK 뉴욕</div></div>
-        </div>
-        <div class="fare">
-          <div class="price">1,156,000<small>원</small></div>
-          <div class="cls">이코노미 · M클래스</div>
-          <div class="seats">잔여 3석</div>
-        </div>
-      </div>
-    </div>
-    <div class="note">💡 클릭 흐름: 검색 → 운항편 선택 → 좌석 선택 → 탑승객/연락처 입력 → 결제 → e-티켓 발권(PNR 생성)</div>
-  </section>
+				<div class="fields">
+					<div class="field">
+						<label>출발</label>
+						<div class="big">ICN 서울/인천</div>
+						<div class="sub">Incheon Intl</div>
+						<div class="swap" onclick="triggerSwapEffect()">⇄</div>
+					</div>
 
-  <section class="block wrap">
-    <div class="htitle"><div><div class="eyebrow">SEAT MAP</div><h2>좌석 선택</h2></div><div class="more">선호 좌석 안내 →</div></div>
-    <div class="seatwrap">
-      <div class="cabin">
-        <div class="plane" id="plane"></div>
-        <div class="legend">
-          <span><i style="border-color:#CBD6E4;background:#fff"></i>선택가능</span>
-          <span><i style="border-color:#1E73BE"></i>비상구·앞열</span>
-          <span><i style="border-color:#E2E8F0;background:#E2E8F0"></i>판매완료</span>
-          <span><i style="border-color:var(--accent);background:var(--accent)"></i>내 좌석</span>
-        </div>
-      </div>
-      <div class="summary">
-        <h3>예약 요약</h3>
-        <div class="sl"><span class="k">여정</span><b>ICN → JFK</b></div>
-        <div class="sl"><span class="k">편명 / 일자</span><b>NU101 · 12.20</b></div>
-        <div class="sl"><span class="k">탑승객</span><b>홍길동 (성인)</b></div>
-        <div class="sl"><span class="k">좌석</span><b id="seatpick">미선택</b></div>
-        <div class="sl"><span class="k">기본 운임</span><b>1,284,000</b></div>
-        <div class="sl"><span class="k">유류할증·세금</span><b>312,400</b></div>
-        <div class="total"><span class="k">총 결제금액</span><span class="v" id="seattotal">1,596,400원</span></div>
-        <!-- 🌟 [수정] 하단 결제하기 버튼도 명확한 링크 전송을 위해 a 태그로 변경 -->
-        <a th:href="@{/booking/payment}" class="btn" style="width:100%; margin-top:16px; border-radius: 12px; box-sizing: border-box;">결제하기 (카카오페이 · 카드)</a>
-      </div>
-    </div>
-  </section>
+					<div class="field">
+						<label>도착</label>
+						<div class="big">JFK 뉴욕</div>
+						<div class="sub">John F. Kennedy</div>
+					</div>
+
+					<div class="field">
+						<label>여정</label>
+						<div class="big">12.20 — 12.27</div>
+						<div class="sub">금요일 출발 · 7박</div>
+					</div>
+
+					<div class="field">
+						<label>인원 · 좌석</label>
+						<div class="big">성인 1</div>
+						<div class="sub">이코노미</div>
+					</div>
+				</div>
+
+				<div class="searchrow">
+					<div class="opts">
+						<span>직항만 <b>OFF</b></span>
+						<span>최저가 달력</span>
+						<span>마일리지로 예약</span>
+					</div>
+
+					<a th:href="@{/member/member_flight_list}" class="btn">항공권 검색</a>
+				</div>
+			</div>
+
+			<div class="quick">
+				<a>인천 → 도쿄 NRT</a>
+				<a>김포 → 제주 CJU</a>
+				<a>인천 → 방콕 BKK</a>
+				<a>인천 → 파리 CDG</a>
+				<a>인천 → 다낭 DAD</a>
+			</div>
+
+			<div class="event-banner-area"
+			     id="mainEventSlider"
+			     th:if="${!#lists.isEmpty(eventList)}">
+
+				<div class="event-slider">
+
+					<a class="event-slide"
+					   th:each="event, stat : ${eventList}"
+					   th:classappend="${stat.index == 0} ? ' active' : ''"
+					   th:href="@{/member/event/detail(event_id=${event.event_id})}">
+
+						<img th:src="@{/assets/upload/{file}(file=${event.image_url})}"
+						     th:alt="${event.title}">
+
+						<div class="event-slide-overlay">
+							<div class="event-slide-copy">
+								<span class="event-label">EVENT</span>
+
+								<h2 th:text="${event.title}"></h2>
+
+								<p th:text="${event.content}"></p>
+
+								<div class="event-period">
+									<span th:text="${#dates.format(event.start_date, 'yyyy.MM.dd')}"></span>
+									<span>~</span>
+									<span th:text="${#dates.format(event.end_date, 'yyyy.MM.dd')}"></span>
+								</div>
+
+								<div class="event-more">
+									이벤트 자세히 보기
+									<span>→</span>
+								</div>
+							</div>
+						</div>
+					</a>
+
+					<button type="button"
+					        class="event-arrow event-prev"
+					        aria-label="이전 이벤트">
+						‹
+					</button>
+
+					<button type="button"
+					        class="event-arrow event-next"
+					        aria-label="다음 이벤트">
+						›
+					</button>
+
+					<div class="event-dots">
+						<button type="button"
+						        class="event-dot"
+						        th:each="event, stat : ${eventList}"
+						        th:classappend="${stat.index == 0} ? ' active' : ''"
+						        th:attr="data-index=${stat.index},aria-label=|${stat.count}번째 이벤트|">
+						</button>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<section class="block wrap">
+		<div class="htitle">
+			<div>
+				<div class="eyebrow">SEARCH RESULTS</div>
+				<h2>인천 → 뉴욕 · 12월 20일</h2>
+			</div>
+			<div class="more">운임 규정 비교 →</div>
+		</div>
+
+		<div class="results">
+			<div class="flight">
+				<div class="carrier">
+					<div class="ci">NU</div>
+					<div>
+						<b>에어누리</b>
+						<div class="fno">NU 101</div>
+					</div>
+				</div>
+
+				<div class="route">
+					<div class="tnode">
+						<div class="t">10:30</div>
+						<div class="ap">ICN 인천</div>
+					</div>
+
+					<div class="leg">
+						<div class="dur">14시간 20분</div>
+						<div class="bar"></div>
+						<div class="ns">직항</div>
+					</div>
+
+					<div class="tnode r">
+						<div class="t">11:50</div>
+						<div class="ap">JFK 뉴욕</div>
+					</div>
+				</div>
+
+				<div class="fare">
+					<div class="price">1,284,000<small>원</small></div>
+					<div class="cls">이코노미 · Y클래스</div>
+					<div class="seats ok">잔여 9석</div>
+				</div>
+			</div>
+
+			<div class="flight">
+				<div class="carrier">
+					<div class="ci">NU</div>
+					<div>
+						<b>에어누리</b>
+						<div class="fno">NU 103</div>
+					</div>
+				</div>
+
+				<div class="route">
+					<div class="tnode">
+						<div class="t">19:05</div>
+						<div class="ap">ICN 인천</div>
+					</div>
+
+					<div class="leg">
+						<div class="dur">14시간 35분</div>
+						<div class="bar"></div>
+						<div class="ns">직항</div>
+					</div>
+
+					<div class="tnode r">
+						<div class="t">20:40</div>
+						<div class="ap">JFK 뉴욕</div>
+					</div>
+				</div>
+
+				<div class="fare">
+					<div class="price">1,156,000<small>원</small></div>
+					<div class="cls">이코노미 · M클래스</div>
+					<div class="seats">잔여 3석</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="note">
+			💡 클릭 흐름: 검색 → 운항편 선택 → 좌석 선택 → 탑승객/연락처 입력 → 결제 → e-티켓 발권(PNR 생성)
+		</div>
+	</section>
+
+	<section class="block wrap">
+		<div class="htitle">
+			<div>
+				<div class="eyebrow">SEAT MAP</div>
+				<h2>좌석 선택</h2>
+			</div>
+			<div class="more">선호 좌석 안내 →</div>
+		</div>
+
+		<div class="seatwrap">
+			<div class="cabin">
+				<div class="plane" id="plane"></div>
+
+				<div class="legend">
+					<span><i style="border-color:#CBD6E4;background:#fff"></i>선택가능</span>
+					<span><i style="border-color:#1E73BE"></i>비상구·앞열</span>
+					<span><i style="border-color:#E2E8F0;background:#E2E8F0"></i>판매완료</span>
+					<span><i style="border-color:var(--accent);background:var(--accent)"></i>내 좌석</span>
+				</div>
+			</div>
+
+			<div class="summary">
+				<h3>예약 요약</h3>
+				<div class="sl"><span class="k">여정</span><b>ICN → JFK</b></div>
+				<div class="sl"><span class="k">편명 / 일자</span><b>NU101 · 12.20</b></div>
+				<div class="sl"><span class="k">탑승객</span><b>홍길동 (성인)</b></div>
+				<div class="sl"><span class="k">좌석</span><b id="seatpick">미선택</b></div>
+				<div class="sl"><span class="k">기본 운임</span><b>1,284,000</b></div>
+				<div class="sl"><span class="k">유류할증·세금</span><b>312,400</b></div>
+
+				<div class="total">
+					<span class="k">총 결제금액</span>
+					<span class="v" id="seattotal">1,596,400원</span>
+				</div>
+
+				<a th:href="@{/booking/payment}"
+				   class="btn"
+				   style="width:100%; margin-top:16px; border-radius:12px; box-sizing:border-box;">
+					결제하기 (카카오페이 · 카드)
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const slider = document.getElementById('mainEventSlider');
+
+		if (!slider) {
+			return;
+		}
+
+		const slides = Array.from(slider.querySelectorAll('.event-slide'));
+		const dots = Array.from(slider.querySelectorAll('.event-dot'));
+		const prevButton = slider.querySelector('.event-prev');
+		const nextButton = slider.querySelector('.event-next');
+
+		if (slides.length < 2) {
+			if (prevButton) {
+				prevButton.style.display = 'none';
+			}
+
+			if (nextButton) {
+				nextButton.style.display = 'none';
+			}
+
+			return;
+		}
+
+		let currentIndex = 0;
+		let timer;
+
+		function showSlide(nextIndex) {
+			currentIndex = (nextIndex + slides.length) % slides.length;
+
+			slides.forEach(function(slide, index) {
+				slide.classList.toggle('active', index === currentIndex);
+			});
+
+			dots.forEach(function(dot, index) {
+				dot.classList.toggle('active', index === currentIndex);
+			});
+		}
+
+		function startAutoSlide() {
+			clearInterval(timer);
+
+			timer = setInterval(function() {
+				showSlide(currentIndex + 1);
+			}, 3000);
+		}
+
+		if (prevButton) {
+			prevButton.addEventListener('click', function(event) {
+				event.preventDefault();
+				event.stopPropagation();
+				showSlide(currentIndex - 1);
+				startAutoSlide();
+			});
+		}
+
+		if (nextButton) {
+			nextButton.addEventListener('click', function(event) {
+				event.preventDefault();
+				event.stopPropagation();
+				showSlide(currentIndex + 1);
+				startAutoSlide();
+			});
+		}
+
+		dots.forEach(function(dot, index) {
+			dot.addEventListener('click', function(event) {
+				event.preventDefault();
+				event.stopPropagation();
+				showSlide(index);
+				startAutoSlide();
+			});
+		});
+
+		slider.addEventListener('mouseenter', function() {
+			clearInterval(timer);
+		});
+
+		slider.addEventListener('mouseleave', function() {
+			startAutoSlide();
+		});
+
+		startAutoSlide();
+	});
+	</script>
+
 </div>
 
-</div>
 </body>
 </html>
