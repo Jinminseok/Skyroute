@@ -16,7 +16,39 @@
 				</div>
 
 				<div class="util">
-					<span>마일리지</span> <span>고객센터</span> <span>ENG</span>
+					<span>마일리지</span> 
+					<div class="util-dropdown">
+						<button type="button" class="util-link">
+						고객센터
+							<span class="material-symbols-outlined util-arrow">expand_more</span>
+						</button>
+						
+						<div class="util-menu">
+							<a th:href="@{/member/notice/list}">
+								<span class="material-symbols-outlined">campaign</span>
+								<div>
+									<b>공지사항</b>
+									<small>서비스 소식과 이용 안내</small>
+								</div>
+							</a>
+							
+							<a href="javascript:alert('FAQ 페이지는 준비 중입니다.');">
+								<span class="material-symbols-outlined">help</span>
+								<div>
+									<b>FAQ</b>
+									<small>자주 묻는 질문</small>
+								</div>
+							</a>
+							
+							<a href="javascript:alert('1:1 문의 페이지는 준비 중입니다.');">
+								<span class="material-symbols-outlined">forum</span>
+								<div>
+									<b>1:1문의</b>
+									<small>문의 등록 및 답변 확인</small>
+								</div>
+							</a>
+						</div>
+					</div>
 
 					<th:block sec:authorize="!isAuthenticated()">
 						<span th:onclick="|location.href='@{/member/registerUser}'|">회원가입</span>
