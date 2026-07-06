@@ -92,6 +92,9 @@ public class MemberNoticeController {
 		//제목에 태그를 허용하지 않음.
 		notice.setTitle(StringUtil.useNoHtml(notice.getTitle()));
 		
+		//본문은 태그를 허용하지 않으면서 줄바꿈 처리
+		notice.setContent(StringUtil.useBrNoHtml(notice.getContent()));
+		
 		model.addAttribute("notice", notice);
 		model.addAttribute("activeMenu", "notice");
 		
