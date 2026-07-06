@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+
+<mapper namespace="kr.spring.staff.notice.dao.StaffNoticeMapper">
+
+	<resultMap type="kr.spring.staff.notice.vo.StaffNoticeVO" id="staffNoticeMap">
+		<id property="notice_id" column="notice_id"/>
+		<result property="title" column="title"/>
+		<result property="content" column="content"/>
+		<result property="is_public" column="is_public"/>
+		<result property="created_by" column="created_by"/>
+		<result property="created_at" column="created_at"/>
+		<result property="updated_at" column="updated_at"/>
+
+		<association property="memberVO" javaType="kr.spring.member.vo.MemberVO">
+			<id property="member_id" column="member_id"/>
+			<result property="id" column="login_id"/>
+			<result property="name" column="name"/>
+		</association>
+	</resultMap>
+
+
+	<!-- 검색 조건 -->
+	<sql id="noticeSearch">
+		<where>
+			<if test="keyword != null and keyword != ''">
+				<if test="keyfield == 1">
+					AND n.title LIKE '%' || #{keyword} || '%'
+				</if>
+
+				<if test="keyfield == 2">
+					AND (
+						m.name LIKE '%' || #{keyword} || '%'
+						OR m.login_id LIKE '%' || #{keyword} || '%'
+					)
+				</if>
+
+				<if test="keyfield == 3">
+					AND DBMS_LOB.INSTR(n.content, #{keyword}) > 0
+				</if>
+			</if>
+
+			<if test="is_public != null and is_public != ''">
+				AND n.is_public = #{is_public}
+			</if>
+		</where>
+	</sql>
+
+
+	<!-- 공지사항 전체/검색 레코드 수 -->
+	<select id="selectRowCount" parameterType="map" resultType="integer">
+		SELECT COUNT(*)
+		FROM NOTICE n
+		JOIN MEMBER m ON n.created_by = m.member_id
+		<include refid="noticeSearch"/>
+	</select>
+
+
+	<!-- 공지사항 목록 -->
+	<select id="selectList" parameterType="map" resultMap="staffNoticeMap">
+		SELECT
+			n.notice_id,
+			<![CDATA[
+			REPLACE(REPLACE(n.title, '<', '&lt;'), '>', '&gt;') title,
+			]]>
+			REPLACE(DBMS_LOB.SUBSTR(n.content, 120, 1), CHR(10), ' ') content,
+			n.is_public,
+			n.created_by,
+			TO_CHAR(n.created_at, 'YYYY-MM-DD HH24:MI') created_at,
+			TO_CHAR(n.updated_at, 'YYYY-MM-DD HH24:MI') updated_at,
+			m.member_id,
+			m.login_id,
+			m.name
+		FROM NOTICE n
+		JOIN MEMBER m ON n.created_by = m.member_id
+		<include refid="noticeSearch"/>
+		ORDER BY n.created_at DESC, n.notice_id DESC
+		OFFSET #{skip} ROWS FETCH NEXT #{limit} ROWS ONLY
+	</select>
+
+
+	<!-- 공지사항 등록 -->
+	<insert id="insertNotice" parameterType="kr.spring.staff.notice.vo.StaffNoticeVO">
+		INSERT INTO NOTICE (
+			title,
+			content,
+			is_public,
+			created_by
+		) VALUES (
+			#{title},
+			#{content},
+			NVL(#{is_public, jdbcType=CHAR}, 'Y'),
+			#{created_by}
+		)
+	</insert>
+
+
+	<!-- 공지사항 상세 -->
+	<select id="selectNotice"
+	        parameterType="long"
+	        resultMap="staffNoticeMap">
+		SELECT
+			n.notice_id,
+			n.title,
+			n.content,
+			n.is_public,
+			n.created_by,
+			TO_CHAR(n.created_at, 'YYYY-MM-DD HH24:MI') created_at,
+			TO_CHAR(n.updated_at, 'YYYY-MM-DD HH24:MI') updated_at,
+			m.member_id,
+			m.login_id,
+			m.name
+		FROM NOTICE n
+		JOIN MEMBER m ON n.created_by = m.member_id
+		WHERE n.notice_id = #{notice_id}
+	</select>
+
+
+	<!-- 공지사항 수정 -->
+	<update id="updateNotice" parameterType="kr.spring.staff.notice.vo.StaffNoticeVO">
+		UPDATE NOTICE
+		SET
+			title = #{title},
+			content = #{content},
+			is_public = #{is_public},
+			updated_at = SYSTIMESTAMP
+		WHERE notice_id = #{notice_id}
+	</update>
+
+
+	<!-- 공개/비공개 변경 -->
+	<update id="updateNoticePublic" parameterType="kr.spring.staff.notice.vo.StaffNoticeVO">
+		UPDATE NOTICE
+		SET
+			is_public = #{is_public},
+			updated_at = SYSTIMESTAMP
+		WHERE notice_id = #{notice_id}
+	</update>
+
+
+	<!-- 공지사항 삭제 : 요구사항 기준 물리 삭제 -->
+	<delete id="deleteNotice" parameterType="long">
+		DELETE FROM NOTICE
+		WHERE notice_id = #{notice_id}
+	</delete>
+
+</mapper>
