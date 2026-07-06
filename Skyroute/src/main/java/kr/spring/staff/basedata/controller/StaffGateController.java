@@ -1,35 +1,71 @@
 package kr.spring.staff.basedata.controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import kr.spring.staff.basedata.service.StaffGateService;
+import kr.spring.staff.basedata.vo.GateVO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
-@Controller
-@RequestMapping("/staff/basedata/gate")
+@RestController
+@RequestMapping("/staff/basedata/gate") // JS 요청 주소와 정확히 일치시킴
+@RequiredArgsConstructor
 public class StaffGateController {
 
-	@GetMapping("/list")
-	public String list(Model model) {
-		model.addAttribute("activeMenu", "base");
-		return "thviews/staff_main/basedata/base_list";
-	}
+    private final StaffGateService staffGateService;
 
-	@GetMapping("/write")
-	public String write(Model model) {
-		model.addAttribute("activeMenu", "base");
-		return "thviews/staff_main/basedata/base_list";
-	}
+    // 1. 게이트 등록
+    @PostMapping("/insert")
+    public String insertGate(@RequestBody GateVO gateVO) {
+        try {
+            staffGateService.registerGate(gateVO);
+            return "success";
+        } catch (IllegalArgumentException e) {
+            return "duplicate";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
+    }
 
-	@GetMapping("/modify")
-	public String modify(Model model) {
-		model.addAttribute("activeMenu", "base");
-		return "thviews/staff_main/basedata/base_list";
-	}
+    // 2. 게이트 수정
+    @PostMapping("/update")
+    public String updateGate(@RequestBody GateVO gateVO) {
+        try {
+            staffGateService.modifyGate(gateVO);
+            return "success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
+    }
 
-	@GetMapping("/detail")
-	public String detail(Model model) {
-		model.addAttribute("activeMenu", "base");
-		return "thviews/staff_main/basedata/base_list";
-	}
+    // 3. 게이트 삭제 (신규 추가)
+    @PostMapping("/delete")
+    public String deleteGate(@RequestParam("gateId") Long gateId) {
+        try {
+            staffGateService.removeGate(gateId);
+            return "success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
+    }
+
+    // 4. 게이트 사용 여부 토글 (컨트롤러는 요청만 받고 서비스로 넘깁니다)
+    @PostMapping("/toggle")
+    public String toggleGate(@RequestBody Map<String, Object> payload) {
+        try {
+            Long gateId = Long.valueOf(payload.get("gateId").toString());
+            String isActive = payload.get("isActive").toString();
+            
+            staffGateService.toggleGateActive(gateId, isActive);
+            return "success";
+        } catch (IllegalStateException e) {
+            // 스케줄에 사용 중일 때의 예외 처리
+            return "in_use";
+        } catch (Exception e) {
+            e.printStackTrace(); 
+            return "fail";
+        }
+    }
 }
