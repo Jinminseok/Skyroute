@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layouts/layout_basic}">
+<head>
+	<meta charset="UTF-8">
+	<title>공지사항</title>
+	<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">
+	<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+</head>
+<body>
+
+<div layout:fragment="panel" class="panel on" id="notice">
+
+	<!-- 상단 소개 영역 : 현재 프로젝트 hero 스타일 -->
+	<div class="notice-hero">
+		<div class="wrap">
+			<div class="eyebrow">SKYROUTE NOTICE</div>
+			<h1>공지사항</h1>
+			<p>SkyRoute의 서비스 소식과 항공편 이용 안내를 확인하세요.</p>
+
+			<!-- 검색 영역 : 현재 프로젝트 searchcard 스타일 -->
+			<form class="searchcard notice-searchcard"
+				  th:action="@{/member/notice/list}"
+				  method="get"
+				  id="search_form">
+
+				<div class="fields notice-fields">
+					<div class="field notice-keyfield">
+						<label>검색조건</label>
+
+						<select name="keyfield" id="keyfield" class="notice-select">
+							<option value="1" th:selected="${keyfield == '1'}">제목</option>
+							<option value="2" th:selected="${keyfield == '2'}">내용</option>
+							<option value="3" th:selected="${keyfield == '3'}">제목 + 내용</option>
+						</select>
+					</div>
+
+					<div class="field notice-keyword">
+						<label>검색어</label>
+
+						<input type="search"
+							   name="keyword"
+							   id="keyword"
+							   class="notice-input"
+							   th:value="${keyword}"
+							   placeholder="검색어를 입력하세요">
+					</div>
+
+					<div class="field notice-count-box">
+						<label>조회 결과</label>
+
+						<div class="big">
+							<span th:text="${count}">0</span>건
+						</div>
+
+						<div class="sub">공개 공지 기준</div>
+					</div>
+				</div>
+
+				<div class="searchrow">
+					<div class="opts">
+						<span>공지사항은 최신 등록순으로 제공됩니다.</span>
+						<span>비공개 공지는 표시되지 않습니다.</span>
+					</div>
+
+					<div class="notice-search-actions">
+						<button type="submit" class="btn">검색</button>
+						<a th:href="@{/member/notice/list}" class="btn ghost">전체보기</a>
+					</div>
+				</div>
+
+			</form>
+		</div>
+	</div>
+
+
+	<!-- 목록 영역 -->
+	<section class="block wrap notice-section">
+
+		<div class="htitle">
+			<div>
+				<div class="eyebrow">NOTICE LIST</div>
+				<h2>서비스 안내</h2>
+			</div>
+
+			<div class="more">고객센터 →</div>
+		</div>
+
+
+		<!-- 조회 결과 없음 -->
+		<div th:if="${count == 0}" class="notice-empty">
+			<div class="notice-empty-icon">
+				<span class="material-symbols-outlined">campaign</span>
+			</div>
+
+			<h3>표시할 공지사항이 없습니다.</h3>
+			<p>검색어를 다시 입력하거나 전체 목록을 확인해 주세요.</p>
+
+			<a th:href="@{/member/notice/list}" class="btn ghost sm">전체 목록 보기</a>
+		</div>
+
+
+		<!-- 조회 결과 있음 -->
+		<th:block th:if="${count > 0}">
+			<div class="results notice-results">
+
+				<article class="notice-item" th:each="notice : ${list}">
+
+					<div class="notice-badge">
+						<span class="material-symbols-outlined">campaign</span>
+						<small>NOTICE</small>
+					</div>
+
+					<div class="notice-main">
+						<div class="notice-meta">
+							<span class="stat soon">공개</span>
+
+							<span th:text="${notice.memberVO != null ? notice.memberVO.name : '관리자'}">
+								관리자
+							</span>
+
+							<span class="dot"></span>
+
+							<span th:text="${notice.created_at}">
+								2026-07-03
+							</span>
+						</div>
+
+						<a class="notice-title"
+						   th:href="@{/member/notice/detail(notice_id=${notice.notice_id})}"
+						   th:text="${notice.title}">
+							공지사항 제목
+						</a>
+
+						<p th:text="${notice.content}">
+							공지사항 요약 내용
+						</p>
+					</div>
+
+					<div class="notice-go">
+						<a class="btn ghost sm"
+						   th:href="@{/member/notice/detail(notice_id=${notice.notice_id})}">
+							자세히 보기
+						</a>
+					</div>
+
+				</article>
+
+			</div>
+
+			<div class="notice-paging" th:utext="${page}"></div>
+		</th:block>
+
+
+		<div class="note notice-note">
+			💡 공지사항은 SkyRoute 서비스 이용, 항공편 운영, 예약/결제 관련 안내를 제공하는 공개 고객지원 페이지입니다.
+		</div>
+
+	</section>
+
+</div>
+
+</body>
+</html>

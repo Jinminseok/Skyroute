@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/layout_basic}">
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout_basic}">
 <head>
 <meta charset="UTF-8">
 <title th:text="${event.title} + ' - 이벤트'">이벤트</title>
@@ -91,19 +91,16 @@
 	font-size: 14px;
 }
 
-@media (max-width: 860px) {
+@media ( max-width : 860px) {
 	.event-detail-wrap {
 		padding: 36px 0 56px;
 	}
-
 	.event-detail-image {
 		height: 280px;
 	}
-
 	.event-detail-body {
 		padding: 28px 24px;
 	}
-
 	.event-detail-title {
 		font-size: 27px;
 	}
@@ -113,67 +110,76 @@
 
 <body>
 
-<div layout:fragment="panel" class="panel on">
+	<div layout:fragment="panel" class="panel on">
 
-	<section class="wrap event-detail-wrap">
+		<section class="wrap event-detail-wrap">
 
-		<div th:if="${message}" class="event-message" th:text="${message}"></div>
+			<div th:if="${message}" class="event-message" th:text="${message}"></div>
 
-		<div class="event-detail-card">
+			<div class="event-detail-card">
 
-			<img th:src="@{/assets/upload/{file}(file=${event.image_url})}"
-			     th:alt="${event.title}"
-			     class="event-detail-image">
+				<img th:src="@{/assets/upload/{file}(file=${event.image_url})}"
+					th:alt="${event.title}" class="event-detail-image">
 
-			<div class="event-detail-body">
+				<div class="event-detail-body">
 
-				<span class="event-detail-label">EVENT</span>
+					<span class="event-detail-label">EVENT</span>
 
-				<h1 class="event-detail-title" th:text="${event.title}"></h1>
+					<h1 class="event-detail-title" th:text="${event.title}"></h1>
 
-				<div class="event-detail-period">
-					<span th:text="${#dates.format(event.start_date, 'yyyy.MM.dd')}"></span>
-					<span>~</span>
-					<span th:text="${#dates.format(event.end_date, 'yyyy.MM.dd')}"></span>
-				</div>
+					<div class="event-detail-period">
+						<span th:text="${#dates.format(event.start_date, 'yyyy.MM.dd')}"></span>
+						<span>~</span> <span
+							th:text="${#dates.format(event.end_date, 'yyyy.MM.dd')}"></span>
+					</div>
 
-				<div class="event-detail-content" th:text="${event.content}"></div>
+					<div class="event-detail-content" th:text="${event.content}"></div>
 
-				<div class="event-detail-actions">
+					<div class="event-detail-actions">
 
-					<a th:href="@{/main/home}" class="btn ghost">
-						메인으로
-					</a>
-
-					<form sec:authorize="isAuthenticated()"
-					      th:action="@{/member/event/participate}"
-					      method="post">
-
-						<input type="hidden" name="event_id" th:value="${event.event_id}">
-						<input type="hidden"
-						       th:if="${_csrf != null}"
-						       th:name="${_csrf.parameterName}"
-						       th:value="${_csrf.token}">
-
-						<button type="submit" class="btn">
-							이벤트 참여하기
+						<a th:href="@{/main/home}" class="btn ghost">
+							메인으로
+						</a>
+					
+						<form sec:authorize="isAuthenticated()"
+						      th:if="${!participated}"
+						      th:action="@{/member/event/participate}"
+						      method="post">
+					
+							<input type="hidden" name="event_id" th:value="${event.event_id}">
+							<input type="hidden"
+							       th:if="${_csrf != null}"
+							       th:name="${_csrf.parameterName}"
+							       th:value="${_csrf.token}">
+					
+							<button type="submit" class="btn">
+								이벤트 참여하기
+							</button>
+						</form>
+					
+						<button sec:authorize="isAuthenticated()"
+						        th:if="${participated}"
+						        type="button"
+						        class="btn ghost"
+						        disabled
+						        style="cursor:default; opacity:.7;">
+							참여 완료
 						</button>
-					</form>
-
-					<a sec:authorize="isAnonymous()"
-					   th:href="@{/member/login}"
-					   class="btn">
-						로그인 후 참여하기
-					</a>
+					
+						<a sec:authorize="isAnonymous()"
+						   th:href="@{/member/login}"
+						   class="btn">
+							로그인 후 참여하기
+						</a>
+					
+					</div>
 
 				</div>
-
 			</div>
-		</div>
 
-	</section>
+		</section>
 
-</div>
+	</div>
 
 </body>
 </html>

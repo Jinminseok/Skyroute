@@ -99,4 +99,15 @@ public class StaffEventServiceImpl implements StaffEventService {
 	public EventVO selectActiveEvent(long event_id) {
 		return staffEventMapper.selectActiveEvent(event_id);
 	}
+
+	@Override
+	public boolean isParticipated(long event_id, long member_id) {
+		Map<String, Long> map = new HashMap<String, Long>();
+		map.put("event_id", event_id);
+		map.put("member_id", member_id);
+
+		Integer count = staffEventMapper.selectParticipationCount(map);
+
+		return count != null && count > 0;
+	}
 }

@@ -172,19 +172,21 @@
 	<select id="selectMyParticipationList"
 			parameterType="long"
 			resultType="kr.spring.staff.content.vo.EventParticipationVO">
-		SELECT EP.PARTICIPATION_ID,
-			   EP.EVENT_ID,
-			   EP.MEMBER_ID,
-			   EP.PARTICIPATED_AT,
-			   E.TITLE,
-			   E.IMAGE_URL,
-			   E.START_DATE,
-			   E.END_DATE
-		FROM EVENT_PARTICIPATION EP
-		JOIN EVENT E
-		  ON EP.EVENT_ID = E.EVENT_ID
-		WHERE EP.MEMBER_ID = #{member_id}
-		ORDER BY EP.PARTICIPATED_AT DESC
+	
+		SELECT ep.PARTICIPATION_ID,
+			   ep.EVENT_ID,
+			   ep.MEMBER_ID,
+			   ep.PARTICIPATED_AT,
+			   e.TITLE,
+			   e.IMAGE_URL,
+			   e.START_DATE,
+			   e.END_DATE
+		FROM EVENT_PARTICIPATION ep
+		JOIN EVENT e
+		  ON ep.EVENT_ID = e.EVENT_ID
+		WHERE ep.MEMBER_ID = #{member_id}
+		ORDER BY ep.PARTICIPATED_AT DESC
+	
 	</select>
 
 

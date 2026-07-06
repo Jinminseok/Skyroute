@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layouts/layout_basic}">
+<head>
+	<meta charset="UTF-8">
+	<title>공지사항 상세</title>
+	<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">
+	<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+</head>
+<body>
+
+<div layout:fragment="panel" class="panel on" id="notice">
+
+	<section class="block wrap notice-detail-wrap">
+
+		<div class="notice-detail-layout">
+
+			<!-- 상세 본문 -->
+			<article class="notice-detail-card">
+
+				<div class="eyebrow">SKYROUTE NOTICE</div>
+
+				<h2 th:text="${notice.title}">
+					공지사항 제목
+				</h2>
+
+				<div class="notice-detail-meta">
+					<span class="stat soon">공개 공지</span>
+
+					<span>
+						<span class="material-symbols-outlined">person</span>
+						<b th:text="${notice.memberVO != null ? notice.memberVO.name : '관리자'}">
+							관리자
+						</b>
+					</span>
+
+					<span>
+						<span class="material-symbols-outlined">calendar_month</span>
+						<b th:text="${notice.created_at}">
+							2026-07-03
+						</b>
+					</span>
+
+					<span th:if="${notice.updated_at != null}">
+						<span class="material-symbols-outlined">edit</span>
+						<b th:text="${notice.updated_at}">
+							2026-07-03
+						</b>
+					</span>
+				</div>
+
+				<div class="notice-detail-content" th:utext="${notice.content}">
+					공지사항 본문 내용
+				</div>
+
+				<div class="notice-detail-actions">
+					<a href="javascript:history.back();" class="btn ghost">
+						이전으로
+					</a>
+
+					<a th:href="@{/member/notice/list}" class="btn">
+						목록으로
+					</a>
+				</div>
+
+			</article>
+
+
+			<!-- 우측 요약 카드 -->
+			<aside class="summary notice-aside">
+
+				<h3>공지 정보</h3>
+
+				<div class="sl">
+					<span class="k">공지번호</span>
+					<b th:text="${notice.notice_id}">1</b>
+				</div>
+
+				<div class="sl">
+					<span class="k">공개상태</span>
+					<b>공개</b>
+				</div>
+
+				<div class="sl">
+					<span class="k">등록자</span>
+					<b th:text="${notice.memberVO != null ? notice.memberVO.name : '관리자'}">
+						관리자
+					</b>
+				</div>
+
+				<div class="sl">
+					<span class="k">등록일</span>
+					<b th:text="${notice.created_at}">
+						2026-07-03
+					</b>
+				</div>
+
+				<div class="sl" th:if="${notice.updated_at != null}">
+					<span class="k">수정일</span>
+					<b th:text="${notice.updated_at}">
+						2026-07-03
+					</b>
+				</div>
+
+				<div class="notice-aside-help">
+					<span class="material-symbols-outlined">info</span>
+					<span>
+						예약, 결제, 운항 관련 주요 안내는 공지사항을 통해 확인할 수 있습니다.
+					</span>
+				</div>
+
+			</aside>
+
+		</div>
+
+	</section>
+
+</div>
+
+</body>
+</html>

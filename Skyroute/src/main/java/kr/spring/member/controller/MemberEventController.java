@@ -22,14 +22,25 @@ public class MemberEventController {
 	private StaffEventService staffEventService;
 
 	@GetMapping("/detail")
-	public String detail(@RequestParam("event_id") long event_id, Model model) {
+	public String detail(@RequestParam("event_id") long event_id,
+						 @AuthenticationPrincipal PrincipalDetails principalDetails,
+						 Model model) {
 		EventVO event = staffEventService.selectActiveEvent(event_id);
 
 		if (event == null) {
 			return "redirect:/main/home";
 		}
 
+		boolean participated = false;
+
+		if (principalDetails != null && principalDetails.getMemberVO() != null) {
+			participated = staffEventService.isParticipated(
+					event_id,
+					principalDetails.getMemberVO().getMember_id());
+		}
+
 		model.addAttribute("event", event);
+		model.addAttribute("participated", participated);
 
 		return "thviews/member/event_detail";
 	}

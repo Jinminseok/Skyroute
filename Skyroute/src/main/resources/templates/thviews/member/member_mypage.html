@@ -5,25 +5,224 @@
       layout:decorate="~{layouts/layout_basic}">
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
-<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">	
+<title>마이페이지</title>
+
+<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
 <script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+
+<style>
+.mypage-event-list {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.mypage-event-card {
+	display: grid;
+	grid-template-columns: 180px 1fr auto;
+	gap: 20px;
+	align-items: center;
+	padding: 18px;
+	background: #fff;
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+}
+
+.mypage-event-image {
+	width: 180px;
+	height: 94px;
+	border-radius: 9px;
+	object-fit: cover;
+	background: #f1f5f9;
+}
+
+.mypage-event-image-empty {
+	width: 180px;
+	height: 94px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 9px;
+	background: #f1f5f9;
+	color: var(--mut);
+	font-size: 12px;
+}
+
+.mypage-event-title {
+	margin: 0 0 7px;
+	color: var(--ink-700);
+	font-size: 17px;
+	font-weight: 600;
+}
+
+.mypage-event-period {
+	display: flex;
+	gap: 7px;
+	margin-bottom: 5px;
+	color: var(--mut);
+	font-family: var(--sans-eng);
+	font-size: 13px;
+}
+
+.mypage-event-date {
+	color: var(--mut);
+	font-size: 12px;
+}
+
+.mypage-event-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-bottom: 8px;
+	padding: 4px 10px;
+	border-radius: 999px;
+	background: var(--accent-soft);
+	color: var(--accent);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.mypage-empty-event {
+	padding: 44px 20px;
+	border: 1px dashed var(--line);
+	border-radius: var(--r);
+	color: var(--mut);
+	font-size: 14px;
+	text-align: center;
+	background: #fbfdff;
+}
+
+@media (max-width: 760px) {
+	.mypage-event-card {
+		grid-template-columns: 1fr;
+	}
+
+	.mypage-event-image,
+	.mypage-event-image-empty {
+		width: 100%;
+		height: 170px;
+	}
+
+	.mypage-event-card .actions {
+		justify-content: flex-end;
+	}
+}
+</style>
 </head>
+
 <body>
+
 <div layout:fragment="panel" class="panel on" id="my">
-  <section class="block wrap">
-    <div class="eyebrow">MY PAGE</div><h2 style="margin:6px 0 4px">홍길동님, 반갑습니다</h2>
-    <p style="color:var(--mut);margin:0 0 22px; font-weight:300;">누리클럽 <b style="color:var(--accent); font-weight:500;">실버</b> · 보유 마일리지 <b style="font-family:var(--sans-eng); font-weight:500;">24,580</b></p>
-    <div class="htitle"><h2 style="font-size:18px">나의 예약</h2></div>
-    <div class="trip">
-      <div><div style="margin-bottom:6px"><span class="stat soon">출발 임박</span> <span class="pnr">NUX4K9</span></div>
-        <div class="rt">ICN → JFK</div><div class="dt">NU101 · 12.20 (토) · 23A</div></div>
-      <div class="actions"><button class="btn ghost sm">체크인</button><button class="btn sm">상세</button></div>
-    </div>
-  </section>
+
+	<section class="block wrap">
+		<div class="eyebrow">MY PAGE</div>
+
+		<h2 style="margin:6px 0 4px">홍길동님, 반갑습니다</h2>
+
+		<p style="color:var(--mut); margin:0 0 22px; font-weight:300;">
+			누리클럽
+			<b style="color:var(--accent); font-weight:500;">실버</b>
+			· 보유 마일리지
+			<b style="font-family:var(--sans-eng); font-weight:500;">24,580</b>
+		</p>
+
+		<div class="htitle">
+			<h2 style="font-size:18px">나의 예약</h2>
+		</div>
+
+		<div class="trip">
+			<div>
+				<div style="margin-bottom:6px">
+					<span class="stat soon">출발 임박</span>
+					<span class="pnr">NUX4K9</span>
+				</div>
+
+				<div class="rt">ICN → JFK</div>
+				<div class="dt">NU101 · 12.20 (토) · 23A</div>
+			</div>
+
+			<div class="actions">
+				<button class="btn ghost sm">체크인</button>
+				<button class="btn sm">상세</button>
+			</div>
+		</div>
+
+		<div class="htitle" style="margin-top:46px;">
+			<div>
+				<div class="eyebrow">EVENT HISTORY</div>
+				<h2 style="font-size:18px; margin-top:4px;">이벤트 참여 내역</h2>
+			</div>
+
+			<div th:if="${!#lists.isEmpty(eventParticipationList)}"
+			     style="font-size:13px; color:var(--mut);">
+				총
+				<b style="color:var(--accent); font-family:var(--sans-eng);"
+				   th:text="${#lists.size(eventParticipationList)}">
+					0
+				</b>건
+			</div>
+		</div>
+
+		<div th:if="${#lists.isEmpty(eventParticipationList)}"
+		     class="mypage-empty-event">
+			아직 참여한 이벤트가 없습니다.
+		</div>
+
+		<div th:unless="${#lists.isEmpty(eventParticipationList)}"
+		     class="mypage-event-list">
+
+			<div class="mypage-event-card"
+			     th:each="participation : ${eventParticipationList}">
+
+				<img th:if="${participation.image_url != null and !#strings.isEmpty(participation.image_url)}"
+				     th:src="@{/assets/upload/{file}(file=${participation.image_url})}"
+				     th:alt="${participation.title}"
+				     class="mypage-event-image">
+
+				<div th:unless="${participation.image_url != null and !#strings.isEmpty(participation.image_url)}"
+				     class="mypage-event-image-empty">
+					이벤트 이미지 없음
+				</div>
+
+				<div>
+					<div class="mypage-event-status">
+						<span class="material-symbols-outlined" style="font-size:15px;">check_circle</span>
+						참여 완료
+					</div>
+
+					<h3 class="mypage-event-title"
+					    th:text="${participation.title}">
+						이벤트 제목
+					</h3>
+
+					<div class="mypage-event-period">
+						<span th:text="${#dates.format(participation.start_date, 'yyyy.MM.dd')}"></span>
+						<span>~</span>
+						<span th:text="${#dates.format(participation.end_date, 'yyyy.MM.dd')}"></span>
+					</div>
+
+					<div class="mypage-event-date">
+						참여일
+						<span th:text="${#dates.format(participation.participated_at, 'yyyy.MM.dd HH:mm')}"></span>
+					</div>
+				</div>
+
+				<div class="actions">
+					<a th:href="@{/member/event/detail(event_id=${participation.event_id})}"
+					   class="btn ghost sm">
+						이벤트 보기
+					</a>
+				</div>
+
+			</div>
+
+		</div>
+	</section>
+
 </div>
+
 </body>
 </html>
