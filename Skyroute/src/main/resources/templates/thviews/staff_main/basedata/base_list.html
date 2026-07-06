@@ -225,6 +225,16 @@
 					<span class="material-symbols-outlined" style="font-size: 18px">add</span>
 					게이트 등록
 				</button>
+
+		
+				<div style="margin-left: 15px;">
+					<input type="text" id="gateSearchInput"
+						onkeyup="filterTable('gateSearchInput', 'baseGateTable')"
+						class="input" placeholder="게이트 검색 (공항명, 코드 등)..."
+						style="width: 250px; padding: 6px 12wpx; font-size: 14px;">
+				</div>
+
+
 				<div class="grow"></div>
 				<span class="badge badge-scheduled"> GATE </span>
 			</div>
@@ -351,14 +361,16 @@
 									style="font-weight: 600; color: var(--text-dark);"></td>
 								<td th:text="${aircraft.model_name}"></td>
 								<td th:text="${aircraft.total_seats}"></td>
-								<td>
-								    <select class="select" style="padding: 4px 8px; font-size: 13px; width: 100px; cursor: pointer;" 
-								            th:onchange="changeAircraftStatus([[${aircraft.aircraft_id}]], this)">
-								        <option value="운항가능" th:selected="${aircraft.status_name == '운항가능'}">운항가능</option>
-								        <option value="정비중" th:selected="${aircraft.status_name == '정비중'}">정비중</option>
-								        <option value="퇴역" th:selected="${aircraft.status_name == '퇴역'}">퇴역</option>
-								    </select>
-								</td>
+								<td><select class="select"
+									style="padding: 4px 8px; font-size: 13px; width: 100px; cursor: pointer;"
+									th:onchange="changeAircraftStatus([[${aircraft.aircraft_id}]], this)">
+										<option value="운항가능"
+											th:selected="${aircraft.status_name == '운항가능'}">운항가능</option>
+										<option value="정비중"
+											th:selected="${aircraft.status_name == '정비중'}">정비중</option>
+										<option value="퇴역"
+											th:selected="${aircraft.status_name == '퇴역'}">퇴역</option>
+								</select></td>
 								<td><label class="toggle-switch"> <input
 										type="checkbox" th:checked="${aircraft.is_active == 'Y'}"
 										th:onchange="toggleAircraftActive([[${aircraft.aircraft_id}]], this)">
@@ -414,7 +426,8 @@
 								</label></td>
 							</tr>
 							<tr th:if="${#lists.isEmpty(seatList)}">
-								<td colspan="5" style="text-align: center; padding: 20px; color: var(--text-light);">
+								<td colspan="5"
+									style="text-align: center; padding: 20px; color: var(--text-light);">
 									생성된 좌석 정보가 없습니다. 좌석 생성 버튼을 클릭하세요.</td>
 							</tr>
 						</tbody>
@@ -1134,7 +1147,41 @@
 	        location.reload();
 	    });
 	}
-	
+	function filterTable(inputId, tbodyId) {
+	    // 1. 입력된 검색어 가져오기 (대소문자 구분을 없애기 위해 무조건 대문자로 변환)
+	    const input = document.getElementById(inputId);
+	    const filter = input.value.toUpperCase();
+	    
+	    // 2. 검색할 테이블의 본문(tbody)과 안의 행(tr)들 가져오기
+	    const tbody = document.getElementById(tbodyId);
+	    const trs = tbody.getElementsByTagName("tr");
+
+	    // 3. 각 행(tr)을 돌면서 검색어가 포함되어 있는지 확인
+	    for (let i = 0; i < trs.length; i++) {
+	        // "데이터가 없습니다" 텍스트가 있는 행은 검사에서 제외
+	        if (trs[i].getElementsByTagName("td").length <= 1) {
+	            continue; 
+	        }
+
+	        let matchFound = false;
+	        const tds = trs[i].getElementsByTagName("td");
+
+	        // 행 안의 모든 칸(td)을 훑어봄
+	        for (let j = 0; j < tds.length; j++) {
+	            if (tds[j]) {
+	                const txtValue = tds[j].textContent || tds[j].innerText;
+	                // 검색어가 하나라도 포함되어 있으면 매칭 성공!
+	                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+	                    matchFound = true;
+	                    break;
+	                }
+	            }
+	        }
+
+	        // 매칭되면 보여주고, 안 되면 화면에서 숨김 처리
+	        trs[i].style.display = matchFound ? "" : "none";
+	    }
+	}
 	</script>
 
 </body>
