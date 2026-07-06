@@ -20,6 +20,7 @@ import kr.spring.member.vo.PrincipalDetails;
 import kr.spring.util.FileUtil;
 import kr.spring.util.ValidationUtil;
 import lombok.extern.slf4j.Slf4j;
+import kr.spring.staff.content.service.StaffEventService;
 
 @Slf4j
 @Controller
@@ -106,10 +107,19 @@ public class MemberUserController {
 	
 	//마이페이지 폼 호출
 	@GetMapping("/member_mypage")
-	public String mypageForm() {
+	public String mypageForm(@AuthenticationPrincipal PrincipalDetails principalDetails,
+							 Model model) {
+		if (principalDetails == null || principalDetails.getMemberVO() == null) {
+			return "redirect:/member/login";
+		}
+
+		long memberId = principalDetails.getMemberVO().getMember_id();
+
+		model.addAttribute("eventParticipationList",
+				staffEventService.selectMyParticipationList(memberId));
+
 		return "thviews/member/member_mypage";
 	}
-	
 	
 	
 	
@@ -178,4 +188,7 @@ public class MemberUserController {
 		model.addAttribute("imageFile", readbyte);
 		model.addAttribute("filename", "face.png");
 	}
+	
+	@Autowired
+	private StaffEventService staffEventService;
 }

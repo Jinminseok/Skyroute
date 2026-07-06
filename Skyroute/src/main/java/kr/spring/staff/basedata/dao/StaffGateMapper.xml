@@ -3,9 +3,90 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
 <mapper namespace="kr.spring.staff.basedata.dao.StaffGateMapper"> 
-	
-</mapper>
+	<!-- 게이트 목록 및 검색 -->
+    <select id="selectGateList" resultType="kr.spring.staff.basedata.vo.GateVO">
+        SELECT 
+            G.GATE_ID AS gateId,
+            G.AIRPORT_ID AS airportId,
+            A.AIRPORT_NAME AS airportName,
+            A.IATA_CODE AS iataCode,
+            G.GATE_CODE AS gateCode,
+            G.GATE_AREA_ID AS gateAreaId,
+            GA.AREA_NAME AS areaName,
+            G.FLIGHT_TYPE AS flightType,
+            G.IS_ACTIVE AS isActive
+        FROM GATE G
+        JOIN AIRPORT A ON G.AIRPORT_ID = A.AIRPORT_ID
+        JOIN GATE_AREA GA ON G.GATE_AREA_ID = GA.GATE_AREA_ID
+        <where>
+            <if test="airportId != null">
+                AND G.AIRPORT_ID = #{airportId}
+            </if>
+            <if test="gateAreaId != null">
+                AND G.GATE_AREA_ID = #{gateAreaId}
+            </if>
+            <if test="flightType != null and flightType != ''">
+                AND G.FLIGHT_TYPE = #{flightType}
+            </if>
+            <if test="isActive != null and isActive != ''">
+                AND G.IS_ACTIVE = #{isActive}
+            </if>
+        </where>
+        ORDER BY A.IATA_CODE, G.GATE_CODE
+    </select>
 
+    <!-- 게이트 코드 중복 확인 -->
+    <select id="checkGateCodeDuplicate" resultType="int">
+        SELECT COUNT(*) 
+        FROM GATE 
+        WHERE AIRPORT_ID = #{airportId} 
+          AND GATE_CODE = #{gateCode}
+    </select>
+
+    <!-- 게이트 등록 -->
+    <insert id="insertGate" parameterType="kr.spring.staff.basedata.vo.GateVO">
+        INSERT INTO GATE (
+            AIRPORT_ID, GATE_CODE, GATE_AREA_ID, FLIGHT_TYPE, IS_ACTIVE
+        ) VALUES (
+            #{airportId}, #{gateCode}, #{gateAreaId}, #{flightType}, 'Y'
+        )
+    </insert>
+
+    <!-- 게이트 상세 조회 -->
+    <select id="selectGateById" resultType="kr.spring.staff.basedata.vo.GateVO">
+        SELECT GATE_ID AS gateId, AIRPORT_ID AS airportId, GATE_CODE AS gateCode 
+        FROM GATE 
+        WHERE GATE_ID = #{gateId}
+    </select>
+
+    <!-- 게이트 수정 -->
+    <update id="updateGate" parameterType="kr.spring.staff.basedata.vo.GateVO">
+        UPDATE GATE
+        SET GATE_AREA_ID = #{gateAreaId},
+            FLIGHT_TYPE = #{flightType}
+        WHERE GATE_ID = #{gateId}
+    </update>
+
+    <!-- 스케줄 사용 여부 확인 -->
+    <select id="checkGateUsedInSchedule" resultType="int">
+        SELECT COUNT(*)
+        FROM FLIGHT_SCHEDULE 
+        WHERE (DEPARTURE_GATE_ID = #{gateId} OR ARRIVAL_GATE_ID = #{gateId})
+          AND IS_DELETED = 'N'
+    </select>
+
+    <!-- 게이트 사용여부 변경 -->
+    <update id="updateGateStatus">
+        UPDATE GATE
+        SET IS_ACTIVE = #{isActive}
+        WHERE GATE_ID = #{gateId}
+    </update>
+
+<delete id="deleteGate">
+    DELETE FROM GATE WHERE GATE_ID = #{gateId}
+</delete>
+
+</mapper>
 
 
 

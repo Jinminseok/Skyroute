@@ -1,14 +1,63 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper   
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">    
+
 <mapper namespace="kr.spring.staff.basedata.dao.StaffSeatMapper"> 
-	
+
+    <select id="selectSeatClassByName" resultType="kr.spring.staff.basedata.vo.SeatClassVO">
+        SELECT * FROM SEAT_CLASS 
+        WHERE class_name = #{className}
+    </select>
+
+    <insert id="insertSeatClass" parameterType="kr.spring.staff.basedata.vo.SeatClassVO" 
+            useGeneratedKeys="true" keyProperty="seat_class_id" keyColumn="seat_class_id">
+        INSERT INTO SEAT_CLASS (
+            class_name, 
+            "ROWS", 
+            "COLUMNS", 
+            sort_order
+        ) VALUES (
+            #{class_name}, 
+            #{seat_rows},
+            #{seat_columns},
+            #{sort_order}
+        )
+    </insert>
+
+    <insert id="insertSeat" parameterType="kr.spring.staff.basedata.vo.SeatVO">
+        INSERT INTO SEAT (
+            aircraft_id, 
+            seat_no, 
+            seat_class_id
+        ) VALUES (
+            #{aircraft_id}, 
+            #{seat_no}, 
+            #{seat_class_id}
+        )
+    </insert>
+    
+    <select id="selectAircraftList" resultType="kr.spring.admin.vo.AirCraftVO">
+        SELECT 
+            aircraft_id,
+            reg_no,
+            model_name,
+            total_seats,
+            is_active,
+            status_name FROM AIRCRAFT
+        ORDER BY aircraft_id DESC
+    </select>
+
+    <update id="updateAircraftActive" parameterType="map">
+        UPDATE AIRCRAFT
+        SET is_active = #{isActive}
+        WHERE aircraft_id = #{aircraftId}
+    </update>
+    
+    <update id="updateAircraftStatus" parameterType="map">
+        UPDATE AIRCRAFT
+        SET status_name = #{statusName}
+        WHERE aircraft_id = #{aircraftId}
+    </update>
+
 </mapper>
-
-
-
-
-
-
-

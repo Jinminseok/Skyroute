@@ -8,6 +8,14 @@ import org.springframework.web.bind.annotation.*;
 
 import kr.spring.staff.basedata.service.StaffAirportService;
 import kr.spring.staff.basedata.vo.AirportVO;
+
+import kr.spring.admin.vo.AirCraftVO;
+import kr.spring.staff.basedata.service.StaffSeatService;
+
+// 👉 게이트 처리를 위해 추가된 Import
+import kr.spring.staff.basedata.service.StaffGateService;
+import kr.spring.staff.basedata.vo.GateVO;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -18,14 +26,34 @@ public class StaffAirportController {
     @Autowired
     private StaffAirportService airportService;
 
+    // 좌석 관련 데이터를
+    @Autowired
+    private StaffSeatService staffSeatService;
+
+    // 👉 게이트 관련 데이터를 위한 서비스 추가
+    @Autowired
+    private StaffGateService staffGateService;
+
     // 1. 공항 마스터 관리 페이지 조회 (목록 렌더링)
     @GetMapping("/airport/list")
     public String getAirportPage(Model model) {
-        // DB에서 공항 목록을 가져와서 Model에 담아 HTML로 전달합니다.
+        
+        // 탭 메뉴 활성화를 위해 추가
+        model.addAttribute("activeMenu", "base");
+
+        // 공항 목록 담기
         List<AirportVO> airportList = airportService.getAirportList();
         model.addAttribute("airportList", airportList);
         
-        // HTML 파일의 위치에 맞게 리턴 경로를 수정해주세요. (예: "staff/basedata")
+        // 항공기 목록 담기
+        List<AirCraftVO> aircraftList = staffSeatService.getAircraftList();
+        model.addAttribute("aircraftList", aircraftList);
+        
+        // 👉 게이트 목록 담기 (이 부분이 HTML의 th:each="gate : ${gateList}"를 채워줍니다)
+        GateVO gateSearchVO = new GateVO();
+        List<GateVO> gateList = staffGateService.getGateList(gateSearchVO);
+        model.addAttribute("gateList", gateList);
+        
         return "thviews/staff_main/basedata/base_list"; 
     }
 
@@ -75,7 +103,8 @@ public class StaffAirportController {
             return "fail";
         }
     }
-    // 공항 사용 여부 토글 (AJAX)
+    
+    // 5. 공항 사용 여부 토글 (AJAX)
     @PostMapping("/airport/toggle")
     @ResponseBody
     public String toggleAirport(@RequestBody AirportVO airportVO) {
