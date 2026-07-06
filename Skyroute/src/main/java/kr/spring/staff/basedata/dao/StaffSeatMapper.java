@@ -1,23 +1,29 @@
 package kr.spring.staff.basedata.dao;
 
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.spring.admin.vo.AirCraftVO;
 import kr.spring.staff.basedata.vo.SeatClassVO;
 import kr.spring.staff.basedata.vo.SeatVO;
 
 @Mapper
 public interface StaffSeatMapper {
     
-    // 등급 등록
-    @Insert("INSERT INTO seat_class (aircraft_id, class_name, seat_rows, seat_columns, sort_order) "
-          + "VALUES (#{aircraft_id}, #{class_name}, #{seat_rows}, #{seat_columns}, #{sort_order})")
-    @Options(useGeneratedKeys = true, keyProperty = "seat_class_id", keyColumn = "seat_class_id")
+    // 이름으로 등급 조회
+    public SeatClassVO selectSeatClassByName(String className);
+    
+    // 등급 마스터 생성
     public void insertSeatClass(SeatClassVO seatClassVO);
     
-    // 낱개 좌석 등록
-    @Insert("INSERT INTO seat (aircraft_id, seat_class_id, seat_no) "
-          + "VALUES (#{aircraft_id}, #{seat_class_id}, #{seat_no})")
+    // 물리적 좌석 생성
     public void insertSeat(SeatVO seatVO);
+    
+    // 항공기 목록 전체 조회
+    public List<AirCraftVO> selectAircraftList();
+    
+    // 항공기 상태(사용 여부) 변경
+    public void updateAircraftActive(Map<String, Object> payload);
 }

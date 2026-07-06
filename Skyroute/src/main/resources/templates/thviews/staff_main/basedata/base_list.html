@@ -286,7 +286,10 @@
 									<span th:text="${aircraft.status_name}" th:style="${aircraft.status_name == '정비중'} ? 'color:#ef4444; font-weight:600;' : 'color:#10b981;'"></span>
 								</td>
 								<td>
-									<span class="badge" th:classappend="${aircraft.is_active == 'Y' ? 'badge-on' : 'badge-off'}" th:text="${aircraft.is_active == 'Y' ? '사용' : '비활성'}"></span>
+								    <label class="toggle-switch"> 
+								        <input type="checkbox" th:checked="${aircraft.is_active == 'Y'}" th:onchange="toggleAircraftActive([[${aircraft.aircraft_id}]], this)">
+								        <span class="slider"></span>
+								    </label>
 								</td>
 							</tr>
 							<tr th:if="${#lists.isEmpty(aircraftList)}">
@@ -466,63 +469,58 @@
     <div class="modal-overlay" id="seatModal" style="display: none;">
 		<div class="modal">
 			<div class="modal-head">
-				<div><h3 id="seatModalTitle">좌석 설계 및 등급 생성</h3></div>
+				<div><h3 id="seatModalTitle">좌석 도면 설계 및 일괄 생성</h3></div>
 				<button type="button" class="modal-close" onclick="closeSeatModal()">
 					<span class="material-symbols-outlined">close</span>
 				</button>
 			</div>
 
 			<div class="modal-body">
-			    <div style="background:#f0f9ff; color:#0369a1; padding:12px; border-radius:6px; font-size:13px; margin-bottom:16px;">
+			    <div style="background:#f0f9ff; color:#0369a1; padding:12px; border-radius:6px; font-size:13px; margin-bottom:16px; line-height:1.5;">
                     <span class="material-symbols-outlined" style="font-size:16px; vertical-align:-3px;">info</span>
-                    좌석의 배치 규칙(행과 열)을 입력하면, 물리적인 개별 좌석 번호(1A, 1B 등)가 시스템에 자동으로 일괄 생성됩니다.
+                    <strong>자동 생성 가이드:</strong><br>
+                    시작 행과 종료 행을 지정하고 가로 좌석 수를 입력하면 알파벳(A~Z) 조합으로 좌석이 자동 생성됩니다.<br>
+                    <em>(예: 시작 1, 종료 5, 가로 6 입력 시 ➔ 1A ~ 5F까지 총 30석 생성)</em>
                 </div>
-				<form id="seatForm" action="/staff/basedata/seat/generate" method="post">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
+				<form id="seatForm">
 					<div class="form-grid">
                         <div class="field full">
 							<label>배치할 항공기 선택 *</label> 
-							<select name="aircraft_id" class="select" required>
-                                <option value="">항공기를 선택하세요</option>
-                                <option th:each="aircraft : ${aircraftList}" th:value="${aircraft.aircraft_id}" th:text="|${aircraft.reg_no} (${aircraft.model_name})|"></option>
+							<select id="seatAircraftId" name="aircraft_id" class="select" required>
+                                <option value="">등록된 항공기를 선택하세요</option>
+                                <option th:each="aircraft : ${aircraftList}" th:value="${aircraft.aircraft_id}" th:text="|${aircraft.reg_no} (${aircraft.model_name} / 총 ${aircraft.total_seats}석)|"></option>
                             </select>
 						</div>
 
-						<div class="field">
+                        <div class="field full">
 							<label>좌석 등급명 (Class) *</label>
-							<select name="class_name" class="select" required>
+							<select id="seatClassName" name="class_name" class="select" required>
 								<option value="">등급 선택</option>
 								<option value="일등석">일등석 (First)</option>
 								<option value="비즈니스">비즈니스 (Business)</option>
 								<option value="이코노미">이코노미 (Economy)</option>
 							</select>
 						</div>
-						
-						<div class="field">
-							<label>우선순위 (Sort Order) *</label> 
-							<input type="number" name="sort_order" class="input" placeholder="예: 1 (높을수록 앞자리)" required min="1" max="99">
+
+                        <div class="field">
+							<label>시작 행 (Start Row) *</label> 
+							<input type="number" id="seatStartRow" name="start_row" class="input" placeholder="예: 1" required min="1" max="100">
 						</div>
 
 						<div class="field">
-							<label>시작 줄 번호 (Start Row) *</label> 
-							<input type="number" name="start_row" class="input" placeholder="예: 1" required min="1" max="100">
+							<label>종료 행 (End Row) *</label> 
+							<input type="number" id="seatEndRow" name="end_row" class="input" placeholder="예: 10" required min="1" max="100">
 						</div>
 
-						<div class="field">
-							<label>만들 행 갯수 (Rows) *</label> 
-							<input type="number" name="seat_rows" class="input" placeholder="예: 10" required min="1" max="100">
-						</div>
-
-						<div class="field full">
-							<label>열(가로) 갯수 (Columns) *</label> 
-							<input type="number" name="seat_columns" class="input" placeholder="예: 6 (A~F열 생성)" required min="1" max="20">
+                        <div class="field full">
+							<label>가로 좌석 수 (Columns) *</label> 
+							<input type="number" id="seatColumns" name="seat_columns" class="input" placeholder="예: 6 (입력 시 A, B, C, D, E, F 생성)" required min="1" max="10">
 						</div>
 					</div>
                     
-                    <div class="modal-foot" style="margin-top: 20px;">
+                    <div class="modal-foot" style="margin-top: 24px;">
                         <button type="button" class="btn btn-ghost" onclick="closeSeatModal()">취소</button>
-                        <button type="submit" class="btn btn-primary">좌석 일괄 생성</button>
+                        <button type="button" class="btn btn-primary" onclick="generateSeats()">좌석 일괄 생성</button>
                     </div>
 				</form>
 			</div>
@@ -589,7 +587,7 @@
 	    document.getElementById('globalModal').style.display = 'none';
 	}
 
-    // [🔥추가됨] 좌석 모달 열기/닫기
+    // 좌석 모달 열기/닫기
     function openSeatModal() {
         document.getElementById('seatForm').reset();
         document.getElementById('seatModal').style.display = 'flex';
@@ -710,6 +708,105 @@
 	        checkbox.checked = !checkbox.checked; // 오류 시 스위치 롤백
 	    });
 	}
+	
+	// ----------------------------------------------------
+	// 5. 좌석 일괄 생성 비동기(Fetch) 로직
+	// ----------------------------------------------------
+	function generateSeats() {
+        // 필수 값 검증
+        const aircraftId = document.getElementById('seatAircraftId').value;
+        const className = document.getElementById('seatClassName').value;
+        const startRow = parseInt(document.getElementById('seatStartRow').value);
+        const endRow = parseInt(document.getElementById('seatEndRow').value);
+        const columns = parseInt(document.getElementById('seatColumns').value);
+
+        if (!aircraftId || !className || !startRow || !endRow || !columns) {
+            alert('모든 항목을 올바르게 입력해주세요.');
+            return;
+        }
+
+        if (startRow > endRow) {
+            alert('시작 행이 종료 행보다 클 수 없습니다.');
+            return;
+        }
+
+        const totalGeneratedSeats = (endRow - startRow + 1) * columns;
+        if (!confirm(`선택한 항공기에 [${className}] 좌석 총 ${totalGeneratedSeats}석을 생성하시겠습니까?`)) {
+            return;
+        }
+
+        // 백엔드로 보낼 데이터
+        const requestData = {
+            aircraft_id: aircraftId,
+            class_name: className,
+            start_row: startRow,
+            end_row: endRow,
+            seat_columns: columns
+        };
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        fetch('/staff/basedata/seat/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.text())
+        .then(result => {
+            if (result === 'success') {
+                alert('좌석이 성공적으로 생성되었습니다.');
+                closeSeatModal();
+                location.reload(); 
+            } else {
+                alert('좌석 생성에 실패했습니다. 이미 등록된 등급이거나 오류가 발생했습니다.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('서버와 통신 중 오류가 발생했습니다.');
+        });
+    }
+	
+	// ----------------------------------------------------
+	// 6. 보유 항공기 사용 여부 토글
+	// ----------------------------------------------------
+	function toggleAircraftActive(aircraftId, checkbox) {
+	    const isActiveValue = checkbox.checked ? 'Y' : 'N';
+	    
+	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+	    
+	    fetch('/staff/basedata/aircraft/toggle', {
+	        method: 'POST',
+	        headers: {
+	            'Content-Type': 'application/json',
+	            [csrfHeader]: csrfToken 
+	        },
+	        body: JSON.stringify({
+	            aircraftId: aircraftId,
+	            isActive: isActiveValue
+	        })
+	    })
+	    .then(response => response.text())
+	    .then(result => {
+	        if (result === 'success') {
+	            console.log(`항공기 ID ${aircraftId} 사용 여부 변경 완료: ${isActiveValue}`);
+	        } else {
+	            alert('상태 변경에 실패했습니다.');
+	            checkbox.checked = !checkbox.checked; // 실패 시 롤백
+	        }
+	    })
+	    .catch(error => {
+	        console.error('Error:', error);
+	        alert('서버와 통신 중 오류가 발생했습니다.');
+	        checkbox.checked = !checkbox.checked; // 오류 시 롤백
+	    });
+	}
+	
 	</script>
 
 </body>
