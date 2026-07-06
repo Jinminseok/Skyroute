@@ -43,8 +43,8 @@
             reg_no,
             model_name,
             total_seats,
-            is_active
-            FROM AIRCRAFT 
+            is_active,
+            status_name FROM AIRCRAFT
         ORDER BY aircraft_id DESC
     </select>
 

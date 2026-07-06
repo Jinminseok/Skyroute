@@ -351,8 +351,13 @@
 									style="font-weight: 600; color: var(--text-dark);"></td>
 								<td th:text="${aircraft.model_name}"></td>
 								<td th:text="${aircraft.total_seats}"></td>
-								<td><span th:text="${aircraft.status_name}"
-									th:style="${aircraft.status_name == '정비중'} ? 'color:#ef4444; font-weight:600;' : 'color:#10b981;'"></span>
+								<td>
+								    <select class="select" style="padding: 4px 8px; font-size: 13px; width: 100px; cursor: pointer;" 
+								            th:onchange="changeAircraftStatus([[${aircraft.aircraft_id}]], this)">
+								        <option value="운항가능" th:selected="${aircraft.status_name == '운항가능'}">운항가능</option>
+								        <option value="정비중" th:selected="${aircraft.status_name == '정비중'}">정비중</option>
+								        <option value="퇴역" th:selected="${aircraft.status_name == '퇴역'}">퇴역</option>
+								    </select>
 								</td>
 								<td><label class="toggle-switch"> <input
 										type="checkbox" th:checked="${aircraft.is_active == 'Y'}"
@@ -379,7 +384,7 @@
 				<button type="button" class="btn btn-primary"
 					onclick="openSeatModal()">
 					<span class="material-symbols-outlined" style="font-size: 18px">grid_on</span>
-					좌석 도면(클래스) 설계 및 자동 생성
+					좌석 등록
 				</button>
 				<div class="grow"></div>
 				<span class="badge badge-scheduled"> SEAT </span>
@@ -409,9 +414,8 @@
 								</label></td>
 							</tr>
 							<tr th:if="${#lists.isEmpty(seatList)}">
-								<td colspan="5"
-									style="text-align: center; padding: 20px; color: var(--text-light);">생성된
-									좌석 정보가 없습니다. 좌석 자동 생성 버튼을 클릭하세요.</td>
+								<td colspan="5" style="text-align: center; padding: 20px; color: var(--text-light);">
+									생성된 좌석 정보가 없습니다. 좌석 생성 버튼을 클릭하세요.</td>
 							</tr>
 						</tbody>
 					</table>
@@ -1087,6 +1091,50 @@
 	    })
 	    .catch(error => console.error('Error:', error));
 	}
+	
+	// ----------------------------------------------------
+	// 7. 보유 항공기 상태(운항가능/정비중/퇴역) 즉시 변경
+	// ----------------------------------------------------
+	function changeAircraftStatus(aircraftId, selectElement) {
+	    const newStatus = selectElement.value;
+	    
+	    if (!confirm(`해당 항공기의 상태를 '${newStatus}'(으)로 변경하시겠습니까?`)) {
+	        location.reload(); // 취소 시 원래 상태로 되돌리기 위해 새로고침
+	        return;
+	    }
+
+	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+	    
+	    fetch('/staff/basedata/seat/aircraft/status', {
+	        method: 'POST',
+	        headers: {
+	            'Content-Type': 'application/json',
+	            [csrfHeader]: csrfToken 
+	        },
+	        body: JSON.stringify({
+	            aircraftId: aircraftId,
+	            statusName: newStatus
+	        })
+	    })
+	    .then(response => response.text())
+	    .then(result => {
+	        if (result === 'success') {
+	            alert('항공기 상태가 성공적으로 변경되었습니다.');
+	            // 상태에 따라 글자 색상을 바꾸는 로직 추가 (선택사항)
+	            selectElement.style.color = (newStatus === '정비중') ? '#ef4444' : '#10b981';
+	        } else {
+	            alert('상태 변경에 실패했습니다.');
+	            location.reload(); 
+	        }
+	    })
+	    .catch(error => {
+	        console.error('Error:', error);
+	        alert('서버와 통신 중 오류가 발생했습니다.');
+	        location.reload();
+	    });
+	}
+	
 	</script>
 
 </body>
