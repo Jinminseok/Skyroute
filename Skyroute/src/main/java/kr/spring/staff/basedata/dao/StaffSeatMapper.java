@@ -24,6 +24,9 @@ public interface StaffSeatMapper {
     // 항공기 목록 전체 조회
     public List<AirCraftVO> selectAircraftList();
     
-    // 항공기 상태(사용 여부) 변경
+    // 항공기 사용 여부 변경
     public void updateAircraftActive(Map<String, Object> payload);
+    
+    // 항공기 상태 변경
+    public void updateAircraftStatus(Map<String, Object> payload);
 }

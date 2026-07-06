@@ -88,4 +88,10 @@ public class StaffSeatServiceImpl implements StaffSeatService {
     public void updateAircraftActive(Map<String, Object> payload) {
         staffSeatMapper.updateAircraftActive(payload);
     }
+
+	@Override
+	public void updateAircraftStatus(Map<String, Object> payload) {
+		staffSeatMapper.updateAircraftStatus(payload);
+	}
+    
 }

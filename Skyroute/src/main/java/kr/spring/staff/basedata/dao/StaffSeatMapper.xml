@@ -53,5 +53,11 @@
         SET is_active = #{isActive}
         WHERE aircraft_id = #{aircraftId}
     </update>
+    
+    <update id="updateAircraftStatus" parameterType="map">
+        UPDATE AIRCRAFT
+        SET status_name = #{statusName}
+        WHERE aircraft_id = #{aircraftId}
+    </update>
 
 </mapper>

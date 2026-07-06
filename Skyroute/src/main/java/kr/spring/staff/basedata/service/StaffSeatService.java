@@ -11,6 +11,9 @@ public interface StaffSeatService {
     // 보유 항공기 목록 조회
     public List<AirCraftVO> getAircraftList();
     
-    // [추가] 항공기 상태 토글
+    // 항공기 사용 여부
     public void updateAircraftActive(Map<String, Object> payload);
+    
+    // 항공기 상태
+    public void updateAircraftStatus(Map<String, Object> payload);
 }

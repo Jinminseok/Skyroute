@@ -1134,8 +1134,16 @@
 	    .then(result => {
 	        if (result === 'success') {
 	            alert('항공기 상태가 성공적으로 변경되었습니다.');
-	            // 상태에 따라 글자 색상을 바꾸는 로직 추가 (선택사항)
-	            selectElement.style.color = (newStatus === '정비중') ? '#ef4444' : '#10b981';
+	            if(newStatus == '운항가능') {
+	            	selectElement.style.color = '#10b981';
+	            } else if(newStatus == '정비중') {
+	            	selectElement.style.color = '#E0B94F';
+	            } else if(newStatus == '퇴역') {
+	            	selectElement.style.color = '#ef4444';
+	            } else {
+	            	alert('상태 변경에 실패했습니다.');
+		            location.reload();
+	            }
 	        } else {
 	            alert('상태 변경에 실패했습니다.');
 	            location.reload(); 
