@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import kr.spring.admin.vo.AirCraftVO;
 import kr.spring.staff.basedata.service.StaffSeatService;
+import kr.spring.staff.basedata.vo.SeatVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,6 +39,13 @@ public class StaffSeatController {
             log.error("좌석 생성 중 오류 발생: ", e);
             return "error";
         }
+    }
+    
+    // 항공기 좌석 데이터
+    @GetMapping("/map/{aircraftId}")
+    @ResponseBody
+    public List<SeatVO> getSeatMap(@PathVariable("aircraftId") int aircraftId) {
+        return staffSeatService.getSeatsByAircraft(aircraftId);
     }
     
     // 항공기 사용 여부

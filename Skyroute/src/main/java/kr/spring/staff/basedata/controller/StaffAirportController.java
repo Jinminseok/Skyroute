@@ -1,6 +1,8 @@
 package kr.spring.staff.basedata.controller;
 
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +17,7 @@ import kr.spring.staff.basedata.service.StaffSeatService;
 // 👉 게이트 처리를 위해 추가된 Import
 import kr.spring.staff.basedata.service.StaffGateService;
 import kr.spring.staff.basedata.vo.GateVO;
+import kr.spring.staff.basedata.vo.SeatVO;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -48,6 +51,10 @@ public class StaffAirportController {
         // 항공기 목록 담기
         List<AirCraftVO> aircraftList = staffSeatService.getAircraftList();
         model.addAttribute("aircraftList", aircraftList);
+
+        // 기재별 좌석 데이터 가져오기
+        List<Map<String, Object>> seatSummaryList = staffSeatService.getSeatSummaryList();
+        model.addAttribute("seatSummaryList", seatSummaryList);
         
         // 👉 게이트 목록 담기 (이 부분이 HTML의 th:each="gate : ${gateList}"를 채워줍니다)
         GateVO gateSearchVO = new GateVO();

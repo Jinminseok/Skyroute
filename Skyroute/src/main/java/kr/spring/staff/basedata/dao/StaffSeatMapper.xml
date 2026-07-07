@@ -59,5 +59,29 @@
         SET status_name = #{statusName}
         WHERE aircraft_id = #{aircraftId}
     </update>
+    
+    <select id="selectSeatSummaryList" resultType="map">
+        SELECT 
+            A.aircraft_id AS "aircraft_id",
+            A.reg_no AS "reg_no",
+            A.model_name AS "model_name",
+            COUNT(S.seat_id) AS "total_generated"
+        FROM AIRCRAFT A
+        LEFT JOIN SEAT S ON A.aircraft_id = S.aircraft_id
+        GROUP BY A.aircraft_id, A.reg_no, A.model_name
+        ORDER BY A.aircraft_id DESC
+    </select>
+
+    <select id="selectSeatsByAircraft" resultType="kr.spring.staff.basedata.vo.SeatVO">
+        SELECT 
+            S.seat_id,
+            S.seat_no,
+            S.is_active,
+            C.class_name
+        FROM SEAT S
+        JOIN SEAT_CLASS C ON S.seat_class_id = C.seat_class_id
+        WHERE S.aircraft_id = #{aircraftId}
+        ORDER BY LENGTH(S.seat_no) ASC, S.seat_no ASC
+    </select>
 
 </mapper>

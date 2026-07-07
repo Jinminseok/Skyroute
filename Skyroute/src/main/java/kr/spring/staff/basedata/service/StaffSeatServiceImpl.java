@@ -93,5 +93,16 @@ public class StaffSeatServiceImpl implements StaffSeatService {
 	public void updateAircraftStatus(Map<String, Object> payload) {
 		staffSeatMapper.updateAircraftStatus(payload);
 	}
+
+	@Override
+	public List<Map<String, Object>> getSeatSummaryList() {
+		return staffSeatMapper.selectSeatSummaryList();
+	}
+
+	@Override
+	public List<SeatVO> getSeatsByAircraft(int aircraftId) {
+		return staffSeatMapper.selectSeatsByAircraft(aircraftId);
+	}
+
     
 }

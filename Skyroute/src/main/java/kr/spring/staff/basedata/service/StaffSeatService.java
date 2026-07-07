@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import kr.spring.admin.vo.AirCraftVO;
+import kr.spring.staff.basedata.vo.SeatVO;
 
 public interface StaffSeatService {
     public void generateSeats(Map<String, Object> payload);
@@ -16,4 +17,8 @@ public interface StaffSeatService {
     
     // 항공기 상태
     public void updateAircraftStatus(Map<String, Object> payload);
+    
+    // 좌석 리스트
+    public List<Map<String, Object>> getSeatSummaryList();
+    public List<SeatVO> getSeatsByAircraft(int aircraftId);
 }

@@ -69,6 +69,22 @@
 .toggle-switch input:checked+.slider:before {
 	transform: translateX(20px);
 }
+
+/* =========================================
+   좌석 설정 모달
+   ========================================= */
+   
+.seat-map-container { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 20px; max-height: 500px; overflow-y: auto; padding: 10px; background: #f8fafc; border-radius: 8px; }
+.seat-row { display: flex; gap: 8px; align-items: center; justify-content: center; width: 100%; }
+.row-number { width: 30px; text-align: center; font-weight: bold; color: #64748b; font-size: 14px; }
+.seat-box { width: 40px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; border: 2px solid transparent; }
+.seat-first { background: #fef08a; color: #854d0e; } /* 일등석 노란색 */
+.seat-business { background: #bae6fd; color: #0369a1; } /* 비즈니스 파란색 */
+.seat-economy { background: #e2e8f0; color: #334155; } /* 이코노미 회색 */
+.seat-broken { background: #fca5a5 !important; color: #991b1b !important; border-color: #ef4444; text-decoration: line-through; } /* 고장난 좌석 빨간색 */
+.seat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); filter: brightness(0.95); }
+.aisle-spacer { width: 20px; } /* 복도 공간 */
+
 </style>
 </head>
 
@@ -393,10 +409,8 @@
 		<!-- ============================================== -->
 		<div id="tab-b-seat" class="sub-page">
 			<div class="toolbar">
-				<button type="button" class="btn btn-primary"
-					onclick="openSeatModal()">
-					<span class="material-symbols-outlined" style="font-size: 18px">grid_on</span>
-					좌석 등록
+				<button type="button" class="btn btn-primary" onclick="openSeatModal()">
+					<span class="material-symbols-outlined" style="font-size: 18px">grid_on</span> 좌석 등록 및 자동 생성
 				</button>
 				<div class="grow"></div>
 				<span class="badge badge-scheduled"> SEAT </span>
@@ -406,29 +420,28 @@
 					<table class="data">
 						<thead>
 							<tr>
-								<th>좌석 ID</th>
-								<th>항공기 번호</th>
-								<th>좌석 등급</th>
-								<th>좌석 번호</th>
-								<th>사용 여부 (고장 등)</th>
+								<th>항공기 ID</th>
+								<th>등록번호</th>
+								<th>모델명</th>
+								<th>생성된 총 좌석 수</th>
+								<th>상세 관리</th>
 							</tr>
 						</thead>
 						<tbody id="baseSeatTable">
-							<tr th:each="seat : ${seatList}">
-								<td th:text="${seat.seat_id}"></td>
-								<td th:text="${seat.reg_no}"></td>
-								<td th:text="${seat.class_name}"></td>
-								<td th:text="${seat.seat_no}" style="font-weight: bold;"></td>
-								<td><label class="toggle-switch"> <input
-										type="checkbox" th:checked="${seat.is_active == 'Y'}"
-										th:onchange="toggleSeatActive([[${seat.seat_id}]], this)">
-										<span class="slider"></span>
-								</label></td>
-							</tr>
-							<tr th:if="${#lists.isEmpty(seatList)}">
-								<td colspan="5"
-									style="text-align: center; padding: 20px; color: var(--text-light);">
-									생성된 좌석 정보가 없습니다. 좌석 생성 버튼을 클릭하세요.</td>
+							<tr th:each="summary : ${seatSummaryList}">
+							    <td th:text="${summary.aircraft_id}"></td>
+							    <td th:text="${summary.reg_no}" style="font-weight: bold; color: var(--text-dark);"></td>
+							    <td th:text="${summary.model_name}"></td>
+							    <td>
+							        <span th:if="${summary.total_generated > 0}" style="color: var(--ok); font-weight: bold;" th:text="${summary.total_generated} + '석'"></span>
+							        <span th:if="${summary.total_generated == 0}" style="color: var(--text-light);">미생성</span>
+							    </td>
+							    <td>
+							        <button type="button" class="btn btn-outline btn-sm" th:if="${summary.total_generated > 0}" 
+                                            th:onclick="openVisualSeatMap([[${summary.aircraft_id}]], [[${summary.reg_no}]])">
+										<span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">view_comfy</span> 좌석 배치 확인 및 수정
+									</button>
+							    </td>
 							</tr>
 						</tbody>
 					</table>
@@ -699,6 +712,26 @@
 				</form>
 			</div>
 		</div>
+	</div>
+	
+	<!-- ============================================== -->
+	<!-- 좌석 설정 모달 창 -->
+	<!-- ============================================== -->
+	<div class="modal-overlay" id="visualSeatModal" style="display: none;">
+	    <div class="modal" style="width: 600px; max-width: 90vw;">
+	        <div class="modal-head">
+	            <div><h3 id="visualSeatTitle">HL1234 좌석 배치도</h3></div>
+	            <button type="button" class="modal-close" onclick="document.getElementById('visualSeatModal').style.display='none'">
+	                <span class="material-symbols-outlined">close</span>
+	            </button>
+	        </div>
+	        <div class="modal-body">
+	            <div style="text-align:center; font-size: 13px; color: #64748b;">
+	                * 좌석을 클릭하면 사용 가능/불가(고장) 상태를 토글할 수 있습니다.
+	            </div>
+	            <div id="seatMapArea" class="seat-map-container"></div>
+	        </div>
+	    </div>
 	</div>
 
 	<div class="toast-wrap" id="toasts"></div>
@@ -1112,7 +1145,7 @@
 	    const newStatus = selectElement.value;
 	    
 	    if (!confirm(`해당 항공기의 상태를 '${newStatus}'(으)로 변경하시겠습니까?`)) {
-	        location.reload(); // 취소 시 원래 상태로 되돌리기 위해 새로고침
+	        location.reload(); // 취소 시 원래 상태로 되돌리기
 	        return;
 	    }
 
@@ -1190,6 +1223,102 @@
 	        trs[i].style.display = matchFound ? "" : "none";
 	    }
 	}
+	
+	// ----------------------------------------------------
+	// 8. 시각적 좌석 도면 렌더링 및 모달 열기
+	// ----------------------------------------------------
+	function openVisualSeatMap(aircraftId, regNo) {
+        document.getElementById('visualSeatTitle').innerText = `${regNo} 좌석 배치도 및 상태 관리`;
+        const mapArea = document.getElementById('seatMapArea');
+        mapArea.innerHTML = '<div style="padding:40px; color:#94a3b8;">도면을 불러오는 중...</div>';
+        document.getElementById('visualSeatModal').style.display = 'flex';
+
+        fetch(`/staff/basedata/seat/map/${aircraftId}`)
+            .then(res => res.json())
+            .then(seats => {
+                mapArea.innerHTML = ''; // 초기화
+                
+                // 좌석을 행(Row) 숫자 기준으로 그룹화 ("12C" -> 12로 추출)
+                const rows = {};
+                seats.forEach(seat => {
+                    const rowNum = parseInt(seat.seat_no); // 숫자만 쏙 뽑아냄!
+                    if (!rows[rowNum]) rows[rowNum] = [];
+                    rows[rowNum].push(seat);
+                });
+
+                // 그리기
+                for (let r in rows) {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'seat-row';
+                    
+                    // 왼쪽에 행 번호 표시
+                    const rowNumDiv = document.createElement('div');
+                    rowNumDiv.className = 'row-number';
+                    rowNumDiv.innerText = r;
+                    rowDiv.appendChild(rowNumDiv);
+
+                    const rowSeats = rows[r];
+                    const half = Math.ceil(rowSeats.length / 2); // 복도를 만들기 위해 반으로 가름
+
+                    rowSeats.forEach((seat, index) => {
+                        // 중간에 복도 공간 추가
+                        if (index === half) {
+                            const aisle = document.createElement('div');
+                            aisle.className = 'aisle-spacer';
+                            rowDiv.appendChild(aisle);
+                        }
+
+                        // 좌석 버튼 생성
+                        const seatBtn = document.createElement('div');
+                        let colorClass = 'seat-economy';
+                        if (seat.class_name === '일등석') colorClass = 'seat-first';
+                        if (seat.class_name === '비즈니스') colorClass = 'seat-business';
+                        
+                        seatBtn.className = `seat-box ${colorClass}`;
+                        if (seat.is_active === 'N') seatBtn.classList.add('seat-broken');
+                        
+                        seatBtn.innerText = seat.seat_no;
+                        seatBtn.title = `[${seat.class_name}] 클릭하여 상태 변경`;
+
+                        // 좌석 클릭 이벤트 (고장 토글)
+                        seatBtn.onclick = () => toggleSeatVisual(seat.seat_id, seat.is_active, aircraftId, regNo);
+
+                        rowDiv.appendChild(seatBtn);
+                    });
+                    mapArea.appendChild(rowDiv);
+                }
+            })
+            .catch(err => {
+                mapArea.innerHTML = '<div style="color:red;">데이터를 불러오지 못했습니다.</div>';
+                console.error(err);
+            });
+    }
+
+    // 시각적 도면에서 좌석 토글하기
+    function toggleSeatVisual(seatId, currentStatus, aircraftId, regNo) {
+        const newStatus = currentStatus === 'Y' ? 'N' : 'Y';
+        const actionMsg = newStatus === 'N' ? '고장/사용불가' : '사용가능';
+        
+        if (!confirm(`이 좌석을 [${actionMsg}] 상태로 변경하시겠습니까?`)) return;
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        fetch('/staff/basedata/seat/toggle', {
+	        method: 'POST',
+	        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+	        body: JSON.stringify({ seatId: seatId, isActive: newStatus })
+	    })
+        .then(res => res.text())
+        .then(result => {
+            if(result === 'success') {
+                // 토글 성공 시 도면 새로고침
+                openVisualSeatMap(aircraftId, regNo); 
+            } else {
+                alert('상태 변경에 실패했습니다.');
+            }
+        });
+    }
 	</script>
 
 </body>
