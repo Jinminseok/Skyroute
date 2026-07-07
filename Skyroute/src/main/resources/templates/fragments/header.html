@@ -89,14 +89,14 @@
 						class="material-symbols-outlined">edit_calendar</span> 예약 조회 · 변경
 					</a>
 
-					<a th:href="@{/member/member_checkin}"
-						th:classappend="${activeMenu == 'checkin'} ? 'on'"> <span
-						class="material-symbols-outlined">how_to_reg</span> 온라인 체크인
+					<a th:href="@{/member/member_schedule}"
+						th:classappend="${activeMenu == 'schedule'} ? 'on'"> <span
+						class="material-symbols-outlined">schedule</span> 출/도착지 및 스케쥴 조회
 					</a>
 
-					<a th:href="@{/member/member_schedule}"
-						th:classappend="${activeMenu == 'status'} ? 'on'"> <span
-						class="material-symbols-outlined">schedule</span> 운항 조회
+					<a th:href="@{/member/member_route}"
+						th:classappend="${activeMenu == 'route'} ? 'on'"> <span
+						class="material-symbols-outlined">route</span> 운항 조회
 					</a>
 					
 					<a th:href="@{/member/member_functions}"

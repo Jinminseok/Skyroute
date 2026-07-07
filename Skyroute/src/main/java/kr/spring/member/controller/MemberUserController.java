@@ -79,19 +79,19 @@ public class MemberUserController {
 	
 	
 	
-	//체크인 폼 호출
-	@GetMapping("/member_checkin")
+	//출/도착지 및 스케쥴 폼 호출
+	@GetMapping("/member_schedule")
 	public String checkinForm() {
-		return "thviews/member/member_checkin";
+		return "thviews/member/member_schedule";
 	}
 	
 	
 	
 	
-	//운항스케쥴 조회
-	@GetMapping("/member_schedule")
-	public String scheduleForm() {
-		return "thviews/member/member_schedule";
+	//운항스케쥴 폼 조회
+	@GetMapping("/member_route")
+	public String routeForm() {
+		return "thviews/member/member_route";
 	}
 	
 	

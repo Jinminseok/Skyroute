@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}">
+<head>
+<meta charset="UTF-8">
+<title>에어누리 - 운항 노선 조회</title>
+<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">	
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+<style>
+    /* 권역 분류 내비게이션 바 */
+    .region-nav { display: flex; gap: 10px; margin-bottom: 24px; background: #f8fafc; padding: 6px; border-radius: 10px; border: 1px solid var(--line); }
+    .region-btn { flex: 1; text-align: center; padding: 10px 0; font-size: 14px; font-weight: 500; color: var(--mut); cursor: pointer; border-radius: 6px; transition: 0.2s; }
+    .region-btn:hover { background: #fff; color: var(--ink); }
+    .region-btn.active { background: var(--accent); color: #fff; font-weight: 600; }
+
+    /* 노선 전용 그리드 카드 레이아웃 (.fgrid, .fcard 클래스 커스텀 응용) */
+    .route-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .route-card { border: 1px solid var(--line); border-radius: 12px; padding: 20px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; }
+    .route-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .route-card h4 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+    .route-card .code { font-family: var(--mono); font-size: 13px; color: var(--accent); background: var(--accent-soft); padding: 2px 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+    <div layout:fragment="panel">
+        <div class="wrap" style="padding-top: 40px; padding-bottom: 60px;">
+            <div class="htitle" style="margin-bottom: 24px;">
+                <div>
+                    <div class="eyebrow">FLIGHT ROUTES</div>
+                    <h2 style="font-size: 22px; font-weight: 600; margin-top: 5px;">에어누리 운항 노선 조회</h2>
+                </div>
+            </div>
+
+            <div class="region-nav">
+                <div class="region-btn active" onclick="filterRegion('all')">전체보기</div>
+                <div class="region-btn" onclick="filterRegion('asia')">동아시아/동남아</div>
+                <div class="region-btn" onclick="filterRegion('america')">미주/대양주</div>
+                <div class="region-btn" onclick="filterRegion('europe')">유럽/중동</div>
+            </div>
+
+            <div class="route-grid">
+                
+                <div class="route-card" data-region="america">
+                    <h4>뉴욕 <span class="code">JFK</span></h4>
+                    <p style="font-size: 13px; color: var(--mut); margin: 6px 0 16px; line-height: 1.5;">매일 운항 | 인천(ICN) 출발<br>자유와 문화의 중심지, 세계 최정상의 대도시</p>
+                    <div style="display: flex; gap: 8px;">
+                        <a th:href="@{/schedule/lookup(arrival='JFK')}" class="btn ghost sm" style="flex:1; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: 12px; height: 34px;">스케줄 검색</a>
+                        <a th:href="@{/booking/flightList(departure='ICN', arrival='JFK')}" class="btn sm" style="flex:1; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: 12px; height: 34px;">즉시 예매</a>
+                    </div>
+                </div>
+
+                <div class="route-card" data-region="asia">
+                    <h4>도쿄/나리타 <span class="code">NRT</span></h4>
+                    <p style="font-size: 13px; color: var(--mut); margin: 6px 0 16px; line-height: 1.5;">주 14회 운항 | 인천(ICN) 출발<br>가깝고도 다채로운 매력, 트렌디한 감성의 쇼핑 천국</p>
+                    <div style="display: flex; gap: 8px;">
+                        <a th:href="@{/schedule/lookup(arrival='NRT')}" class="btn ghost sm" style="flex:1; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: 12px; height: 34px;">스케줄 검색</a>
+                        <a th:href="@{/booking/flightList(departure='ICN', arrival='NRT')}" class="btn sm" style="flex:1; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: 12px; height: 34px;">즉시 예매</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function filterRegion(region) {
+            // 버튼 활성화 클래스 스위칭
+            const buttons = document.querySelectorAll('.region-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 카드 리스트 필터링 구현
+            const cards = document.querySelectorAll('.route-card');
+            cards.forEach(card => {
+                if(region === 'all' || card.getAttribute('data-region') === region) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
