@@ -8,158 +8,199 @@
 	<title>공지사항</title>
 	<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">
 	<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+
+	<!-- 공지사항 목록 전용 스타일 (member.css 토큰 재사용, #notice 하위로 스코프) -->
+	<style>
+		#notice .nl { max-width: 1040px; margin: 0 auto; padding: 46px 24px 90px; }
+
+		/* 페이지 타이틀 */
+		#notice .nl-title {
+			margin: 0 0 30px;
+			font-size: 30px; font-weight: 700; letter-spacing: -.6px;
+			color: var(--accent-700);
+		}
+
+		/* 검색 카드 */
+		#notice .nl-search {
+			display: flex; align-items: center; gap: 30px;
+			background: var(--paper);
+			border: 1px solid var(--line);
+			border-radius: var(--r);
+			box-shadow: var(--sh);
+			padding: 24px 30px;
+		}
+		#notice .nl-search-label {
+			font-size: 15px; font-weight: 700; color: var(--ink-700);
+			white-space: nowrap;
+		}
+		#notice .nl-search-field { flex: 1; min-width: 0; }
+		#notice .nl-search-field label {
+			display: block; margin-bottom: 6px;
+			font-size: 12px; color: var(--mut);
+		}
+		#notice .nl-search-field input {
+			width: 100%; border: none; border-bottom: 1.5px solid var(--ink-700);
+			background: transparent; padding: 8px 2px;
+			font-size: 15px; color: var(--ink); outline: none;
+		}
+		#notice .nl-search-field input:focus { border-bottom-color: var(--accent); }
+		#notice .nl-search-btn {
+			flex-shrink: 0;
+			border: 1.5px solid var(--accent-700); background: #fff;
+			color: var(--accent-700); font-weight: 600; font-size: 14px;
+			border-radius: 24px; padding: 12px 32px; cursor: pointer;
+			transition: .15s;
+		}
+		#notice .nl-search-btn:hover { background: var(--accent-700); color: #fff; }
+
+		/* 목록 */
+		#notice .nl-list {
+			margin-top: 34px;
+			border-top: 2px solid var(--accent-700);
+		}
+		#notice .nl-row {
+			display: flex; align-items: center; gap: 14px;
+			padding: 19px 12px;
+			border-bottom: 1px solid var(--line);
+			color: var(--ink);
+		}
+		#notice .nl-row:hover { background: #FAFBFF; }
+		#notice .nl-row.is-featured { background: var(--accent-soft); }
+
+		#notice .nl-icon {
+			width: 26px; flex-shrink: 0;
+			display: flex; justify-content: center; align-items: center;
+			color: var(--accent-700);
+		}
+		#notice .nl-icon .material-symbols-outlined { font-size: 20px; }
+		/* '신규(N)' 뱃지 — is_pinned / 신규여부 컬럼 생기면 th:if로 연결만 하면 됨 */
+		#notice .nl-icon .nl-new {
+			width: 22px; height: 22px; border-radius: 50%;
+			border: 1.5px solid var(--accent); color: var(--accent);
+			font-size: 11px; font-weight: 700;
+			display: grid; place-items: center;
+		}
+
+		#notice .nl-row-title {
+			flex: 1; min-width: 0;
+			font-size: 15.5px; font-weight: 500; color: var(--ink-700);
+			overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+		}
+		#notice .nl-row.is-featured .nl-row-title { font-weight: 700; }
+		#notice .nl-row:hover .nl-row-title { color: var(--accent-700); }
+
+		#notice .nl-row-meta {
+			display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+			font-size: 13px; color: var(--mut);
+		}
+		#notice .nl-cat { color: var(--ink-500); }
+		#notice .nl-bar { width: 1px; height: 12px; background: var(--line); }
+
+		/* 빈 목록 */
+		#notice .nl-empty {
+			padding: 70px 20px; text-align: center; color: var(--mut);
+		}
+		#notice .nl-empty .material-symbols-outlined {
+			font-size: 42px; color: var(--line); display: block; margin-bottom: 12px;
+		}
+		#notice .nl-empty h3 { margin: 0 0 6px; font-size: 16px; color: var(--ink-700); }
+		#notice .nl-empty p { margin: 0; font-size: 13px; }
+
+		/* 페이지네이션 (PagingUtil 출력 th:utext를 감싸 공통 스타일 적용) */
+		#notice .nl-paging {
+			margin-top: 36px;
+			display: flex; justify-content: center; align-items: center; gap: 6px;
+			flex-wrap: wrap;
+		}
+		#notice .nl-paging a,
+		#notice .nl-paging strong,
+		#notice .nl-paging span {
+			display: inline-grid; place-items: center;
+			min-width: 34px; height: 34px; padding: 0 8px;
+			border-radius: 8px; font-size: 14px; color: var(--mut);
+			text-decoration: none;
+		}
+		#notice .nl-paging a:hover { color: var(--accent-700); background: var(--accent-soft); }
+		#notice .nl-paging strong { background: var(--accent); color: #fff; font-weight: 600; }
+
+		/* 반응형 */
+		@media (max-width: 640px) {
+			#notice .nl-search { flex-direction: column; align-items: stretch; gap: 16px; }
+			#notice .nl-search-btn { width: 100%; }
+			#notice .nl-row { flex-wrap: wrap; gap: 8px 14px; }
+			#notice .nl-row-meta { width: 100%; padding-left: 40px; }
+		}
+	</style>
 </head>
 <body>
 
 <div layout:fragment="panel" class="panel on" id="notice">
+	<div class="nl">
 
-	<!-- 상단 소개 영역 : 현재 프로젝트 hero 스타일 -->
-	<div class="notice-hero">
-		<div class="wrap">
-			<div class="eyebrow">SKYROUTE NOTICE</div>
-			<h1>공지사항</h1>
-			<p>SkyRoute의 서비스 소식과 항공편 이용 안내를 확인하세요.</p>
+		<!-- 페이지 타이틀 -->
+		<h1 class="nl-title">공지사항</h1>
 
-			<!-- 검색 영역 : 현재 프로젝트 searchcard 스타일 -->
-			<form class="searchcard notice-searchcard"
-				  th:action="@{/member/notice/list}"
-				  method="get"
-				  id="search_form">
+		<!-- 검색 카드 -->
+		<form class="nl-search" th:action="@{/member/notice/list}" method="get" id="search_form">
+			<div class="nl-search-label">공지사항 검색</div>
 
-				<div class="fields notice-fields">
-					<div class="field notice-keyfield">
-						<label>검색조건</label>
-
-						<select name="keyfield" id="keyfield" class="notice-select">
-							<option value="1" th:selected="${keyfield == '1'}">제목</option>
-							<option value="2" th:selected="${keyfield == '2'}">내용</option>
-							<option value="3" th:selected="${keyfield == '3'}">제목 + 내용</option>
-						</select>
-					</div>
-
-					<div class="field notice-keyword">
-						<label>검색어</label>
-
-						<input type="search"
-							   name="keyword"
-							   id="keyword"
-							   class="notice-input"
-							   th:value="${keyword}"
-							   placeholder="검색어를 입력하세요">
-					</div>
-
-					<div class="field notice-count-box">
-						<label>조회 결과</label>
-
-						<div class="big">
-							<span th:text="${count}">0</span>건
-						</div>
-
-						<div class="sub">공개 공지 기준</div>
-					</div>
-				</div>
-
-				<div class="searchrow">
-					<div class="opts">
-						<span>공지사항은 최신 등록순으로 제공됩니다.</span>
-						<span>비공개 공지는 표시되지 않습니다.</span>
-					</div>
-
-					<div class="notice-search-actions">
-						<button type="submit" class="btn">검색</button>
-						<a th:href="@{/member/notice/list}" class="btn ghost">전체보기</a>
-					</div>
-				</div>
-
-			</form>
-		</div>
-	</div>
-
-
-	<!-- 목록 영역 -->
-	<section class="block wrap notice-section">
-
-		<div class="htitle">
-			<div>
-				<div class="eyebrow">NOTICE LIST</div>
-				<h2>서비스 안내</h2>
+			<div class="nl-search-field">
+				<label for="keyword">키워드 검색</label>
+				<input type="search" id="keyword" name="keyword"
+					   th:value="${keyword}" placeholder="검색어를 입력하세요">
 			</div>
 
-			<div class="more">고객센터 →</div>
+			<button type="submit" class="nl-search-btn">검색</button>
+		</form>
+
+		<!-- 목록 -->
+		<div class="nl-list" th:if="${count > 0}">
+
+			<a class="nl-row"
+			   th:each="notice, st : ${list}"
+			   th:classappend="${st.first} ? ' is-featured' : ''"
+			   th:href="@{/member/notice/detail(notice_id=${notice.notice_id})}">
+
+				<!-- 아이콘: 첫 항목 = 상단고정(종) / 신규(N) 뱃지는 플래그 생기면 연결 -->
+				<span class="nl-icon">
+					<span th:if="${st.first}" class="material-symbols-outlined">notifications</span>
+					<!-- 신규 예시:
+					<span th:if="${notice.isNew}" class="nl-new">N</span> -->
+				</span>
+
+				<!-- 제목 -->
+				<span class="nl-row-title" th:text="${notice.title}">공지사항 제목</span>
+
+				<!-- 분류 · 날짜 -->
+				<span class="nl-row-meta">
+					<span class="nl-cat">공지</span>
+					<span class="nl-bar"></span>
+					<span class="nl-date"
+						  th:text="${(notice.created_at != null and #strings.length(notice.created_at) ge 10)
+									? (#strings.substring(notice.created_at,0,4) + '년 '
+									 + #strings.substring(notice.created_at,5,7) + '월 '
+									 + #strings.substring(notice.created_at,8,10) + '일')
+									: notice.created_at}">
+						2026년 07월 03일
+					</span>
+				</span>
+			</a>
+
 		</div>
 
-
-		<!-- 조회 결과 없음 -->
-		<div th:if="${count == 0}" class="notice-empty">
-			<div class="notice-empty-icon">
+		<!-- 빈 목록 -->
+		<div class="nl-list" th:if="${count == 0}">
+			<div class="nl-empty">
 				<span class="material-symbols-outlined">campaign</span>
+				<h3>표시할 공지사항이 없습니다.</h3>
+				<p>검색어를 다시 입력하거나 전체 목록을 확인해 주세요.</p>
 			</div>
-
-			<h3>표시할 공지사항이 없습니다.</h3>
-			<p>검색어를 다시 입력하거나 전체 목록을 확인해 주세요.</p>
-
-			<a th:href="@{/member/notice/list}" class="btn ghost sm">전체 목록 보기</a>
 		</div>
 
+		<!-- 페이지네이션 -->
+		<div class="nl-paging" th:if="${count > 0}" th:utext="${page}"></div>
 
-		<!-- 조회 결과 있음 -->
-		<th:block th:if="${count > 0}">
-			<div class="results notice-results">
-
-				<article class="notice-item" th:each="notice : ${list}">
-
-					<div class="notice-badge">
-						<span class="material-symbols-outlined">campaign</span>
-						<small>NOTICE</small>
-					</div>
-
-					<div class="notice-main">
-						<div class="notice-meta">
-							<span class="stat soon">공개</span>
-
-							<span th:text="${notice.memberVO != null ? notice.memberVO.name : '관리자'}">
-								관리자
-							</span>
-
-							<span class="dot"></span>
-
-							<span th:text="${notice.created_at}">
-								2026-07-03
-							</span>
-						</div>
-
-						<a class="notice-title"
-						   th:href="@{/member/notice/detail(notice_id=${notice.notice_id})}"
-						   th:text="${notice.title}">
-							공지사항 제목
-						</a>
-
-						<p th:text="${notice.content}">
-							공지사항 요약 내용
-						</p>
-					</div>
-
-					<div class="notice-go">
-						<a class="btn ghost sm"
-						   th:href="@{/member/notice/detail(notice_id=${notice.notice_id})}">
-							자세히 보기
-						</a>
-					</div>
-
-				</article>
-
-			</div>
-
-			<div class="notice-paging" th:utext="${page}"></div>
-		</th:block>
-
-
-		<div class="note notice-note">
-			💡 공지사항은 SkyRoute 서비스 이용, 항공편 운영, 예약/결제 관련 안내를 제공하는 공개 고객지원 페이지입니다.
-		</div>
-
-	</section>
-
+	</div>
 </div>
 
 </body>

@@ -770,8 +770,6 @@ aside.summary .total {
 .class-divider::after {
 	right: 0;
 }
-<<<<<<< HEAD
-
 .event-banner-area {
 	margin-top: 28px;
 }
@@ -988,7 +986,8 @@ aside.summary .total {
 	.event-period {
 		font-size: 12px;
 	}
-=======
+}
+
 /* ===== member notice ===== */
 
 .notice-hero {
@@ -1473,5 +1472,5 @@ aside.summary .total {
     .util-dropdown:focus-within .util-menu {
         transform: translateY(0);
     }
->>>>>>> branch 'master' of https://github.com/Jinminseok/Skyroute.git
 }
+

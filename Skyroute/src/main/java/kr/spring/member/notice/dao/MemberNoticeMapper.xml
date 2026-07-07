@@ -10,7 +10,7 @@
 		<result property="content" column="content"/>
 		<result property="is_public" column="is_public"/>
 		<result property="created_by" column="created_by"/>
-		<result property="created_at" column="created_ad"/>
+		<result property="created_at" column="created_at"/>
 		<result property="updated_at" column="updated_at"/>
 		<result property="memberVO.name" column="name"/>
 	</resultMap>
