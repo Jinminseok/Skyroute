@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -81,7 +82,9 @@ public class MemberUserController {
 	
 	//출/도착지 및 스케쥴 폼 호출
 	@GetMapping("/member_schedule")
-	public String checkinForm() {
+	public String scheduleForm(@RequestParam(value = "tabType", required = false, defaultValue = "STATUS") String tabType,
+			Model model) {
+		model.addAttribute("tabType", tabType);
 		return "thviews/member/member_schedule";
 	}
 	

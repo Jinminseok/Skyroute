@@ -20,100 +20,253 @@
 </style>
 </head>
 <body>
-    <div layout:fragment="panel">
+    <div layout:fragment="panel" class="panel on" id="book">
+        
         <div class="wrap" style="padding-top: 40px; padding-bottom: 60px;">
+            
             <div class="htitle" style="margin-bottom: 24px;">
                 <div>
-                    <div class="eyebrow">FLIGHT SCHEDULE</div>
+                    <div class="eyebrow">FLIGHT INFO & SCHEDULE</div>
                     <h2 style="font-size: 22px; font-weight: 600; margin-top: 5px;">출/도착 및 스케줄 조회</h2>
                 </div>
             </div>
 
-            <div class="schedule-tabs">
-                <div class="schedule-tab active" onclick="switchTab('route')">출/도착지 기준 조회</div>
-                <div class="schedule-tab" onclick="switchTab('flight')">편명 기준 조회</div>
+            <div class="schedule-tabs" style="display: flex; gap: 20px; margin-bottom: 25px; border-bottom: 2px solid var(--line); padding-bottom: 12px;">
+                <a th:href="@{/member/member_schedule(tabType='STATUS')}" 
+                   th:style="${tabType == 'STATUS' or tabType == null} ? 'font-size: 16px; font-weight: 600; color: var(--accent); text-decoration: none; position: relative;' : 'font-size: 16px; font-weight: 500; color: var(--mut); text-decoration: none; position: relative;'">
+                   출/도착 조회
+                </a>
+                <a th:href="@{/member/member_schedule(tabType='SCHEDULE')}" 
+                   th:style="${tabType == 'SCHEDULE'} ? 'font-size: 16px; font-weight: 600; color: var(--accent); text-decoration: none; position: relative;' : 'font-size: 16px; font-weight: 500; color: var(--mut); text-decoration: none; position: relative;'">
+                   스케줄 조회
+                </a>
             </div>
 
-            <div class="searchcard" id="searchRouteSection" style="margin-top:0; padding-bottom:24px; display: block;">
-                <div class="fields" style="grid-template-columns:1fr 1fr 1fr">
-                    <div class="field">
-                        <label>출발지</label>
-                        <input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px;" placeholder="EX) ICN 또는 인천">
-                    </div>
-                    <div class="field">
-                        <label>도착지</label>
-                        <input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px;" placeholder="EX) JFK 또는 뉴욕">
-                    </div>
-                    <div class="field" style="border-right:0">
-                        <label>날짜</label>
-                        <input type="date" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--sans-eng);">
-                    </div>
-                </div>
-                <div class="searchrow">
-                    <div class="opts"><span style="font-size: 13px; color: var(--mut);">* 입력하신 출발/도착 노선의 전체 실시간 운항 리스트를 가져옵니다.</span></div>
-                    <a th:href="@{/schedule/list}" class="btn" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; height: 42px;">스케줄 조회</a>
-                </div>
-            </div>
 
-            <div class="searchcard" id="searchFlightSection" style="margin-top:0; padding-bottom:24px; display: none;">
-                <div class="fields" style="grid-template-columns: 1fr 1fr;">
-                    <div class="field">
-                        <label>항공 편명</label>
-                        <input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--mono);" placeholder="EX) NU101">
-                    </div>
-                    <div class="field" style="border-right:0">
-                        <label>출발 날짜</label>
-                        <input type="date" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--sans-eng);">
-                    </div>
-                </div>
-                <div class="searchrow">
-                    <div class="opts"><span style="font-size: 13px; color: var(--mut);">* 정확한 편명을 입력하시면 해당 항공편의 타임라인을 조회합니다.</span></div>
-                    <a th:href="@{/schedule/list}" class="btn" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; height: 42px;">편명 조회</a>
-                </div>
-            </div>
-
-            <div style="margin-top: 24px;" class="results">
-                <h3 style="font-size: 15px; font-weight: 500; margin-bottom: 12px; color: var(--ink-500);">운항 스케줄 검색 결과</h3>
+            <div id="statusContainer" th:style="${tabType == 'STATUS' or tabType == null} ? 'display: block;' : 'display: none;'">
                 
-                <div class="trip" style="margin-bottom: 12px;">
-                    <div>
-                        <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px">
-                            <span class="stat soon" style="background: var(--accent-soft); color: var(--accent); font-family: var(--mono);">NU101</span>
-                            <span class="pnr" style="font-weight: 500; color: var(--mut);">B777-300ER</span>
-                        </div>
-                        <div class="rt" style="font-weight: 500; font-size: 17px;">ICN 인천 ➔ JFK 뉴욕</div>
-                        <div class="dt" style="font-weight: 400; font-size: 13px; margin-top: 4px;">
-                            <span style="color: var(--accent); font-weight: 600;">출발</span> 2026.12.20 10:30 &nbsp;|&nbsp; 
-                            <span style="color: var(--bad); font-weight: 600;">도착</span> 2026.12.20 22:00 (현지시간)
-                        </div>
+                <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                    <a href="javascript:void(0);" id="subTabStatusRoute" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">노선별 검색</a>
+                    <a href="javascript:void(0);" id="subTabStatusFlight" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">편명별 검색</a>
+                </div>
+
+                <div class="searchcard" id="statusRouteCard" style="margin-top:0; padding-bottom:24px; display: block;">
+                    <div class="fields" style="grid-template-columns:1fr 1fr 1fr">
+                        <div class="field"><label>출발지</label><input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px;" value="ICN 인천"></div>
+                        <div class="field"><label>도착지</label><input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px;" value="JFK 뉴욕"></div>
+                        <div class="field" style="border-right:0"><label>날짜</label><input type="date" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--sans-eng);" value="2026-07-07"></div>
                     </div>
-                    <div class="actions">
-                        <a th:href="@{/booking/flightList(departure='ICN', arrival='JFK', date='2026-12-20')}" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 0 16px;">예매하러 가기</a>
+                    <div class="searchrow">
+                        <div class="opts"><span style="font-size: 13px; color: var(--mut);">* 오늘 기준 당일 실시간 항공기 운항 상태(출발전/출발/도착)를 조회합니다.</span></div>
+                        <a th:href="@{/member/member_schedule(tabType='STATUS')}" class="btn" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; height: 42px;">운항 현황 조회</a>
+                    </div>
+                </div>
+
+                <div class="searchcard" id="statusFlightCard" style="margin-top:0; padding-bottom:24px; display: none;">
+                    <div class="fields" style="grid-template-columns:1fr 1fr">
+                        <div class="field"><label>항공 편명</label><input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--mono);" placeholder="EX) NU101" value="NU101"></div>
+                        <div class="field" style="border-right:0"><label>출발 날짜</label><input type="date" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--sans-eng);" value="2026-07-07"></div>
+                    </div>
+                    <div class="searchrow">
+                        <div class="opts"><span style="font-size: 13px; color: var(--mut);">* 편명을 입력하시면 해당 항공기의 게이트 및 실시간 터미널 정보를 확인합니다.</span></div>
+                        <a th:href="@{/member/member_schedule(tabType='STATUS')}" class="btn" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; height: 42px;">편명 현황 조회</a>
+                    </div>
+                </div>
+
+                <div style="margin-top: 24px;" class="results">
+                    <div class="trip" style="margin-bottom: 12px;">
+                        <div>
+                            <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px">
+                                <span class="stat soon" style="background: #f1f5f9; color: var(--mut);">출발 전</span>
+                                <span class="pnr" style="font-weight: 500; font-family: var(--mono);">NU101</span>
+                                <span style="font-size: 12px; color: var(--accent); font-weight: 500;"><span class="material-symbols-outlined" style="font-size: 14px; vertical-align: -2px;">door_open</span> 제1터미널 26번 게이트</span>
+                            </div>
+                            <div class="rt" style="font-weight: 500; font-size: 17px;">ICN 인천 ➔ JFK 뉴욕</div>
+                            <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut);">출발 예정 10:30 | 도착 예정 22:00</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
+
+            <div id="scheduleContainer" th:style="${tabType == 'SCHEDULE'} ? 'display: block;' : 'display: none;'">
+                
+                <div class="triptabs" style="margin-bottom: 12px; padding: 0;">
+                    <label><input type="radio" name="sched_trip_type" value="RT" checked><span style="padding: 8px 20px;">왕복 스케줄</span></label>
+                    <label><input type="radio" name="sched_trip_type" value="OW"><span style="padding: 8px 20px;">편도 스케줄</span></label>
+                </div>
+
+                <div class="searchcard" style="margin-top:0; padding-bottom:24px">
+                    <div class="fields" id="schedFields" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;">
+                        <div class="field"><label>출발지</label><input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px;" value="ICN 인천"></div>
+                        <div class="field"><label>도착지</label><input type="text" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px;" value="JFK 뉴욕"></div>
+                        <div class="field" id="outboundDateField"><label>가는 날짜</label><input type="date" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--sans-eng);" value="2026-12-20"></div>
+                        <div class="field" id="inboundDateField" style="border-right:0;"><label>오는 날짜</label><input type="date" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--sans-eng);" value="2026-12-25"></div>
+                    </div>
+                    <div class="searchrow">
+                        <div class="opts"><span style="font-size: 13px; color: var(--mut);">* 정기 운항 스케줄을 조회하며, 리스트 클릭 시 여정 상세 정보가 노출됩니다.</span></div>
+                        <a th:href="@{/member/member_schedule(tabType='SCHEDULE')}" class="btn" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; height: 42px;">스케줄 조회</a>
+                    </div>
+                </div>
+
+                <div id="roundTripToggleBar" style="display: flex; gap: 8px; margin-top: 24px; margin-bottom: 12px;">
+                    <a href="javascript:void(0);" id="btnSchedOutbound" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border-radius: 8px;">가는 편 스케줄 (인천➔뉴욕)</a>
+                    <a href="javascript:void(0);" id="btnSchedInbound" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border-radius: 8px;">오는 편 스케줄 (뉴욕➔인천)</a>
+                </div>
+
+                <div class="results" style="margin-top: 12px;">
+                    <div id="schedOutboundList" style="display: block;">
+                        <a href="javascript:void(0);" class="trip open-modal-trigger" data-flight="NU101" data-route="ICN 서울/인천 ➔ JFK 뉴욕" data-dep="10:30" data-arr="22:00" style="margin-bottom: 10px; display: flex; text-decoration: none; color: inherit; text-align: left;">
+                            <div>
+                                <div style="display:flex; gap:10px; align-items:center; margin-bottom:4px">
+                                    <span class="stat soon" style="background: var(--accent-soft); color: var(--accent);">정기운항</span>
+                                    <span class="pnr" style="font-weight: 500; font-family: var(--mono);">NU101</span>
+                                </div>
+                                <div class="rt" style="font-weight: 500; font-size: 16px;">ICN 서울/인천 ➔ JFK 뉴욕</div>
+                                <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut);">시간: 10:30 — 22:00 | 운항 요일: 월 화 수 목 금 토 일</div>
+                            </div>
+                            <div class="actions"><span class="material-symbols-outlined" style="color: var(--line);">arrow_forward_ios</span></div>
+                        </a>
+                    </div>
+
+                    <div id="schedInboundList" style="display: none;">
+                        <a href="javascript:void(0);" class="trip open-modal-trigger" data-flight="NU102" data-route="JFK 뉴욕 ➔ ICN 서울/인천" data-dep="14:00" data-arr="18:20 (+1일)" style="margin-bottom: 10px; display: flex; text-decoration: none; color: inherit; text-align: left;">
+							<div>
+								<div style="display:flex; gap:10px; align-items:center; margin-bottom:4px">
+									<span class="stat soon" style="background: var(--accent-soft); color: var(--accent);">정기운항</span>
+									<span class="pnr" style="font-weight: 500; font-family: var(--mono);">NU102</span>
+								</div>
+								<div class="rt" style="font-weight: 500; font-size: 16px;">JFK 뉴욕 ➔ ICN 서울/인천</div>
+								<div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut);">시간: 14:00 — 18:20 (+1일) | 운항 요일: 화 목 토</div>
+							</div>
+							<div class="actions"><span class="material-symbols-outlined" style="color: var(--line);">arrow_forward_ios</span></div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div> <div id="schedDetailModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+            <div class="summary" style="background:#fff; width:480px; padding:30px; border-radius:16px; box-shadow: var(--sh); position:relative;">
+                <h3 style="margin-top:0; border-bottom:1px solid var(--line); padding-bottom:12px; font-size:18px; font-weight: 600;">여정 상세 정보</h3>
+                <div style="margin:20px 0; display:flex; flex-direction:column; gap:12px;">
+                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">운항 편명</span><b id="modalFlightNo">NU101</b></div>
+                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">운항 노선</span><b id="modalRoute">ICN ➔ JFK</b></div>
+                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">출발 시간</span><b id="modalDepTime">10:30</b></div>
+                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">도착 시간</span><b id="modalArrTime">22:00</b></div>
+                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">기재 기종</span><b>Boeing 777-300ER</b></div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap: 10px; margin-top:24px;">
+                    <a href="javascript:void(0);" id="btnModalClose" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; width:100px; height: 38px;">닫기</a>
+                    <a th:href="@{/booking/flightList(departure='ICN', arrival='JFK')}" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; width:130px; height: 38px;">예매하러 가기</a>
+                </div>
+            </div>
         </div>
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                
+                var btnRoute = document.getElementById('subTabStatusRoute');
+                var btnFlight = document.getElementById('subTabStatusFlight');
+                var cardRoute = document.getElementById('statusRouteCard');
+                var cardFlight = document.getElementById('statusFlightCard');
+
+                // 왕복/편도 및 가변 날짜 대응 요소 선언
+                var radioRT = document.querySelector('input[name="sched_trip_type"][value="RT"]');
+                var radioOW = document.querySelector('input[name="sched_trip_type"][value="OW"]');
+                var toggleBar = document.getElementById('roundTripToggleBar');
+                var schedFields = document.getElementById('schedFields');
+                var outboundDate = document.getElementById('outboundDateField');
+                var inboundDate = document.getElementById('inboundDateField');
+
+                var btnOut = document.getElementById('btnSchedOutbound');
+                var btnIn = document.getElementById('btnSchedInbound');
+                var listOut = document.getElementById('schedOutboundList');
+                var listIn = document.getElementById('schedInboundList');
+
+                // 1. 실시간 출/도착 내부 서브 탭 제어 (노선별 VS 편명별)
+                if (btnRoute && btnFlight) {
+                    btnRoute.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        btnRoute.className = 'btn sm'; btnFlight.className = 'btn ghost sm';
+                        if (cardRoute) cardRoute.style.display = 'block';
+                        if (cardFlight) cardFlight.style.display = 'none';
+                    });
+
+                    btnFlight.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        btnRoute.className = 'btn ghost sm'; btnFlight.className = 'btn sm';
+                        if (cardRoute) cardRoute.style.display = 'none';
+                        if (cardFlight) cardFlight.style.display = 'block';
+                    });
+                }
+
+                // 2. 🌟 [핵심 패치] 왕복/편도 선택에 따른 오는날짜 칸 제어 및 그리드 폭 조절
+                if (radioRT && radioOW) {
+                    radioRT.addEventListener('change', function() {
+                        if (toggleBar) toggleBar.style.display = 'flex';
+                        if (inboundDate) inboundDate.style.display = 'block';
+                        if (outboundDate) outboundDate.style.borderRight = '1px solid var(--line)';
+                        if (schedFields) schedFields.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
+                    });
+                    
+                    radioOW.addEventListener('change', function() {
+                        if (toggleBar) toggleBar.style.display = 'none';
+                        if (inboundDate) inboundDate.style.display = 'none';
+                        // 편도일 땐 '가는날짜'가 우측 마지막이 되므로 우측 보더라인을 지워줌
+                        if (outboundDate) outboundDate.style.borderRight = '0';
+                        if (schedFields) schedFields.style.gridTemplateColumns = '1fr 1fr 1fr';
+                        if (btnOut) btnOut.click(); 
+                    });
+                }
+
+                // 3. 왕복 정기 스케줄 내부 (가는편 VS 오는편) 토글 버튼
+                if (btnOut && btnIn) {
+                    btnOut.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        btnOut.className = 'btn sm'; btnIn.className = 'btn ghost sm';
+                        if (listOut) listOut.style.display = 'block';
+                        if (listIn) listIn.style.display = 'none';
+                    });
+
+                    btnIn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        btnOut.className = 'btn ghost sm'; btnIn.className = 'btn sm';
+                        if (listOut) listOut.style.display = 'none';
+                        if (listIn) listIn.style.display = 'block';
+                    });
+                }
+
+                // 4. 모달 팝업 가동 처리
+                var modalTriggers = document.querySelectorAll('.open-modal-trigger');
+                var modal = document.getElementById('schedDetailModal');
+                
+                modalTriggers.forEach(function(trigger) {
+                    trigger.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var flight = trigger.getAttribute('data-flight');
+                        var route = trigger.getAttribute('data-route');
+                        var dep = trigger.getAttribute('data-dep');
+                        var arr = trigger.getAttribute('data-arr');
+
+                        document.getElementById('modalFlightNo').innerText = flight;
+                        document.getElementById('modalRoute').innerText = route;
+                        document.getElementById('modalDepTime').innerText = dep;
+                        document.getElementById('modalArrTime').innerText = arr;
+
+                        if (modal) modal.style.display = 'flex';
+                    });
+                });
+
+                var btnClose = document.getElementById('btnModalClose');
+                if (btnClose) {
+                    btnClose.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (modal) modal.style.display = 'none';
+                    });
+                }
+            });
+        </script>
     </div>
-
-    <script th:inline="javascript">
-        function switchTab(type) {
-            const tabs = document.querySelectorAll('.schedule-tab');
-            const routeSec = document.getElementById('searchRouteSection');
-            const flightSec = document.getElementById('searchFlightSection');
-
-            tabs.forEach(t => t.classList.remove('active'));
-            
-            if(type === 'route') {
-                tabs[0].classList.add('active');
-                routeSec.style.display = 'block';
-                flightSec.style.display = 'none';
-            } else {
-                tabs[1].classList.add('active');
-                routeSec.style.display = 'none';
-                flightSec.style.display = 'block';
-            }
-        }
-    </script>
 </body>
 </html>
