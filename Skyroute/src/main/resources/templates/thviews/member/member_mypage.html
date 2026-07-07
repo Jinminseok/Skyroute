@@ -110,6 +110,36 @@
 		justify-content: flex-end;
 	}
 }
+.mypage-event-status.status-pending {
+	background: #fff7ed;
+	color: #d97706;
+}
+
+.mypage-event-status.status-winner {
+	background: #ecfdf5;
+	color: #059669;
+}
+
+.mypage-event-status.status-not-selected {
+	background: #f1f5f9;
+	color: #64748b;
+}
+
+.mypage-event-result-text {
+	margin-top: 8px;
+	color: var(--mut);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.mypage-event-result-text.winner {
+	color: #059669;
+	font-weight: 500;
+}
+
+.mypage-event-result-text.not-selected {
+	color: #64748b;
+}
 </style>
 </head>
 
@@ -188,25 +218,47 @@
 				</div>
 
 				<div>
-					<div class="mypage-event-status">
+					<div th:if="${participation.result_status == null or participation.result_status == 'APPLIED'}"
+					     class="mypage-event-status status-pending">
+						<span class="material-symbols-outlined" style="font-size:15px;">hourglass_top</span>
+						결과 발표 대기
+					</div>
+					
+					<div th:if="${participation.result_status == 'WINNER'}"
+					     class="mypage-event-status status-winner">
+						<span class="material-symbols-outlined" style="font-size:15px;">emoji_events</span>
+						당첨
+					</div>
+					
+					<div th:if="${participation.result_status == 'NOT_SELECTED'}"
+					     class="mypage-event-status status-not-selected">
 						<span class="material-symbols-outlined" style="font-size:15px;">check_circle</span>
-						참여 완료
+						미당첨
 					</div>
 
 					<h3 class="mypage-event-title"
 					    th:text="${participation.title}">
 						이벤트 제목
 					</h3>
+					<p th:if="${participation.result_status == null or participation.result_status == 'APPLIED'}"
+					   class="mypage-event-result-text">
+						이벤트 종료 후 랜덤 추첨 결과가 발표됩니다.
+					</p>
+					
+					<p th:if="${participation.result_status == 'WINNER'}"
+					   class="mypage-event-result-text winner">
+						축하합니다. 이벤트 당첨자로 선정되었습니다.
+					</p>
+					
+					<p th:if="${participation.result_status == 'NOT_SELECTED'}"
+					   class="mypage-event-result-text not-selected">
+						아쉽지만 이번 이벤트에는 선정되지 않았습니다.
+					</p>
 
-					<div class="mypage-event-period">
-						<span th:text="${#dates.format(participation.start_date, 'yyyy.MM.dd')}"></span>
-						<span>~</span>
-						<span th:text="${#dates.format(participation.end_date, 'yyyy.MM.dd')}"></span>
-					</div>
 
 					<div class="mypage-event-date">
-						참여일
-						<span th:text="${#dates.format(participation.participated_at, 'yyyy.MM.dd HH:mm')}"></span>
+						응모
+						<span th:text="${#dates.format(participation.participated_at, 'yyyy.MM.dd')}"></span>
 					</div>
 				</div>
 

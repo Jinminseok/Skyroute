@@ -32,4 +32,12 @@ public class EventVO {
 	private int display_order;
 	private MultipartFile upload;
 	private int participation_count;
+
+	private int winner_count;
+	private String result_status;
+	private Timestamp result_announced_at;
+	private String display_visibility;
+	private String progress_status;
+	private String event_status;
+	private boolean drawRequired;
 }

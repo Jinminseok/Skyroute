@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layouts/layout_basic}">
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}">
 <head>
 <meta charset="UTF-8">
 <title th:text="${event.title} + ' - 이벤트'">이벤트</title>
+
 <link rel="stylesheet" th:href="@{/assets/css/member.css}">
 
 <style>
@@ -91,18 +92,63 @@
 	font-size: 14px;
 }
 
-@media ( max-width : 860px) {
+.event-result-box {
+	margin-top: 28px;
+	padding: 20px;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	background: #fbfdff;
+}
+
+.event-result-title {
+	margin-bottom: 8px;
+	font-size: 14px;
+	font-weight: 700;
+}
+
+.event-result-text {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.event-result-pending {
+	border-color: #fed7aa;
+	background: #fff7ed;
+	color: #c2410c;
+}
+
+.event-result-winner {
+	border-color: #a7f3d0;
+	background: #ecfdf5;
+	color: #047857;
+}
+
+.event-result-not-selected {
+	border-color: #e2e8f0;
+	background: #f8fafc;
+	color: #475569;
+}
+
+@media (max-width: 860px) {
 	.event-detail-wrap {
 		padding: 36px 0 56px;
 	}
+
 	.event-detail-image {
 		height: 280px;
 	}
+
 	.event-detail-body {
 		padding: 28px 24px;
 	}
+
 	.event-detail-title {
 		font-size: 27px;
+	}
+
+	.event-detail-actions {
+		flex-wrap: wrap;
 	}
 }
 </style>
@@ -110,76 +156,129 @@
 
 <body>
 
-	<div layout:fragment="panel" class="panel on">
+<div layout:fragment="panel" class="panel on">
 
-		<section class="wrap event-detail-wrap">
+	<section class="wrap event-detail-wrap">
 
-			<div th:if="${message}" class="event-message" th:text="${message}"></div>
+		<div th:if="${message}" class="event-message" th:text="${message}"></div>
 
-			<div class="event-detail-card">
+		<div class="event-detail-card">
 
-				<img th:src="@{/assets/upload/{file}(file=${event.image_url})}"
-					th:alt="${event.title}" class="event-detail-image">
+			<img th:src="@{/assets/upload/{file}(file=${event.image_url})}"
+			     th:alt="${event.title}"
+			     class="event-detail-image">
 
-				<div class="event-detail-body">
+			<div class="event-detail-body">
 
-					<span class="event-detail-label">EVENT</span>
+				<span class="event-detail-label">EVENT</span>
 
-					<h1 class="event-detail-title" th:text="${event.title}"></h1>
+				<h1 class="event-detail-title" th:text="${event.title}"></h1>
 
-					<div class="event-detail-period">
-						<span th:text="${#dates.format(event.start_date, 'yyyy.MM.dd')}"></span>
-						<span>~</span> <span
-							th:text="${#dates.format(event.end_date, 'yyyy.MM.dd')}"></span>
-					</div>
+				<div class="event-detail-period">
+					<span th:text="${#dates.format(event.start_date, 'yyyy.MM.dd')}"></span>
+					<span>~</span>
+					<span th:text="${#dates.format(event.end_date, 'yyyy.MM.dd')}"></span>
+				</div>
 
-					<div class="event-detail-content" th:text="${event.content}"></div>
+				<div class="event-detail-content" th:text="${event.content}"></div>
 
-					<div class="event-detail-actions">
+				<div th:if="${participated and (participation.result_status == null or participation.result_status == 'APPLIED')}"
+				     class="event-result-box event-result-pending">
+					<div class="event-result-title">결과 발표 대기</div>
+					<p class="event-result-text">
+						응모가 완료되었습니다. 이벤트 종료 후 랜덤 추첨 결과가 발표됩니다.
+					</p>
+				</div>
 
-						<a th:href="@{/main/home}" class="btn ghost">
-							메인으로
-						</a>
-					
-						<form sec:authorize="isAuthenticated()"
-						      th:if="${!participated}"
-						      th:action="@{/member/event/participate}"
-						      method="post">
-					
-							<input type="hidden" name="event_id" th:value="${event.event_id}">
-							<input type="hidden"
-							       th:if="${_csrf != null}"
-							       th:name="${_csrf.parameterName}"
-							       th:value="${_csrf.token}">
-					
-							<button type="submit" class="btn">
-								이벤트 참여하기
-							</button>
-						</form>
-					
-						<button sec:authorize="isAuthenticated()"
-						        th:if="${participated}"
-						        type="button"
-						        class="btn ghost"
-						        disabled
-						        style="cursor:default; opacity:.7;">
-							참여 완료
+				<div th:if="${participated and participation.result_status == 'WINNER'}"
+				     class="event-result-box event-result-winner">
+					<div class="event-result-title">당첨</div>
+					<p class="event-result-text">
+						축하합니다. 이벤트 당첨자로 선정되었습니다.
+					</p>
+				</div>
+
+				<div th:if="${participated and participation.result_status == 'NOT_SELECTED'}"
+				     class="event-result-box event-result-not-selected">
+					<div class="event-result-title">미당첨</div>
+					<p class="event-result-text">
+						아쉽지만 이번 이벤트에는 선정되지 않았습니다.
+					</p>
+				</div>
+
+				<div th:if="${event.result_status == 'ANNOUNCED' and event.result_announced_at != null}"
+				     class="event-result-box"
+				     style="margin-top:14px; padding:14px 20px;">
+					<div class="event-result-title">결과 발표일</div>
+					<p class="event-result-text">
+						<span th:text="${#dates.format(event.result_announced_at, 'yyyy.MM.dd')}"></span>
+					</p>
+				</div>
+				
+				<div class="event-detail-actions">
+
+					<a th:href="@{/main/home}" class="btn ghost">
+						메인으로
+					</a>
+
+					<form sec:authorize="isAuthenticated()"
+					      th:if="${activeEvent and !participated}"
+					      th:action="@{/member/event/participate}"
+					      method="post">
+
+						<input type="hidden" name="event_id" th:value="${event.event_id}">
+						<input type="hidden"
+						       th:if="${_csrf != null}"
+						       th:name="${_csrf.parameterName}"
+						       th:value="${_csrf.token}">
+
+						<button type="submit" class="btn">
+							이벤트 참여하기
 						</button>
-					
-						<a sec:authorize="isAnonymous()"
-						   th:href="@{/member/login}"
-						   class="btn">
-							로그인 후 참여하기
-						</a>
-					
-					</div>
+					</form>
+
+					<button sec:authorize="isAuthenticated()"
+					        th:if="${activeEvent and participated}"
+					        type="button"
+					        class="btn ghost"
+					        disabled
+					        style="cursor:default; opacity:.7;">
+						참여 완료
+					</button>
+
+					<button sec:authorize="isAuthenticated()"
+					        th:if="${!activeEvent and participated and event.result_status != 'ANNOUNCED'}"
+					        type="button"
+					        class="btn ghost"
+					        disabled
+					        style="cursor:default; opacity:.7;">
+						응모 마감
+					</button>
+
+					<button sec:authorize="isAuthenticated()"
+					        th:if="${!activeEvent and participated and event.result_status == 'ANNOUNCED'}"
+					        type="button"
+					        class="btn ghost"
+					        disabled
+					        style="cursor:default; opacity:.7;">
+						결과 발표 완료
+					</button>
+
+					<a sec:authorize="isAnonymous()"
+					   th:if="${activeEvent}"
+					   th:href="@{/member/login}"
+					   class="btn">
+						로그인 후 참여하기
+					</a>
 
 				</div>
+
 			</div>
+		</div>
 
-		</section>
+	</section>
 
-	</div>
+</div>
 
 </body>
 </html>

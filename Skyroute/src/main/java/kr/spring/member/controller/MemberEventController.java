@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import kr.spring.member.vo.PrincipalDetails;
 import kr.spring.staff.content.service.StaffEventService;
+import kr.spring.staff.content.vo.EventParticipationVO;
 import kr.spring.staff.content.vo.EventVO;
 
 @Controller
@@ -25,22 +26,33 @@ public class MemberEventController {
 	public String detail(@RequestParam("event_id") long event_id,
 						 @AuthenticationPrincipal PrincipalDetails principalDetails,
 						 Model model) {
-		EventVO event = staffEventService.selectActiveEvent(event_id);
+		EventVO event = staffEventService.selectEvent(event_id);
 
 		if (event == null) {
 			return "redirect:/main/home";
 		}
 
+		EventParticipationVO participation = null;
 		boolean participated = false;
 
 		if (principalDetails != null && principalDetails.getMemberVO() != null) {
-			participated = staffEventService.isParticipated(
+			participation = staffEventService.selectMyEventParticipation(
 					event_id,
 					principalDetails.getMemberVO().getMember_id());
+
+			participated = participation != null;
+		}
+
+		boolean activeEvent = staffEventService.selectActiveEvent(event_id) != null;
+
+		if (!activeEvent && !participated) {
+			return "redirect:/main/home";
 		}
 
 		model.addAttribute("event", event);
 		model.addAttribute("participated", participated);
+		model.addAttribute("activeEvent", activeEvent);
+		model.addAttribute("participation", participation);
 
 		return "thviews/member/event_detail";
 	}

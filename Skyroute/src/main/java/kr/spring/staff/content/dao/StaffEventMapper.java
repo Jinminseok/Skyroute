@@ -11,28 +11,30 @@ import kr.spring.staff.content.vo.EventVO;
 
 @Mapper
 public interface StaffEventMapper {
-
 	public List<EventVO> selectEventList();
-
-	public EventVO selectEvent(long event_id);
+	public EventVO selectEvent(@Param("event_id") long event_id);
+	public EventVO selectActiveEvent(@Param("event_id") long event_id);
+	public EventVO selectEventForDraw(@Param("event_id") long event_id);
 
 	public void insertEvent(EventVO event);
-
 	public void updateEvent(EventVO event);
-
-	public void hideEvent(long event_id);
-
-	public void endEvent(long event_id);
+	public void hideEvent(@Param("event_id") long event_id);
+	public void endEvent(@Param("event_id") long event_id);
+	public void announceEventResult(@Param("event_id") long event_id);
 
 	public List<EventVO> selectActiveEventList();
 
-	public List<EventParticipationVO> selectParticipationList(long event_id);
+	public List<EventParticipationVO> selectParticipationList(@Param("event_id") long event_id);
+	public List<EventParticipationVO> selectRandomWinnerList(Map<String, Long> map);
 
 	public Integer selectParticipationCount(Map<String, Long> map);
 
 	public void insertParticipation(EventParticipationVO participation);
+	public void updateNotSelected(@Param("event_id") long event_id);
+	public void updateWinnerResult(@Param("participationIds") List<Long> participationIds);
 
-	public List<EventParticipationVO> selectMyParticipationList(long member_id);
-	
-	public EventVO selectActiveEvent(@Param("event_id") long event_id);
+	public List<EventParticipationVO> selectMyParticipationList(@Param("member_id") long member_id);
+	public EventParticipationVO selectMyEventParticipation(
+			@Param("event_id") long event_id,
+			@Param("member_id") long member_id);
 }

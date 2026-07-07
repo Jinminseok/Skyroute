@@ -18,7 +18,10 @@ public interface StaffEventService {
 	public List<EventVO> selectActiveEventList();
 
 	public void participateEvent(long event_id, long member_id);
+	public EventParticipationVO selectMyEventParticipation(long event_id, long member_id);
 	public List<EventParticipationVO> selectMyParticipationList(long member_id);
 	public EventVO selectActiveEvent(long event_id);
 	public boolean isParticipated(long event_id, long member_id);
+	public int drawAndAnnounceEvent(long event_id);
+	
 }

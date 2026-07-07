@@ -1,5 +1,6 @@
 package kr.spring.staff.content.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,5 +110,57 @@ public class StaffEventServiceImpl implements StaffEventService {
 		Integer count = staffEventMapper.selectParticipationCount(map);
 
 		return count != null && count > 0;
+	}
+
+	@Transactional
+	@Override
+	public int drawAndAnnounceEvent(long event_id) {
+		EventVO event = staffEventMapper.selectEvent(event_id);
+
+		if (event == null) {
+			throw new IllegalStateException("존재하지 않는 이벤트입니다.");
+		}
+
+		if ("ANNOUNCED".equals(event.getResult_status())) {
+			throw new IllegalStateException("이미 당첨 결과를 발표한 이벤트입니다.");
+		}
+
+		EventVO drawEvent = staffEventMapper.selectEventForDraw(event_id);
+
+		if (drawEvent == null) {
+			throw new IllegalStateException("이벤트 종료 후 또는 강제 종료 후에 추첨할 수 있습니다.");
+		}
+
+		if (drawEvent.getWinner_count() < 1) {
+			throw new IllegalStateException("당첨 인원을 1명 이상 설정하세요.");
+		}
+
+		Map<String, Long> map = new HashMap<String, Long>();
+		map.put("event_id", event_id);
+		map.put("winner_count", (long) drawEvent.getWinner_count());
+
+		List<EventParticipationVO> winnerList =
+				staffEventMapper.selectRandomWinnerList(map);
+
+		if (winnerList.isEmpty()) {
+			throw new IllegalStateException("응모자가 없어 추첨할 수 없습니다.");
+		}
+
+		List<Long> participationIds = new ArrayList<Long>();
+
+		for (EventParticipationVO participation : winnerList) {
+			participationIds.add(participation.getParticipation_id());
+		}
+
+		staffEventMapper.updateNotSelected(event_id);
+		staffEventMapper.updateWinnerResult(participationIds);
+		staffEventMapper.announceEventResult(event_id);
+
+		return participationIds.size();
+	}
+
+	@Override
+	public EventParticipationVO selectMyEventParticipation(long event_id, long member_id) {
+		return staffEventMapper.selectMyEventParticipation(event_id, member_id);
 	}
 }

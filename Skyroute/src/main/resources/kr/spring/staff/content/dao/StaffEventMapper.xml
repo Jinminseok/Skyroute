@@ -17,6 +17,9 @@
 			   CREATED_BY,
 			   CREATED_AT,
 			   DISPLAY_ORDER,
+			   WINNER_COUNT,
+			   RESULT_STATUS,
+			   RESULT_ANNOUNCED_AT,
 			   (
 			   		SELECT COUNT(*)
 			   		FROM EVENT_PARTICIPATION
@@ -40,7 +43,10 @@
 			   IS_ENDED,
 			   CREATED_BY,
 			   CREATED_AT,
-			   DISPLAY_ORDER
+				DISPLAY_ORDER,
+				WINNER_COUNT,
+				RESULT_STATUS,
+				RESULT_ANNOUNCED_AT
 		FROM EVENT
 		WHERE EVENT_ID = #{event_id}
 	</select>
@@ -57,7 +63,8 @@
 			IS_VISIBLE,
 			IS_ENDED,
 			CREATED_BY,
-			DISPLAY_ORDER
+DISPLAY_ORDER,
+WINNER_COUNT
 		) VALUES (
 			#{title},
 			#{content},
@@ -67,7 +74,8 @@
 			NVL(#{is_visible}, 'Y'),
 			NVL(#{is_ended}, 'N'),
 			#{created_by},
-			#{display_order}
+#{display_order},
+#{winner_count}
 		)
 	</insert>
 	
@@ -81,7 +89,8 @@
 			START_DATE = #{start_date},
 			END_DATE = #{end_date},
 			IS_VISIBLE = #{is_visible},
-			DISPLAY_ORDER = #{display_order},
+DISPLAY_ORDER = #{display_order},
+WINNER_COUNT = #{winner_count},
 			
 			<if test="image_url != null and image_url != ''">
 				IMAGE_URL = #{image_url},
@@ -133,7 +142,8 @@
 			   EP.EVENT_ID,
 			   EP.MEMBER_ID,
 			   EP.PARTICIPATED_AT,
-			   E.TITLE,
+EP.RESULT_STATUS,
+E.TITLE,
 			   M.NAME,
 			   M.LOGIN_ID,
 			   M.EMAIL
@@ -176,8 +186,9 @@
 		SELECT ep.PARTICIPATION_ID,
 			   ep.EVENT_ID,
 			   ep.MEMBER_ID,
-			   ep.PARTICIPATED_AT,
-			   e.TITLE,
+			  ep.PARTICIPATED_AT,
+ep.RESULT_STATUS,
+e.TITLE,
 			   e.IMAGE_URL,
 			   e.START_DATE,
 			   e.END_DATE
@@ -201,7 +212,10 @@
 	           IMAGE_URL,
 	           IS_VISIBLE,
 	           IS_ENDED,
-	           DISPLAY_ORDER
+DISPLAY_ORDER,
+WINNER_COUNT,
+RESULT_STATUS,
+RESULT_ANNOUNCED_AT
 	    FROM EVENT
 	    WHERE EVENT_ID = #{event_id}
 	      AND IS_VISIBLE = 'Y'
@@ -209,4 +223,93 @@
 	      AND SYSDATE >= START_DATE
 	      AND SYSDATE &lt; END_DATE + 1
 	</select>
+	
+	<select id="selectEventForDraw"
+		parameterType="long"
+		resultType="kr.spring.staff.content.vo.EventVO">
+	SELECT EVENT_ID,
+		   TITLE,
+		   CONTENT,
+		   START_DATE,
+		   END_DATE,
+		   IMAGE_URL,
+		   IS_VISIBLE,
+		   IS_ENDED,
+		   DISPLAY_ORDER,
+		   WINNER_COUNT,
+		   RESULT_STATUS,
+		   RESULT_ANNOUNCED_AT
+	FROM EVENT
+	WHERE EVENT_ID = #{event_id}
+	  AND RESULT_STATUS = 'PENDING'
+	  AND (
+		   IS_ENDED = 'Y'
+		   OR SYSDATE >= END_DATE + 1
+	  )
+</select>
+
+<select id="selectRandomWinnerList"
+		parameterType="map"
+		resultType="kr.spring.staff.content.vo.EventParticipationVO">
+	SELECT PARTICIPATION_ID,
+		   EVENT_ID,
+		   MEMBER_ID,
+		   PARTICIPATED_AT,
+		   RESULT_STATUS
+	FROM (
+		SELECT PARTICIPATION_ID,
+			   EVENT_ID,
+			   MEMBER_ID,
+			   PARTICIPATED_AT,
+			   RESULT_STATUS
+		FROM EVENT_PARTICIPATION
+		WHERE EVENT_ID = #{event_id}
+		  AND RESULT_STATUS = 'APPLIED'
+		ORDER BY DBMS_RANDOM.VALUE
+	)
+	WHERE ROWNUM &lt;= #{winner_count}
+</select>
+
+<update id="updateNotSelected"
+		parameterType="long">
+	UPDATE EVENT_PARTICIPATION
+	SET RESULT_STATUS = 'NOT_SELECTED'
+	WHERE EVENT_ID = #{event_id}
+	  AND RESULT_STATUS = 'APPLIED'
+</update>
+
+<update id="updateWinnerResult">
+	UPDATE EVENT_PARTICIPATION
+	SET RESULT_STATUS = 'WINNER'
+	WHERE PARTICIPATION_ID IN
+	<foreach collection="participationIds"
+			 item="participationId"
+			 open="("
+			 separator=","
+			 close=")">
+		#{participationId}
+	</foreach>
+</update>
+
+<update id="announceEventResult"
+		parameterType="long">
+	UPDATE EVENT
+	SET RESULT_STATUS = 'ANNOUNCED',
+		RESULT_ANNOUNCED_AT = SYSTIMESTAMP,
+		IS_VISIBLE = 'N',
+		IS_ENDED = 'Y'
+	WHERE EVENT_ID = #{event_id}
+	  AND RESULT_STATUS = 'PENDING'
+</update>
+<select id="selectMyEventParticipation"
+		resultType="kr.spring.staff.content.vo.EventParticipationVO">
+	SELECT PARTICIPATION_ID,
+		   EVENT_ID,
+		   MEMBER_ID,
+		   PARTICIPATED_AT,
+		   RESULT_STATUS
+	FROM EVENT_PARTICIPATION
+	WHERE EVENT_ID = #{event_id}
+	  AND MEMBER_ID = #{member_id}
+</select>
 </mapper>

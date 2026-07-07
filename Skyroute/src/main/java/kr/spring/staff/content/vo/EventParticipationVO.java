@@ -24,4 +24,5 @@ public class EventParticipationVO {
 	private String name;
 	private String login_id;
 	private String email;
+	private String result_status;
 }

@@ -12,6 +12,67 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
 
 <link rel="stylesheet" th:href="@{/assets/css/staff.css}">
+
+<style>
+.event-edit-wrap {
+	width: min(100%, 1040px);
+	margin: 0 auto;
+}
+
+.event-edit-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+	margin-bottom: 24px;
+}
+
+.event-edit-head h1 {
+	margin: 0 0 6px;
+}
+
+.event-edit-card {
+	max-width: none;
+}
+
+.event-banner-box {
+	padding: 14px;
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	background: #f8fbff;
+}
+
+.event-banner-image {
+	display: block;
+	width: 100%;
+	max-width: 420px;
+	height: 190px;
+	object-fit: cover;
+	border-radius: 8px;
+}
+
+.event-edit-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 28px;
+}
+
+@media (max-width: 760px) {
+	.event-edit-head {
+		flex-direction: column;
+	}
+
+	.event-edit-head .btn {
+		width: 100%;
+		text-align: center;
+	}
+
+	.event-banner-image {
+		height: 150px;
+	}
+}
+</style>
 </head>
 
 <body>
@@ -20,103 +81,128 @@
 
 	<main class="main">
 
-		<div class="toolbar">
-			<div>
-				<h1 style="margin-bottom:6px;">새 이벤트 등록</h1>
+		<div class="event-edit-wrap">
+
+			<div class="event-edit-head">
+				<div>
+					<h1>새 이벤트 등록</h1>
+					<p class="desc">이벤트 내용, 기간, 노출 여부, 배너 순서와 당첨 인원을 등록합니다.</p>
+				</div>
+
+				<a th:href="@{/staff/notice/list(tab='event')}" class="btn btn-ghost">
+					목록으로
+				</a>
 			</div>
 
-			<div class="grow"></div>
+			<div class="card event-edit-card">
+				<form th:action="@{/staff/content/event/write}"
+				      th:object="${event}"
+				      method="post"
+				      enctype="multipart/form-data">
 
-			<a th:href="@{/staff/content/event}" class="btn btn-ghost">
-				목록으로
-			</a>
-		</div>
-
-		<div class="card" style="max-width:900px;">
-			<form th:action="@{/staff/content/event/write}"
-			      th:object="${event}"
-			      method="post"
-			      enctype="multipart/form-data">
-
-				<div th:if="${error}"
-				     style="margin-bottom:20px; padding:12px 14px; border-radius:8px; background:#FEF2F2; color:#DC2626; font-size:13px;"
-				     th:text="${error}">
-				</div>
-
-				<div class="form-grid">
-
-					<div class="field full">
-						<label>이벤트명 *</label>
-						<input type="text"
-						       class="input"
-						       th:field="*{title}"
-						       placeholder="예: 제주 노선 얼리버드 특가">
+					<div th:if="${error}"
+					     style="margin-bottom:20px; padding:12px 14px; border-radius:8px; background:#FEF2F2; color:#DC2626; font-size:13px;"
+					     th:text="${error}">
 					</div>
 
-					<div class="field full">
-						<label>이벤트 상세 내용 *</label>
-						<textarea class="textarea"
-						          th:field="*{content}"
-						          rows="8"
-						          placeholder="이벤트 참여 방법, 대상, 혜택, 유의사항을 입력하세요."></textarea>
+					<div class="form-grid">
+
+						<div class="field full">
+							<label>이벤트명 *</label>
+							<input type="text"
+							       class="input"
+							       th:field="*{title}"
+							       placeholder="예: 제주 노선 얼리버드 특가">
+						</div>
+
+						<div class="field full">
+							<label>이벤트 상세 내용 *</label>
+							<textarea class="textarea"
+							          th:field="*{content}"
+							          rows="8"
+							          placeholder="이벤트 참여 방법, 대상, 혜택, 유의사항을 입력하세요."></textarea>
+						</div>
+
+						<div class="field">
+							<label>시작일 *</label>
+							<input type="date"
+							       class="input"
+							       th:field="*{start_date}">
+						</div>
+
+						<div class="field">
+							<label>종료일 *</label>
+							<input type="date"
+							       class="input"
+							       th:field="*{end_date}">
+						</div>
+
+						<div class="field">
+							<label>메인 배너 노출 순서</label>
+							<input type="number"
+							       class="input"
+							       min="0"
+							       th:field="*{display_order}">
+						</div>
+
+						<div class="field">
+							<label>당첨 인원 *</label>
+							<input type="number"
+							       class="input"
+							       min="1"
+							       th:field="*{winner_count}">
+
+							<p style="margin-top:8px; color:var(--text-light); font-size:12px;">
+								이벤트 종료 후 응모자 중 랜덤으로 선정할 인원입니다.
+							</p>
+						</div>
+
+						<div class="field">
+							<label>사용자 화면 노출 여부</label>
+							<select class="input" th:field="*{is_visible}">
+								<option value="Y">노출</option>
+								<option value="N">비노출</option>
+							</select>
+						</div>
+
+						<div class="field full">
+							<label>배너 이미지 *</label>
+
+							<div class="event-banner-box">
+								<div style="height:190px; display:flex; align-items:center; justify-content:center; color:var(--text-light);">
+									등록할 배너 이미지를 선택하세요.
+								</div>
+							</div>
+						</div>
+
+						<div class="field full">
+							<label>새 배너 이미지 *</label>
+							<input type="file"
+							       class="input"
+							       name="upload"
+							       accept="image/png,image/jpeg,image/gif,image/webp">
+
+							<p style="margin-top:8px; color:var(--text-light); font-size:12px;">
+								PNG, JPG, GIF, WEBP 이미지 파일만 등록할 수 있으며 최대 10MB까지 업로드할 수 있습니다.
+							</p>
+						</div>
+
 					</div>
 
-					<div class="field">
-						<label>시작일 *</label>
-						<input type="date"
-						       class="input"
-						       th:field="*{start_date}">
+					<div class="event-edit-actions">
+						<a th:href="@{/staff/content/event}"
+						   class="btn btn-ghost">
+							취소
+						</a>
+
+						<button type="submit" class="btn btn-primary">
+							이벤트 등록
+						</button>
 					</div>
 
-					<div class="field">
-						<label>종료일 *</label>
-						<input type="date"
-						       class="input"
-						       th:field="*{end_date}">
-					</div>
+				</form>
+			</div>
 
-					<div class="field">
-						<label>메인 배너 노출 순서</label>
-						<input type="number"
-						       class="input"
-						       min="0"
-						       th:field="*{display_order}">
-					</div>
-
-					<div class="field">
-						<label>사용자 화면 노출 여부</label>
-						<select class="input" th:field="*{is_visible}">
-							<option value="Y">노출</option>
-							<option value="N">비노출</option>
-						</select>
-					</div>
-
-					<div class="field full">
-						<label>배너 이미지 *</label>
-						<input type="file"
-						       class="input"
-						       name="upload"
-						       accept="image/png,image/jpeg,image/gif,image/webp">
-						<p style="margin-top:8px; color:var(--text-light); font-size:12px;">
-							PNG, JPG, GIF, WEBP 이미지 파일만 등록할 수 있으며 최대 10MB까지 업로드할 수 있습니다.
-						</p>
-					</div>
-
-				</div>
-
-				<div class="toolbar" style="margin-top:28px; margin-bottom:0;">
-					<div class="grow"></div>
-
-					<a th:href="@{/staff/content/event}" class="btn btn-ghost">
-						취소
-					</a>
-
-					<button type="submit" class="btn btn-primary">
-						이벤트 등록
-					</button>
-				</div>
-
-			</form>
 		</div>
 
 	</main>

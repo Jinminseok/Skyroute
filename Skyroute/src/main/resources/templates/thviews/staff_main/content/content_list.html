@@ -12,6 +12,65 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
 
 <link rel="stylesheet" th:href="@{/assets/css/staff.css}">
+<style>
+.draw-alert {
+	margin-bottom: 18px;
+	padding: 18px 20px;
+	border: 1px solid #fed7aa;
+	border-radius: 12px;
+	background: #fff7ed;
+}
+
+.draw-alert-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	color: #c2410c;
+	font-size: 15px;
+	font-weight: 700;
+}
+
+.draw-alert-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.draw-alert-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 11px 12px;
+	border-radius: 8px;
+	background: #ffffff;
+}
+
+.draw-alert-title {
+	color: var(--text);
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.draw-alert-info {
+	margin-top: 3px;
+	color: var(--text-light);
+	font-size: 12px;
+}
+
+.event-status-draw {
+	background: #fff7ed;
+	color: #c2410c;
+}
+
+@media (max-width: 760px) {
+	.draw-alert-item {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+}
+</style>
 </head>
 
 <body>
@@ -22,7 +81,7 @@
 
 		<h1>사용자 노출 정보 및 콘텐츠 관리</h1>
 		<p class="desc">
-			사용자 페이지에 노출되는 공지사항, 이벤트, FAQ 데이터를 관리합니다.
+			사용자 페이지에 노출되는 공지사항을 등록, 수정, 공개/비공개 처리, 삭제합니다. 비공개 공지는 사용자 공지사항 목록에 표시되지 않습니다.
 		</p>
 
 		<div class="grid grid-4" style="margin-bottom:24px">
@@ -81,13 +140,13 @@
 			<button type="button"
 			        th:classappend="${activeTab == 'notice'} ? 'active' : ''"
 			        onclick="subTab('content', 'notice', this)">
-				공지사항 관리 (NOTICE)
+				공지사항 관리
 			</button>
 
 			<button type="button"
 			        th:classappend="${activeTab == 'event'} ? 'active' : ''"
 			        onclick="location.href='/staff/content/event'">
-				이벤트 배너 관리 (EVENT)
+				이벤트 관리
 			</button>
 
 			<button type="button"
@@ -141,113 +200,187 @@
 
 		</div>
 
-		<div id="tab-c-event"
-		     class="sub-page"
-		     th:classappend="${activeTab == 'event'} ? 'active' : ''">
+		<div th:fragment="eventList">
 
-			<div class="toolbar">
-				<a th:href="@{/staff/content/event/write}" class="btn btn-primary">
-					<span class="material-symbols-outlined" style="font-size:18px">
-						add
-					</span>
-					새 이벤트 등록
-				</a>
-
-				<div class="grow"></div>
-
-				<span class="badge badge-scheduled">
-					EVENT
-				</span>
+	<div id="eventStatsFragment" class="grid grid-4" style="margin-bottom:24px">
+		<div class="stat">
+			<div class="label">
+				<span class="material-symbols-outlined" style="font-size:18px">local_activity</span>
+				전체 이벤트
 			</div>
-
-			<div class="card">
-				<div class="table-wrap">
-					<table class="data">
-						<thead>
-							<tr>
-								<th>이벤트 ID</th>
-								<th>배너 이미지</th>
-								<th>이벤트명</th>
-								<th>진행 기간</th>
-								<th>노출 순서</th>
-								<th>노출 여부</th>
-								<th>종료 여부</th>
-								<th>참여자 수</th>
-								<th>콘텐츠 편집</th>
-							</tr>
-						</thead>
-
-						<tbody>
-							<tr th:if="${#lists.isEmpty(eventList)}">
-								<td colspan="9">등록된 이벤트가 없습니다.</td>
-							</tr>
-
-							<tr th:each="event : ${eventList}">
-								<td class="mono" th:text="${event.event_id}"></td>
-
-								<td>
-									<img th:if="${event.image_url != null and !#strings.isEmpty(event.image_url)}"
-									    th:src="@{/assets/upload/{file}(file=${event.image_url})}"
-									    alt="이벤트 배너"
-									    style="width:120px; height:56px; object-fit:cover; border-radius:6px;">
-
-									<span th:unless="${event.image_url != null and !#strings.isEmpty(event.image_url)}"
-										  style="color:var(--text-light);">
-										이미지 없음
-									</span>
-								</td>
-
-								<td>
-									<strong th:text="${event.title}"></strong>
-								</td>
-
-								<td class="mono">
-									<span th:text="${#dates.format(event.start_date, 'yyyy-MM-dd')}"></span>
-									~
-									<span th:text="${#dates.format(event.end_date, 'yyyy-MM-dd')}"></span>
-								</td>
-
-								<td class="mono" th:text="${event.display_order}"></td>
-
-								<td>
-									<span class="badge"
-										  th:classappend="${event.is_visible == 'Y'} ? 'badge-ok' : 'badge-muted'"
-										  th:text="${event.is_visible == 'Y'} ? '노출' : '비노출'">
-									</span>
-								</td>
-
-								<td>
-									<span class="badge"
-										  th:classappend="${event.is_ended == 'Y'} ? 'badge-muted' : 'badge-scheduled'"
-										  th:text="${event.is_ended == 'Y'} ? '종료됨' : '진행 가능'">
-									</span>
-								</td>
-
-								<td class="mono">
-									<span th:text="${event.participation_count}"></span>명
-								</td>
-
-								<td>
-									<div class="btn-action-group">
-										<a th:href="@{/staff/content/event/detail(event_id=${event.event_id})}"
-										   class="btn btn-ghost btn-sm">
-											상세
-										</a>
-
-										<a th:href="@{/staff/content/event/update(event_id=${event.event_id})}"
-										   class="btn btn-primary btn-sm">
-											수정
-										</a>
-									</div>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+			<div class="value">
+				<span th:text="${#lists.size(eventList)}">0</span><span class="unit">건</span>
 			</div>
-
 		</div>
 
+		<div class="stat">
+			<div class="label">
+				<span class="material-symbols-outlined" style="font-size:18px; color:var(--ok)">visibility</span>
+				메인 노출 중
+			</div>
+			<div class="value" style="color:var(--ok)">
+				<span th:text="${#lists.size(eventList.?[display_visibility == '노출'])}">0</span><span class="unit">건</span>
+			</div>
+		</div>
+
+		<div class="stat">
+			<div class="label">
+				<span class="material-symbols-outlined" style="font-size:18px; color:var(--primary)">play_circle</span>
+				응모 진행 중
+			</div>
+			<div class="value" style="color:var(--primary)">
+				<span th:text="${#lists.size(eventList.?[progress_status == '진행 중'])}">0</span><span class="unit">건</span>
+			</div>
+		</div>
+
+		<div class="stat">
+			<div class="label">
+				<span class="material-symbols-outlined" style="font-size:18px; color:var(--warn)">casino</span>
+				추첨 필요
+			</div>
+			<div class="value" style="color:var(--warn)">
+				<span th:text="${#lists.size(eventList.?[drawRequired == true])}">0</span><span class="unit">건</span>
+			</div>
+		</div>
+	</div>
+
+	<div id="eventListFragment">
+
+		<div class="toolbar">
+			<a th:href="@{/staff/content/event/write}" class="btn btn-primary">
+				<span class="material-symbols-outlined" style="font-size:18px">add</span>
+				새 이벤트 등록
+			</a>
+
+			<div class="grow"></div>
+
+			<span class="badge badge-scheduled">EVENT</span>
+		</div>
+
+		<div class="card">
+			<div class="table-wrap">
+				<table class="data">
+					<thead>
+						<tr>
+							<th>배너 이미지</th>
+							<th>이벤트명</th>
+							<th>진행 기간</th>
+							<th>노출 순서</th>
+							<th>노출 여부</th>
+							<th>진행 여부</th>
+							<th>이벤트 상태</th>
+							<th>참여자 수</th>
+							<th>콘텐츠 편집</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						<tr th:if="${#lists.isEmpty(eventList)}">
+							<td colspan="9">등록된 이벤트가 없습니다.</td>
+						</tr>
+
+						<tr th:each="event : ${eventList}">
+							<td>
+								<img th:if="${event.image_url != null and !#strings.isEmpty(event.image_url)}"
+									 th:src="@{/assets/upload/{file}(file=${event.image_url})}"
+									 alt="이벤트 배너"
+									 style="width:120px; height:56px; object-fit:cover; border-radius:6px;">
+
+								<span th:unless="${event.image_url != null and !#strings.isEmpty(event.image_url)}"
+									  style="color:var(--text-light);">
+									이미지 없음
+								</span>
+							</td>
+
+							<td>
+								<strong th:text="${event.title}"></strong>
+							</td>
+
+							<td class="mono">
+								<span th:text="${#dates.format(event.start_date, 'yyyy-MM-dd')}"></span>
+								~
+								<span th:text="${#dates.format(event.end_date, 'yyyy-MM-dd')}"></span>
+							</td>
+
+							<td class="mono" th:text="${event.display_order}"></td>
+
+							<td>
+								<span class="badge"
+									  th:classappend="${event.display_visibility == '노출'} ? 'badge-ok' : 'badge-muted'"
+									  th:text="${event.display_visibility}">
+								</span>
+							</td>
+
+							<td>
+								<span th:if="${event.progress_status == '진행 중'}"
+									  class="badge badge-ok">
+									진행 중
+								</span>
+
+								<span th:if="${event.progress_status == '진행 예정'}"
+									  class="badge badge-scheduled">
+									진행 예정
+								</span>
+
+								<span th:if="${event.progress_status == '종료됨'}"
+									  class="badge badge-muted">
+									종료됨
+								</span>
+							</td>
+
+							<td>
+								<span th:if="${event.drawRequired}"
+									  class="badge event-status-draw"
+									  th:text="${event.event_status}">
+								</span>
+
+								<span th:if="${!event.drawRequired and event.event_status == '결과 발표 완료'}"
+									  class="badge badge-ok"
+									  th:text="${event.event_status}">
+								</span>
+
+								<span th:if="${!event.drawRequired
+											  and event.event_status != '결과 발표 완료'
+											  and event.event_status != '응모 마감 · 응모자 없음'
+											  and event.event_status != '강제 종료 · 응모자 없음'}"
+									  class="badge badge-scheduled"
+									  th:text="${event.event_status}">
+								</span>
+
+								<span th:if="${event.event_status == '응모 마감 · 응모자 없음'
+											  or event.event_status == '강제 종료 · 응모자 없음'}"
+									  class="badge badge-muted"
+									  th:text="${event.event_status}">
+								</span>
+							</td>
+
+							<td class="mono">
+								<span th:text="${event.participation_count}"></span>명
+							</td>
+
+							<td>
+								<div class="btn-action-group">
+									<a th:href="@{/staff/content/event/detail(event_id=${event.event_id})}"
+									   class="btn btn-ghost btn-sm">
+										상세
+									</a>
+
+									<a th:if="${event.result_status != 'ANNOUNCED'}"
+									   th:href="@{/staff/content/event/update(event_id=${event.event_id})}"
+									   class="btn btn-primary btn-sm">
+										수정
+									</a>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+	</div>
+
+</div>
 		<div id="tab-c-faq"
 		     class="sub-page"
 		     th:classappend="${activeTab == 'faq'} ? 'active' : ''">

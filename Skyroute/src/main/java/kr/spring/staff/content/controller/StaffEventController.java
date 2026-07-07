@@ -1,6 +1,9 @@
 package kr.spring.staff.content.controller;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,10 +13,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kr.spring.member.vo.PrincipalDetails;
 import kr.spring.staff.content.service.StaffEventService;
+import kr.spring.staff.content.vo.EventParticipationVO;
 import kr.spring.staff.content.vo.EventVO;
 import kr.spring.util.FileUtil;
 
@@ -29,6 +34,7 @@ public class StaffEventController {
 		EventVO event = new EventVO();
 		event.setIs_visible("Y");
 		event.setDisplay_order(0);
+		event.setWinner_count(1);
 
 		model.addAttribute("activeMenu", "content");
 		model.addAttribute("event", event);
@@ -75,10 +81,56 @@ public class StaffEventController {
 			return "redirect:/staff/content/event";
 		}
 
+		List<EventParticipationVO> participationList =
+				staffEventService.selectParticipationList(event_id);
+
+		int participationCount = participationList.size();
+
+		LocalDate today = LocalDate.now();
+		LocalDate startDate = toLocalDate(event.getStart_date());
+		LocalDate endDate = toLocalDate(event.getEnd_date());
+
+		boolean started = startDate == null || !today.isBefore(startDate);
+		boolean periodEnded = endDate != null && today.isAfter(endDate);
+		boolean forcedEnded = "Y".equals(event.getIs_ended());
+		boolean announced = "ANNOUNCED".equals(event.getResult_status());
+		boolean noParticipants = participationCount == 0;
+
+		String eventDetailStatus;
+		String resultDisplayStatus;
+		boolean canDraw = false;
+
+		if (announced) {
+			eventDetailStatus = "ANNOUNCED";
+			resultDisplayStatus = "발표 완료";
+		} else if (forcedEnded && noParticipants) {
+			eventDetailStatus = "FORCED_ENDED_NO_PARTICIPANTS";
+			resultDisplayStatus = "처리 없음";
+		} else if (forcedEnded) {
+			eventDetailStatus = "FORCED_ENDED_DRAW_REQUIRED";
+			resultDisplayStatus = "발표 전";
+			canDraw = true;
+		} else if (periodEnded && noParticipants) {
+			eventDetailStatus = "CLOSED_NO_PARTICIPANTS";
+			resultDisplayStatus = "처리 없음";
+		} else if (periodEnded) {
+			eventDetailStatus = "CLOSED_DRAW_REQUIRED";
+			resultDisplayStatus = "발표 전";
+			canDraw = true;
+		} else if (!started) {
+			eventDetailStatus = "SCHEDULED";
+			resultDisplayStatus = "발표 전";
+		} else {
+			eventDetailStatus = "ONGOING";
+			resultDisplayStatus = "발표 전";
+		}
+
 		model.addAttribute("activeMenu", "content");
 		model.addAttribute("event", event);
-		model.addAttribute("participationList",
-				staffEventService.selectParticipationList(event_id));
+		model.addAttribute("participationList", participationList);
+		model.addAttribute("eventDetailStatus", eventDetailStatus);
+		model.addAttribute("resultDisplayStatus", resultDisplayStatus);
+		model.addAttribute("canDraw", canDraw);
 
 		return "thviews/staff_main/content/event/event_detail";
 	}
@@ -144,6 +196,32 @@ public class StaffEventController {
 		return "redirect:/staff/content/event/detail?event_id=" + event_id;
 	}
 
+	@PostMapping("/draw")
+	public String draw(@RequestParam("event_id") long event_id,
+					   RedirectAttributes redirectAttributes) {
+		try {
+			int winnerCount = staffEventService.drawAndAnnounceEvent(event_id);
+
+			redirectAttributes.addFlashAttribute(
+					"message",
+					winnerCount + "명을 랜덤 당첨 처리하고 결과를 발표했습니다.");
+		} catch (IllegalStateException e) {
+			redirectAttributes.addFlashAttribute("message", e.getMessage());
+		}
+
+		return "redirect:/staff/content/event/detail?event_id=" + event_id;
+	}
+
+	private LocalDate toLocalDate(java.util.Date date) {
+		if (date == null) {
+			return null;
+		}
+
+		return date.toInstant()
+				.atZone(ZoneId.systemDefault())
+				.toLocalDate();
+	}
+
 	private String returnWriteForm(Model model, EventVO event, String error) {
 		model.addAttribute("activeMenu", "content");
 		model.addAttribute("event", event);
@@ -171,6 +249,10 @@ public class StaffEventController {
 
 		if (event.getStart_date().after(event.getEnd_date())) {
 			return "종료일은 시작일보다 빠를 수 없습니다.";
+		}
+
+		if (event.getWinner_count() < 1) {
+			return "당첨 인원은 1명 이상 입력하세요.";
 		}
 
 		if (imageRequired && (event.getUpload() == null || event.getUpload().isEmpty())) {

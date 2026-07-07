@@ -20,13 +20,13 @@
 
 <main class="main">
 
-	<h1>공지사항 관리</h1>
-	<p class="desc">
+	<h1 id="contentPageTitle">공지사항 관리</h1>
+	<p id="contentPageDesc" class="desc">
 		사용자 페이지에 노출되는 공지사항을 등록, 수정, 공개/비공개 처리, 삭제합니다.
 		비공개 공지는 사용자 공지사항 목록에 표시되지 않습니다.
 	</p>
 
-	<div class="grid grid-4" style="margin-bottom:24px">
+	<div id="noticeStats" class="grid grid-4" style="margin-bottom:24px">
 		<div class="stat">
 			<div class="label">
 				<span class="material-symbols-outlined" style="font-size:18px">campaign</span>
@@ -62,12 +62,28 @@
 		</div>
 	</div>
 
-	<div class="tabs">
-		<button type="button" class="active">공지사항 관리</button>
-		<button type="button" th:onclick="|location.href='@{/staff/content/event}'|">이벤트 관리</button>
-		<button type="button" onclick="alert('FAQ 관리는 다음 단계에서 연결합니다.');">FAQ 관리</button>
-	</div>
+	<div id="eventStats" style="display:none;"></div>
 
+	<div class="tabs">
+		<button id="noticeTabButton"
+				type="button"
+				class="active"
+				onclick="showNoticeTab(this)">
+			공지사항 관리
+		</button>
+	
+		<button id="eventTabButton"
+				type="button"
+				onclick="showEventTab(this)">
+			이벤트 관리
+		</button>
+	
+		<button type="button"
+				onclick="alert('FAQ 관리는 다음 단계에서 연결합니다.');">
+			FAQ 관리
+		</button>
+	</div>
+	<div id="noticeTabContent">
 	<div class="toolbar">
 		<a th:href="@{/staff/notice/write}" class="btn btn-primary">
 			<span class="material-symbols-outlined" style="font-size:18px">edit_document</span>
@@ -218,8 +234,89 @@
 		<div class="notice-paging" th:utext="${page}"></div>
 
 	</div>
+		</div>
 
+	<div id="eventTabContent" style="display:none;"></div>
 </main>
+<script th:inline="javascript">
+const eventFragmentUrl = /*[[@{/staff/content/event/fragment}]]*/ '/staff/content/event/fragment';
 
+function setActiveTab(button) {
+	document.querySelectorAll('.tabs button').forEach(tab => {
+		tab.classList.remove('active');
+	});
+
+	button.classList.add('active');
+}
+
+function showNoticeTab(button) {
+	document.getElementById('contentPageTitle').textContent = '공지사항 관리';
+	document.getElementById('contentPageDesc').textContent =
+		'사용자 페이지에 노출되는 공지사항을 등록, 수정, 공개/비공개 처리, 삭제합니다. 비공개 공지는 사용자 공지사항 목록에 표시되지 않습니다.';
+
+	document.getElementById('noticeStats').style.display = 'grid';
+	document.getElementById('eventStats').style.display = 'none';
+	document.getElementById('noticeTabContent').style.display = 'block';
+	document.getElementById('eventTabContent').style.display = 'none';
+
+	setActiveTab(button);
+}
+
+function showEventTab(button) {
+	document.getElementById('contentPageTitle').textContent = '이벤트 배너 관리';
+	document.getElementById('contentPageDesc').textContent =
+		'메인 화면에 노출되는 이벤트 배너를 등록하고, 진행 상태와 참여자 현황 및 결과 발표를 관리합니다.';
+
+	document.getElementById('noticeStats').style.display = 'none';
+	document.getElementById('noticeTabContent').style.display = 'none';
+
+	const eventStats = document.getElementById('eventStats');
+	const eventTabContent = document.getElementById('eventTabContent');
+
+	eventStats.style.display = 'block';
+	eventTabContent.style.display = 'block';
+
+	setActiveTab(button);
+
+	if (eventTabContent.dataset.loaded === 'true') {
+		return;
+	}
+
+	fetch(eventFragmentUrl)
+		.then(response => {
+			if (!response.ok) {
+				throw new Error();
+			}
+
+			return response.text();
+		})
+		.then(html => {
+			const temp = document.createElement('div');
+			temp.innerHTML = html;
+
+			const statsFragment = temp.querySelector('#eventStatsFragment');
+			const listFragment = temp.querySelector('#eventListFragment');
+
+			eventStats.innerHTML = statsFragment ? statsFragment.outerHTML : '';
+			eventTabContent.innerHTML = listFragment ? listFragment.innerHTML : html;
+			eventTabContent.dataset.loaded = 'true';
+		})
+		.catch(() => {
+			eventStats.innerHTML = '';
+			eventTabContent.innerHTML = `
+				<div class="card" style="padding:28px; text-align:center;">
+					이벤트 목록을 불러오지 못했습니다.
+				</div>
+			`;
+		});
+}
+document.addEventListener('DOMContentLoaded', function() {
+	const tab = new URLSearchParams(window.location.search).get('tab');
+
+	if (tab === 'event') {
+		showEventTab(document.getElementById('eventTabButton'));
+	}
+});
+</script>
 </body>
 </html>

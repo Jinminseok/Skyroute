@@ -883,3 +883,8 @@ to {
 	color: var(--danger);
 	font-size: 12px;
 }
+
+.event-status-draw {
+	background: #fff7ed;
+	color: #c2410c;
+}
