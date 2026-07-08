@@ -114,10 +114,12 @@
 .zone-tab { padding: 8px 20px; border-radius: 99px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; }
 .zone-tab:hover { background: #f1f5f9; border-color: #94a3b8; }
 
-/* 심플한 비상구 구분선 */
-.exit-separator { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; margin: 30px 0 20px 0; position: relative; }
+/* 클래스 분리선 */
+.exit-separator { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; margin: 25px 0; position: relative; }
 .exit-door { background: #ef4444; color: white; font-size: 10px; padding: 4px 6px; font-weight: bold; border-radius: 3px; letter-spacing: 1px; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3); }
-.exit-line { height: 1px; background: #cbd5e1; flex-grow: 1; margin: 0 15px; }
+.exit-center-icons { display: flex; gap: 20px; color: #94a3b8; padding: 0 15px; }
+.exit-center-icons span { font-size: 18px; }
+.exit-line { height: 1px; border-top: 1px dashed #cbd5e1; flex-grow: 1; margin: 0 10px; }
 
 
 </style>
@@ -477,6 +479,11 @@
                                             th:onclick="openVisualSeatMap([[${summary.aircraft_id}]], [[${summary.reg_no}]])">
 										<span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">view_comfy</span> 좌석 배치 확인 및 수정
 									</button>
+									<button type="button" class="btn btn-outline btn-sm" style="color: #ef4444; border-color: #ef4444; margin-left: 5px;" 
+									        th:if="${summary.total_generated > 0}" 
+									        th:onclick="resetSeats([[${summary.aircraft_id}]], [[${summary.reg_no}]])">
+									    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">delete_sweep</span> 초기화
+									</button>
 							    </td>
 							</tr>
 						</tbody>
@@ -753,27 +760,6 @@
 	
 	<!-- ============================================== -->
 	<!-- 좌석 설정 모달 창 -->
-	<!-- ============================================== 
-	<div class="modal-overlay" id="visualSeatModal" style="display: none;">
-	    <div class="modal" style="width: 600px; max-width: 90vw;">
-	        <div class="modal-head">
-	            <div><h3 id="visualSeatTitle">HL1234 좌석 배치도</h3></div>
-	            <button type="button" class="modal-close" onclick="document.getElementById('visualSeatModal').style.display='none'">
-	                <span class="material-symbols-outlined">close</span>
-	            </button>
-	        </div>
-	        <div class="modal-body">
-	            <div style="text-align:center; font-size: 13px; color: #64748b;">
-	                * 좌석을 클릭하면 사용 가능/불가(고장) 상태를 토글할 수 있습니다.
-	            </div>
-	            <div id="seatMapArea" class="seat-map-container"></div>
-	        </div>
-	    </div>
-	</div>
-	-->
-	
-	<!-- ============================================== -->
-	<!-- 좌석 설정 모달 창 2-->
 	<!-- ============================================== -->
 	<div class="modal-overlay" id="visualSeatModal" style="display: none;">
 	    <div class="modal" style="width: 700px; max-width: 95vw;">
@@ -1176,7 +1162,7 @@
 	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 	    
-	    fetch('/staff/basedata/aircraft/toggle', {
+	    fetch('/staff/basedata/seat/aircraft/toggle', {
 	        method: 'POST',
 	        headers: {
 	            'Content-Type': 'application/json',
@@ -1202,6 +1188,7 @@
 	        checkbox.checked = !checkbox.checked;
 	    });
 	}
+	
 	// 게이트 삭제 함수
 	function deleteGate(gateId) {
 	    if (!confirm('정말 이 게이트를 삭제하시겠습니까?')) {
@@ -1318,9 +1305,6 @@
 	// ----------------------------------------------------
 	// 8. 시각적 좌석 도면 렌더링 및 모달 열기
 	// ----------------------------------------------------
-	// ----------------------------------------------------
-	// 8. 시각적 좌석 도면 (일직선 통로 블록 분할 & 네이티브 스크롤)
-	// ----------------------------------------------------
 	let currentSeatData = [];     
 	let currentAircraftId = null;
 	let currentRegNo = null;
@@ -1348,7 +1332,7 @@
             });
     }
 
-    function renderContinuousSeatMap() {
+	function renderContinuousSeatMap() {
         const mapArea = document.getElementById('seatMapArea');
         const tabsArea = document.getElementById('seatZoneTabs');
         mapArea.innerHTML = '';
@@ -1372,32 +1356,85 @@
             if (rows[rowNum].length > maxColsInPlane) maxColsInPlane = rows[rowNum].length;
         });
 
-        // 최대 가로 좌석이 7개 이상이면 대형기(통로 2개), 아니면 소형기(통로 1개)
         const isWideBody = maxColsInPlane >= 7; 
         const sortedRowNums = Object.keys(rows).map(Number).sort((a, b) => a - b);
+        
         let previousClass = null;
 
+        // ✨ [핵심] 단일 등급(예: 이코노미만 있는 소형기)인지 확인
+        const isSingleClass = classes.length === 1;
+        // 단일 등급일 경우, 전체 행의 정확히 절반 위치(인덱스) 계산
+        const middleRowIndex = isSingleClass ? Math.floor(sortedRowNums.length / 2) : -1;
+
         // 3. 전체 좌석 렌더링 루프
-        sortedRowNums.forEach(rowNum => {
+        sortedRowNums.forEach((rowNum, index) => {
             const rowSeats = rows[rowNum];
             const currentClass = rowSeats[0].class_name;
             const colCount = rowSeats.length; 
 
-            // 심플한 비상구(EXIT) 라인 삽입
-            if (previousClass !== null && previousClass !== currentClass) {
-                const exitDiv = document.createElement('div');
-                exitDiv.className = 'exit-separator';
-                exitDiv.id = `class-section-${currentClass}`; 
-                exitDiv.innerHTML = `<div class="exit-door">EXIT</div><div class="exit-line"></div><div class="exit-door">EXIT</div>`;
-                mapArea.appendChild(exitDiv);
-            } else if (previousClass === null) {
-                const firstAnchor = document.createElement('div');
-                firstAnchor.id = `class-section-${currentClass}`;
-                mapArea.appendChild(firstAnchor);
+            // 🌟 [핵심] 군더더기 없는 완벽한 출입구(EXIT) 배치 로직
+            if (isSingleClass) {
+                // 1) 단일 등급: 정확히 절반 위치(날개 위 비상구)에만 심플한 EXIT 삽입
+                if (index === middleRowIndex && index !== 0) {
+                    const midExitDiv = document.createElement('div');
+                    midExitDiv.className = 'exit-separator';
+                    midExitDiv.innerHTML = `
+                        <div class="exit-door">EXIT</div>
+                        <div class="exit-line"></div>
+                        <div class="exit-door">EXIT</div>
+                    `;
+                    mapArea.appendChild(midExitDiv);
+                }
+            } else {
+                // 2) 다중 등급: 등급이 바뀔 때만 아이콘이 포함된 EXIT 삽입 (맨 앞/맨 뒤 생략)
+                if (previousClass !== null && previousClass !== currentClass) {
+                    const exitDiv = document.createElement('div');
+                    exitDiv.className = 'exit-separator';
+                    exitDiv.innerHTML = `
+                        <div class="exit-door">EXIT</div>
+                        <div class="exit-line"></div>
+                        <div class="exit-center-icons">
+                            <span class="material-symbols-outlined" title="화장실">wc</span>
+                            <span class="material-symbols-outlined" title="갤리(주방)">local_cafe</span>
+                        </div>
+                        <div class="exit-line"></div>
+                        <div class="exit-door">EXIT</div>
+                    `;
+                    mapArea.appendChild(exitDiv);
+                }
+            }
+
+            // 행(Row) 래퍼 생성
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'seat-row';
+            
+            // 🌟 [핵심] 스크롤 타겟(Anchor)을 맨 첫 번째 행 자체에 부여! 
+            if (previousClass !== currentClass) {
+                rowDiv.id = `class-section-${currentClass}`;
             }
             previousClass = currentClass;
 
-            // 🌟 [핵심] 블록 분할 계산 (왼쪽 / 중앙 / 오른쪽)
+            // 왼쪽에 숫자(행 번호) 표시
+            const rowNumDiv = document.createElement('div');
+            rowNumDiv.className = 'row-number';
+            rowNumDiv.innerText = rowNum;
+            rowDiv.appendChild(rowNumDiv);
+
+            // 좌석 버튼 생성 함수
+            const createSeatBtn = (seat) => {
+                const seatBtn = document.createElement('div');
+                let colorClass = 'seat-economy';
+                if (seat.class_name === '일등석') colorClass = 'seat-first';
+                if (seat.class_name === '비즈니스') colorClass = 'seat-business';
+                seatBtn.className = `seat-box ${colorClass}`;
+                if (seat.is_active === 'N') seatBtn.classList.add('seat-broken');
+                seatBtn.innerText = seat.seat_no; 
+                seatBtn.title = `[${seat.class_name}] 클릭하여 상태 변경`;
+                seatBtn.onclick = () => toggleSeatVisual(seat.seat_id, seat.is_active, currentAircraftId, currentRegNo);
+                return seatBtn;
+            };
+
+            // 🌟 블록 분할 계산 (왼쪽 / 중앙 / 오른쪽)
             let leftCnt = 0, centerCnt = 0, rightCnt = 0;
             if (isWideBody) {
                 if (colCount === 4) { leftCnt = 1; centerCnt = 2; rightCnt = 1; }
@@ -1413,34 +1450,9 @@
                 else { leftCnt = Math.floor(colCount/2); rightCnt = colCount - leftCnt; }
             }
 
-            // 행(Row) 래퍼 생성
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'seat-row';
-            
-            // 왼쪽에 숫자(행 번호) 표시
-            const rowNumDiv = document.createElement('div');
-            rowNumDiv.className = 'row-number';
-            rowNumDiv.innerText = rowNum;
-            rowDiv.appendChild(rowNumDiv);
-
-            // 좌석 버튼을 생성해주는 내부 함수
-            const createSeatBtn = (seat) => {
-                const seatBtn = document.createElement('div');
-                let colorClass = 'seat-economy';
-                if (seat.class_name === '일등석') colorClass = 'seat-first';
-                if (seat.class_name === '비즈니스') colorClass = 'seat-business';
-                seatBtn.className = `seat-box ${colorClass}`;
-                if (seat.is_active === 'N') seatBtn.classList.add('seat-broken');
-                seatBtn.innerText = seat.seat_no; 
-                seatBtn.title = `[${seat.class_name}] 클릭하여 상태 변경`;
-                seatBtn.onclick = () => toggleSeatVisual(seat.seat_id, seat.is_active, currentAircraftId, currentRegNo);
-                return seatBtn;
-            };
-
-            // 🌟 계산된 카운트만큼 블록(Block)에 좌석 밀어넣기
+            // 계산된 카운트만큼 블록(Block)에 좌석 밀어넣기
             let seatIndex = 0;
             if (isWideBody) {
-                // 👉 [수정됨] block-left, block-right 클래스 적용
                 const leftBlock = document.createElement('div'); leftBlock.className = 'seat-block block-left';
                 const centerBlock = document.createElement('div'); centerBlock.className = 'seat-block block-center';
                 const rightBlock = document.createElement('div'); rightBlock.className = 'seat-block block-right';
@@ -1510,6 +1522,34 @@
             }
         });
     }
+    
+	// ----------------------------------------------------
+	// 9. 좌석 초기화
+	// ----------------------------------------------------
+    function resetSeats(aircraftId, regNo) {
+        if(!confirm(`⚠️ 경고: [${regNo}] 항공기에 생성된 모든 좌석 데이터를 삭제하시겠습니까?\n\n※ 이미 이 비행기로 예약된 항공권이 있다면 오류가 발생할 수 있습니다.`)) {
+            return;
+        }
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        fetch('/staff/basedata/seat/reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+            body: JSON.stringify({ aircraftId: parseInt(aircraftId) })
+        })
+        .then(res => res.text())
+        .then(result => {
+            if(result === 'success') {
+                alert('좌석이 모두 초기화되었습니다.');
+                location.reload(); 
+            } else {
+                alert('초기화에 실패했습니다. 관리자에게 문의하세요.');
+            }
+        });
+    }
+ 
 	</script>
 
 </body>

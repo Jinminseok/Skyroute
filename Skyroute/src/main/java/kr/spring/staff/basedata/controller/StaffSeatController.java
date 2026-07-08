@@ -26,28 +26,6 @@ public class StaffSeatController {
 	
 	private final StaffSeatService staffSeatService;
 
-	// 좌석 자동 생성
-    @PostMapping("/generate")
-    @ResponseBody
-    public String generateSeats(@RequestBody Map<String, Object> payload) {
-        log.info("좌석 생성 요청 데이터: {}", payload);
-        try {
-            // 서비스로 데이터 전달하여 좌석 생성 로직 실행
-            staffSeatService.generateSeats(payload);
-            return "success";
-        } catch (Exception e) {
-            log.error("좌석 생성 중 오류 발생: ", e);
-            return "error";
-        }
-    }
-    
-    // 항공기 좌석 데이터
-    @GetMapping("/map/{aircraftId}")
-    @ResponseBody
-    public List<SeatVO> getSeatMap(@PathVariable("aircraftId") int aircraftId) {
-        return staffSeatService.getSeatsByAircraft(aircraftId);
-    }
-    
     // 항공기 사용 여부
     @PostMapping("/aircraft/toggle")
     @ResponseBody
@@ -73,4 +51,54 @@ public class StaffSeatController {
             return "error";
         }
     }
+    
+	// 좌석 자동 생성
+    @PostMapping("/generate")
+    @ResponseBody
+    public String generateSeats(@RequestBody Map<String, Object> payload) {
+        log.info("좌석 생성 요청 데이터: {}", payload);
+        try {
+            // 서비스로 데이터 전달하여 좌석 생성 로직 실행
+            staffSeatService.generateSeats(payload);
+            return "success";
+        } catch (Exception e) {
+            log.error("좌석 생성 중 오류 발생: ", e);
+            return "error";
+        }
+    }
+    
+    // 항공기 좌석 데이터
+    @GetMapping("/map/{aircraftId}")
+    @ResponseBody
+    public List<SeatVO> getSeatMap(@PathVariable("aircraftId") int aircraftId) {
+        return staffSeatService.getSeatsByAircraft(aircraftId);
+    }
+    
+    // 좌석 상태(고장/정상) 변경
+    @PostMapping("/toggle")
+    @ResponseBody
+    public String toggleSeatActive(@RequestBody Map<String, Object> payload) {
+        try {
+            staffSeatService.updateSeatActive(payload);
+            return "success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
+    }
+    
+    // 좌석 초기화
+    @PostMapping("/reset")
+    @ResponseBody
+    public String resetSeats(@RequestBody Map<String, Integer> payload) {
+        try {
+            int aircraftId = payload.get("aircraftId");
+            staffSeatService.deleteSeatsByAircraft(aircraftId);
+            return "success";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "fail";
+        }
+    }
+    
 }

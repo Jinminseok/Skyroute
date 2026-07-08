@@ -21,4 +21,10 @@ public interface StaffSeatService {
     // 좌석 리스트
     public List<Map<String, Object>> getSeatSummaryList();
     public List<SeatVO> getSeatsByAircraft(int aircraftId);
+    
+    // 좌석 상태 변경
+    public void updateSeatActive(Map<String, Object> payload);
+
+    // 좌석 초기화(삭제)
+    public void deleteSeatsByAircraft(int aircraftId);
 }

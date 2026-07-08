@@ -83,5 +83,16 @@
         WHERE S.aircraft_id = #{aircraftId}
         ORDER BY LENGTH(S.seat_no) ASC, S.seat_no ASC
     </select>
-
+    
+    <update id="updateSeatActive" parameterType="map">
+        UPDATE SEAT
+        SET is_active = #{isActive}
+        WHERE seat_id = #{seatId}
+    </update>
+    
+    <!-- 특정 항공기의 전체 좌석 삭제 -->
+    <delete id="deleteSeatsByAircraft" parameterType="int">
+        DELETE FROM SEAT 
+        WHERE aircraft_id = #{aircraftId}
+    </delete>
 </mapper>

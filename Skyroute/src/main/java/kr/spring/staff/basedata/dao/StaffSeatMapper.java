@@ -34,4 +34,10 @@ public interface StaffSeatMapper {
     public List<SeatVO> selectSeatList();
     public List<Map<String, Object>> selectSeatSummaryList();
     public List<SeatVO> selectSeatsByAircraft(int aircraftId);
+    
+    // 좌석 고장/정상 상태 변경
+    public void updateSeatActive(Map<String, Object> payload);
+    
+    // 항공기별 좌석 일괄 삭제 (초기화)
+    public void deleteSeatsByAircraft(int aircraftId);
 }

@@ -104,5 +104,15 @@ public class StaffSeatServiceImpl implements StaffSeatService {
 		return staffSeatMapper.selectSeatsByAircraft(aircraftId);
 	}
 
+	@Override
+	public void updateSeatActive(Map<String, Object> payload) {
+		staffSeatMapper.updateSeatActive(payload);
+	}
+
+	@Override
+	public void deleteSeatsByAircraft(int aircraftId) {
+		staffSeatMapper.deleteSeatsByAircraft(aircraftId);
+	}
+
     
 }

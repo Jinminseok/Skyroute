@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">    
+
+<mapper namespace="kr.spring.admin.dao.AirCraftMapper"> 
+
+    <insert id="insertAircraft" parameterType="kr.spring.admin.vo.AirCraftVO">
+        INSERT INTO aircraft (
+            reg_no, 
+            model_name, 
+            total_seats
+        ) VALUES (
+            #{reg_no}, 
+            #{model_name}, 
+            #{total_seats}
+        )
+    </insert>
+    
+    <select id="selectListAircraft" resultType="kr.spring.admin.vo.AirCraftVO">
+        SELECT * FROM aircraft 
+        ORDER BY aircraft_id DESC
+    </select>
+    
+    <update id="updateAircraftStatus">
+        UPDATE aircraft 
+        SET is_active = #{is_active} 
+        WHERE aircraft_id = #{aircraft_id}
+    </update>
+
+</mapper>
