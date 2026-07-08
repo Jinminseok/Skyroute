@@ -14,10 +14,16 @@ import kr.spring.staff.basedata.vo.AirportVO;
 import kr.spring.admin.vo.AirCraftVO;
 import kr.spring.staff.basedata.service.StaffSeatService;
 
-// 👉 게이트 처리를 위해 추가된 Import
+// 게이트 처리를 위해 추가된 Import
 import kr.spring.staff.basedata.service.StaffGateService;
 import kr.spring.staff.basedata.vo.GateVO;
 import kr.spring.staff.basedata.vo.SeatVO;
+
+// 👉 [추가] 운항 노선 및 노선 유형(관리자) 처리를 위한 Import
+import kr.spring.admin.dao.RouteTypeMapper;
+import kr.spring.admin.vo.RouteTypeVO;
+import kr.spring.staff.basedata.service.StaffRouteService;
+import kr.spring.staff.basedata.vo.RouteVO;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,13 +35,21 @@ public class StaffAirportController {
     @Autowired
     private StaffAirportService airportService;
 
-    // 좌석 관련 데이터를
+    // 좌석 관련 데이터
     @Autowired
     private StaffSeatService staffSeatService;
 
-    // 👉 게이트 관련 데이터를 위한 서비스 추가
+    // 게이트 관련 데이터
     @Autowired
     private StaffGateService staffGateService;
+
+    // 노선 유형 데이터 - 관리자
+    @Autowired
+    private RouteTypeMapper routeTypeMapper;
+
+    // 운항 노선 데이터 - 지상직
+    @Autowired
+    private StaffRouteService staffRouteService;
 
     // 1. 공항 마스터 관리 페이지 조회 (목록 렌더링)
     @GetMapping("/airport/list")
@@ -56,10 +70,18 @@ public class StaffAirportController {
         List<Map<String, Object>> seatSummaryList = staffSeatService.getSeatSummaryList();
         model.addAttribute("seatSummaryList", seatSummaryList);
         
-        // 👉 게이트 목록 담기 (이 부분이 HTML의 th:each="gate : ${gateList}"를 채워줍니다)
+        // 게이트 목록 담기 
         GateVO gateSearchVO = new GateVO();
         List<GateVO> gateList = staffGateService.getGateList(gateSearchVO);
         model.addAttribute("gateList", gateList);
+        
+        // 노선 유형 리스트
+        List<RouteTypeVO> routeTypeList = routeTypeMapper.selectRouteTypeList();
+        model.addAttribute("routeTypeList", routeTypeList);
+
+        // 등록된 운항 노선 리스트
+        List<RouteVO> routeList = staffRouteService.getRouteList();
+        model.addAttribute("routeList", routeList);
         
         return "thviews/staff_main/basedata/base_list"; 
     }

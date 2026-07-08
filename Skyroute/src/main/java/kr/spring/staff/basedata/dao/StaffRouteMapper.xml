@@ -1,14 +1,66 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper   
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">    
+
 <mapper namespace="kr.spring.staff.basedata.dao.StaffRouteMapper"> 
-	
+
+    <select id="selectRouteList" resultType="kr.spring.staff.basedata.vo.RouteVO">
+        SELECT 
+            r.route_id,
+            r.departure_airport_id,
+            ad.iata_code || ' (' || ad.airport_name || ')' AS dep_airport_name,
+            r.arrival_airport_id,
+            aa.iata_code || ' (' || aa.airport_name || ')' AS arr_airport_name,
+            r.flight_type,
+            r.route_type_id,
+            rt.type_name AS type_name, r.is_active
+        FROM ROUTE r
+        JOIN AIRPORT ad ON r.departure_airport_id = ad.airport_id
+        JOIN AIRPORT aa ON r.arrival_airport_id = aa.airport_id
+        LEFT JOIN ROUTE_TYPE rt ON r.route_type_id = rt.route_type_id
+        ORDER BY r.route_id DESC
+    </select>
+
+    <select id="checkDuplicateRoute" parameterType="kr.spring.staff.basedata.vo.RouteVO" resultType="int">
+        SELECT COUNT(*) FROM ROUTE 
+        WHERE departure_airport_id = #{departure_airport_id} 
+          AND arrival_airport_id = #{arrival_airport_id}
+    </select>
+
+    <insert id="insertRoute" parameterType="kr.spring.staff.basedata.vo.RouteVO">
+        INSERT INTO ROUTE (
+            departure_airport_id, 
+            arrival_airport_id, 
+            flight_type, 
+            route_type_id, 
+            is_active
+        ) VALUES ( 
+            #{departure_airport_id}, 
+            #{arrival_airport_id}, 
+            #{flight_type}, 
+            #{route_type_id}, 
+            'Y'
+        )
+    </insert>
+
+    <update id="updateRoute" parameterType="kr.spring.staff.basedata.vo.RouteVO">
+        UPDATE ROUTE 
+        SET departure_airport_id = #{departure_airport_id},
+            arrival_airport_id = #{arrival_airport_id},
+            flight_type = #{flight_type},
+            route_type_id = #{route_type_id}
+        WHERE route_id = #{route_id}
+    </update>
+
+    <delete id="deleteRoute" parameterType="int">
+        DELETE FROM ROUTE WHERE route_id = #{route_id}
+    </delete>
+
+    <update id="updateRouteActive" parameterType="map">
+        UPDATE ROUTE 
+        SET is_active = #{isActive} 
+        WHERE route_id = #{routeId}
+    </update>
+
 </mapper>
-
-
-
-
-
-
-
