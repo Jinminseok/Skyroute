@@ -44,11 +44,29 @@
 						   class="input"
 						   maxlength="200"
 						   placeholder="공지사항 제목을 입력하세요">
-
+						   
 					<div class="field-error"
 						 th:if="${#fields.hasErrors('title')}"
 						 th:errors="*{title}">
 						제목 오류
+					</div>
+				</div>
+				
+				<div class="field">
+					<label for="category">카테고리</label>
+					<select th:field="*{category}" id="category" class="select">
+						<option value="">카테고리 선택</option>
+						<option th:each="cat : ${noticeCategoryMap}"
+								th:value="${cat.key}"
+								th:text="${cat.value}">
+							일반
+						</option>
+					</select>
+				
+					<div class="field-error"
+						 th:if="${#fields.hasErrors('category')}"
+						 th:errors="*{category}">
+						카테고리 오류
 					</div>
 				</div>
 

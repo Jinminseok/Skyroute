@@ -6,6 +6,7 @@
 	
 	<resultMap type="kr.spring.member.notice.vo.MemberNoticeVO" id="memberNoticeMap">
 		<id property="notice_id" column="notice_id"/>
+		<result property="category" column="category"/>
 		<result property="title" column="title"/>
 		<result property="content" column="content"/>
 		<result property="is_public" column="is_public"/>
@@ -19,6 +20,10 @@
 	<sql id="noticeSearch">
 		<where>
 			n.is_public = 'Y'
+			
+			<if test="category != null and category != ''">
+				AND n.category = #{category}
+			</if>
 			
 			<if test="keyword != null and keyword != ''">
 				<if test="keyfield == 1">
@@ -51,6 +56,7 @@
 	<select id="selectList" parameterType="map" resultMap="memberNoticeMap">
 		SELECT
 			n.notice_id,
+			n.category,
 			<![CDATA[REPLACE(REPLACE(n.title, '<', '&lt;'), '>', '&gt;') title,]]>
 			DBMS_LOB.SUBSTR(n.content, 120, 1) content,
 			n.is_public,
@@ -69,6 +75,7 @@
 	<select id="selectNotice" parameterType="long" resultMap="memberNoticeMap">
 		SELECT
 			n.notice_id,
+			n.category,
 			n.title,
 			n.content,
 			n.is_public,

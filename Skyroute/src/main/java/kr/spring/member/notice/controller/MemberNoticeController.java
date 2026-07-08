@@ -8,12 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kr.spring.member.notice.service.MemberNoticeService;
 import kr.spring.member.notice.vo.MemberNoticeVO;
+import kr.spring.util.NoticeCategoryUtil;
 import kr.spring.util.PagingUtil;
 import kr.spring.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +28,14 @@ public class MemberNoticeController {
 	@Autowired
 	private MemberNoticeService memberNoticeService;
 	
+	@ModelAttribute("noticeCategoryMap")
+	public Map<String, String> noticeCategoryMap() {
+		return NoticeCategoryUtil.getCategoryMap();
+	}
+	
 	//공지사항 목록
 	@GetMapping("/list")
-	public String getList(@RequestParam(defaultValue = "1") int pageNum, String keyfield, String keyword, Model model) {
+	public String getList(@RequestParam(defaultValue = "1") int pageNum, String keyfield, String keyword, String category, Model model) {
 		
 		Map<String,Object> map = new HashMap<String,Object>();
 		
@@ -44,14 +51,33 @@ public class MemberNoticeController {
 			keyfield = "1";
 		}
 		
+		if (category != null) {
+			category = category.trim();
+
+			if (category.length() == 0) {
+				category = null;
+			}
+		}
+
+		if (category != null && !NoticeCategoryUtil.isValid(category)) {
+			category = null;
+		}
+		
 		map.put("keyfield", keyfield);
 		map.put("keyword", keyword);
+		map.put("category", category);
 		
 		//전체/검색 레코드 수
 		int count = memberNoticeService.selectRowCount(map);
 		
 		//페이지 처리
-		PagingUtil page = new PagingUtil(keyfield, keyword, pageNum, count, 10, 10, "list");
+		String addKey = null;
+
+		if (category != null) {
+			addKey = "&category=" + category;
+		}
+
+		PagingUtil page = new PagingUtil(keyfield, keyword, pageNum, count, 10, 10, "list", addKey);
 		
 		List<MemberNoticeVO> list = null;
 		
@@ -67,6 +93,7 @@ public class MemberNoticeController {
 		model.addAttribute("page", page.getPage());
 		model.addAttribute("keyfield", keyfield);
 		model.addAttribute("keyword", keyword);
+		model.addAttribute("category", category);
 		model.addAttribute("activeMenu", "notice");
 		
 		return "thviews/member/member_notice_list";

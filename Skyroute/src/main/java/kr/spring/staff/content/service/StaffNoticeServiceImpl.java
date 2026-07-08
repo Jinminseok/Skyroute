@@ -1,5 +1,7 @@
 package kr.spring.staff.content.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.spring.staff.content.dao.StaffNoticeMapper;
+import kr.spring.staff.content.vo.StaffNoticeCategoryStatsVO;
 import kr.spring.staff.content.vo.StaffNoticeVO;
+import kr.spring.util.NoticeCategoryUtil;
 
 @Service
 @Transactional
@@ -23,7 +27,7 @@ public class StaffNoticeServiceImpl implements StaffNoticeService {
 	}
 
 	@Override
-	public Integer selectRowCount(Map<String, Object> map) {
+	public int selectRowCount(Map<String, Object> map) {
 		return staffNoticeMapper.selectRowCount(map);
 	}
 
@@ -50,5 +54,28 @@ public class StaffNoticeServiceImpl implements StaffNoticeService {
 	@Override
 	public void deleteNotice(Long notice_id) {
 		staffNoticeMapper.deleteNotice(notice_id);
+	}
+
+	@Override
+	public List<StaffNoticeCategoryStatsVO> selectNoticeCategoryStats() {
+		List<StaffNoticeCategoryStatsVO> dbList = staffNoticeMapper.selectNoticeCategoryStats();
+
+		Map<String, Integer> countMap = new HashMap<String, Integer>();
+
+		for (StaffNoticeCategoryStatsVO stats : dbList) {
+			countMap.put(stats.getCategory(), stats.getCnt());
+		}
+
+		List<StaffNoticeCategoryStatsVO> result = new ArrayList<StaffNoticeCategoryStatsVO>();
+
+		for (String category : NoticeCategoryUtil.getCategoryMap().keySet()) {
+			StaffNoticeCategoryStatsVO stats = new StaffNoticeCategoryStatsVO();
+			stats.setCategory(category);
+			stats.setCnt(countMap.getOrDefault(category, 0));
+
+			result.add(stats);
+		}
+
+		return result;
 	}
 }

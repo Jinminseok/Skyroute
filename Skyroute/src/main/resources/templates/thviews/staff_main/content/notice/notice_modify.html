@@ -54,6 +54,24 @@
 				</div>
 
 				<div class="field">
+					<label for="category">카테고리</label>
+					<select th:field="*{category}" id="category" class="select">
+						<option value="">카테고리 선택</option>
+						<option th:each="cat : ${noticeCategoryMap}"
+								th:value="${cat.key}"
+								th:text="${cat.value}">
+							일반
+						</option>
+					</select>
+				
+					<div class="field-error"
+						 th:if="${#fields.hasErrors('category')}"
+						 th:errors="*{category}">
+						카테고리 오류
+					</div>
+				</div>
+
+				<div class="field">
 					<label for="is_public">공개 여부</label>
 					<select th:field="*{is_public}" id="is_public" class="select">
 						<option value="Y">공개</option>

@@ -790,25 +790,30 @@ to {
 }
 
 .notice-row-title {
-	display: inline-block;
-	color: var(--text-dark);
-	font-weight: 700;
-	text-decoration: none;
-	margin-bottom: 4px;
-}
-
-.notice-row-title:hover {
-	color: var(--primary);
-	text-decoration: underline;
-}
-
-.notice-row-summary {
-	color: var(--text-gray);
-	font-size: 12px;
-	max-width: 520px;
+	display: block;
+	max-width: 100%;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	
+	color: var(--text-dark);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.notice-row-title:hover {
+	color: var(--text-dark);
+	text-decoration: none;
+}
+
+.notice-row-summary {
+	max-width: 100%;       /* 기존 520px 제거 */
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.notice-row-title:visited {
+	color: var(--text-dark);
 }
 
 .notice-empty-cell {
@@ -887,4 +892,474 @@ to {
 .event-status-draw {
 	background: #fff7ed;
 	color: #c2410c;
+}
+
+/* =========================================================
+   공지사항 관리 페이지 보정 — staff.css 하단에 추가
+   (기존 .toolbar / .data / .badge 규칙은 건드리지 않고 스코프로만 덮음)
+   ========================================================= */
+
+/* 1) 카드 헤더: '새 공지사항 등록' + NOTICE 배지를 카드 안쪽 상단으로
+      → 버튼 밑에 카드 테두리가 가로줄처럼 보이던 문제 해결 */
+.notice-card {
+	padding: 24px;
+}
+
+.notice-card-head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+/* 2) 컬럼 정렬 — 헤더(th)와 셀(td)을 같은 축으로 통일.
+      .notice-data 로 스코프를 걸어 다른 지상직 테이블에는 영향 없음.
+      기본 중앙 정렬, 3번째 열(제목/본문)만 좌측 정렬 */
+.notice-data th,
+.notice-data td {
+	text-align: center;
+	vertical-align: middle;
+}
+
+.notice-data th:nth-child(3),
+.notice-data td:nth-child(3) {
+	text-align: left;
+}
+
+.notice-title-cell {
+	min-width: 260px;
+}
+
+/* 날짜 셀: 줄바꿈 방지 + 숫자 폭 고정으로 세로 정렬감 확보 */
+.notice-date {
+	white-space: nowrap;
+	color: var(--text-gray);
+	font-variant-numeric: tabular-nums;
+}
+
+/* 관리 버튼 그룹 중앙 정렬 */
+.notice-data .btn-action-group {
+	display: inline-flex;
+	gap: 6px;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: nowrap;
+}
+
+/* 3) 카테고리 배지 (연한 하늘색 pill) */
+.badge-category {
+	background: var(--primary-light);
+	color: var(--primary);
+	text-transform: none;
+}
+
+/* 4) 공개 여부 토글 스위치 — '관리' 칸의 비공개 버튼을 대체 */
+.toggle-form {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	margin: 0;
+}
+
+.toggle {
+	position: relative;
+	display: inline-block;
+	width: 42px;
+	height: 24px;
+	flex-shrink: 0;
+}
+
+.toggle input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.toggle-track {
+	position: absolute;
+	inset: 0;
+	cursor: pointer;
+	background: #CBD5E1;
+	border-radius: 99px;
+	transition: background 0.2s ease;
+}
+
+.toggle-track::before {
+	content: "";
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	left: 3px;
+	top: 3px;
+	background: #FFFFFF;
+	border-radius: 50%;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+	transition: transform 0.2s ease;
+}
+
+.toggle input:checked + .toggle-track {
+	background: var(--ok);
+}
+
+.toggle input:checked + .toggle-track::before {
+	transform: translateX(18px);
+}
+
+.toggle input:focus-visible + .toggle-track {
+	box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.toggle-label {
+	font-size: 12px;
+	font-weight: 600;
+	min-width: 34px;
+	text-align: left;
+}
+
+.toggle-label.is-on {
+	color: var(--ok);
+}
+
+.toggle-label.is-off {
+	color: var(--text-light);
+}
+
+/* =========================================================
+   공지사항 관리 페이지 보정 — staff.css 하단에 추가
+   (기존 .toolbar / .data / .badge / .toggle 규칙은 건드리지 않음)
+   ⚠ 이전에 붙여넣은 '공지사항 관리 페이지 보정' 블록이 있으면
+     그 블록을 지우고 이걸로 교체하세요. (토글 클래스명이 .notice-toggle 로 변경됨)
+   ========================================================= */
+
+/* 1) 카드 헤더: '새 공지사항 등록' + NOTICE 배지를 카드 안쪽 상단으로
+      → 버튼 밑에 카드 테두리가 가로줄처럼 보이던 문제 해결 */
+.notice-card {
+	padding: 24px;
+}
+
+.notice-card-head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+/* 2) 컬럼 정렬 — 헤더(th)와 셀(td)을 같은 축으로 통일.
+      .notice-data 로 스코프를 걸어 다른 지상직 테이블에는 영향 없음.
+      기본 중앙 정렬, 3번째 열(제목/본문)만 좌측 정렬 */
+.notice-data th,
+.notice-data td {
+	text-align: center;
+	vertical-align: middle;
+}
+
+.notice-data th:nth-child(3),
+.notice-data td:nth-child(3) {
+	text-align: left;
+}
+
+.notice-title-cell {
+	max-width: 0;
+	width: 100%;
+	min-width: 200px;
+}
+
+/* 날짜 셀: 줄바꿈 방지 + 숫자 폭 고정으로 세로 정렬감 확보 */
+.notice-date {
+	white-space: nowrap;
+	color: var(--text-gray);
+	font-variant-numeric: tabular-nums;
+}
+
+/* 관리 버튼 그룹 중앙 정렬 */
+.notice-data .btn-action-group {
+	display: inline-flex;
+	gap: 6px;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: nowrap;
+}
+
+/* 3) 카테고리 배지 (연한 하늘색 pill) */
+.badge-category {
+	background: var(--primary-light);
+	color: var(--primary);
+	text-transform: none;
+}
+
+/* 4) 공개 여부 토글 스위치 — '관리' 칸의 비공개 버튼을 대체
+      ★ 기존 staff.html 의 .toggle 과 충돌하지 않도록 .notice-toggle 로 분리 */
+.notice-toggle-form {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	margin: 0;
+}
+
+.notice-toggle {
+	position: relative;
+	display: inline-block;
+	width: 42px;
+	height: 24px;
+	flex-shrink: 0;
+}
+
+.notice-toggle input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.notice-toggle-track {
+	position: absolute;
+	inset: 0;
+	cursor: pointer;
+	background: #CBD5E1;
+	border-radius: 99px;
+	transition: background 0.2s ease;
+}
+
+.notice-toggle-track::before {
+	content: "";
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	left: 3px;
+	top: 3px;
+	background: #FFFFFF;
+	border-radius: 50%;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+	transition: transform 0.2s ease;
+}
+
+.notice-toggle input:checked + .notice-toggle-track {
+	background: var(--ok);
+}
+
+.notice-toggle input:checked + .notice-toggle-track::before {
+	transform: translateX(18px);
+}
+
+.notice-toggle input:focus-visible + .notice-toggle-track {
+	box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.notice-toggle-label {
+	font-size: 12px;
+	font-weight: 600;
+	min-width: 34px;
+	text-align: left;
+}
+
+.notice-toggle-label.is-on {
+	color: var(--ok);
+}
+
+.notice-toggle-label.is-off {
+	color: var(--text-light);
+}
+
+/* 5) 링크형 버튼(<a class="btn">) 기본 밑줄 제거
+      새 공지사항 등록 / 초기화 / 상세 / 수정 등 */
+a.btn,
+a.btn:hover {
+	text-decoration: none;
+}
+
+/* ===== staff notice category stats ===== */
+
+.notice-category-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+	gap: 14px;
+}
+ 
+/* --- 카드 공통 --- */
+.notice-category-stat {
+	--accent: var(--primary);
+	--accent-soft: rgba(2, 132, 199, 0.1);
+ 
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 18px 18px 16px;
+	min-height: 128px;
+ 
+	text-decoration: none;
+	color: inherit;
+	background: var(--bg-white);
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	box-shadow: var(--shadow-sm);
+	overflow: hidden;
+	transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+ 
+/* 상단 액센트 라인 */
+.notice-category-stat::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: var(--accent);
+	opacity: 0.9;
+}
+ 
+.notice-category-stat:hover {
+	transform: translateY(-3px);
+	border-color: var(--accent);
+	box-shadow: var(--shadow);
+}
+ 
+/* 현재 선택된 카테고리 강조 */
+.notice-category-stat.is-active {
+	border-color: var(--accent);
+	box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow-sm);
+}
+ 
+/* --- 상단: 아이콘 칩 + 라벨 --- */
+.ncs-top {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+ 
+.ncs-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border-radius: 9px;
+	background: var(--accent-soft);
+	color: var(--accent);
+	font-size: 18px;
+	flex-shrink: 0;
+}
+ 
+.ncs-label {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-gray);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+ 
+/* --- 값 --- */
+.ncs-value {
+	display: flex;
+	align-items: baseline;
+	justify-content: flex-end;
+	gap: 2px;
+	margin-top: auto;
+	font-size: 30px;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--text-dark);
+}
+ 
+.ncs-unit {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--text-gray);
+}
+ 
+/* --- 전체 대비 비율 바 --- */
+.ncs-bar {
+	height: 5px;
+	border-radius: 99px;
+	background: rgba(15, 23, 42, 0.06);
+	overflow: hidden;
+}
+ 
+.ncs-bar-fill {
+	display: block;
+	height: 100%;
+	min-width: 3px;
+	border-radius: 99px;
+	background: var(--accent);
+	transition: width 0.4s ease;
+}
+ 
+/* --- 코드 태그 --- */
+.ncs-code {
+	font-family: var(--mono);
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	color: var(--text-light);
+}
+ 
+/* --- 전체 공지 (히어로 카드) --- */
+.notice-total-stat {
+	--accent: var(--navy);
+	--accent-soft: rgba(30, 58, 138, 0.1);
+	background: linear-gradient(180deg, rgba(224, 242, 254, 0.6) 0%, rgba(255, 255, 255, 0.92) 60%);
+	border-color: rgba(30, 58, 138, 0.25);
+}
+ 
+/* --- 카테고리별 액센트 컬러 (전체=1번, 이후 카테고리 순서대로) --- */
+.notice-category-stats > a:nth-child(2) { --accent:#0284C7; --accent-soft:rgba(2,132,199,0.10); }   /* 스카이 소식 */
+.notice-category-stats > a:nth-child(3) { --accent:#F2994A; --accent-soft:rgba(242,153,74,0.12); }   /* 유류할증료 */
+.notice-category-stats > a:nth-child(4) { --accent:#00B06B; --accent-soft:rgba(0,176,107,0.12); }    /* 멤버십클럽 */
+.notice-category-stats > a:nth-child(5) { --accent:#8E44AD; --accent-soft:rgba(142,68,173,0.12); }   /* 제휴사 소식 */
+.notice-category-stats > a:nth-child(6) { --accent:#64748B; --accent-soft:rgba(100,116,139,0.12); }  /* 기타 */
+
+/* 카테고리 배지 한 줄 고정 */
+.badge-category {
+	white-space: nowrap;
+}
+
+
+/* 공통(한 줄 고정 등은 기존 규칙 유지) */
+.badge-category {
+	text-transform: none;
+	white-space: nowrap;
+}
+ 
+/* 스카이 소식 — 블루 (패널 #0284C7) */
+.badge-category[data-category="SKY_NEWS"] {
+	background: rgba(2, 132, 199, 0.12);
+	color: #0284C7;
+}
+ 
+/* 유류할증료 — 오렌지 (패널 #F2994A) */
+.badge-category[data-category="FUEL_SURCHARGE"] {
+	background: rgba(242, 153, 74, 0.16);
+	color: #C2410C;
+}
+ 
+/* 멤버십클럽 — 그린 (패널 #00B06B) */
+.badge-category[data-category="MEMBERSHIP_CLUB"] {
+	background: rgba(0, 176, 107, 0.14);
+	color: #047857;
+}
+ 
+/* 제휴사 소식 — 퍼플 (패널 #8E44AD) */
+.badge-category[data-category="PARTNER_NEWS"] {
+	background: rgba(142, 68, 173, 0.14);
+	color: #7E22CE;
+}
+ 
+/* 기타 — 그레이 (패널 #64748B) */
+.badge-category[data-category="ETC"] {
+	background: rgba(100, 116, 139, 0.14);
+	color: #475569;
+}
+
+/* 헤더(등록자 등)·등록자 셀 줄바꿈 방지 */
+.notice-data th {
+	white-space: nowrap;
+}
+
+.notice-data td:nth-child(4) {
+	white-space: nowrap;
 }

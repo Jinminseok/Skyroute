@@ -27,7 +27,7 @@
 				</h2>
 
 				<div class="notice-detail-meta">
-					<span class="stat soon">공개 공지</span>
+					<span class="stat soon" th:text="${notice.categoryLabel}">일반</span>
 
 					<span>
 						<span class="material-symbols-outlined">person</span>
@@ -76,6 +76,11 @@
 				<div class="sl">
 					<span class="k">공지번호</span>
 					<b th:text="${notice.notice_id}">1</b>
+				</div>
+				
+				<div class="sl">
+					<span class="k">카테고리</span>
+					<b th:text="${notice.categoryLabel}">일반</b>
 				</div>
 
 				<div class="sl">

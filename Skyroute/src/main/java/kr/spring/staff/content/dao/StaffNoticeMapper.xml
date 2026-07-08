@@ -7,6 +7,7 @@
 
 	<resultMap type="kr.spring.staff.content.vo.StaffNoticeVO" id="staffNoticeMap">
 		<id property="notice_id" column="notice_id"/>
+		<result property="category" column="category"/>
 		<result property="title" column="title"/>
 		<result property="content" column="content"/>
 		<result property="is_public" column="is_public"/>
@@ -29,21 +30,25 @@
 				<if test="keyfield == 1">
 					AND n.title LIKE '%' || #{keyword} || '%'
 				</if>
-
+	
 				<if test="keyfield == 2">
 					AND (
 						m.name LIKE '%' || #{keyword} || '%'
 						OR m.login_id LIKE '%' || #{keyword} || '%'
 					)
 				</if>
-
+	
 				<if test="keyfield == 3">
 					AND DBMS_LOB.INSTR(n.content, #{keyword}) > 0
 				</if>
 			</if>
-
+	
 			<if test="is_public != null and is_public != ''">
 				AND n.is_public = #{is_public}
+			</if>
+	
+			<if test="category != null and category != ''">
+				AND n.category = #{category}
 			</if>
 		</where>
 	</sql>
@@ -62,6 +67,7 @@
 	<select id="selectList" parameterType="map" resultMap="staffNoticeMap">
 		SELECT
 			n.notice_id,
+			n.category,
 			<![CDATA[
 			REPLACE(REPLACE(n.title, '<', '&lt;'), '>', '&gt;') title,
 			]]>
@@ -79,16 +85,26 @@
 		ORDER BY n.created_at DESC, n.notice_id DESC
 		OFFSET #{skip} ROWS FETCH NEXT #{limit} ROWS ONLY
 	</select>
+	
+	<select id="selectNoticeCategoryStats" resultType="kr.spring.staff.content.vo.StaffNoticeCategoryStatsVO">
+		SELECT
+			NVL(category, 'ETC') category,
+			COUNT(*) cnt
+		FROM NOTICE
+		GROUP BY NVL(category, 'ETC')
+	</select>
 
 
 	<!-- 공지사항 등록 -->
 	<insert id="insertNotice" parameterType="kr.spring.staff.content.vo.StaffNoticeVO">
 		INSERT INTO NOTICE (
+			category,
 			title,
 			content,
 			is_public,
 			created_by
 		) VALUES (
+			#{category},
 			#{title},
 			#{content},
 			NVL(#{is_public, jdbcType=CHAR}, 'Y'),
@@ -103,6 +119,7 @@
 	        resultMap="staffNoticeMap">
 		SELECT
 			n.notice_id,
+			n.category,
 			n.title,
 			n.content,
 			n.is_public,
@@ -122,6 +139,7 @@
 	<update id="updateNotice" parameterType="kr.spring.staff.content.vo.StaffNoticeVO">
 		UPDATE NOTICE
 		SET
+			category = #{category},
 			title = #{title},
 			content = #{content},
 			is_public = #{is_public},

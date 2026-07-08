@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import kr.spring.staff.content.vo.StaffNoticeCategoryStatsVO;
 import kr.spring.staff.content.vo.StaffNoticeVO;
 
 @Mapper
@@ -14,7 +15,10 @@ public interface StaffNoticeMapper {
 	public List<StaffNoticeVO> selectList(Map<String, Object> map);
 
 	// 공지사항 전체/검색 레코드 수
-	public Integer selectRowCount(Map<String, Object> map);
+	public int selectRowCount(Map<String, Object> map);
+	
+	// 공지사항 통계
+	public List<StaffNoticeCategoryStatsVO> selectNoticeCategoryStats();
 
 	// 공지사항 등록
 	public void insertNotice(StaffNoticeVO notice);

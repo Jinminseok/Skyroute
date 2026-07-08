@@ -19,7 +19,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import kr.spring.member.vo.PrincipalDetails;
 import kr.spring.staff.content.service.StaffNoticeService;
+import kr.spring.staff.content.vo.StaffNoticeCategoryStatsVO;
 import kr.spring.staff.content.vo.StaffNoticeVO;
+import kr.spring.util.NoticeCategoryUtil;
 import kr.spring.util.PagingUtil;
 import kr.spring.util.StringUtil;
 import kr.spring.util.ValidationUtil;
@@ -37,6 +39,11 @@ public class StaffNoticeController {
 	public StaffNoticeVO initCommand() {
 		return new StaffNoticeVO();
 	}
+	
+	@ModelAttribute("noticeCategoryMap")
+	public Map<String, String> noticeCategoryMap() {
+		return NoticeCategoryUtil.getCategoryMap();
+	}
 
 
 	// 공지사항 목록
@@ -45,6 +52,7 @@ public class StaffNoticeController {
 						  String keyfield,
 						  String keyword,
 						  String is_public,
+						  String category,
 						  Model model) {
 
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -72,17 +80,38 @@ public class StaffNoticeController {
 		if (is_public != null && !"Y".equals(is_public) && !"N".equals(is_public)) {
 			is_public = null;
 		}
+		
+		if (category != null) {
+			category = category.trim();
+
+			if (category.length() == 0) {
+				category = null;
+			}
+		}
+
+		if (category != null && !NoticeCategoryUtil.isValid(category)) {
+			category = null;
+		}
 
 		map.put("keyfield", keyfield);
 		map.put("keyword", keyword);
 		map.put("is_public", is_public);
+		map.put("category", category);
 
 		int count = staffNoticeService.selectRowCount(map);
 
-		String addKey = null;
+		String addKey = "";
 
 		if (is_public != null) {
-			addKey = "&is_public=" + is_public;
+			addKey += "&is_public=" + is_public;
+		}
+
+		if (category != null) {
+			addKey += "&category=" + category;
+		}
+
+		if (addKey.length() == 0) {
+			addKey = null;
 		}
 
 		PagingUtil page = new PagingUtil(keyfield, keyword, pageNum, count, 10, 10, "list", addKey);
@@ -95,13 +124,26 @@ public class StaffNoticeController {
 
 			list = staffNoticeService.selectList(map);
 		}
+		
 
 		model.addAttribute("count", count);
 		model.addAttribute("list", list);
 		model.addAttribute("page", page.getPage());
+		
+		List<StaffNoticeCategoryStatsVO> categoryStatsList = staffNoticeService.selectNoticeCategoryStats();
+
+		int totalNoticeCount = 0;
+
+		for (StaffNoticeCategoryStatsVO stats : categoryStatsList) {
+			totalNoticeCount += stats.getCnt();
+		}
+
+		model.addAttribute("categoryStatsList", categoryStatsList);
+		model.addAttribute("totalNoticeCount", totalNoticeCount);
 		model.addAttribute("keyfield", keyfield);
 		model.addAttribute("keyword", keyword);
 		model.addAttribute("is_public", is_public);
+		model.addAttribute("category", category);
 		model.addAttribute("activeMenu", "content");
 
 		return "thviews/staff_main/content/notice/notice_list";
@@ -125,6 +167,10 @@ public class StaffNoticeController {
 						 Model model) {
 
 		log.debug("<<지상직 공지사항 등록>> : {}", staffNoticeVO);
+
+		if (!NoticeCategoryUtil.isValid(staffNoticeVO.getCategory())) {
+			result.rejectValue("category", "invalid", "카테고리를 선택해주세요.");
+		}
 
 		if (result.hasErrors()) {
 			ValidationUtil.printErrorFields(result);
@@ -222,6 +268,10 @@ public class StaffNoticeController {
 			model.addAttribute("accessUrl", request.getContextPath() + "/staff/content/notice/list");
 
 			return "thviews/common/resultView";
+		}
+
+		if (!NoticeCategoryUtil.isValid(staffNoticeVO.getCategory())) {
+			result.rejectValue("category", "invalid", "카테고리를 선택해주세요.");
 		}
 
 		if (result.hasErrors()) {

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import kr.spring.member.vo.MemberVO;
+import kr.spring.util.NoticeCategoryUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,6 +15,10 @@ import lombok.ToString;
 public class StaffNoticeVO {
 
 	private long notice_id;
+
+	@NotBlank
+	@Size(max = 30)
+	private String category;
 
 	@NotBlank
 	@Size(max = 200)
@@ -27,10 +32,12 @@ public class StaffNoticeVO {
 
 	private long created_by;
 
-	// DB는 TIMESTAMP지만 화면 출력용이라 String으로 받음
 	private String created_at;
 	private String updated_at;
 
-	// 등록자 이름 출력용
 	private MemberVO memberVO;
+
+	public String getCategoryLabel() {
+		return NoticeCategoryUtil.getLabel(category);
+	}
 }

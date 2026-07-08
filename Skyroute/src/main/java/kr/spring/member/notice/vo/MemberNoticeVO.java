@@ -1,6 +1,7 @@
 package kr.spring.member.notice.vo;
 
 import kr.spring.member.vo.MemberVO;
+import kr.spring.util.NoticeCategoryUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,6 +12,7 @@ import lombok.ToString;
 public class MemberNoticeVO {
 	
 	private long notice_id;
+	private String category;
 	private String title;
 	private String content;
 	private String is_public;
@@ -20,4 +22,8 @@ public class MemberNoticeVO {
 	
 	//작성자 정보
 	private MemberVO memberVO;
+	
+	public String getCategoryLabel() {
+		return NoticeCategoryUtil.getLabel(category);
+	}
 }

@@ -26,6 +26,10 @@
 	<div class="card notice-detail-card">
 
 		<div class="toolbar">
+			<span class="badge badge-scheduled"
+				  th:text="${notice.categoryLabel}">
+				일반
+			</span>
 			<span th:if="${notice.is_public == 'Y'}" class="badge badge-ok">공개</span>
 			<span th:if="${notice.is_public == 'N'}" class="badge badge-muted">비공개</span>
 
@@ -39,6 +43,7 @@
 
 		<div class="notice-detail-meta">
 			<span>공지 ID : <b class="mono" th:text="${notice.notice_id}">1</b></span>
+			<span>카테고리 : <b th:text="${notice.categoryLabel}">일반</b></span>
 			<span>등록자 : <b th:text="${notice.memberVO != null ? notice.memberVO.name : '지상직'}">지상직</b></span>
 			<span>등록일 : <b th:text="${notice.created_at}">2026-07-03 10:00</b></span>
 			<span th:if="${notice.updated_at != null}">수정일 : <b th:text="${notice.updated_at}">2026-07-03 10:00</b></span>
