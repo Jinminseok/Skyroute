@@ -1,4 +1,4 @@
-package kr.spring.staff.notice.vo;
+package kr.spring.staff.content.vo;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

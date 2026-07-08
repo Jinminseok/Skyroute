@@ -1,9 +1,9 @@
-package kr.spring.staff.notice.service;
+package kr.spring.staff.content.service;
 
 import java.util.List;
 import java.util.Map;
 
-import kr.spring.staff.notice.vo.StaffNoticeVO;
+import kr.spring.staff.content.vo.StaffNoticeVO;
 
 public interface StaffNoticeService {
 

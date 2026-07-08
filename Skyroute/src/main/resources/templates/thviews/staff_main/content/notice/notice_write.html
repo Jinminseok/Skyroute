@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>에어 - 공지사항 수정</title>
+<title>에어 - 공지사항 등록</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,12 +20,12 @@
 
 <main class="main">
 
-	<h1>공지사항 수정</h1>
-	<p class="desc">공지사항 제목, 본문, 공개 여부를 수정합니다.</p>
+	<h1>공지사항 등록</h1>
+	<p class="desc">사용자 페이지에 노출할 공지사항을 등록합니다.</p>
 
 	<div class="card">
 
-		<form th:action="@{/staff/notice/modify}"
+		<form th:action="@{/staff/content/notice/write}"
 			  th:object="${staffNoticeVO}"
 			  method="post">
 
@@ -33,8 +33,6 @@
 				   th:if="${_csrf != null}"
 				   th:name="${_csrf.parameterName}"
 				   th:value="${_csrf.token}">
-
-			<input type="hidden" th:field="*{notice_id}">
 
 			<div class="form-grid">
 
@@ -44,7 +42,8 @@
 						   th:field="*{title}"
 						   id="title"
 						   class="input"
-						   maxlength="200">
+						   maxlength="200"
+						   placeholder="공지사항 제목을 입력하세요">
 
 					<div class="field-error"
 						 th:if="${#fields.hasErrors('title')}"
@@ -71,7 +70,8 @@
 					<label for="content">본문</label>
 					<textarea th:field="*{content}"
 							  id="content"
-							  class="textarea notice-textarea"></textarea>
+							  class="textarea notice-textarea"
+							  placeholder="공지사항 본문을 입력하세요"></textarea>
 
 					<div class="field-error"
 						 th:if="${#fields.hasErrors('content')}"
@@ -85,11 +85,11 @@
 			<div class="toolbar" style="margin-top:20px;">
 				<div class="grow"></div>
 
-				<a th:href="@{/staff/notice/detail(notice_id=*{notice_id})}" class="btn btn-ghost">취소</a>
+				<a th:href="@{/staff/content/notice/list}" class="btn btn-ghost">취소</a>
 
 				<button type="submit" class="btn btn-primary">
 					<span class="material-symbols-outlined" style="font-size:18px">save</span>
-					수정
+					등록
 				</button>
 			</div>
 

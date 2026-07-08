@@ -1,4 +1,4 @@
-package kr.spring.staff.notice.service;
+package kr.spring.staff.content.service;
 
 import java.util.List;
 import java.util.Map;
@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.spring.staff.notice.dao.StaffNoticeMapper;
-import kr.spring.staff.notice.vo.StaffNoticeVO;
+import kr.spring.staff.content.dao.StaffNoticeMapper;
+import kr.spring.staff.content.vo.StaffNoticeVO;
 
 @Service
 @Transactional

@@ -95,21 +95,14 @@ public class StaffContentController {
 				.toLocalDate();
 	}
 
-	@GetMapping("/list")
-	public String list(Model model) {
-		setContentModel(model, "notice");
-		return "thviews/staff_main/content/content_list";
-	}
-
-	@GetMapping("/notice")
-	public String notice(Model model) {
-		setContentModel(model, "notice");
-		return "thviews/staff_main/content/content_list";
+	@GetMapping({"", "/list", "/notice"})
+	public String list() {
+		return "redirect:/staff/content/notice/list ";
 	}
 
 	@GetMapping("/event")
 	public String event() {
-		return "redirect:/staff/notice/list?tab=event";
+		return "redirect:/staff/content/notice/list?tab=event";
 	}
 
 	@GetMapping("/faq")

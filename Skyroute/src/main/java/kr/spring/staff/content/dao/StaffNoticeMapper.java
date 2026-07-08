@@ -1,11 +1,11 @@
-package kr.spring.staff.notice.dao;
+package kr.spring.staff.content.dao;
 
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import kr.spring.staff.notice.vo.StaffNoticeVO;
+import kr.spring.staff.content.vo.StaffNoticeVO;
 
 @Mapper
 public interface StaffNoticeMapper {

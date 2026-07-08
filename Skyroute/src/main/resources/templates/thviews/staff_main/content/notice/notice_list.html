@@ -85,7 +85,7 @@
 	</div>
 	<div id="noticeTabContent">
 	<div class="toolbar">
-		<a th:href="@{/staff/notice/write}" class="btn btn-primary">
+		<a th:href="@{/staff/content/notice/write}" class="btn btn-primary">
 			<span class="material-symbols-outlined" style="font-size:18px">edit_document</span>
 			새 공지사항 등록
 		</a>
@@ -97,7 +97,7 @@
 
 	<div class="card">
 
-		<form th:action="@{/staff/notice/list}" method="get" class="toolbar notice-search-form">
+		<form th:action="@{/staff/content/notice/list}" method="get" class="toolbar notice-search-form">
 
 			<select name="keyfield" class="select" style="width:150px;">
 				<option value="1" th:selected="${keyfield == null or keyfield == '1'}">제목</option>
@@ -123,7 +123,7 @@
 				검색
 			</button>
 
-			<a th:href="@{/staff/notice/list}" class="btn btn-ghost">초기화</a>
+			<a th:href="@{/staff/content/notice/list}" class="btn btn-ghost">초기화</a>
 		</form>
 
 		<div class="table-wrap">
@@ -152,7 +152,7 @@
 
 						<td>
 							<a class="notice-row-title"
-							   th:href="@{/staff/notice/detail(notice_id=${notice.notice_id})}"
+							   th:href="@{/staff/content/notice/detail(notice_id=${notice.notice_id})}"
 							   th:text="${notice.title}">
 								공지사항 제목
 							</a>
@@ -179,16 +179,16 @@
 						<td>
 							<div class="btn-action-group">
 								<a class="btn btn-ghost btn-sm"
-								   th:href="@{/staff/notice/detail(notice_id=${notice.notice_id})}">
+								   th:href="@{/staff/content/notice/detail(notice_id=${notice.notice_id})}">
 									상세
 								</a>
 
 								<a class="btn btn-primary btn-sm"
-								   th:href="@{/staff/notice/modify(notice_id=${notice.notice_id})}">
+								   th:href="@{/staff/content/notice/modify(notice_id=${notice.notice_id})}">
 									수정
 								</a>
 
-								<form th:action="@{/staff/notice/public}"
+								<form th:action="@{/staff/content/notice/public}"
 									  method="post"
 									  style="display:inline;"
 									  onsubmit="return confirm('공개 여부를 변경하시겠습니까?');">
@@ -208,7 +208,7 @@
 									</button>
 								</form>
 
-								<form th:action="@{/staff/notice/delete}"
+								<form th:action="@{/staff/content/notice/delete}"
 									  method="post"
 									  style="display:inline;"
 									  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');">

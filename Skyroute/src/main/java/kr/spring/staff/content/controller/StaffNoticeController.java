@@ -1,4 +1,4 @@
-package kr.spring.staff.notice.controller;
+package kr.spring.staff.content.controller;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import kr.spring.member.vo.PrincipalDetails;
-import kr.spring.staff.notice.service.StaffNoticeService;
-import kr.spring.staff.notice.vo.StaffNoticeVO;
+import kr.spring.staff.content.service.StaffNoticeService;
+import kr.spring.staff.content.vo.StaffNoticeVO;
 import kr.spring.util.PagingUtil;
 import kr.spring.util.StringUtil;
 import kr.spring.util.ValidationUtil;
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @Slf4j
-@RequestMapping("/staff/notice")
+@RequestMapping("/staff/content/notice")
 public class StaffNoticeController {
 
 	@Autowired
@@ -104,7 +104,7 @@ public class StaffNoticeController {
 		model.addAttribute("is_public", is_public);
 		model.addAttribute("activeMenu", "content");
 
-		return "thviews/staff_main/notice/notice_list";
+		return "thviews/staff_main/content/notice/notice_list";
 	}
 
 
@@ -112,7 +112,7 @@ public class StaffNoticeController {
 	@GetMapping("/write")
 	public String form(Model model) {
 		model.addAttribute("activeMenu", "content");
-		return "thviews/staff_main/notice/notice_write";
+		return "thviews/staff_main/content/notice/notice_write";
 	}
 
 
@@ -129,7 +129,7 @@ public class StaffNoticeController {
 		if (result.hasErrors()) {
 			ValidationUtil.printErrorFields(result);
 			model.addAttribute("activeMenu", "content");
-			return "thviews/staff_main/notice/notice_write";
+			return "thviews/staff_main/content/notice/notice_write";
 		}
 
 		if (principal == null || principal.getMemberVO() == null) {
@@ -145,7 +145,7 @@ public class StaffNoticeController {
 		staffNoticeService.insertNotice(staffNoticeVO);
 
 		model.addAttribute("message", "공지사항 등록이 완료되었습니다.");
-		model.addAttribute("url", request.getContextPath() + "/staff/notice/list");
+		model.addAttribute("url", request.getContextPath() + "/staff/content/notice/list");
 
 		return "thviews/common/resultAlert";
 	}
@@ -165,7 +165,7 @@ public class StaffNoticeController {
 			model.addAttribute("accessTitle", "공지사항 관리");
 			model.addAttribute("accessMsg", "조회 결과가 없습니다.");
 			model.addAttribute("accessBtn", "목록으로");
-			model.addAttribute("accessUrl", request.getContextPath() + "/staff/notice/list");
+			model.addAttribute("accessUrl", request.getContextPath() + "/staff/content/notice/list");
 
 			return "thviews/common/resultView";
 		}
@@ -176,7 +176,7 @@ public class StaffNoticeController {
 		model.addAttribute("notice", notice);
 		model.addAttribute("activeMenu", "content");
 
-		return "thviews/staff_main/notice/notice_detail";
+		return "thviews/staff_main/content/notice/notice_detail";
 	}
 
 
@@ -192,7 +192,7 @@ public class StaffNoticeController {
 			model.addAttribute("accessTitle", "공지사항 관리");
 			model.addAttribute("accessMsg", "조회 결과가 없습니다.");
 			model.addAttribute("accessBtn", "목록으로");
-			model.addAttribute("accessUrl", request.getContextPath() + "/staff/notice/list");
+			model.addAttribute("accessUrl", request.getContextPath() + "/staff/content/notice/list");
 
 			return "thviews/common/resultView";
 		}
@@ -200,7 +200,7 @@ public class StaffNoticeController {
 		model.addAttribute("staffNoticeVO", notice);
 		model.addAttribute("activeMenu", "content");
 
-		return "thviews/staff_main/notice/notice_modify";
+		return "thviews/staff_main/content/notice/notice_modify";
 	}
 
 
@@ -219,7 +219,7 @@ public class StaffNoticeController {
 			model.addAttribute("accessTitle", "공지사항 관리");
 			model.addAttribute("accessMsg", "조회 결과가 없습니다.");
 			model.addAttribute("accessBtn", "목록으로");
-			model.addAttribute("accessUrl", request.getContextPath() + "/staff/notice/list");
+			model.addAttribute("accessUrl", request.getContextPath() + "/staff/content/notice/list");
 
 			return "thviews/common/resultView";
 		}
@@ -227,13 +227,13 @@ public class StaffNoticeController {
 		if (result.hasErrors()) {
 			ValidationUtil.printErrorFields(result);
 			model.addAttribute("activeMenu", "content");
-			return "thviews/staff_main/notice/notice_modify";
+			return "thviews/staff_main/content/notice/notice_modify";
 		}
 
 		staffNoticeService.updateNotice(staffNoticeVO);
 
 		model.addAttribute("message", "공지사항 수정이 완료되었습니다.");
-		model.addAttribute("url", request.getContextPath() + "/staff/notice/detail?notice_id=" + staffNoticeVO.getNotice_id());
+		model.addAttribute("url", request.getContextPath() + "/staff/content/notice/detail?notice_id=" + staffNoticeVO.getNotice_id());
 
 		return "thviews/common/resultAlert";
 	}
@@ -250,7 +250,7 @@ public class StaffNoticeController {
 			model.addAttribute("accessTitle", "공지사항 관리");
 			model.addAttribute("accessMsg", "잘못된 공개 여부 값입니다.");
 			model.addAttribute("accessBtn", "목록으로");
-			model.addAttribute("accessUrl", request.getContextPath() + "/staff/notice/list");
+			model.addAttribute("accessUrl", request.getContextPath() + "/staff/content/notice/list");
 
 			return "thviews/common/resultView";
 		}
@@ -261,7 +261,7 @@ public class StaffNoticeController {
 			model.addAttribute("accessTitle", "공지사항 관리");
 			model.addAttribute("accessMsg", "조회 결과가 없습니다.");
 			model.addAttribute("accessBtn", "목록으로");
-			model.addAttribute("accessUrl", request.getContextPath() + "/staff/notice/list");
+			model.addAttribute("accessUrl", request.getContextPath() + "/staff/content/notice/list");
 
 			return "thviews/common/resultView";
 		}
@@ -273,7 +273,7 @@ public class StaffNoticeController {
 		staffNoticeService.updateNoticePublic(notice);
 
 		model.addAttribute("message", "공지사항 공개 여부가 변경되었습니다.");
-		model.addAttribute("url", request.getContextPath() + "/staff/notice/list");
+		model.addAttribute("url", request.getContextPath() + "/staff/content/notice/list");
 
 		return "thviews/common/resultAlert";
 	}
@@ -291,7 +291,7 @@ public class StaffNoticeController {
 			model.addAttribute("accessTitle", "공지사항 관리");
 			model.addAttribute("accessMsg", "조회 결과가 없습니다.");
 			model.addAttribute("accessBtn", "목록으로");
-			model.addAttribute("accessUrl", request.getContextPath() + "/staff/notice/list");
+			model.addAttribute("accessUrl", request.getContextPath() + "/staff/content/notice/list");
 
 			return "thviews/common/resultView";
 		}
@@ -299,7 +299,7 @@ public class StaffNoticeController {
 		staffNoticeService.deleteNotice(notice_id);
 
 		model.addAttribute("message", "공지사항이 삭제되었습니다.");
-		model.addAttribute("url", request.getContextPath() + "/staff/notice/list");
+		model.addAttribute("url", request.getContextPath() + "/staff/content/notice/list");
 
 		return "thviews/common/resultAlert";
 	}
