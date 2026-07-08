@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import kr.spring.member.service.MemberMailService;
 import kr.spring.member.service.MemberService;
 import kr.spring.member.vo.MemberVO;
 import kr.spring.member.vo.PrincipalDetails;
@@ -33,6 +35,9 @@ public class MemberUserController {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
+	@Autowired
+	private MemberMailService memberMailService;
+	
 	//자바빈(VO) 초기화
 	@ModelAttribute
 	public MemberVO initCommand() {
@@ -45,32 +50,88 @@ public class MemberUserController {
 		return "thviews/member/memberRegister";
 	}
 	//회원 가입 데이터 처리
-	@PostMapping("/registerUser")
-	public String submit(@Valid MemberVO memberVO, BindingResult result, Model model, HttpServletRequest request) {
-		log.debug("<<회원 가입>> : " + memberVO);
-		
-		//유효성 체크 결과 오류가 있으면 폼 호출
-		if(result.hasErrors()) {
-			//유효성 체크 결과 오류 필드 출력
-			ValidationUtil.printErrorFields(result);
-			return form();
+		@PostMapping("/registerUser")
+		@ResponseBody
+		public String submit(@Valid MemberVO memberVO, BindingResult result, Model model, HttpServletRequest request) {
+			log.debug("<<회원 가입>> : " + memberVO);
+			
+			// 유효성 체크 결과 오류가 있으면 폼 호출 (기존 로직 유지)
+			if(result.hasErrors()) {
+				// 유효성 체크 결과 오류 필드 출력
+				ValidationUtil.printErrorFields(result);
+								
+				return "<script>" +
+				       "alert('입력 정보를 다시 확인해주세요.');" +
+				       "history.back();" +
+				       "</script>";
+			}
+			
+			// 비밀번호 암호화
+			memberVO.setPassword(passwordEncoder.encode(memberVO.getPassword()));
+			
+			// 회원 가입
+			memberService.insertMember(memberVO);
+						
+			String homepageUrl = request.getContextPath() + "/main/home";
+			
+			return "<script>" +
+			       "alert('회원 가입이 완료되었습니다.');" +
+			       "location.href='" + homepageUrl + "';" +
+			       "</script>";
 		}
-		
-		//비밀번호 암호화
-		memberVO.setPassword(passwordEncoder.encode(memberVO.getPassword()));
-		
-		//회원 가입
-		memberService.insertMember(memberVO);
-		
-		//결과 메시지 처리
-		model.addAttribute("accessTitle", "회원 가입");
-		model.addAttribute("accessMsg", "회원 가입이 완료되었습니다.");
-		model.addAttribute("accessBtn", "홈으로");
-		model.addAttribute("accessUrl", request.getContextPath()+"/main/home");
-		
-		return "thviews/common/resultView";
-	}
 	
+	//아이디 찾기 처리
+		@PostMapping("/findId")
+		@ResponseBody
+		public String findId(@RequestParam("name") String name, @RequestParam("email") String email) {
+			
+			// 이름과 이메일로 DB 조회
+			String foundId = memberMailService.findIdByNameAndEmail(name, email);
+			
+			if (foundId == null) {
+				return "일치하는 회원 정보가 존재하지 않습니다.";
+			}
+			
+			// 일치하는 회원이 있을 경우 메일 발송
+			String subject = "[SkyRoute] 아이디 찾기 안내";
+			String body = "안녕하세요 " + name + "님,\n\n가입하신 아이디는 [" + foundId + "] 입니다.";
+			
+			memberMailService.sendMail(email, subject, body);
+			
+			return "입력하신 이메일 주소로 아이디를 발송했습니다.";
+		}
+	
+		// 비밀번호 찾기 (임시 비밀번호 발급) 처리
+		@PostMapping("/findPw")
+		@ResponseBody
+		public String findPw(@RequestParam("id") String id, 
+							 @RequestParam("name") String name, 
+							 @RequestParam("email") String email) {
+			
+			// 아이디, 이름, 이메일 일치 여부 확인
+			boolean isExist = memberMailService.checkMemberForResetPw(id, name, email);
+			
+			if (!isExist) {
+				return "일치하는 회원 정보가 존재하지 않습니다.";
+			}
+			
+			// 8자리 임시 비밀번호 난수 생성
+			String tempPw = java.util.UUID.randomUUID().toString().substring(0, 8);
+			
+			// 생성된 임시 비밀번호를 암호화하여 DB 업데이트
+			String encodedPw = passwordEncoder.encode(tempPw);
+			memberMailService.updatePassword(id, encodedPw);
+			
+			// 임시 비밀번호 메일 발송
+			String subject = "[SkyRoute] 임시 비밀번호 안내";
+			String body = "안녕하세요 " + name + "님,\n\n요청하신 임시 비밀번호는 [" + tempPw + "] 입니다.\n로그인 후 즉시 비밀번호를 변경해 주세요.";
+			
+			memberMailService.sendMail(email, subject, body);
+			
+			return "입력하신 이메일 주소로 임시 비밀번호를 발송했습니다.";
+		}
+	
+		
 	//예약 조회변경 폼 호출
 	@GetMapping("/member_booking")
 	public String bookingForm() {	    

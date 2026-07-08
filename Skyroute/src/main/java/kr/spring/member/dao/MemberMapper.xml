@@ -3,7 +3,25 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
 <mapper namespace="kr.spring.member.dao.MemberMapper"> 
+	<!-- 아이디 찾기 -->
+	<select id="findIdByNameAndEmail" resultType="string">
+		SELECT login_id  FROM MEMBER 
+		WHERE name = #{name} AND email = #{email}
+	</select>
 
+	<!-- 비밀번호 찾기 대상자 확인 (존재하면 1, 아니면 0) -->
+	<select id="checkMemberForResetPw" resultType="boolean">
+		SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+		FROM MEMBER 
+		WHERE login_id = #{id} AND name = #{name} AND email = #{email}
+	</select>
+
+	<!-- 비밀번호 업데이트 -->
+	<update id="updatePassword">
+		UPDATE MEMBER 
+		SET password = #{encodedPw} 
+		WHERE login_id = #{id}
+	</update>
 </mapper>
 
 

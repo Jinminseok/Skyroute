@@ -61,8 +61,9 @@ public class SecurityConfig{
 								"/",
 								"/main/**",
 								"/member/**"
-						).
+						).						
 						permitAll()
+						.requestMatchers("/member/findId", "/member/findPw").permitAll()						
 						// 위 조건 외에는 인증 필요
 						//인증되지 않은 요청은 로그인 페이지로 리다이렉트됨
 						.anyRequest().authenticated() 
