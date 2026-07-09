@@ -299,6 +299,7 @@
 						아쉽지만 이번 이벤트에는 선정되지 않았습니다.
 					</p>
 
+
 					<div class="mypage-event-date">
 						응모
 						<span th:text="${#dates.format(participation.participated_at, 'yyyy.MM.dd')}"></span>
@@ -315,6 +316,7 @@
 			</div>
 
 		</div>
+
 	</section>
 
 	<input type="hidden" id="csrfParameterName" th:value="${_csrf != null ? _csrf.parameterName : '_csrf'}">
