@@ -12,6 +12,9 @@ import kr.spring.staff.content.vo.EventVO;
 @Mapper
 public interface StaffEventMapper {
 	public List<EventVO> selectEventList();
+	public Integer selectEventRowCount(Map<String, Object> map);
+	public List<EventVO> selectEventSearchList(Map<String, Object> map);
+	public Map<String, Object> selectEventStats();
 	public EventVO selectEvent(@Param("event_id") long event_id);
 	public EventVO selectActiveEvent(@Param("event_id") long event_id);
 	public EventVO selectEventForDraw(@Param("event_id") long event_id);
@@ -20,6 +23,7 @@ public interface StaffEventMapper {
 	public void updateEvent(EventVO event);
 	public void hideEvent(@Param("event_id") long event_id);
 	public void endEvent(@Param("event_id") long event_id);
+	public void showEvent(@Param("event_id") long event_id);
 	public void announceEventResult(@Param("event_id") long event_id);
 
 	public List<EventVO> selectActiveEventList();
@@ -37,4 +41,5 @@ public interface StaffEventMapper {
 	public EventParticipationVO selectMyEventParticipation(
 			@Param("event_id") long event_id,
 			@Param("member_id") long member_id);
+	
 }

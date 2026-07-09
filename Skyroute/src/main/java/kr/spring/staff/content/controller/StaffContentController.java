@@ -2,13 +2,18 @@ package kr.spring.staff.content.controller;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import kr.spring.staff.content.service.StaffEventService;
 import kr.spring.staff.content.vo.EventVO;
@@ -31,6 +36,87 @@ public class StaffContentController {
 		model.addAttribute("activeMenu", "content");
 		model.addAttribute("activeTab", activeTab);
 		model.addAttribute("eventList", eventList);
+	}
+
+	private void setEventFragmentModel(int pageNum, String status, String keyword, Model model) {
+		if (keyword != null) {
+			keyword = keyword.trim();
+
+			if (keyword.length() == 0) {
+				keyword = null;
+			}
+		}
+
+		if (status != null) {
+			status = status.trim();
+
+			if (!isValidEventStatus(status)) {
+				status = null;
+			}
+		}
+
+		if (pageNum < 1) {
+			pageNum = 1;
+		}
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("status", status);
+		map.put("keyword", keyword);
+
+		int count = staffEventService.selectEventRowCount(map);
+		int pageSize = 10;
+		int pageBlock = 10;
+		int pageCount = (count + pageSize - 1) / pageSize;
+
+		if (pageCount > 0 && pageNum > pageCount) {
+			pageNum = pageCount;
+		}
+
+		int startPage = 0;
+		int endPage = 0;
+
+		if (pageCount > 0) {
+			startPage = ((pageNum - 1) / pageBlock) * pageBlock + 1;
+			endPage = Math.min(startPage + pageBlock - 1, pageCount);
+		}
+
+		List<EventVO> eventList = new ArrayList<EventVO>();
+
+		if (count > 0) {
+			int skip = (pageNum - 1) * pageSize;
+
+			map.put("skip", skip);
+			map.put("limit", pageSize);
+			map.put("endRow", skip + pageSize);
+
+			eventList = staffEventService.selectEventSearchList(map);
+		}
+
+		LocalDate today = LocalDate.now();
+
+		for (EventVO event : eventList) {
+			setEventDisplayStatus(event, today);
+		}
+
+		model.addAttribute("activeMenu", "content");
+		model.addAttribute("activeTab", "event");
+		model.addAttribute("eventList", eventList);
+		model.addAttribute("eventStats", staffEventService.selectEventStats());
+		model.addAttribute("eventCount", count);
+		model.addAttribute("eventStatus", status);
+		model.addAttribute("eventKeyword", keyword);
+		model.addAttribute("eventPageNum", pageNum);
+		model.addAttribute("eventPageCount", pageCount);
+		model.addAttribute("eventStartPage", startPage);
+		model.addAttribute("eventEndPage", endPage);
+	}
+
+	private boolean isValidEventStatus(String status) {
+		return "visible".equals(status)
+				|| "ongoing".equals(status)
+				|| "scheduled".equals(status)
+				|| "draw".equals(status)
+				|| "ended".equals(status);
 	}
 
 	private void setEventDisplayStatus(EventVO event, LocalDate today) {
@@ -95,16 +181,23 @@ public class StaffContentController {
 				.toLocalDate();
 	}
 
-	@GetMapping({"", "/list", "/notice"})
-	public String list() {
-		return "redirect:/staff/content/notice/list ";
+	@GetMapping("/list")
+	public String list(Model model) {
+		setContentModel(model, "notice");
+		return "thviews/staff_main/content/content_list";
 	}
+
+	/*
+	 * @GetMapping("/notice") public String notice(Model model) {
+	 * setContentModel(model, "notice"); return
+	 * "thviews/staff_main/content/content_list"; }
+	 */
 
 	@GetMapping("/event")
 	public String event() {
-		return "redirect:/staff/content/notice/list?tab=event";
+		return "redirect:/staff/content/notice?tab=event";
 	}
-
+	
 	@GetMapping("/faq")
 	public String faq(Model model) {
 		setContentModel(model, "faq");
@@ -116,10 +209,15 @@ public class StaffContentController {
 		setContentModel(model, "notice");
 		return "thviews/staff_main/content/content_list";
 	}
-	
+
 	@GetMapping("/event/fragment")
-	public String eventFragment(Model model) {
-		setContentModel(model, "event");
+	public String eventFragment(@RequestParam(defaultValue = "1") int pageNum,
+								@RequestParam(required = false) String status,
+								@RequestParam(required = false) String keyword,
+								Model model) {
+		setEventFragmentModel(pageNum, status, keyword, model);
 		return "thviews/staff_main/content/content_list :: eventList";
 	}
+
+	
 }

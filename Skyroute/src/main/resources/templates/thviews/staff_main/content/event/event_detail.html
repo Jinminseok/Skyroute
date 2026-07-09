@@ -366,18 +366,31 @@
 						<div class="event-edit-actions">
 
 							<form th:if="${event.is_visible == 'Y'
-							              and event.result_status != 'ANNOUNCED'}"
-							      th:action="@{/staff/content/event/hide}"
-							      method="post">
-
+										  and event.result_status != 'ANNOUNCED'
+										  and event.progress_status != '종료됨'}"
+								  th:action="@{/staff/content/event/hide}"
+								  method="post"
+								  class="inline-action-form">
 								<input type="hidden" name="event_id" th:value="${event.event_id}">
 								<input type="hidden"
-								       th:if="${_csrf != null}"
-								       th:name="${_csrf.parameterName}"
-								       th:value="${_csrf.token}">
-
-								<button type="submit" class="btn btn-ghost">
-									비노출 처리
+									   name="returnUrl"
+									   th:value="@{/staff/content/event/detail(event_id=${event.event_id})}">
+								<button type="submit" class="btn btn-ghost btn-sm">
+									비노출
+								</button>
+							</form>
+							<form th:if="${event.is_visible != 'Y'
+										  and event.result_status != 'ANNOUNCED'
+										  and event.progress_status != '종료됨'}"
+								  th:action="@{/staff/content/event/show}"
+								  method="post"
+								  class="inline-action-form">
+								<input type="hidden" name="event_id" th:value="${event.event_id}">
+								<input type="hidden"
+									   name="returnUrl"
+									   th:value="@{/staff/content/event/detail(event_id=${event.event_id})}">
+								<button type="submit" class="btn btn-primary btn-sm">
+									노출 처리
 								</button>
 							</form>
 

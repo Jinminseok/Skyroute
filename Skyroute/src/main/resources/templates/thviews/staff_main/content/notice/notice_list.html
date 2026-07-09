@@ -325,6 +325,180 @@ function showNoticeTab(button) {
 	setActiveTab(button);
 }
 
+function renderEventFragment(html) {
+	const temp = document.createElement('div');
+	temp.innerHTML = html;
+
+	const statsFragment = temp.querySelector('#eventStatsFragment');
+	const listFragment = temp.querySelector('#eventListFragment');
+
+	const eventStats = document.getElementById('eventStats');
+	const eventTabContent = document.getElementById('eventTabContent');
+
+	if (!statsFragment || !listFragment) {
+		throw new Error();
+	}
+
+	eventStats.innerHTML = statsFragment.outerHTML;
+	eventTabContent.innerHTML = listFragment.outerHTML;
+	eventTabContent.dataset.loaded = 'true';
+
+	initEventSearch();
+	initEventVisibilityToggle();
+}
+
+function loadEventFragment(params) {
+	const requestParams = new URLSearchParams(params);
+
+	if (!requestParams.get('pageNum')) {
+		requestParams.set('pageNum', '1');
+	}
+
+	return fetch(eventFragmentUrl + '?' + requestParams.toString())
+		.then(response => {
+			if (!response.ok) {
+				throw new Error();
+			}
+
+			return response.text();
+		})
+		.then(renderEventFragment)
+		.catch(() => {
+			document.getElementById('eventStats').innerHTML = '';
+			document.getElementById('eventTabContent').innerHTML = `
+				<div class="card" style="padding:28px; text-align:center;">
+					이벤트 목록을 불러오지 못했습니다.
+				</div>
+			`;
+		});
+}
+
+function initEventSearch() {
+	const eventTabContent = document.getElementById('eventTabContent');
+	const form = eventTabContent.querySelector('#eventSearchForm');
+
+	if (!form) {
+		return;
+	}
+
+	const statusInput = form.querySelector('#eventStatus');
+	const filterButtons = form.querySelectorAll('.event-filter-btn');
+	const resetButton = form.querySelector('#eventSearchReset');
+	const pageButtons = eventTabContent.querySelectorAll('.event-page-btn');
+	const statCards = document.getElementById('eventStats').querySelectorAll('.event-stat-card');
+
+	form.addEventListener('submit', function(event) {
+		event.preventDefault();
+
+		const params = new URLSearchParams(new FormData(form));
+		params.set('pageNum', '1');
+
+		loadEventFragment(params);
+	});
+
+	filterButtons.forEach(button => {
+		button.addEventListener('click', function() {
+			statusInput.value = this.dataset.status;
+
+			const params = new URLSearchParams(new FormData(form));
+			params.set('pageNum', '1');
+
+			loadEventFragment(params);
+		});
+	});
+
+	resetButton.addEventListener('click', function() {
+		form.querySelector('[name="keyword"]').value = '';
+		statusInput.value = '';
+
+		loadEventFragment(new URLSearchParams({
+			pageNum: '1'
+		}));
+	});
+
+	pageButtons.forEach(button => {
+		button.addEventListener('click', function() {
+			if (this.disabled) {
+				return;
+			}
+
+			const params = new URLSearchParams(new FormData(form));
+			params.set('pageNum', this.dataset.page);
+
+			loadEventFragment(params);
+		});
+	});
+	statCards.forEach(card => {
+		card.addEventListener('click', function() {
+			statusInput.value = this.dataset.eventStatus;
+
+			const params = new URLSearchParams(new FormData(form));
+			params.set('pageNum', '1');
+
+			loadEventFragment(params);
+		});
+	});
+}
+
+function getCurrentEventParams() {
+	const eventTabContent = document.getElementById('eventTabContent');
+	const form = eventTabContent.querySelector('#eventSearchForm');
+	const params = new URLSearchParams();
+
+	if (form) {
+		const formParams = new URLSearchParams(new FormData(form));
+
+		formParams.forEach((value, key) => {
+			params.set(key, value);
+		});
+	}
+
+	const activePageButton = eventTabContent.querySelector('.event-page-btn.active');
+
+	if (activePageButton) {
+		params.set('pageNum', activePageButton.dataset.page);
+	} else {
+		params.set('pageNum', '1');
+	}
+
+	return params;
+}
+
+function initEventVisibilityToggle() {
+	const eventTabContent = document.getElementById('eventTabContent');
+	const forms = eventTabContent.querySelectorAll('.event-visibility-form');
+
+	forms.forEach(form => {
+		form.addEventListener('submit', function(event) {
+			event.preventDefault();
+
+			const scrollY = window.scrollY;
+			const params = getCurrentEventParams();
+
+			fetch(this.action, {
+				method: 'POST',
+				body: new FormData(this),
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			})
+				.then(response => {
+					if (!response.ok) {
+						throw new Error();
+					}
+
+					return loadEventFragment(params);
+				})
+				.then(() => {
+					window.scrollTo(0, scrollY);
+				})
+				.catch(() => {
+					alert('상태 변경 중 오류가 발생했습니다.');
+				});
+		});
+	});
+}
+
 function showEventTab(button) {
 	document.getElementById('contentPageTitle').textContent = '이벤트 배너 관리';
 	document.getElementById('contentPageDesc').textContent =
@@ -345,34 +519,11 @@ function showEventTab(button) {
 		return;
 	}
 
-	fetch(eventFragmentUrl)
-		.then(response => {
-			if (!response.ok) {
-				throw new Error();
-			}
-
-			return response.text();
-		})
-		.then(html => {
-			const temp = document.createElement('div');
-			temp.innerHTML = html;
-
-			const statsFragment = temp.querySelector('#eventStatsFragment');
-			const listFragment = temp.querySelector('#eventListFragment');
-
-			eventStats.innerHTML = statsFragment ? statsFragment.outerHTML : '';
-			eventTabContent.innerHTML = listFragment ? listFragment.innerHTML : html;
-			eventTabContent.dataset.loaded = 'true';
-		})
-		.catch(() => {
-			eventStats.innerHTML = '';
-			eventTabContent.innerHTML = `
-				<div class="card" style="padding:28px; text-align:center;">
-					이벤트 목록을 불러오지 못했습니다.
-				</div>
-			`;
-		});
+	loadEventFragment(new URLSearchParams({
+		pageNum: '1'
+	}));
 }
+
 document.addEventListener('DOMContentLoaded', function() {
 	const tab = new URLSearchParams(window.location.search).get('tab');
 

@@ -24,6 +24,20 @@ public class StaffEventServiceImpl implements StaffEventService {
 	public List<EventVO> selectEventList() {
 		return staffEventMapper.selectEventList();
 	}
+	@Override
+	public int selectEventRowCount(Map<String, Object> map) {
+		return staffEventMapper.selectEventRowCount(map);
+	}
+
+	@Override
+	public List<EventVO> selectEventSearchList(Map<String, Object> map) {
+		return staffEventMapper.selectEventSearchList(map);
+	}
+
+	@Override
+	public Map<String, Object> selectEventStats() {
+		return staffEventMapper.selectEventStats();
+	}
 
 	@Override
 	public EventVO selectEvent(long event_id) {
@@ -48,6 +62,10 @@ public class StaffEventServiceImpl implements StaffEventService {
 	@Override
 	public void endEvent(long event_id) {
 		staffEventMapper.endEvent(event_id);
+	}
+	@Override
+	public void showEvent(long event_id) {
+		staffEventMapper.showEvent(event_id);
 	}
 
 	@Override
@@ -163,4 +181,6 @@ public class StaffEventServiceImpl implements StaffEventService {
 	public EventParticipationVO selectMyEventParticipation(long event_id, long member_id) {
 		return staffEventMapper.selectMyEventParticipation(event_id, member_id);
 	}
+	
+	
 }

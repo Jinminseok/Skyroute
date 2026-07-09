@@ -203,43 +203,43 @@
 		<div th:fragment="eventList">
 
 	<div id="eventStatsFragment" class="grid grid-4" style="margin-bottom:24px">
-		<div class="stat">
+		<div class="stat event-stat-card" data-event-status="">
 			<div class="label">
 				<span class="material-symbols-outlined" style="font-size:18px">local_activity</span>
 				전체 이벤트
 			</div>
 			<div class="value">
-				<span th:text="${#lists.size(eventList)}">0</span><span class="unit">건</span>
+				<span th:text="${eventStats.totalCount}">0</span><span class="unit">건</span>
 			</div>
 		</div>
 
-		<div class="stat">
+		<div class="stat event-stat-card" data-event-status="visible">
 			<div class="label">
 				<span class="material-symbols-outlined" style="font-size:18px; color:var(--ok)">visibility</span>
 				메인 노출 중
 			</div>
 			<div class="value" style="color:var(--ok)">
-				<span th:text="${#lists.size(eventList.?[display_visibility == '노출'])}">0</span><span class="unit">건</span>
+				<span th:text="${eventStats.visibleCount}">0</span><span class="unit">건</span>
 			</div>
 		</div>
 
-		<div class="stat">
+		<div class="stat event-stat-card" data-event-status="ongoing">
 			<div class="label">
 				<span class="material-symbols-outlined" style="font-size:18px; color:var(--primary)">play_circle</span>
 				응모 진행 중
 			</div>
 			<div class="value" style="color:var(--primary)">
-				<span th:text="${#lists.size(eventList.?[progress_status == '진행 중'])}">0</span><span class="unit">건</span>
+				<span th:text="${eventStats.ongoingCount}">0</span><span class="unit">건</span>
 			</div>
 		</div>
 
-		<div class="stat">
+		<div class="stat event-stat-card" data-event-status="draw">
 			<div class="label">
 				<span class="material-symbols-outlined" style="font-size:18px; color:var(--warn)">casino</span>
 				추첨 필요
 			</div>
 			<div class="value" style="color:var(--warn)">
-				<span th:text="${#lists.size(eventList.?[drawRequired == true])}">0</span><span class="unit">건</span>
+				<span th:text="${eventStats.drawCount}">0</span><span class="unit">건</span>
 			</div>
 		</div>
 	</div>
@@ -256,6 +256,83 @@
 
 			<span class="badge badge-scheduled">EVENT</span>
 		</div>
+
+		<form id="eventSearchForm" class="event-filter-bar">
+			<div class="event-filter-left">
+				<input type="hidden"
+					   id="eventStatus"
+					   name="status"
+					   th:value="${eventStatus}">
+
+				<div class="event-filter-group">
+					<button type="button"
+							class="event-filter-btn"
+							th:classappend="${eventStatus == null} ? 'active' : ''"
+							data-status="">
+						전체
+					</button>
+					<button type="button"
+							class="event-filter-btn"
+							th:classappend="${eventStatus == 'visible'} ? 'active' : ''"
+							data-status="visible">
+						메인 노출 중
+					</button>
+
+					<button type="button"
+							class="event-filter-btn"
+							th:classappend="${eventStatus == 'ongoing'} ? 'active' : ''"
+							data-status="ongoing">
+						진행 중
+					</button>
+
+					<button type="button"
+							class="event-filter-btn"
+							th:classappend="${eventStatus == 'scheduled'} ? 'active' : ''"
+							data-status="scheduled">
+						진행 예정
+					</button>
+
+					<button type="button"
+							class="event-filter-btn event-filter-draw"
+							th:classappend="${eventStatus == 'draw'} ? 'active' : ''"
+							data-status="draw">
+						추첨 필요
+					</button>
+
+					<button type="button"
+							class="event-filter-btn"
+							th:classappend="${eventStatus == 'ended'} ? 'active' : ''"
+							data-status="ended">
+						종료됨
+					</button>
+				</div>
+
+				<div class="event-search-box">
+					<span class="material-symbols-outlined">search</span>
+
+					<input type="search"
+						   name="keyword"
+						   th:value="${eventKeyword}"
+						   placeholder="이벤트명을 검색하세요"
+						   autocomplete="off">
+				</div>
+
+				<button type="submit" class="btn btn-primary btn-sm">
+					검색
+				</button>
+
+				<button type="button"
+						id="eventSearchReset"
+						class="btn btn-ghost btn-sm">
+					초기화
+				</button>
+			</div>
+
+			<div class="event-result-count">
+				검색 결과
+				<strong th:text="${eventCount}">0</strong>건
+			</div>
+		</form>
 
 		<div class="card">
 			<div class="table-wrap">
@@ -275,8 +352,8 @@
 					</thead>
 
 					<tbody>
-						<tr th:if="${#lists.isEmpty(eventList)}">
-							<td colspan="9">등록된 이벤트가 없습니다.</td>
+						<tr th:if="${eventCount == 0}">
+							<td colspan="9">조건에 맞는 이벤트가 없습니다.</td>
 						</tr>
 
 						<tr th:each="event : ${eventList}">
@@ -364,17 +441,79 @@
 									   class="btn btn-ghost btn-sm">
 										상세
 									</a>
-
+								
 									<a th:if="${event.result_status != 'ANNOUNCED'}"
 									   th:href="@{/staff/content/event/update(event_id=${event.event_id})}"
 									   class="btn btn-primary btn-sm">
 										수정
 									</a>
+								
+									<form th:if="${event.is_visible == 'Y'
+												  and event.result_status != 'ANNOUNCED'
+												  and event.progress_status != '종료됨'}"
+										  th:action="@{/staff/content/event/hide}"
+										  method="post"
+										  class="inline-action-form event-visibility-form">
+										<input type="hidden" name="event_id" th:value="${event.event_id}">
+										<button type="submit" class="btn btn-ghost btn-sm">
+											비노출
+										</button>
+									</form>
+								
+									<form th:if="${event.is_visible != 'Y'
+												  and event.result_status != 'ANNOUNCED'
+												  and event.progress_status != '종료됨'}"
+										  th:action="@{/staff/content/event/show}"
+										  method="post"
+										  class="inline-action-form event-visibility-form">
+										<input type="hidden" name="event_id" th:value="${event.event_id}">
+										<button type="submit" class="btn btn-primary btn-sm">
+											노출
+										</button>
+									</form>
 								</div>
 							</td>
 						</tr>
 					</tbody>
 				</table>
+			</div>
+
+			<div class="event-paging" th:if="${eventPageCount > 1}">
+				<button type="button"
+						class="event-page-btn"
+						data-page="1"
+						th:disabled="${eventPageNum == 1}">
+					<span class="material-symbols-outlined">first_page</span>
+				</button>
+
+				<button type="button"
+						class="event-page-btn"
+						th:attr="data-page=${eventPageNum - 1}"
+						th:disabled="${eventPageNum == 1}">
+					<span class="material-symbols-outlined">chevron_left</span>
+				</button>
+
+				<button type="button"
+						class="event-page-btn"
+						th:each="page : ${#numbers.sequence(eventStartPage, eventEndPage)}"
+						th:classappend="${page == eventPageNum} ? 'active' : ''"
+						th:attr="data-page=${page}"
+						th:text="${page}">
+				</button>
+
+				<button type="button"
+						class="event-page-btn"
+						th:attr="data-page=${eventPageNum + 1}"
+						th:disabled="${eventPageNum == eventPageCount}">
+					<span class="material-symbols-outlined">chevron_right</span>
+				</button>
+
+				<button type="button"
+						class="event-page-btn"
+						th:attr="data-page=${eventPageCount}"
+						th:disabled="${eventPageNum == eventPageCount}">
+					<span class="material-symbols-outlined">last_page</span>
+				</button>
 			</div>
 		</div>
 

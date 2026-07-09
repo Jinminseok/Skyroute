@@ -1,6 +1,7 @@
 package kr.spring.staff.content.service;
 
 import java.util.List;
+import java.util.Map;
 
 import kr.spring.staff.content.vo.EventParticipationVO;
 import kr.spring.staff.content.vo.EventVO;
@@ -13,6 +14,7 @@ public interface StaffEventService {
 	public void updateEvent(EventVO event);
 	public void hideEvent(long event_id);
 	public void endEvent(long event_id);
+	public void showEvent(long event_id);
 	public List<EventParticipationVO> selectParticipationList(long event_id);
 
 	public List<EventVO> selectActiveEventList();
@@ -23,5 +25,7 @@ public interface StaffEventService {
 	public EventVO selectActiveEvent(long event_id);
 	public boolean isParticipated(long event_id, long member_id);
 	public int drawAndAnnounceEvent(long event_id);
-	
+	public int selectEventRowCount(Map<String, Object> map);
+	public List<EventVO> selectEventSearchList(Map<String, Object> map);
+	public Map<String, Object> selectEventStats();
 }

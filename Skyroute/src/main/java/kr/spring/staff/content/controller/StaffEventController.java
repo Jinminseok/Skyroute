@@ -277,4 +277,28 @@ public class StaffEventController {
 	private boolean isBlank(String value) {
 		return value == null || value.trim().isEmpty();
 	}
+	@PostMapping("/event/hide")
+	public String hide(@RequestParam long event_id,
+					   @RequestParam(required = false) String returnUrl) {
+		staffEventService.hideEvent(event_id);
+
+		if (returnUrl != null && returnUrl.startsWith("/staff/content/")) {
+			return "redirect:" + returnUrl;
+		}
+
+		return "redirect:/staff/content/notice?tab=event";
+	}
+
+	@PostMapping("/show")
+	public String show(@RequestParam long event_id,
+					   @RequestParam(required = false) String returnUrl) {
+		staffEventService.showEvent(event_id);
+
+		if (returnUrl != null && returnUrl.startsWith("/staff/content/")) {
+			return "redirect:" + returnUrl;
+		}
+
+		return "redirect:/staff/content/notice?tab=event";
+	}
+	
 }

@@ -5,6 +5,150 @@
 
 <mapper namespace="kr.spring.staff.content.dao.StaffEventMapper">
 
+	<sql id="eventSearchCondition">
+	<where>
+		<if test="keyword != null and keyword != ''">
+			AND UPPER(E.TITLE) LIKE '%' || UPPER(#{keyword}) || '%'
+		</if>
+		<if test="status == 'visible'">
+			AND E.IS_VISIBLE = 'Y'
+			AND E.IS_ENDED = 'N'
+			AND NVL(E.RESULT_STATUS, 'PENDING') = 'PENDING'
+			AND SYSDATE >= E.START_DATE
+			AND SYSDATE &lt; E.END_DATE + 1
+		</if>
+		<if test="status == 'ongoing'">
+			AND E.IS_ENDED = 'N'
+			AND NVL(E.RESULT_STATUS, 'PENDING') != 'ANNOUNCED'
+			AND SYSDATE >= E.START_DATE
+			AND SYSDATE &lt; E.END_DATE + 1
+		</if>
+
+		<if test="status == 'scheduled'">
+			AND E.IS_ENDED = 'N'
+			AND NVL(E.RESULT_STATUS, 'PENDING') = 'PENDING'
+			AND SYSDATE &lt; E.START_DATE
+		</if>
+
+		<if test="status == 'draw'">
+			AND NVL(E.RESULT_STATUS, 'PENDING') = 'PENDING'
+			AND (
+				E.IS_ENDED = 'Y'
+				OR SYSDATE >= E.END_DATE + 1
+			)
+			AND EXISTS (
+				SELECT 1
+				FROM EVENT_PARTICIPATION EP
+				WHERE EP.EVENT_ID = E.EVENT_ID
+			)
+		</if>
+
+		<if test="status == 'ended'">
+			AND (
+				E.IS_ENDED = 'Y'
+				OR NVL(E.RESULT_STATUS, 'PENDING') = 'ANNOUNCED'
+				OR SYSDATE >= E.END_DATE + 1
+			)
+		</if>
+	</where>
+</sql>
+
+<select id="selectEventRowCount"
+		parameterType="map"
+		resultType="int">
+	SELECT COUNT(*)
+	FROM EVENT E
+	<include refid="eventSearchCondition"/>
+</select>
+
+<select id="selectEventSearchList"
+		parameterType="map"
+		resultType="kr.spring.staff.content.vo.EventVO">
+	SELECT EVENT_ID,
+		   TITLE,
+		   START_DATE,
+		   END_DATE,
+		   IMAGE_URL,
+		   IS_VISIBLE,
+		   IS_ENDED,
+		   CREATED_BY,
+		   CREATED_AT,
+		   DISPLAY_ORDER,
+		   WINNER_COUNT,
+		   RESULT_STATUS,
+		   RESULT_ANNOUNCED_AT,
+		   PARTICIPATION_COUNT
+	FROM (
+		SELECT E.EVENT_ID,
+			   E.TITLE,
+			   E.START_DATE,
+			   E.END_DATE,
+			   E.IMAGE_URL,
+			   E.IS_VISIBLE,
+			   E.IS_ENDED,
+			   E.CREATED_BY,
+			   E.CREATED_AT,
+			   E.DISPLAY_ORDER,
+			   E.WINNER_COUNT,
+			   E.RESULT_STATUS,
+			   E.RESULT_ANNOUNCED_AT,
+			   (
+					SELECT COUNT(*)
+					FROM EVENT_PARTICIPATION EP
+					WHERE EP.EVENT_ID = E.EVENT_ID
+			   ) AS PARTICIPATION_COUNT,
+			   ROW_NUMBER() OVER (ORDER BY E.CREATED_AT DESC) AS ROW_NUM
+		FROM EVENT E
+		<include refid="eventSearchCondition"/>
+	)
+	WHERE ROW_NUM > #{skip}
+	  AND ROW_NUM &lt;= #{endRow}
+	ORDER BY ROW_NUM
+</select>
+
+<select id="selectEventStats"
+		resultType="map">
+	SELECT COUNT(*) AS "totalCount",
+		   NVL(SUM(
+			   CASE
+				   WHEN E.IS_VISIBLE = 'Y'
+					AND E.IS_ENDED = 'N'
+					AND NVL(E.RESULT_STATUS, 'PENDING') = 'PENDING'
+					AND SYSDATE >= E.START_DATE
+					AND SYSDATE &lt; E.END_DATE + 1
+				   THEN 1
+				   ELSE 0
+			   END
+		   ), 0) AS "visibleCount",
+		   NVL(SUM(
+			   CASE
+				   WHEN E.IS_ENDED = 'N'
+					AND NVL(E.RESULT_STATUS, 'PENDING') = 'PENDING'
+					AND SYSDATE >= E.START_DATE
+					AND SYSDATE &lt; E.END_DATE + 1
+				   THEN 1
+				   ELSE 0
+			   END
+		   ), 0) AS "ongoingCount",
+		   NVL(SUM(
+			   CASE
+				   WHEN NVL(E.RESULT_STATUS, 'PENDING') = 'PENDING'
+					AND (
+						E.IS_ENDED = 'Y'
+						OR SYSDATE >= E.END_DATE + 1
+					)
+					AND EXISTS (
+						SELECT 1
+						FROM EVENT_PARTICIPATION EP
+						WHERE EP.EVENT_ID = E.EVENT_ID
+					)
+				   THEN 1
+				   ELSE 0
+			   END
+		   ), 0) AS "drawCount"
+	FROM EVENT E
+</select>
+	
 	<select id="selectEventList"
 			resultType="kr.spring.staff.content.vo.EventVO">
 		SELECT EVENT_ID,
@@ -107,6 +251,15 @@ WINNER_COUNT = #{winner_count},
 		WHERE EVENT_ID = #{event_id}
 	</update>
 	
+	<update id="showEvent"
+			parameterType="long">
+		UPDATE EVENT
+		SET IS_VISIBLE = 'Y'
+		WHERE EVENT_ID = #{event_id}
+		  AND IS_ENDED = 'N'
+		  AND NVL(RESULT_STATUS, 'PENDING') = 'PENDING'
+		  AND SYSDATE &lt; END_DATE + 1
+	</update>
 	
 	<update id="endEvent"
 			parameterType="long">
