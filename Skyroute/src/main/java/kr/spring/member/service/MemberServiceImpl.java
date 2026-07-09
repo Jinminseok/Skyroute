@@ -1,5 +1,6 @@
 package kr.spring.member.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -29,6 +30,11 @@ public class MemberServiceImpl implements MemberService{
 	@Override
 	public MemberVO selectMember(Long mem_num) {
 		return memberMapper.selectMember(mem_num);
+	}
+
+	@Override
+	public void updateMemberProfile(MemberVO member) {
+		memberMapper.updateMemberProfile(member);
 	}
 
 

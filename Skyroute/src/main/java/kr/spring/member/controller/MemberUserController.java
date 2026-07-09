@@ -172,12 +172,15 @@ public class MemberUserController {
 	//마이페이지 폼 호출
 	@GetMapping("/member_mypage")
 	public String mypageForm(@AuthenticationPrincipal PrincipalDetails principalDetails,
-							 Model model) {
+			Model model) {
 		if (principalDetails == null || principalDetails.getMemberVO() == null) {
 			return "redirect:/member/login";
 		}
 
-		long memberId = principalDetails.getMemberVO().getMember_id();
+		MemberVO memberVO = principalDetails.getMemberVO();
+		long memberId = memberVO.getMember_id();
+
+		model.addAttribute("member", memberVO);
 
 		model.addAttribute("eventParticipationList",
 				staffEventService.selectMyParticipationList(memberId));
@@ -185,6 +188,43 @@ public class MemberUserController {
 		return "thviews/member/member_mypage";
 	}
 	
+	// 내 정보 관리 - 프로필 수정 처리
+	@PostMapping("/updateProfile")
+	@ResponseBody
+	public String updateProfile(@AuthenticationPrincipal PrincipalDetails principalDetails,
+								MemberVO memberVO) {
+
+		// 🚨 [안전 가드 추가] 세션이 만료되었거나 비어있으면 튕겨내기
+		if (principalDetails == null || principalDetails.getMemberVO() == null) {
+			return "로그인 세션이 만료되었습니다. 다시 로그인 후 시도해 주세요.";
+		}
+
+		// 1. 세션에서 로그인한 유저 원본 객체 가져오기
+		MemberVO loginMember = principalDetails.getMemberVO();
+
+		// 2. 현재 비밀번호 검증
+		if (!passwordEncoder.matches(memberVO.getNow_passwd(), loginMember.getPassword())) {
+			return "현재 비밀번호가 일치하지 않습니다."; 
+		}
+
+		// 3. 식별자(PK) 주입
+		memberVO.setMember_id(loginMember.getMember_id());
+		memberVO.setId(loginMember.getId()); 
+
+		// 4. 새 비밀번호 처리
+		if (memberVO.getPassword() != null && !memberVO.getPassword().trim().isEmpty()) {
+			String encodedNewPw = passwordEncoder.encode(memberVO.getPassword());
+			memberVO.setPassword(encodedNewPw);
+		} else {
+			memberVO.setPassword(loginMember.getPassword());
+		}
+
+		// 5. DB 업데이트 및 세션 갱신
+		memberService.updateMemberProfile(memberVO);
+		principalDetails.setMemberVO(memberVO);
+
+		return "회원 정보 수정이 완료되었습니다."; 
+	}
 	
 	
 	//항공권 세부 검색 폼 호출

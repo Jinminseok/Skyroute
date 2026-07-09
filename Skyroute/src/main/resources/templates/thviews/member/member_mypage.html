@@ -11,15 +11,54 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
-<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
 
 <style>
+/* 내 정보 수정 모달 전용 스타일 코드 */
+.form-group-edit {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-bottom: 14px;
+	text-align: left;
+}
+.form-group-edit label {
+	font-size: 13px;
+	font-weight: 600;
+	color: #334155;
+}
+.form-control-edit {
+	width: 100%;
+	height: 40px;
+	padding: 0 12px;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	font-size: 14px;
+	box-sizing: border-box;
+	outline: none;
+	transition: border-color 0.2s;
+}
+.form-control-edit:focus {
+	border-color: #000000;
+}
+.mypage-profile-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid var(--line);
+	padding-bottom: 20px;
+	margin-bottom: 15px;
+}
+.profile-actions .btn {
+	display: inline-flex;
+	align-items: center;
+}
+
+/* 원본 이벤트 내역 스타일 보존 구역 */
 .mypage-event-list {
 	display: flex;
 	flex-direction: column;
 	gap: 14px;
 }
-
 .mypage-event-card {
 	display: grid;
 	grid-template-columns: 180px 1fr auto;
@@ -27,10 +66,9 @@
 	align-items: center;
 	padding: 18px;
 	background: #fff;
-	border: 1px solid var(--line);
+	border: 1px solid #cbd5e1;
 	border-radius: var(--r);
 }
-
 .mypage-event-image {
 	width: 180px;
 	height: 94px;
@@ -38,7 +76,6 @@
 	object-fit: cover;
 	background: #f1f5f9;
 }
-
 .mypage-event-image-empty {
 	width: 180px;
 	height: 94px;
@@ -50,14 +87,12 @@
 	color: var(--mut);
 	font-size: 12px;
 }
-
 .mypage-event-title {
 	margin: 0 0 7px;
 	color: var(--ink-700);
 	font-size: 17px;
 	font-weight: 600;
 }
-
 .mypage-event-period {
 	display: flex;
 	gap: 7px;
@@ -66,12 +101,10 @@
 	font-family: var(--sans-eng);
 	font-size: 13px;
 }
-
 .mypage-event-date {
 	color: var(--mut);
 	font-size: 12px;
 }
-
 .mypage-event-status {
 	display: inline-flex;
 	align-items: center;
@@ -84,28 +117,24 @@
 	font-size: 12px;
 	font-weight: 600;
 }
-
 .mypage-empty-event {
 	padding: 44px 20px;
-	border: 1px dashed var(--line);
+	border: 1px dashed #cbd5e1;
 	border-radius: var(--r);
 	color: var(--mut);
 	font-size: 14px;
 	text-align: center;
 	background: #fbfdff;
 }
-
 @media (max-width: 760px) {
 	.mypage-event-card {
 		grid-template-columns: 1fr;
 	}
-
 	.mypage-event-image,
 	.mypage-event-image-empty {
 		width: 100%;
 		height: 170px;
 	}
-
 	.mypage-event-card .actions {
 		justify-content: flex-end;
 	}
@@ -114,29 +143,24 @@
 	background: #fff7ed;
 	color: #d97706;
 }
-
 .mypage-event-status.status-winner {
 	background: #ecfdf5;
 	color: #059669;
 }
-
 .mypage-event-status.status-not-selected {
 	background: #f1f5f9;
 	color: #64748b;
 }
-
 .mypage-event-result-text {
 	margin-top: 8px;
 	color: var(--mut);
 	font-size: 12px;
 	line-height: 1.5;
 }
-
 .mypage-event-result-text.winner {
 	color: #059669;
 	font-weight: 500;
 }
-
 .mypage-event-result-text.not-selected {
 	color: #64748b;
 }
@@ -150,33 +174,53 @@
 	<section class="block wrap">
 		<div class="eyebrow">MY PAGE</div>
 
-		<h2 style="margin:6px 0 4px">홍길동님, 반갑습니다</h2>
-
-		<p style="color:var(--mut); margin:0 0 22px; font-weight:300;">
-			누리클럽
-			<b style="color:var(--accent); font-weight:500;">실버</b>
-			· 보유 마일리지
-			<b style="font-family:var(--sans-eng); font-weight:500;">24,580</b>
-		</p>
-
-		<div class="htitle">
-			<h2 style="font-size:18px">나의 예약</h2>
+		<div class="mypage-profile-header">
+			<div>
+				<h2 style="margin:6px 0 4px"><span th:text="${member.name}">홍길동</span>님, 반갑습니다</h2>
+				<p style="color:var(--mut); margin:0; font-weight:300;">
+					누리클럽 <b style="color:var(--accent); font-weight:500;">스카이 멤버</b>
+				</p>
+			</div>
+			<div class="profile-actions">
+				<a href="javascript:void(0);" id="btnOpenEditProfile" class="btn ghost sm">
+				    <span class="material-symbols-outlined" style="font-size:16px; margin-right:4px;">manage_accounts</span>
+				    내 정보 관리
+				</a>
+			</div>
 		</div>
 
-		<div class="trip">
+		<div class="htitle" style="margin-top:40px;">
+			<h2 style="font-size:18px">나의 예약 (다가오는 여정)</h2>
+		</div>
+
+		<div class="trip" style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #fff;">
 			<div>
 				<div style="margin-bottom:6px">
-					<span class="stat soon">출발 임박</span>
-					<span class="pnr">NUX4K9</span>
+					<span class="stat soon" style="background:#eff6ff; color:#3b82f6; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:600; margin-right:6px;">출발 임박</span>
+					<span class="pnr" style="color:var(--mut); font-family:var(--sans-eng); font-size:13px;">NUX4K9</span>
 				</div>
-
-				<div class="rt">ICN → JFK</div>
-				<div class="dt">NU101 · 12.20 (토) · 23A</div>
+				<div class="rt" style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">ICN ➔ JFK</div>
+				<div class="dt" style="font-size: 13px; color: var(--mut);">NU101 · 12.20 (토) · 23A</div>
 			</div>
+			<div class="actions" style="display: flex; gap: 8px;">
+				<button class="btn ghost sm" style="padding: 6px 12px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer;">체크인</button>
+				<button class="btn sm" style="padding: 6px 12px; background: #0052cc; color: #fff; border: none; border-radius: 6px; cursor: pointer;">상세</button>
+			</div>
+		</div>
 
-			<div class="actions">
-				<button class="btn ghost sm">체크인</button>
-				<button class="btn sm">상세</button>
+		<div class="htitle" style="margin-top:40px;">
+			<h2 style="font-size:18px">지난 탑승 내역 (History)</h2>
+		</div>
+
+		<div class="trip" style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #fff;">
+			<div>
+				<div style="margin-bottom:6px">
+					<span class="stat" style="background:#f1f5f9; color:#64748b; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:600; margin-right:6px;">탑승 완료</span>
+					<span class="pnr" style="color:var(--mut); font-family:var(--sans-eng); font-size:13px; margin-right:12px;">예약번호: ABC123</span>
+					<span class="pnr" style="color:var(--mut); font-family:var(--sans-eng); font-size:13px;">탑승일: 2026.05.10</span>
+				</div>
+				<div class="rt" style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">ICN ➔ NRT</div>
+				<div class="dt" style="font-size: 13px; color: var(--mut);">편명: NU202</div>
 			</div>
 		</div>
 
@@ -255,7 +299,6 @@
 						아쉽지만 이번 이벤트에는 선정되지 않았습니다.
 					</p>
 
-
 					<div class="mypage-event-date">
 						응모
 						<span th:text="${#dates.format(participation.participated_at, 'yyyy.MM.dd')}"></span>
@@ -274,6 +317,236 @@
 		</div>
 	</section>
 
+	<input type="hidden" id="csrfParameterName" th:value="${_csrf != null ? _csrf.parameterName : '_csrf'}">
+	<input type="hidden" id="csrfToken" th:value="${_csrf != null ? _csrf.token : ''}">
+
+	<div class="modal-overlay" id="editProfileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+	  <div class="modal-content" style="width: 460px; max-height: 85vh; overflow-y: auto; background-color: #ffffff !important; padding: 30px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); position: relative; box-sizing: border-box;">
+	    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+	      <h2 style="font-size: 18px; font-weight: 600; margin: 0; color: #000000;">내 정보 관리 / 수정</h2>
+	      <span class="material-symbols-outlined modal-close" id="btnCloseEditProfile" style="cursor: pointer; color: #000000; font-size: 24px;">close</span>
+	    </div>
+	    <div class="modal-body">
+	      <div id="formEditProfile">
+	        
+	        <div class="form-group-edit">
+	          <label>이름</label>
+	          <input type="text" id="editName" class="form-control-edit" th:value="${member.name}" readonly style="background:#f1f5f9; color:#64748b; border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editNowPasswd" style="color:var(--accent); font-weight:600;">현재 비밀번호 확인</label>
+	          <input type="password" id="editNowPasswd" class="form-control-edit" placeholder="정보 수정을 위해 현재 비밀번호를 입력하세요" required style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editPassword">새 비밀번호 (변경시에만 입력)</label>
+	          <input type="password" id="editPassword" class="form-control-edit" placeholder="변경할 새 비밀번호를 입력해주세요" style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editPhone">전화번호</label>
+	          <input type="text" id="editPhone" class="form-control-edit" th:value="${member.phone}" placeholder="EX) 010-1234-5678" required style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editEmail">이메일</label>
+	          <input type="text" id="editEmail" class="form-control-edit" th:value="${member.email}" placeholder="EX) airnuri@sky.com" required style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editZipcode">우편번호</label>
+	          <div style="display:flex; gap:8px;">
+	            <input type="text" id="editZipcode" class="form-control-edit" th:value="${member.zipcode}" readonly placeholder="우편번호" style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">            
+	            <input type="button" onclick="execDaumPostcode()" value="우편번호 찾기" class="btn ghost sm" style="min-width: 110px; height: 40px; border-radius: 8px; font-size:12px;">
+	          </div>
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editAddress1">주소</label>
+	          <input type="text" id="editAddress1" class="form-control-edit" th:value="${member.address1}" readonly placeholder="기본 주소" style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">            
+	        </div>
+	
+	        <div class="form-group-edit" style="margin-bottom: 25px;">
+	          <label for="editAddress2">상세 주소</label>
+	          <input type="text" id="editAddress2" class="form-control-edit" th:value="${member.address2}" placeholder="상세 주소를 입력해주세요" style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">            
+	        </div>
+	
+	        <button type="button" id="btnSubmitEditProfile" class="btn-modal-submit" style="width: 100%; height: 44px; background: #000000; color: #ffffff; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 15px; transition: background 0.2s;">
+	            회원정보 수정 완료
+	        </button>
+	      </div>
+	      <div class="modal-result" id="editProfileResult" style="display:none; margin-top:15px; padding:10px; border-radius:8px; font-size:13px; text-align:center;"></div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div id="layer" style="display:none;position:fixed;overflow:hidden;z-index:10000;align-items:center;justify-content:center;border-radius:12px;box-shadow:var(--sh);background:#fff;">
+	    <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnCloseLayer" style="cursor:pointer;position:absolute;right:10px;top:10px;z-index:1;width:18px;" onclick="closeDaumPostcode()" alt="닫기 버튼">
+	</div>
+
+	<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	<script th:inline="javascript">
+	  var element_layer = document.getElementById('layer');
+
+	  function closeDaumPostcode() {
+	      element_layer.style.display = 'none';
+	  }
+
+	  document.addEventListener("DOMContentLoaded", function() {
+	    
+	    var mEdit = document.getElementById('editProfileModal');
+	    var btnOpenEdit = document.getElementById('btnOpenEditProfile');
+	    var btnCloseEdit = document.getElementById('btnCloseEditProfile');
+
+	    if(btnOpenEdit) {
+	      btnOpenEdit.onclick = function(e) {
+	        e.preventDefault();
+	        if(mEdit) mEdit.style.display = 'flex';
+	      };
+	    }
+
+	    if(btnCloseEdit) {
+	      btnCloseEdit.onclick = function() {
+	        if(mEdit) {
+	          mEdit.style.display = 'none';
+	          closeDaumPostcode();
+	          document.getElementById('editNowPasswd').value = '';
+	          document.getElementById('editPassword').value = '';
+	          document.getElementById('editProfileResult').style.display = 'none';
+	        }
+	      };
+	    }
+
+	    var btnSubmitEdit = document.getElementById('btnSubmitEditProfile');
+	    if(btnSubmitEdit) {
+	      btnSubmitEdit.onclick = function(e) {
+	        e.preventDefault();
+
+	        var nowPasswd = document.getElementById('editNowPasswd').value;
+	        var password = document.getElementById('editPassword').value;
+	        var phone = document.getElementById('editPhone').value;
+	        var email = document.getElementById('editEmail').value;
+	        var zipcode = document.getElementById('editZipcode').value;
+	        var address1 = document.getElementById('editAddress1').value;
+	        var address2 = document.getElementById('editAddress2').value;
+	        var resultBox = document.getElementById('editProfileResult');
+
+	        if(!nowPasswd) {
+	          alert("정보 수정을 위해 현재 비밀번호를 입력해 주세요.");
+	          document.getElementById('editNowPasswd').focus();
+	          return;
+	        }
+	        if(!phone || !email) {
+	          alert("전화번호 and 이메일은 필수 입력 사항입니다.");
+	          return;
+	        }
+
+	        var paramName = document.getElementById('csrfParameterName').value;
+	        var tokenValue = document.getElementById('csrfToken').value;
+
+	        var formData = new URLSearchParams();
+	        formData.append('now_passwd', nowPasswd);
+	        formData.append('password', password);
+	        formData.append('phone', phone);
+	        formData.append('email', email);
+	        formData.append('zipcode', zipcode);
+	        formData.append('address1', address1);
+	        formData.append('address2', address2);
+	        formData.append(paramName, tokenValue);
+
+	        // 🌟 [핵심 패치] 상대경로 이슈 해결을 위해 주소 앞에 확실한 절대경로 슬래시('/') 바인딩 마감
+	        fetch('/member/updateProfile', {
+	          method: 'POST',
+	          headers: {
+	            'Content-Type': 'application/x-www-form-urlencoded'
+	          },
+	          body: formData.toString()
+	        })
+	        .then(function(res) { return res.text(); })
+	        .then(function(response) {
+	            resultBox.innerText = response;
+	            resultBox.style.display = 'block';
+	            if(response.includes("완료") || response.includes("성공")) {
+	              resultBox.style.background = "#ecfdf5";
+	              resultBox.style.color = "#059669";
+	              alert("회원 정보 수정이 완료되었습니다.");
+	              setTimeout(function() { location.reload(); }, 1000);
+	            } else {
+	              resultBox.style.background = "#fef2f2";
+	              resultBox.style.color = "#dc2626";
+	              alert(response);
+	            }
+	        })
+	        .catch(function() {
+	            alert('수정 처리 중 서버 에러가 발생했습니다.');
+	        });
+	      };
+	    }
+
+	    window.onclick = function(e) {
+	      if (e.target === mEdit) {
+	        mEdit.style.display = 'none';
+	        closeDaumPostcode();
+	        document.getElementById('editNowPasswd').value = '';
+	        document.getElementById('editPassword').value = '';
+	        document.getElementById('editProfileResult').style.display = 'none';
+	      }
+	    };
+
+	  });
+
+	  function execDaumPostcode() {
+	      new daum.Postcode({
+	          oncomplete: function(data) {
+	              var addr = ''; 
+	              var extraAddr = ''; 
+
+	              if (data.userSelectedType === 'R') { 
+	                  addr = data.roadAddress;
+	              } else { 
+	                  addr = data.jibunAddress;
+	              }
+
+	              if(data.userSelectedType === 'R'){
+	                  if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+	                      extraAddr += data.bname;
+	                  }
+	                  if(data.buildingName !== '' && data.apartment === 'Y'){
+	                      extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+	                  }
+	                  if(extraAddr !== ''){
+	                      extraAddr = ' (' + extraAddr + ')';
+	                  }
+	              } 
+
+	              document.getElementById('editZipcode').value = data.zonecode;
+	              document.getElementById("editAddress1").value = addr + extraAddr;
+	              document.getElementById("editAddress2").focus();
+
+	              element_layer.style.display = 'none';
+	          },
+	          width : '100%',
+	          height : '100%',
+	          maxSuggestItems : 5
+	      }).embed(element_layer);
+
+	      element_layer.style.display = 'block';
+	      initLayerPosition();
+	  }
+
+	  function initLayerPosition(){
+	      var width = 400; 
+	      var height = 480; 
+	      var borderWidth = 1; 
+
+	      element_layer.style.width = width + 'px';
+	      element_layer.style.height = height + 'px';
+	      element_layer.style.border = borderWidth + 'px solid #cbd5e1';
+	      element_layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width)/2 - borderWidth) + 'px';
+	      element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
+	  }
+	</script>
 </div>
 
 </body>

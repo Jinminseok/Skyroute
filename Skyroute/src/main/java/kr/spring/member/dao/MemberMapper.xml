@@ -22,6 +22,24 @@
 		SET password = #{encodedPw} 
 		WHERE login_id = #{id}
 	</update>
+	
+	<!-- 회원 정보 수정 -->
+	<update id="updateMemberProfile">
+		UPDATE MEMBER 
+		SET 
+			password = #{password},
+			phone = #{phone},
+			email = #{email},
+			zipcode = #{zipcode},
+			address1 = #{address1},
+			address2 = #{address2},
+			updated_at = SYSTIMESTAMP  
+		WHERE 
+			member_id = #{member_id} 
+	</update>
+
+	
+	
 </mapper>
 
 

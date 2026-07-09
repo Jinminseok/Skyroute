@@ -1,4 +1,5 @@
 package kr.spring.member.dao;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Insert;
@@ -26,4 +27,7 @@ public interface MemberMapper {
 	public boolean checkMemberForResetPw(@Param("id") String id, @Param("name") String name, @Param("email") String email);
 	// 임시 비밀번호로 업데이트
 	public void updatePassword(@Param("id") String id, @Param("encodedPw") String encodedPw);	
+	//회원정보 수정
+	public void updateMemberProfile(MemberVO member);
+
 }
