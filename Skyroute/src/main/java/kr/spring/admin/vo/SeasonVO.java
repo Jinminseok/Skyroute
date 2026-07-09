@@ -9,4 +9,7 @@ public class SeasonVO {
     private String startDate;
     private String endDate;
     private String isActive;
+    
+    public int getSeasonId() { return this.seasonId; }
+    public String getSeasonName() { return this.seasonName; }
 }

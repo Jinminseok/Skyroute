@@ -70,65 +70,188 @@
 	transform: translateX(20px);
 }
 
-
 /* =========================================
    좌석 설정 모달 (완벽한 일직선 통로 & 스크롤 개선)
    ========================================= */
-.seat-map-container { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px 0; background: #f8fafc; border-radius: 8px; }
-/* gap: 20px이 실제 통로(Aisle) 역할을 합니다 */
-.seat-row { display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; position: relative; }
-.row-number { width: 30px; text-align: center; font-weight: bold; color: #94a3b8; font-size: 13px; position: absolute; left: 10px; }
-
-/* 통로를 일직선으로 맞추기 위한 블록 디자인 */
-.seat-block { display: flex; gap: 6px; align-items: center; }
-.block-left { width: 132px; justify-content: flex-end; }  /* 왼쪽 블록: 우측(통로)으로 밀착 */
-.block-center { width: 178px; justify-content: center; }  /* 중앙 블록: 가운데 정렬 */
-.block-right { width: 132px; justify-content: flex-start; } /* 오른쪽 블록: 좌측(통로)으로 밀착 */
-.block-narrow { width: 132px; justify-content: center; } /* 소형기는 중앙 정렬 유지 */
-
-/* 좌석 박스 */
-.seat-box { width: 40px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; border: 2px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.seat-economy { background: #e2e8f0; color: #334155; } /* 이코노미 회색 */
-.seat-business { background: #bae6fd; color: #0369a1; width: 56px; height: 44px; font-size: 13px; } /* 비즈니스 파란색 */
-.seat-first { background: #fef08a; color: #854d0e; width: 70px; height: 48px; font-size: 14px; } /* 일등석 노란색 */
-.seat-broken { background: #fca5a5 !important; border-color: #ef4444; color: #991b1b; text-decoration: line-through; } /* 고장난 좌석 빨간색 */
-.seat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); filter: brightness(0.95); }
-
-/* 등급별 퀵 내비게이션 탭 */
-.zone-tabs-container { 
-    display: flex; 
-    gap: 10px; 
-    justify-content: center; 
-    padding: 12px 10px;
-    margin-bottom: 5px; 
-    border-bottom: 2px solid #e2e8f0; 
-    position: sticky; 
-    top: -24px; /* 천장 밀착 유지 */
-    
-    /* 블러 효과 */
-    background: rgba(255, 255, 255, 0.75); /* 투명도를*/
-    backdrop-filter: blur(12px); /* 블러 수치 */
-    
-    z-index: 10; 
+.seat-map-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 20px 0;
+	background: #f8fafc;
+	border-radius: 8px;
 }
-.zone-tab { padding: 8px 20px; border-radius: 99px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; }
-.zone-tab:hover { background: #f1f5f9; border-color: #94a3b8; }
 
-/* 클래스 분리선 */
-.exit-separator { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 450px; margin: 25px 0; position: relative; }
-.exit-door { background: #ef4444; color: white; font-size: 10px; padding: 4px 6px; font-weight: bold; border-radius: 3px; letter-spacing: 1px; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3); }
-.exit-center-icons { display: flex; gap: 20px; color: #94a3b8; padding: 0 15px; }
-.exit-center-icons span { font-size: 18px; }
-.exit-line { height: 1px; border-top: 1px dashed #cbd5e1; flex-grow: 1; margin: 0 10px; }
+.seat-row {
+	display: flex;
+	gap: 20px;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	position: relative;
+}
 
+.row-number {
+	width: 30px;
+	text-align: center;
+	font-weight: bold;
+	color: #94a3b8;
+	font-size: 13px;
+	position: absolute;
+	left: 10px;
+}
 
+.seat-block {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+
+.block-left {
+	width: 132px;
+	justify-content: flex-end;
+}
+
+.block-center {
+	width: 178px;
+	justify-content: center;
+}
+
+.block-right {
+	width: 132px;
+	justify-content: flex-start;
+}
+
+.block-narrow {
+	width: 132px;
+	justify-content: center;
+}
+
+.seat-box {
+	width: 40px;
+	height: 40px;
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: 0.2s;
+	border: 2px solid transparent;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.seat-economy {
+	background: #e2e8f0;
+	color: #334155;
+}
+
+.seat-business {
+	background: #bae6fd;
+	color: #0369a1;
+	width: 56px;
+	height: 44px;
+	font-size: 13px;
+}
+
+.seat-first {
+	background: #fef08a;
+	color: #854d0e;
+	width: 70px;
+	height: 48px;
+	font-size: 14px;
+}
+
+.seat-broken {
+	background: #fca5a5 !important;
+	border-color: #ef4444;
+	color: #991b1b;
+	text-decoration: line-through;
+}
+
+.seat-box:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+	filter: brightness(0.95);
+}
+
+.zone-tabs-container {
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+	padding: 12px 10px;
+	margin-bottom: 5px;
+	border-bottom: 2px solid #e2e8f0;
+	position: sticky;
+	top: -24px;
+	background: rgba(255, 255, 255, 0.75);
+	backdrop-filter: blur(12px);
+	z-index: 10;
+}
+
+.zone-tab {
+	padding: 8px 20px;
+	border-radius: 99px;
+	border: 1px solid #cbd5e1;
+	background: #fff;
+	color: #334155;
+	font-weight: bold;
+	cursor: pointer;
+	transition: 0.2s;
+	font-size: 13px;
+}
+
+.zone-tab:hover {
+	background: #f1f5f9;
+	border-color: #94a3b8;
+}
+
+.exit-separator {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	max-width: 450px;
+	margin: 25px 0;
+	position: relative;
+}
+
+.exit-door {
+	background: #ef4444;
+	color: white;
+	font-size: 10px;
+	padding: 4px 6px;
+	font-weight: bold;
+	border-radius: 3px;
+	letter-spacing: 1px;
+	box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.exit-center-icons {
+	display: flex;
+	gap: 20px;
+	color: #94a3b8;
+	padding: 0 15px;
+}
+
+.exit-center-icons span {
+	font-size: 18px;
+}
+
+.exit-line {
+	height: 1px;
+	border-top: 1px dashed #cbd5e1;
+	flex-grow: 1;
+	margin: 0 10px;
+}
 </style>
 
 </head>
 
 <body>
 
-	<!-- 헤더 프래그먼트 불러오기 -->
 	<div th:replace="~{fragments/staff_header :: staffHeader('base')}"></div>
 
 	<main class="main">
@@ -137,7 +260,6 @@
 		<p class="desc">지상직 권한으로 공항, 게이트, 노선, 항공기, 좌석 구성, 기본 운임 데이터를
 			조회·등록·수정·비활성화합니다. 운영 기준 정보는 운항 스케줄 등록과 사용자 항공권 검색의 기반 데이터로 사용됩니다.</p>
 
-		<!-- 상단 요약 통계 -->
 		<div class="grid grid-4" style="margin-bottom: 24px">
 			<div class="stat">
 				<div class="label">
@@ -178,7 +300,6 @@
 			</div>
 		</div>
 
-		<!-- 탭 메뉴 (전환 스크립트 연결됨) -->
 		<div class="tabs">
 			<button type="button" class="active"
 				onclick="subTab('base', 'airport', this)">공항 마스터 (AIRPORT)</button>
@@ -194,9 +315,6 @@
 				운임 (FARE)</button>
 		</div>
 
-		<!-- ============================================== -->
-		<!-- 1. 공항 마스터 탭 -->
-		<!-- ============================================== -->
 		<div id="tab-b-airport" class="sub-page active">
 			<div class="toolbar">
 				<button type="button" class="btn btn-primary"
@@ -235,8 +353,7 @@
 									th:text="${airport.regionName != null ? airport.regionName : airport.regionId}">국내선</td>
 								<td><span class="badge"
 									th:classappend="${airport.flightType == 'DOM' ? 'badge-dom' : 'badge-int'}"
-									th:text="${airport.flightType == 'DOM' ? '국내선' : '국제선'}"></span>
-								</td>
+									th:text="${airport.flightType == 'DOM' ? '국내선' : '국제선'}"></span></td>
 								<td><label class="toggle-switch"> <input
 										type="checkbox" th:checked="${airport.isActive == 'Y'}"
 										th:onchange="toggleAirportActive([[${airport.airportId}]], this)">
@@ -269,9 +386,6 @@
 			</div>
 		</div>
 
-		<!-- ============================================== -->
-		<!-- 2. 게이트 구성 탭 (GATE) 수정된 영역 -->
-		<!-- ============================================== -->
 		<div id="tab-b-gate" class="sub-page">
 			<div class="toolbar">
 				<button type="button" class="btn btn-primary"
@@ -280,14 +394,12 @@
 					게이트 등록
 				</button>
 
-		
 				<div style="margin-left: 15px;">
 					<input type="text" id="gateSearchInput"
 						onkeyup="filterTable('gateSearchInput', 'baseGateTable')"
 						class="input" placeholder="게이트 검색 (공항명, 코드 등)..."
-						style="width: 250px; padding: 6px 12wpx; font-size: 14px;">
+						style="width: 250px; padding: 6px 12px; font-size: 14px;">
 				</div>
-
 
 				<div class="grow"></div>
 				<span class="badge badge-scheduled"> GATE </span>
@@ -347,12 +459,10 @@
 			</div>
 		</div>
 
-		<!-- ============================================== -->
-		<!-- 3. 운항 노선 탭 -->
-		<!-- ============================================== -->
 		<div id="tab-b-route" class="sub-page">
 			<div class="toolbar">
-				<button type="button" class="btn btn-primary" onclick="openRouteModal('register')">
+				<button type="button" class="btn btn-primary"
+					onclick="openRouteModal('register')">
 					<span class="material-symbols-outlined" style="font-size: 18px">add</span>
 					운항 노선 등록
 				</button>
@@ -376,32 +486,40 @@
 						<tbody id="baseRouteTable">
 							<tr th:each="route : ${routeList}">
 								<td th:text="${route.route_id}"></td>
-								<td th:text="${route.dep_airport_name}" style="font-weight: 500;"></td>
-								<td th:text="${route.arr_airport_name}" style="font-weight: 500;"></td>
-								<td>
-									<span class="badge" 
-										th:classappend="${route.flight_type == 'DOM' ? 'badge-dom' : 'badge-int'}" 
-										th:text="${route.flight_type == 'DOM' ? '국내선' : '국제선'}"></span>
+								<td th:text="${route.dep_airport_name}"
+									style="font-weight: 500;"></td>
+								<td th:text="${route.arr_airport_name}"
+									style="font-weight: 500;"></td>
+								<td><span class="badge"
+									th:classappend="${route.flight_type == 'DOM' ? 'badge-dom' : 'badge-int'}"
+									th:text="${route.flight_type == 'DOM' ? '국내선' : '국제선'}"></span>
 								</td>
 								<td th:text="${route.type_name}"></td>
-								<td>
-									<label class="toggle-switch"> 
-										<input type="checkbox" th:checked="${route.is_active == 'Y'}"
-											th:onchange="toggleRouteActive([[${route.route_id}]], this)">
+								<td><label class="toggle-switch"> <input
+										type="checkbox" th:checked="${route.is_active == 'Y'}"
+										th:onchange="toggleRouteActive([[${route.route_id}]], this)">
 										<span class="slider"></span>
-									</label>
-								</td>
+								</label></td>
 								<td>
-									<button type="button" class="btn btn-outline btn-sm" th:onclick="openRouteModal('edit', [[${route}]])">
-										<span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">edit</span> 수정
+									<button type="button" class="btn btn-outline btn-sm"
+										th:onclick="openRouteModal('edit', [[${route}]])">
+										<span class="material-symbols-outlined"
+											style="font-size: 14px; vertical-align: middle;">edit</span>
+										수정
 									</button>
-									<button type="button" class="btn btn-outline btn-sm" style="color: red; border-color: red;" th:onclick="deleteRoute([[${route.route_id}]])">
-										<span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">delete</span> 삭제
+									<button type="button" class="btn btn-outline btn-sm"
+										style="color: red; border-color: red;"
+										th:onclick="deleteRoute([[${route.route_id}]])">
+										<span class="material-symbols-outlined"
+											style="font-size: 14px; vertical-align: middle;">delete</span>
+										삭제
 									</button>
 								</td>
 							</tr>
 							<tr th:if="${#lists.isEmpty(routeList)}">
-								<td colspan="7" style="text-align: center; padding: 20px; color: var(--text-light);">등록된 운항 노선 정보가 없습니다.</td>
+								<td colspan="7"
+									style="text-align: center; padding: 20px; color: var(--text-light);">등록된
+									운항 노선 정보가 없습니다.</td>
 							</tr>
 						</tbody>
 					</table>
@@ -409,12 +527,8 @@
 			</div>
 		</div>
 
-		<!-- ============================================== -->
-		<!-- 4. 보유 항공기 탭 -->
-		<!-- ============================================== -->
 		<div id="tab-b-aircraft" class="sub-page">
 			<div class="toolbar">
-
 				<div class="grow"></div>
 				<span class="badge badge-scheduled"> AIRCRAFT </span>
 			</div>
@@ -465,13 +579,12 @@
 			</div>
 		</div>
 
-		<!-- ============================================== -->
-		<!-- 5. 기재별 좌석 탭 -->
-		<!-- ============================================== -->
 		<div id="tab-b-seat" class="sub-page">
 			<div class="toolbar">
-				<button type="button" class="btn btn-primary" onclick="openSeatModal()">
-					<span class="material-symbols-outlined" style="font-size: 18px">grid_on</span> 좌석 등록 및 자동 생성
+				<button type="button" class="btn btn-primary"
+					onclick="openSeatModal()">
+					<span class="material-symbols-outlined" style="font-size: 18px">grid_on</span>
+					좌석 등록 및 자동 생성
 				</button>
 				<div class="grow"></div>
 				<span class="badge badge-scheduled"> SEAT </span>
@@ -490,24 +603,32 @@
 						</thead>
 						<tbody id="baseSeatTable">
 							<tr th:each="summary : ${seatSummaryList}">
-							    <td th:text="${summary.aircraft_id}"></td>
-							    <td th:text="${summary.reg_no}" style="font-weight: bold; color: var(--text-dark);"></td>
-							    <td th:text="${summary.model_name}"></td>
-							    <td>
-							        <span th:if="${summary.total_generated > 0}" style="color: var(--ok); font-weight: bold;" th:text="${summary.total_generated} + '석'"></span>
-							        <span th:if="${summary.total_generated == 0}" style="color: var(--text-light);">미생성</span>
-							    </td>
-							    <td>
-							        <button type="button" class="btn btn-outline btn-sm" th:if="${summary.total_generated > 0}" 
-                                            th:onclick="openVisualSeatMap([[${summary.aircraft_id}]], [[${summary.reg_no}]])">
-										<span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">view_comfy</span> 좌석 배치 확인 및 수정
+								<td th:text="${summary.aircraft_id}"></td>
+								<td th:text="${summary.reg_no}"
+									style="font-weight: bold; color: var(--text-dark);"></td>
+								<td th:text="${summary.model_name}"></td>
+								<td><span th:if="${summary.total_generated > 0}"
+									style="color: var(--ok); font-weight: bold;"
+									th:text="${summary.total_generated} + '석'"></span> <span
+									th:if="${summary.total_generated == 0}"
+									style="color: var(--text-light);">미생성</span></td>
+								<td>
+									<button type="button" class="btn btn-outline btn-sm"
+										th:if="${summary.total_generated > 0}"
+										th:onclick="openVisualSeatMap([[${summary.aircraft_id}]], [[${summary.reg_no}]])">
+										<span class="material-symbols-outlined"
+											style="font-size: 14px; vertical-align: middle;">view_comfy</span>
+										좌석 배치 확인 및 수정
 									</button>
-									<button type="button" class="btn btn-outline btn-sm" style="color: #ef4444; border-color: #ef4444; margin-left: 5px;" 
-									        th:if="${summary.total_generated > 0}" 
-									        th:onclick="resetSeats([[${summary.aircraft_id}]], [[${summary.reg_no}]])">
-									    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">delete_sweep</span> 초기화
+									<button type="button" class="btn btn-outline btn-sm"
+										style="color: #ef4444; border-color: #ef4444; margin-left: 5px;"
+										th:if="${summary.total_generated > 0}"
+										th:onclick="resetSeats([[${summary.aircraft_id}]], [[${summary.reg_no}]])">
+										<span class="material-symbols-outlined"
+											style="font-size: 14px; vertical-align: middle;">delete_sweep</span>
+										초기화
 									</button>
-							    </td>
+								</td>
 							</tr>
 						</tbody>
 					</table>
@@ -515,16 +636,21 @@
 			</div>
 		</div>
 
-		<!-- ============================================== -->
-		<!-- 6. 등급/시즌별 운임 탭 -->
-		<!-- ============================================== -->
 		<div id="tab-b-fare" class="sub-page">
 			<div class="toolbar">
 				<button type="button" class="btn btn-primary"
-					onclick="openBaseModal('fare', '등록')">
+					onclick="openFareModal('register')">
 					<span class="material-symbols-outlined" style="font-size: 18px">add</span>
 					운임 기준 등록
 				</button>
+
+				<div style="margin-left: 15px;">
+					<input type="text" id="fareSearchInput"
+						onkeyup="filterTable('fareSearchInput', 'baseFareTable')"
+						class="input" placeholder="운임 검색 (노선, 등급 등)..."
+						style="width: 250px; padding: 6px 12px; font-size: 14px;">
+				</div>
+
 				<div class="grow"></div>
 				<span class="badge badge-scheduled"> FARE </span>
 			</div>
@@ -534,15 +660,39 @@
 						<thead>
 							<tr>
 								<th>운임 ID</th>
-								<th>노선 ID</th>
-								<th>좌석 등급 ID</th>
-								<th>시즌 ID</th>
+								<th>노선 (출발 ➔ 도착)</th>
+								<th>좌석 등급</th>
+								<th>시즌</th>
 								<th>가격액 (원)</th>
 								<th>사용 여부</th>
 								<th>기준정보 관리</th>
 							</tr>
 						</thead>
 						<tbody id="baseFareTable">
+							<tr th:each="fare : ${fareList}">
+								<td th:text="${fare.fare_id}"></td>
+								<td
+									th:text="|${fare.departure_airport_code} ➔ ${fare.arrival_airport_code}|"
+									style="font-weight: 500;"></td>
+								<td th:text="${fare.class_name}"></td>
+								<td th:text="${fare.season_name}"></td>
+								<td
+									th:text="${#numbers.formatInteger(fare.price, 3, 'COMMA')} + ' 원'"
+									style="color: var(--primary); font-weight: bold;"></td>
+								<td><label class="toggle-switch"> <input
+										type="checkbox" th:checked="${fare.is_active == 'Y'}"
+										th:onchange="toggleFareActive([[${fare.fare_id}]], this)">
+										<span class="slider"></span>
+								</label></td>
+								<td>
+									<button type="button" class="btn btn-outline btn-sm"
+										th:onclick="openFareModal('edit', [[${fare}]])">
+										<span class="material-symbols-outlined"
+											style="font-size: 14px; vertical-align: middle;">edit</span>
+										수정
+									</button>
+								</td>
+							</tr>
 							<tr th:if="${#lists.isEmpty(fareList)}">
 								<td colspan="7"
 									style="text-align: center; padding: 20px; color: var(--text-light);">등록된
@@ -556,9 +706,6 @@
 
 	</main>
 
-	<!-- ============================================== -->
-	<!-- 공항 등록 / 수정 전용 모달창 -->
-	<!-- ============================================== -->
 	<div class="modal-overlay" id="globalModal" style="display: none;">
 		<div class="modal">
 			<div class="modal-head">
@@ -573,30 +720,25 @@
 			<div class="modal-body" id="globalModalBody">
 				<form id="airportForm">
 					<input type="hidden" id="modalAirportId" name="airportId">
-
 					<div class="form-grid">
 						<div class="field">
 							<label>IATA 코드 *</label> <input type="text" id="modalIataCode"
 								name="iataCode" class="input" placeholder="예: GMP" required
 								maxlength="3" oninput="this.value = this.value.toUpperCase()">
 						</div>
-
 						<div class="field">
 							<label>공항명 *</label> <input type="text" id="modalAirportName"
 								name="airportName" class="input" placeholder="예: 서울 김포공항"
 								required>
 						</div>
-
 						<div class="field">
 							<label>국가 *</label> <input type="text" id="modalCountry"
 								name="country" class="input" value="대한민국" required>
 						</div>
-
 						<div class="field">
 							<label>타임존 *</label> <input type="text" id="modalTimezone"
 								name="timezone" class="input" value="Asia/Seoul" required>
 						</div>
-
 						<div class="field">
 							<label>권역 선택 *</label> <select id="modalRegionId" name="regionId"
 								class="select" required>
@@ -608,7 +750,6 @@
 								<option value="5">유럽 (5)</option>
 							</select>
 						</div>
-
 						<div class="field">
 							<label>국내/국제선 구분 *</label> <select id="modalFlightType"
 								name="flightType" class="select" required>
@@ -616,7 +757,6 @@
 								<option value="INT">INT (국제선)</option>
 							</select>
 						</div>
-
 						<div class="field full">
 							<label>사용 여부</label> <select id="modalIsActive" name="isActive"
 								class="select">
@@ -637,9 +777,6 @@
 		</div>
 	</div>
 
-	<!-- ============================================== -->
-	<!-- 게이트 등록 / 수정 전용 모달창 추가 -->
-	<!-- ============================================== -->
 	<div class="modal-overlay" id="gateModal" style="display: none;">
 		<div class="modal">
 			<div class="modal-head">
@@ -653,26 +790,21 @@
 
 			<div class="modal-body" id="gateModalBody">
 				<form id="gateForm">
-					<!-- 숨김 처리된 게이트 ID (수정용) -->
 					<input type="hidden" id="modalGateId" name="gateId">
-
 					<div class="form-grid">
 						<div class="field full">
 							<label>소속 공항 *</label> <select id="modalGateAirportId"
 								name="airportId" class="select" required>
 								<option value="">공항을 선택하세요</option>
-								<!-- 서버에서 넘겨받은 공항 리스트 바인딩 -->
 								<option th:each="airport : ${airportList}"
 									th:value="${airport.airportId}"
 									th:text="|${airport.airportName} (${airport.iataCode})|"></option>
 							</select>
 						</div>
-
 						<div class="field">
 							<label>게이트 코드 *</label> <input type="text" id="modalGateCode"
 								name="gateCode" class="input" placeholder="예: A1, 10B" required>
 						</div>
-
 						<div class="field">
 							<label>게이트 구역 (AREA) *</label> <select id="modalGateAreaId"
 								name="gateAreaId" class="select" required>
@@ -683,7 +815,6 @@
 								<option value="4">D구역</option>
 							</select>
 						</div>
-
 						<div class="field full">
 							<label>국내/국제선 구분 *</label> <select id="modalGateFlightType"
 								name="flightType" class="select" required>
@@ -704,9 +835,6 @@
 		</div>
 	</div>
 
-	<!-- ============================================== -->
-	<!-- 좌석 등급 범위 생성 전용 모달창 -->
-	<!-- ============================================== -->
 	<div class="modal-overlay" id="seatModal" style="display: none;">
 		<div class="modal">
 			<div class="modal-head">
@@ -730,16 +858,15 @@
 				<form id="seatForm">
 					<div class="form-grid">
 						<div class="field full">
-							<label>배치할 항공기 선택 *</label>
-							<select id="seatAircraftId" name="aircraft_id" class="select" required>
-							    <option value="">등록된 항공기를 선택하세요</option>
-							    <option th:each="aircraft : ${aircraftList}"
-							            th:value="${aircraft.aircraft_id}"
-							            th:data-total-seats="${aircraft.total_seats}" 
-							            th:text="|${aircraft.reg_no} (${aircraft.model_name} / 총 ${aircraft.total_seats}석)|"></option>
+							<label>배치할 항공기 선택 *</label> <select id="seatAircraftId"
+								name="aircraft_id" class="select" required>
+								<option value="">등록된 항공기를 선택하세요</option>
+								<option th:each="aircraft : ${aircraftList}"
+									th:value="${aircraft.aircraft_id}"
+									th:data-total-seats="${aircraft.total_seats}"
+									th:text="|${aircraft.reg_no} (${aircraft.model_name} / 총 ${aircraft.total_seats}석)|"></option>
 							</select>
 						</div>
-
 						<div class="field full">
 							<label>좌석 등급명 (Class) *</label> <select id="seatClassName"
 								name="class_name" class="select" required>
@@ -749,19 +876,16 @@
 								<option value="이코노미">이코노미 (Economy)</option>
 							</select>
 						</div>
-
 						<div class="field">
 							<label>시작 행 (Start Row) *</label> <input type="number"
 								id="seatStartRow" name="start_row" class="input"
 								placeholder="예: 1" required min="1" max="100">
 						</div>
-
 						<div class="field">
 							<label>종료 행 (End Row) *</label> <input type="number"
 								id="seatEndRow" name="end_row" class="input" placeholder="예: 10"
 								required min="1" max="100">
 						</div>
-
 						<div class="field full">
 							<label>가로 좌석 수 (Columns) *</label> <input type="number"
 								id="seatColumns" name="seat_columns" class="input"
@@ -780,40 +904,36 @@
 			</div>
 		</div>
 	</div>
-	
-	<!-- ============================================== -->
-	<!-- 좌석 설정 모달 창 -->
-	<!-- ============================================== -->
+
 	<div class="modal-overlay" id="visualSeatModal" style="display: none;">
-	    <div class="modal" style="width: 700px; max-width: 95vw;">
-	        <div class="modal-head">
-	            <div><h3 id="visualSeatTitle">HL1234 좌석 배치도</h3></div>
-	            <button type="button" class="modal-close" onclick="document.getElementById('visualSeatModal').style.display='none'">
-	                <span class="material-symbols-outlined">close</span>
-	            </button>
-	        </div>
-	        <div class="modal-body">
-	            <div style="text-align:center; font-size: 13px; color: #64748b; margin-bottom: 15px;">
-	                * 구역을 선택하여 빠르게 확인하세요. 좌석을 클릭하면 상태를 변경할 수 있습니다.
-	            </div>
-                
-	            <div id="seatZoneTabs" class="zone-tabs-container"></div>
-                
-	            <div id="seatMapArea" class="seat-map-container"></div>
-	        </div>
-	    </div>
+		<div class="modal" style="width: 700px; max-width: 95vw;">
+			<div class="modal-head">
+				<div>
+					<h3 id="visualSeatTitle">HL1234 좌석 배치도</h3>
+				</div>
+				<button type="button" class="modal-close"
+					onclick="document.getElementById('visualSeatModal').style.display='none'">
+					<span class="material-symbols-outlined">close</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div
+					style="text-align: center; font-size: 13px; color: #64748b; margin-bottom: 15px;">
+					* 구역을 선택하여 빠르게 확인하세요. 좌석을 클릭하면 상태를 변경할 수 있습니다.</div>
+				<div id="seatZoneTabs" class="zone-tabs-container"></div>
+				<div id="seatMapArea" class="seat-map-container"></div>
+			</div>
+		</div>
 	</div>
-	
-	<!-- ============================================== -->
-	<!-- 운항 노선 모달 창 -->
-	<!-- ============================================== -->
+
 	<div class="modal-overlay" id="routeModal" style="display: none;">
 		<div class="modal">
 			<div class="modal-head">
 				<div>
 					<h3 id="routeModalTitle">운항 노선 등록</h3>
 				</div>
-				<button type="button" class="modal-close" onclick="closeRouteModal()">
+				<button type="button" class="modal-close"
+					onclick="closeRouteModal()">
 					<span class="material-symbols-outlined">close</span>
 				</button>
 			</div>
@@ -821,37 +941,38 @@
 			<div class="modal-body" id="routeModalBody">
 				<form id="routeForm">
 					<input type="hidden" id="modalRouteId" name="route_id">
-
 					<div class="form-grid">
 						<div class="field">
-							<label>출발 공항 *</label> 
-							<select id="modalDepAirportId" name="departure_airport_id" class="select" required>
+							<label>출발 공항 *</label> <select id="modalDepAirportId"
+								name="departure_airport_id" class="select" required>
 								<option value="">출발 공항을 선택하세요</option>
-								<option th:each="airport : ${airportList}" th:value="${airport.airportId}" th:text="|${airport.airportName} (${airport.iataCode})|"></option>
+								<option th:each="airport : ${airportList}"
+									th:value="${airport.airportId}"
+									th:text="|${airport.airportName} (${airport.iataCode})|"></option>
 							</select>
 						</div>
-
 						<div class="field">
-							<label>도착 공항 *</label> 
-							<select id="modalArrAirportId" name="arrival_airport_id" class="select" required>
+							<label>도착 공항 *</label> <select id="modalArrAirportId"
+								name="arrival_airport_id" class="select" required>
 								<option value="">도착 공항을 선택하세요</option>
-								<option th:each="airport : ${airportList}" th:value="${airport.airportId}" th:text="|${airport.airportName} (${airport.iataCode})|"></option>
+								<option th:each="airport : ${airportList}"
+									th:value="${airport.airportId}"
+									th:text="|${airport.airportName} (${airport.iataCode})|"></option>
 							</select>
 						</div>
-
 						<div class="field">
-							<label>국내/국제선 구분 *</label> 
-							<select id="modalRouteFlightType" name="flight_type" class="select" required>
+							<label>국내/국제선 구분 *</label> <select id="modalRouteFlightType"
+								name="flight_type" class="select" required>
 								<option value="DOM">DOM (국내선)</option>
 								<option value="INT">INT (국제선)</option>
 							</select>
 						</div>
-
 						<div class="field">
-							<label>노선 유형 *</label> 
-							<select id="modalRouteTypeId" name="route_type_id" class="select" required>
+							<label>노선 유형 *</label> <select id="modalRouteTypeId"
+								name="route_type_id" class="select" required>
 								<option value="">유형을 선택하세요</option>
-                                <option th:each="type : ${routeTypeList}" th:value="${type.routeTypeId}" th:text="${type.typeName}"></option>
+								<option th:each="type : ${routeTypeList}"
+									th:value="${type.routeTypeId}" th:text="${type.typeName}"></option>
 							</select>
 						</div>
 					</div>
@@ -859,11 +980,79 @@
 			</div>
 
 			<div class="modal-foot">
-				<button type="button" class="btn btn-ghost" onclick="closeRouteModal()">취소</button>
-				<button type="button" class="btn btn-primary" onclick="saveRouteData()">데이터 저장</button>
+				<button type="button" class="btn btn-ghost"
+					onclick="closeRouteModal()">취소</button>
+				<button type="button" class="btn btn-primary"
+					onclick="saveRouteData()">데이터 저장</button>
 			</div>
 		</div>
 	</div>
+<div class="modal-overlay" id="fareModal" style="display: none;">
+    <div class="modal">
+        <div class="modal-head">
+            <div>
+                <h3 id="fareModalTitle">운임 기준 등록</h3>
+            </div>
+            <button type="button" class="modal-close" onclick="closeFareModal()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="modal-body" id="fareModalBody">
+            <div style="background: #fffbeb; color: #b45309; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; line-height: 1.5; display: none;" id="fareEditNotice">
+                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: -3px;">info</span> 
+                <strong>수정 안내:</strong> 등록된 운임 조합(노선, 등급, 시즌)은 변경할 수 없으며, <strong>가격액만 수정 가능</strong>합니다.
+            </div>
+
+            <form id="fareForm">
+                <input type="hidden" id="modalFareId" name="fare_id">
+
+                <div class="form-grid">
+                    <div class="field full">
+                        <label>적용 노선 *</label> 
+                        <select id="modalFareRouteId" name="route_id" class="select" required>
+                            <option value="">노선을 선택하세요</option>
+                            <option th:each="route : ${routeList}"
+                                    th:value="${route.route_id}"
+                                    th:text="|${route.dep_airport_name} ➔ ${route.arr_airport_name} (${route.type_name})|"></option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>좌석 등급 *</label> 
+                        <select id="modalFareSeatClassId" name="seat_class_id" class="select" required>
+                            <option value="">등급을 선택하세요</option>
+                            <option th:each="sc : ${seatClassList}" 
+                                    th:value="${sc.seat_class_id}" 
+                                    th:text="${sc.class_name}"></option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>적용 시즌 *</label> 
+                        <select id="modalFareSeasonId" name="season_id" class="select" required>
+                            <option value="">시즌을 선택하세요</option>
+                            <option th:each="s : ${seasonList}" 
+                                    th:value="${s.seasonId}" 
+                                    th:text="${s.seasonName}"></option>
+                        </select>
+                    </div>
+
+                    <div class="field full">
+                        <label>가격액 (원) *</label> 
+                        <input type="number" id="modalFarePrice" name="price" class="input" placeholder="예: 250000" required min="1000" step="1000">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-foot">
+            <button type="button" class="btn btn-ghost" onclick="closeFareModal()">취소</button>
+            <button type="button" class="btn btn-primary" onclick="saveFareData()">데이터 저장</button>
+        </div>
+    </div>
+</div>
+	
 
 	<div class="toast-wrap" id="toasts"></div>
 
@@ -872,19 +1061,15 @@
 	// 0. 탭 화면 부드러운 전환 로직
 	// ----------------------------------------------------
 	function subTab(prefix, tabName, element) {
-	    // 모든 탭 버튼에서 'active' 클래스 제거
 	    const tabs = element.parentElement.children;
 	    for (let i = 0; i < tabs.length; i++) {
 	        tabs[i].classList.remove('active');
 	    }
-	    // 클릭한 버튼만 활성화
 	    element.classList.add('active');
 
-	    // 모든 서브 페이지 내용 숨기기
 	    const pages = document.querySelectorAll('.sub-page');
 	    pages.forEach(page => page.classList.remove('active'));
 
-	    // 선택한 탭 보여주기 (ex: tab-b-gate)
 	    const activePage = document.getElementById(`tab-${prefix.charAt(0)}-${tabName}`);
 	    if (activePage) {
 	        activePage.classList.add('active');
@@ -894,8 +1079,6 @@
 	// ====================================================
 	// ★ [게이트] Javascript 로직 추가 (CRUD)
 	// ====================================================
-	
-	// 1. 게이트 모달창 열기
 	function openGateModal(mode, gate = null) {
 	    const modal = document.getElementById('gateModal');
 	    const title = document.getElementById('gateModalTitle');
@@ -920,7 +1103,6 @@
 	        document.getElementById('modalGateAreaId').value = gate.gateAreaId;
 	        document.getElementById('modalGateFlightType').value = gate.flightType;
 
-	        // 소속 공항 및 게이트 코드는 식별자로 고정되어 수정 불가
 	        airportSelect.disabled = true;
 	        gateCodeInput.readOnly = true;
 	    }
@@ -931,7 +1113,6 @@
 	    document.getElementById('gateModal').style.display = 'none';
 	}
 
-	// 2. 게이트 데이터 저장 (기존 공항 로직과 통일된 스타일)
 	function saveGateData() {
 	    const gateId = document.getElementById('modalGateId').value;
 	    
@@ -971,10 +1152,8 @@
 	    .catch(error => console.error('Error:', error));
 	}
 
-	// 3. 게이트 사용 여부 토글 (비활성화 검증 포함)
 	function toggleGateActive(gateId, checkbox) {
 	    const isActiveValue = checkbox.checked ? 'Y' : 'N';
-	    
 	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 	    
@@ -995,23 +1174,22 @@
 	            console.log(`게이트 ID ${gateId} 사용 여부 변경 완료: ${isActiveValue}`);
 	        } else if (result === 'in_use') {
 	            alert('해당 게이트를 사용하는 운항 스케줄을 먼저 정리해주세요.');
-	            checkbox.checked = true; // 스위치 롤백
+	            checkbox.checked = true; 
 	        } else {
 	            alert('상태 변경에 실패했습니다.');
-	            checkbox.checked = !checkbox.checked; // 실패 시 롤백
+	            checkbox.checked = !checkbox.checked; 
 	        }
 	    })
 	    .catch(error => {
 	        console.error('Error:', error);
 	        alert('서버와 통신 중 오류가 발생했습니다.');
-	        checkbox.checked = !checkbox.checked; // 오류 시 롤백
+	        checkbox.checked = !checkbox.checked; 
 	    });
 	}
 
 	// ====================================================
-	// 기존 기능 유지 영역 (공항, 좌석, 항공기)
+	// 공항, 좌석, 항공기 로직
 	// ====================================================
-
 	function openAirportModal(mode, airport = null) {
 	    const modal = document.getElementById('globalModal');
 	    const title = document.getElementById('globalModalTitle');
@@ -1065,7 +1243,6 @@
 	    };
 
 	    const url = airportId ? '/staff/basedata/airport/update' : '/staff/basedata/airport/insert';
-
 	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
@@ -1095,18 +1272,14 @@
 	}
 
 	function deleteAirport(airportId) {
-	    if (!confirm('정말 이 공항을 삭제하시겠습니까?')) {
-	        return;
-	    }
+	    if (!confirm('정말 이 공항을 삭제하시겠습니까?')) return;
 
 	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
 	    fetch(`/staff/basedata/airport/delete?airportId=${airportId}`, {
 	        method: 'POST',
-	        headers: {
-	            [csrfHeader]: csrfToken
-	        }
+	        headers: { [csrfHeader]: csrfToken }
 	    })
 	    .then(response => response.text())
 	    .then(result => {
@@ -1122,7 +1295,6 @@
 
 	function toggleAirportActive(airportId, checkbox) {
 	    const isActiveValue = checkbox.checked ? 'Y' : 'N';
-	    
 	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 	    
@@ -1132,10 +1304,7 @@
 	            'Content-Type': 'application/json',
 	            [csrfHeader]: csrfToken 
 	        },
-	        body: JSON.stringify({
-	            airportId: airportId,
-	            isActive: isActiveValue
-	        })
+	        body: JSON.stringify({ airportId: airportId, isActive: isActiveValue })
 	    })
 	    .then(response => response.text())
 	    .then(result => {
@@ -1171,39 +1340,29 @@
             return;
         }
 
-        // 좌석 수 초과 방지 검증
-        // 1. 선택한 비행기의 최대 좌석 수 가져오기
         const selectedOption = aircraftSelect.options[aircraftSelect.selectedIndex];
         const maxSeats = parseInt(selectedOption.getAttribute('data-total-seats')); 
-        
-        // 2. 이번에 새로 만들 좌석 수 계산
         const newSeatsCount = (endRow - startRow + 1) * columns;
 
-        // 3. 이미 생성된 좌석 수 찾기
         let alreadyGenerated = 0;
         const summaryRows = document.querySelectorAll('#baseSeatTable tr');
         for (let i = 0; i < summaryRows.length; i++) {
             const idCell = summaryRows[i].querySelector('td:nth-child(1)');
-            // 테이블의 항공기 ID와 현재 선택한 ID가 일치하면
             if (idCell && idCell.innerText.trim() === aircraftId) {
                 const countCell = summaryRows[i].querySelector('td:nth-child(4) span');
                 if (countCell && countCell.innerText.includes('석')) {
-                    // '120석' 텍스트에서 숫자만 추출
                     alreadyGenerated = parseInt(countCell.innerText.replace(/[^0-9]/g, ''));
                 }
                 break;
             }
         }
 
-        // 4. 초과 검증
         if (alreadyGenerated + newSeatsCount > maxSeats) {
             alert(`해당 항공기의 총 좌석 수(${maxSeats}석)를 초과할 수 없습니다.\n\n- 이미 생성된 좌석: ${alreadyGenerated}석\n- 추가하려는 좌석: ${newSeatsCount}석\n- 초과분: ${(alreadyGenerated + newSeatsCount) - maxSeats}석`);
             return;
         }
 
-        if (!confirm(`선택한 항공기에 [${className}] 좌석 총 ${newSeatsCount}석을 생성하시겠습니까?`)) {
-            return;
-        }
+        if (!confirm(`선택한 항공기에 [${className}] 좌석 총 ${newSeatsCount}석을 생성하시겠습니까?`)) return;
 
         const requestData = {
             aircraft_id: aircraftId,
@@ -1218,10 +1377,7 @@
 
         fetch('/staff/basedata/seat/generate', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken
-            },
+            headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
             body: JSON.stringify(requestData)
         })
         .then(response => response.text())
@@ -1242,20 +1398,13 @@
 	
 	function toggleAircraftActive(aircraftId, checkbox) {
 	    const isActiveValue = checkbox.checked ? 'Y' : 'N';
-	    
 	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 	    
 	    fetch('/staff/basedata/seat/aircraft/toggle', {
 	        method: 'POST',
-	        headers: {
-	            'Content-Type': 'application/json',
-	            [csrfHeader]: csrfToken 
-	        },
-	        body: JSON.stringify({
-	            aircraftId: aircraftId,
-	            isActive: isActiveValue
-	        })
+	        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+	        body: JSON.stringify({ aircraftId: aircraftId, isActive: isActiveValue })
 	    })
 	    .then(response => response.text())
 	    .then(result => {
@@ -1273,20 +1422,15 @@
 	    });
 	}
 	
-	// 게이트 삭제 함수
 	function deleteGate(gateId) {
-	    if (!confirm('정말 이 게이트를 삭제하시겠습니까?')) {
-	        return;
-	    }
+	    if (!confirm('정말 이 게이트를 삭제하시겠습니까?')) return;
 
 	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
 	    fetch(`/staff/basedata/gate/delete?gateId=${gateId}`, {
 	        method: 'POST',
-	        headers: {
-	            [csrfHeader]: csrfToken
-	        }
+	        headers: { [csrfHeader]: csrfToken }
 	    })
 	    .then(response => response.text())
 	    .then(result => {
@@ -1300,14 +1444,10 @@
 	    .catch(error => console.error('Error:', error));
 	}
 	
-	// ----------------------------------------------------
-	// 7. 보유 항공기 상태(운항가능/정비중/퇴역) 즉시 변경
-	// ----------------------------------------------------
 	function changeAircraftStatus(aircraftId, selectElement) {
 	    const newStatus = selectElement.value;
-	    
 	    if (!confirm(`해당 항공기의 상태를 '${newStatus}'(으)로 변경하시겠습니까?`)) {
-	        location.reload(); // 취소 시 원래 상태로 되돌리기
+	        location.reload(); 
 	        return;
 	    }
 
@@ -1316,29 +1456,17 @@
 	    
 	    fetch('/staff/basedata/seat/aircraft/status', {
 	        method: 'POST',
-	        headers: {
-	            'Content-Type': 'application/json',
-	            [csrfHeader]: csrfToken 
-	        },
-	        body: JSON.stringify({
-	            aircraftId: aircraftId,
-	            statusName: newStatus
-	        })
+	        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+	        body: JSON.stringify({ aircraftId: aircraftId, statusName: newStatus })
 	    })
 	    .then(response => response.text())
 	    .then(result => {
 	        if (result === 'success') {
 	            alert('항공기 상태가 성공적으로 변경되었습니다.');
-	            if(newStatus == '운항가능') {
-	            	selectElement.style.color = '#10b981';
-	            } else if(newStatus == '정비중') {
-	            	selectElement.style.color = '#E0B94F';
-	            } else if(newStatus == '퇴역') {
-	            	selectElement.style.color = '#ef4444';
-	            } else {
-	            	alert('상태 변경에 실패했습니다.');
-		            location.reload();
-	            }
+	            if(newStatus == '운항가능') { selectElement.style.color = '#10b981'; } 
+                else if(newStatus == '정비중') { selectElement.style.color = '#E0B94F'; } 
+                else if(newStatus == '퇴역') { selectElement.style.color = '#ef4444'; } 
+                else { alert('상태 변경에 실패했습니다.'); location.reload(); }
 	        } else {
 	            alert('상태 변경에 실패했습니다.');
 	            location.reload(); 
@@ -1350,45 +1478,30 @@
 	        location.reload();
 	    });
 	}
+
 	function filterTable(inputId, tbodyId) {
-	    // 1. 입력된 검색어 가져오기 (대문자로 변환)
 	    const input = document.getElementById(inputId);
 	    const filter = input.value.toUpperCase();
-	    
-	    // 2. 검색할 테이블의 본문과 안의 행들 가져오기
 	    const tbody = document.getElementById(tbodyId);
 	    const trs = tbody.getElementsByTagName("tr");
 
-	    // 3. 각 행을 돌면서 검색어가 포함되어 있는지 확인
 	    for (let i = 0; i < trs.length; i++) {
-	        // 데이터가 없는 행은 검사에서 제외
-	        if (trs[i].getElementsByTagName("td").length <= 1) {
-	            continue; 
-	        }
-
+	        if (trs[i].getElementsByTagName("td").length <= 1) continue; 
 	        let matchFound = false;
 	        const tds = trs[i].getElementsByTagName("td");
-
-	        // 행 안의 모든 칸 확인
 	        for (let j = 0; j < tds.length; j++) {
 	            if (tds[j]) {
 	                const txtValue = tds[j].textContent || tds[j].innerText;
-	                // 검색어가 하나라도 포함되어 있으면 매칭
 	                if (txtValue.toUpperCase().indexOf(filter) > -1) {
 	                    matchFound = true;
 	                    break;
 	                }
 	            }
 	        }
-
-	        // 매칭되면 보여주고, 안 되면 화면에서 숨김 처리
 	        trs[i].style.display = matchFound ? "" : "none";
 	    }
 	}
 	
-	// ----------------------------------------------------
-	// 8. 시각적 좌석 도면 렌더링 및 모달 열기
-	// ----------------------------------------------------
 	let currentSeatData = [];     
 	let currentAircraftId = null;
 	let currentRegNo = null;
@@ -1421,18 +1534,13 @@
         const tabsArea = document.getElementById('seatZoneTabs');
         mapArea.innerHTML = '';
 
-        // 1. 퀵 스크롤 탭 생성
         const classes = [...new Set(currentSeatData.map(s => s.class_name))];
         let tabsHtml = '';
-        classes.forEach(c => {
-            tabsHtml += `<button class="zone-tab" onclick="scrollToClass('${c}')">${c}</button>`;
-        });
+        classes.forEach(c => { tabsHtml += `<button class="zone-tab" onclick="scrollToClass('${c}')">${c}</button>`; });
         tabsArea.innerHTML = tabsHtml;
 
-        // 2. 행(Row) 숫자를 기준으로 그룹화 & 최대 좌석 수 찾기
         const rows = {};
         let maxColsInPlane = 0; 
-
         currentSeatData.forEach(seat => {
             const rowNum = parseInt(seat.seat_no); 
             if (!rows[rowNum]) rows[rowNum] = [];
@@ -1442,69 +1550,41 @@
 
         const isWideBody = maxColsInPlane >= 7; 
         const sortedRowNums = Object.keys(rows).map(Number).sort((a, b) => a - b);
-        
         let previousClass = null;
-
-        // 단일 등급인지 확인
         const isSingleClass = classes.length === 1;
-        // 단일 등급일 경우, 전체 행의 절반 위치 계산
         const middleRowIndex = isSingleClass ? Math.floor(sortedRowNums.length / 2) : -1;
 
-        // 3. 전체 좌석 렌더링 루프
         sortedRowNums.forEach((rowNum, index) => {
             const rowSeats = rows[rowNum];
             const currentClass = rowSeats[0].class_name;
             const colCount = rowSeats.length; 
 
-            // 출입구 배치
             if (isSingleClass) {
-                // 1) 단일 등급: 절반 위치에 출입구 배치
                 if (index === middleRowIndex && index !== 0) {
                     const midExitDiv = document.createElement('div');
                     midExitDiv.className = 'exit-separator';
-                    midExitDiv.innerHTML = `
-                        <div class="exit-door">EXIT</div>
-                        <div class="exit-line"></div>
-                        <div class="exit-door">EXIT</div>
-                    `;
+                    midExitDiv.innerHTML = `<div class="exit-door">EXIT</div><div class="exit-line"></div><div class="exit-door">EXIT</div>`;
                     mapArea.appendChild(midExitDiv);
                 }
             } else {
-                // 2) 다중 등급: 등급이 바뀔 때 출입구 배치
                 if (previousClass !== null && previousClass !== currentClass) {
                     const exitDiv = document.createElement('div');
                     exitDiv.className = 'exit-separator';
-                    exitDiv.innerHTML = `
-                        <div class="exit-door">EXIT</div>
-                        <div class="exit-line"></div>
-                        <div class="exit-center-icons">
-                            <span class="material-symbols-outlined" title="화장실">wc</span>
-                            <span class="material-symbols-outlined" title="갤리(주방)">local_cafe</span>
-                        </div>
-                        <div class="exit-line"></div>
-                        <div class="exit-door">EXIT</div>
-                    `;
+                    exitDiv.innerHTML = `<div class="exit-door">EXIT</div><div class="exit-line"></div><div class="exit-center-icons"><span class="material-symbols-outlined" title="화장실">wc</span><span class="material-symbols-outlined" title="갤리(주방)">local_cafe</span></div><div class="exit-line"></div><div class="exit-door">EXIT</div>`;
                     mapArea.appendChild(exitDiv);
                 }
             }
 
-            // 행(Row) 래퍼 생성
             const rowDiv = document.createElement('div');
             rowDiv.className = 'seat-row';
-            
-            // 스크롤 타겟을 맨 첫 번째 행에 부여 
-            if (previousClass !== currentClass) {
-                rowDiv.id = `class-section-${currentClass}`;
-            }
+            if (previousClass !== currentClass) { rowDiv.id = `class-section-${currentClass}`; }
             previousClass = currentClass;
 
-            // 왼쪽에 숫자(행 번호) 표시
             const rowNumDiv = document.createElement('div');
             rowNumDiv.className = 'row-number';
             rowNumDiv.innerText = rowNum;
             rowDiv.appendChild(rowNumDiv);
 
-            // 좌석 버튼 생성 함수
             const createSeatBtn = (seat) => {
                 const seatBtn = document.createElement('div');
                 let colorClass = 'seat-economy';
@@ -1518,7 +1598,6 @@
                 return seatBtn;
             };
 
-            // 블록 분할 계산
             let leftCnt = 0, centerCnt = 0, rightCnt = 0;
             if (isWideBody) {
                 if (colCount === 4) { leftCnt = 1; centerCnt = 2; rightCnt = 1; }
@@ -1534,7 +1613,6 @@
                 else { leftCnt = Math.floor(colCount/2); rightCnt = colCount - leftCnt; }
             }
 
-            // 계산된 카운트만큼 좌석 배치
             let seatIndex = 0;
             if (isWideBody) {
                 const leftBlock = document.createElement('div'); leftBlock.className = 'seat-block block-left';
@@ -1563,15 +1641,11 @@
         });
     }
 
-    // 스크롤 기능
     function scrollToClass(className) {
         const target = document.getElementById(`class-section-${className}`);
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     }
 
-    // 시각적 도면에서 좌석 토글
     function toggleSeatVisual(seatId, currentStatus, aircraftId, regNo) {
         const newStatus = currentStatus === 'Y' ? 'N' : 'Y';
         const actionMsg = newStatus === 'N' ? '고장(사용불가)' : '정상(사용가능)';
@@ -1589,7 +1663,6 @@
         .then(res => res.text())
         .then(result => {
             if(result === 'success') {
-                // 토글 시 전체 모달 스크롤 위치를 기억하는 로직
                 const modalBody = document.querySelector('#visualSeatModal .modal-body');
                 const scrollPos = modalBody.scrollTop;
                 
@@ -1598,22 +1671,14 @@
                     .then(newData => {
                         currentSeatData = newData;
                         renderContinuousSeatMap();
-                        // 렌더링 직후 기존 스크롤 위치 원복
                         setTimeout(() => { modalBody.scrollTop = scrollPos; }, 10);
                     });
-            } else {
-                alert('상태 변경에 실패했습니다.');
-            }
+            } else { alert('상태 변경에 실패했습니다.'); }
         });
     }
     
-	// ----------------------------------------------------
-	// 9. 좌석 초기화
-	// ----------------------------------------------------
     function resetSeats(aircraftId, regNo) {
-        if(!confirm(`⚠️ 경고: [${regNo}] 항공기에 생성된 모든 좌석 데이터를 삭제하시겠습니까?\n\n※ 이미 이 비행기로 예약된 항공권이 있다면 오류가 발생할 수 있습니다.`)) {
-            return;
-        }
+        if(!confirm(`⚠️ 경고: [${regNo}] 항공기에 생성된 모든 좌석 데이터를 삭제하시겠습니까?\n\n※ 이미 이 비행기로 예약된 항공권이 있다면 오류가 발생할 수 있습니다.`)) return;
 
         const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
@@ -1635,9 +1700,8 @@
     }
 	
 	// ====================================================
-	// 10. 운항 노선 로직
+	// 운항 노선 로직
 	// ====================================================
-	
 	function openRouteModal(mode, route = null) {
 	    const modal = document.getElementById('routeModal');
 	    const title = document.getElementById('routeModalTitle');
@@ -1659,9 +1723,7 @@
 	    modal.style.display = 'flex';
 	}
 
-	function closeRouteModal() {
-	    document.getElementById('routeModal').style.display = 'none';
-	}
+	function closeRouteModal() { document.getElementById('routeModal').style.display = 'none'; }
 
 	function saveRouteData() {
 	    const routeId = document.getElementById('modalRouteId').value;
@@ -1670,15 +1732,8 @@
 	    const flightType = document.getElementById('modalRouteFlightType').value;
 	    const routeTypeId = document.getElementById('modalRouteTypeId').value;
 	    
-	    if(!depId || !arrId || !flightType || !routeTypeId) {
-	        alert('모든 항목을 선택해주세요.');
-	        return;
-	    }
-	    
-	    if(depId === arrId) {
-	        alert('출발 공항과 도착 공항은 같을 수 없습니다.');
-	        return;
-	    }
+	    if(!depId || !arrId || !flightType || !routeTypeId) { alert('모든 항목을 선택해주세요.'); return; }
+	    if(depId === arrId) { alert('출발 공항과 도착 공항은 같을 수 없습니다.'); return; }
 
 	    const requestData = {
 	        route_id: routeId ? parseInt(routeId) : null,
@@ -1694,10 +1749,7 @@
 
 	    fetch(url, {
 	        method: 'POST',
-	        headers: {
-	            'Content-Type': 'application/json',
-	            [csrfHeader]: csrfToken
-	        },
+	        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
 	        body: JSON.stringify(requestData)
 	    })
 	    .then(response => response.text())
@@ -1732,9 +1784,7 @@
 	        if (result === 'success') {
 	            alert('삭제가 완료되었습니다.');
 	            location.reload(); 
-	        } else {
-	            alert('삭제에 실패했습니다.');
-	        }
+	        } else { alert('삭제에 실패했습니다.'); }
 	    })
 	    .catch(error => console.error('Error:', error));
 	}
@@ -1746,14 +1796,8 @@
 	    
 	    fetch('/staff/basedata/route/toggle', {
 	        method: 'POST',
-	        headers: {
-	            'Content-Type': 'application/json',
-	            [csrfHeader]: csrfToken 
-	        },
-	        body: JSON.stringify({
-	            routeId: routeId,
-	            isActive: isActiveValue
-	        })
+	        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+	        body: JSON.stringify({ routeId: routeId, isActive: isActiveValue })
 	    })
 	    .then(response => response.text())
 	    .then(result => {
@@ -1767,7 +1811,122 @@
 	        checkbox.checked = !checkbox.checked;
 	    });
 	}
- 
+
+	// ====================================================
+	// ★ [운임(FARE)] Javascript 로직 (CRUD 및 토글)
+	// ====================================================
+	function openFareModal(mode, fare = null) {
+	    const modal = document.getElementById('fareModal');
+	    const title = document.getElementById('fareModalTitle');
+	    const form = document.getElementById('fareForm');
+	    const notice = document.getElementById('fareEditNotice');
+	    
+	    form.reset();
+	    document.getElementById('modalFareId').value = '';
+
+	    const routeSelect = document.getElementById('modalFareRouteId');
+	    const classSelect = document.getElementById('modalFareSeatClassId');
+	    const seasonSelect = document.getElementById('modalFareSeasonId');
+
+	    if (mode === 'register') {
+	        title.innerText = '운임 기준 등록';
+	        notice.style.display = 'none'; 
+	        
+	        routeSelect.disabled = false;
+	        classSelect.disabled = false;
+	        seasonSelect.disabled = false;
+	        
+	    } else if (mode === 'edit' && fare != null) {
+	        title.innerText = '운임 기준 가격 수정';
+	        notice.style.display = 'block'; 
+	        
+	        document.getElementById('modalFareId').value = fare.fare_id;
+	        routeSelect.value = fare.route_id;
+	        classSelect.value = fare.seat_class_id;
+	        seasonSelect.value = fare.season_id;
+	        document.getElementById('modalFarePrice').value = fare.price;
+
+	        routeSelect.disabled = true;
+	        classSelect.disabled = true;
+	        seasonSelect.disabled = true;
+	    }
+	    
+	    modal.style.display = 'flex';
+	}
+
+	function closeFareModal() {
+	    document.getElementById('fareModal').style.display = 'none';
+	}
+
+	function saveFareData() {
+	    const fareId = document.getElementById('modalFareId').value;
+	    const price = document.getElementById('modalFarePrice').value;
+	    
+	    if(!price || price <= 0) {
+	        alert('올바른 가격액을 입력해주세요.');
+	        return;
+	    }
+
+	    const requestData = {
+	        fare_id: fareId ? parseInt(fareId) : null,
+	        route_id: parseInt(document.getElementById('modalFareRouteId').value),
+	        seat_class_id: parseInt(document.getElementById('modalFareSeatClassId').value),
+	        season_id: parseInt(document.getElementById('modalFareSeasonId').value),
+	        price: parseInt(price)
+	    };
+
+	    const url = fareId ? '/staff/basedata/fare/update' : '/staff/basedata/fare/insert';
+	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+	    fetch(url, {
+	        method: 'POST',
+	        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+	        body: JSON.stringify(requestData)
+	    })
+	    .then(response => response.text())
+	    .then(result => {
+	        if (result === 'success') {
+	            alert('운임이 정상적으로 저장되었습니다.');
+	            closeFareModal();
+	            location.reload(); 
+	        } else if (result === 'duplicate') {
+	            alert('이미 등록된 운임 조합(노선+등급+시즌)입니다.');
+	        } else {
+	            alert('저장에 실패했습니다. 시스템 오류를 확인해주세요.');
+	        }
+	    })
+	    .catch(error => console.error('Error:', error));
+	}
+
+	function toggleFareActive(fareId, checkbox) {
+	    const isActiveValue = checkbox.checked ? 'Y' : 'N';
+	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+	    
+	    fetch('/staff/basedata/fare/updateFareActive', {
+	        method: 'POST',
+	        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+	        body: JSON.stringify({ fare_id: fareId, is_active: isActiveValue })
+	    })
+	    .then(response => response.json()) 
+	    .then(result => {
+	        if (result.result === 'success') {
+	            console.log(`운임 ID ${fareId} 사용 여부 변경 완료: ${isActiveValue}`);
+	        } else if (result.result === 'in_use') {
+	            alert(result.message); 
+	            checkbox.checked = true; 
+	        } else {
+	            alert('상태 변경에 실패했습니다.');
+	            checkbox.checked = !checkbox.checked;
+	        }
+	    })
+	    .catch(error => {
+	        console.error('Error:', error);
+	        alert('서버와 통신 중 오류가 발생했습니다.');
+	        checkbox.checked = !checkbox.checked;
+	    });
+	}
 	</script>
 
 </body>

@@ -1,35 +1,86 @@
 package kr.spring.staff.basedata.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
+import kr.spring.staff.basedata.service.StaffFareService;
+import kr.spring.staff.basedata.vo.FareVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Controller
 @RequestMapping("/staff/basedata/fare")
 public class StaffFareController {
 
-	@GetMapping("/list")
-	public String list(Model model) {
-		model.addAttribute("activeMenu", "base");
-		return "thviews/staff_main/basedata/base_list";
-	}
+    @Autowired
+    private StaffFareService fareService;
 
-	@GetMapping("/write")
-	public String write(Model model) {
-		model.addAttribute("activeMenu", "base");
-		return "thviews/staff_main/basedata/base_list";
-	}
+    // 1. 등록 (AJAX)
+    @PostMapping("/insert")
+    @ResponseBody
+    public String insertFare(@RequestBody FareVO fareVO) {
+        try {
+            log.info(">>>> 운임 등록 데이터: {}", fareVO);
+            fareService.insertFare(fareVO);
+            return "success";
+        }catch(org.springframework.dao.DuplicateKeyException e) {
+        	return "duplicate";
+        }catch (Exception e) {
+            log.error("운임 등록 오류", e);
+            return "fail";
+        }
+    }
 
-	@GetMapping("/modify")
-	public String modify(Model model) {
-		model.addAttribute("activeMenu", "base");
-		return "thviews/staff_main/basedata/base_list";
-	}
+    // 2. 수정 (AJAX)
+    @PostMapping("/update")
+    @ResponseBody
+    public String updateFare(@RequestBody FareVO fareVO) {
+        try {
+            log.info(">>>> 운임 수정 데이터: {}", fareVO);
+            fareService.updateFare(fareVO);
+            return "success";
+        } catch (Exception e) {
+            log.error("운임 수정 오류", e);
+            return "fail";
+        }
+    }
 
-	@GetMapping("/detail")
-	public String detail(Model model) {
-		model.addAttribute("activeMenu", "base");
-		return "thviews/staff_main/basedata/base_list";
-	}
+    // 3. 삭제 (AJAX)
+    @PostMapping("/delete")
+    @ResponseBody
+    public String deleteFare(@RequestParam("fare_id") Long fare_id) {
+        try {
+            // 삭제 전 사용 여부 체크 로직 포함 (service에 구현된 메서드 활용)
+            boolean result = fareService.disableFare(fare_id);
+            return result ? "success" : "in_use";
+        } catch (Exception e) {
+            log.error("운임 삭제 오류", e);
+            return "fail";
+        }
+    }
+
+    // 4. 상태 토글 (AJAX)
+    @PostMapping("/updateFareActive")
+    @ResponseBody
+    public Map<String, Object> updateFareActive(@RequestBody Map<String, Object> payload) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            String status = fareService.updateFareActive(payload);
+            if ("in_use".equals(status)) {
+                result.put("result", "in_use");
+                result.put("message", "사용 중인 운임이라 변경할 수 없습니다.");
+            } else {
+                result.put("result", "success");
+            }
+        } catch (Exception e) {
+            log.error("상태 변경 오류", e);
+            result.put("result", "error");
+        }
+        return result;
+    }
 }

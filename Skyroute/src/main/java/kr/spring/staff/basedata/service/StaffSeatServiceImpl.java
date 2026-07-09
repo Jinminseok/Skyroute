@@ -114,5 +114,10 @@ public class StaffSeatServiceImpl implements StaffSeatService {
 		staffSeatMapper.deleteSeatsByAircraft(aircraftId);
 	}
 
+	@Override
+	public List<SeatClassVO> getSeatClassList() {
+		return staffSeatMapper.selectSeatClassList();
+	}
+
     
 }

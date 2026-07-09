@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import kr.spring.staff.basedata.service.StaffAirportService;
+import kr.spring.staff.basedata.service.StaffFareService;
 import kr.spring.staff.basedata.vo.AirportVO;
 
 import kr.spring.admin.vo.AirCraftVO;
@@ -22,11 +23,16 @@ import kr.spring.staff.basedata.vo.SeatVO;
 // 👉 [추가] 운항 노선 및 노선 유형(관리자) 처리를 위한 Import
 import kr.spring.admin.dao.RouteTypeMapper;
 import kr.spring.admin.vo.RouteTypeVO;
+import kr.spring.admin.vo.SeasonVO;
 import kr.spring.staff.basedata.service.StaffRouteService;
 import kr.spring.staff.basedata.vo.RouteVO;
+import kr.spring.staff.basedata.vo.SeatClassVO;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import java.util.HashMap;
+import kr.spring.staff.basedata.vo.FareVO;
 
 @Controller
 @RequestMapping("/staff/basedata")
@@ -50,38 +56,60 @@ public class StaffAirportController {
     // 운항 노선 데이터 - 지상직
     @Autowired
     private StaffRouteService staffRouteService;
+    
+    //운임 서비스를 주입
+    @Autowired
+    private StaffFareService fareService;
 
     // 1. 공항 마스터 관리 페이지 조회 (목록 렌더링)
     @GetMapping("/airport/list")
     public String getAirportPage(Model model) {
         
-        // 탭 메뉴 활성화를 위해 추가
+    	// 탭 메뉴 활성화를 위해 추가
         model.addAttribute("activeMenu", "base");
 
-        // 공항 목록 담기
+        // 1. 공항 목록
         List<AirportVO> airportList = airportService.getAirportList();
-        model.addAttribute("airportList", airportList);
+        model.addAttribute("airportList", (airportList != null) ? airportList : new java.util.ArrayList<>());
         
-        // 항공기 목록 담기
+        // 2. 항공기 목록
         List<AirCraftVO> aircraftList = staffSeatService.getAircraftList();
-        model.addAttribute("aircraftList", aircraftList);
+        model.addAttribute("aircraftList", (aircraftList != null) ? aircraftList : new java.util.ArrayList<>());
 
-        // 기재별 좌석 데이터 가져오기
+        // 3. 기재별 좌석 데이터
         List<Map<String, Object>> seatSummaryList = staffSeatService.getSeatSummaryList();
-        model.addAttribute("seatSummaryList", seatSummaryList);
+        model.addAttribute("seatSummaryList", (seatSummaryList != null) ? seatSummaryList : new java.util.ArrayList<>());
         
-        // 게이트 목록 담기 
+        // 4. 게이트 목록 
         GateVO gateSearchVO = new GateVO();
         List<GateVO> gateList = staffGateService.getGateList(gateSearchVO);
-        model.addAttribute("gateList", gateList);
+        model.addAttribute("gateList", (gateList != null) ? gateList : new java.util.ArrayList<>());
         
-        // 노선 유형 리스트
+        // 5. 노선 유형 리스트
         List<RouteTypeVO> routeTypeList = routeTypeMapper.selectRouteTypeList();
-        model.addAttribute("routeTypeList", routeTypeList);
+        model.addAttribute("routeTypeList", (routeTypeList != null) ? routeTypeList : new java.util.ArrayList<>());
 
-        // 등록된 운항 노선 리스트
+        // 6. 운항 노선 리스트
         List<RouteVO> routeList = staffRouteService.getRouteList();
-        model.addAttribute("routeList", routeList);
+        model.addAttribute("routeList", (routeList != null) ? routeList : new java.util.ArrayList<>());
+        
+        // 7. 운임 리스트
+        Map<String, Object> fareMap = new HashMap<>();
+        fareMap.put("start", 1);
+        fareMap.put("end", 1000); 
+        List<FareVO> fareList = fareService.selectFareList(fareMap);
+        model.addAttribute("fareList", (fareList != null) ? fareList : new java.util.ArrayList<>());
+        
+        // 8. 좌석 등급 리스트 (에러 방지: null일 경우 빈 리스트 생성)
+        List<SeasonVO> seasonList = fareService.getSeasonList();
+        System.out.println("DEBUG: 가져온 시즌 리스트 -> " + seasonList);
+        model.addAttribute("seasonList", (seasonList == null) ? new java.util.ArrayList<>() : seasonList);
+        
+        // 9. 시즌 리스트 (중복 선언 제거)
+        List<SeatClassVO> seatClassList = staffSeatService.getSeatClassList();
+        
+        model.addAttribute("seatClassList", (seatClassList == null) ? new java.util.ArrayList<>() : seatClassList);
+
         
         return "thviews/staff_main/basedata/base_list"; 
     }

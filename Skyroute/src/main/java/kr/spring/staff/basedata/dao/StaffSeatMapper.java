@@ -30,6 +30,8 @@ public interface StaffSeatMapper {
     // 항공기 상태 변경
     public void updateAircraftStatus(Map<String, Object> payload);
     
+    public List<SeatClassVO> selectSeatClassList();
+    
     // 항공기 좌석 조회
     public List<SeatVO> selectSeatList();
     public List<Map<String, Object>> selectSeatSummaryList();

@@ -91,8 +91,17 @@
     </update>
     
     <!-- 특정 항공기의 전체 좌석 삭제 -->
-    <delete id="deleteSeatsByAircraft" parameterType="int">
+    <delete id="deleteSeatsByAircraft" parameterType="int"> 
         DELETE FROM SEAT 
         WHERE aircraft_id = #{aircraftId}
     </delete>
+    
+    <select id="selectSeatClassList" resultType="kr.spring.staff.basedata.vo.SeatClassVO">
+    SELECT 
+        seat_class_id AS seat_class_id, 
+        class_name AS class_name 
+    FROM SEAT_CLASS 
+    WHERE is_active = 'Y' 
+    ORDER BY sort_order ASC
+</select>
 </mapper>
