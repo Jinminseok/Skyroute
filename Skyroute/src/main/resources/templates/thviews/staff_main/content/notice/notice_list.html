@@ -119,43 +119,61 @@
 			<div class="card notice-card">
 	
 				<!-- 검색 폼 -->
-			<form th:action="@{/staff/content/notice/list}" method="get" class="toolbar notice-search-form">
-
-				<select name="keyfield" class="select" style="width:150px;">
-					<option value="1" th:selected="${keyfield == null or keyfield == '1'}">제목</option>
-					<option value="2" th:selected="${keyfield == '2'}">등록자</option>
-					<option value="3" th:selected="${keyfield == '3'}">본문</option>
-				</select>
-
-				<input type="search"
-					   name="keyword"
-					   class="input"
-					   style="width:260px;"
-					   th:value="${keyword}"
-					   placeholder="검색어를 입력하세요">
-				
-				<select name="category" class="select" style="width:170px;">
-					<option value="" th:selected="${category == null}">카테고리 전체</option>
-					<option th:each="cat : ${noticeCategoryMap}"
-							th:value="${cat.key}"
-							th:text="${cat.value}"
-							th:selected="${category == cat.key}">
-						스카이 소식
-					</option>
-				</select>
-				
-				<select name="is_public" class="select" style="width:150px;">
-					<option value="" th:selected="${is_public == null}">공개상태</option>
-					<option value="Y" th:selected="${is_public == 'Y'}">공개</option>
-					<option value="N" th:selected="${is_public == 'N'}">비공개</option>
-				</select>
-
-				<button type="submit" class="btn btn-primary">
-					<span class="material-symbols-outlined" style="font-size:18px">search</span>
-					검색
-				</button>
-
-				<a th:href="@{/staff/content/notice/list}" class="btn btn-ghost">초기화</a>
+			<form th:action="@{/staff/content/notice/list}" method="get" class="notice-filter">
+ 
+				<!-- 검색 대상 -->
+				<div class="filter-field">
+					<label class="filter-label">검색 대상</label>
+					<select name="keyfield" class="filter-select">
+						<option value="1" th:selected="${keyfield == null or keyfield == '1'}">제목</option>
+						<option value="2" th:selected="${keyfield == '2'}">등록자</option>
+						<option value="3" th:selected="${keyfield == '3'}">본문</option>
+					</select>
+				</div>
+			 
+				<!-- 검색어 (아이콘 내장 · 남는 폭 흡수) -->
+				<div class="filter-field filter-field-grow">
+					<label class="filter-label">검색어</label>
+					<div class="filter-search">
+						<span class="material-symbols-outlined filter-search-icon">search</span>
+						<input type="search"
+							   name="keyword"
+							   class="filter-input"
+							   th:value="${keyword}"
+							   placeholder="제목·등록자·본문으로 검색">
+					</div>
+				</div>
+			 
+				<!-- 카테고리 -->
+				<div class="filter-field">
+					<label class="filter-label">카테고리</label>
+					<select name="category" class="filter-select">
+						<option value="" th:selected="${category == null}">전체</option>
+						<option th:each="cat : ${noticeCategoryMap}"
+								th:value="${cat.key}"
+								th:text="${cat.value}"
+								th:selected="${category == cat.key}">스카이 소식</option>
+					</select>
+				</div>
+			 
+				<!-- 공개 상태 -->
+				<div class="filter-field">
+					<label class="filter-label">공개 상태</label>
+					<select name="is_public" class="filter-select">
+						<option value="" th:selected="${is_public == null}">전체</option>
+						<option value="Y" th:selected="${is_public == 'Y'}">공개</option>
+						<option value="N" th:selected="${is_public == 'N'}">비공개</option>
+					</select>
+				</div>
+			 
+				<!-- 액션 -->
+				<div class="filter-actions">
+					<button type="submit" class="btn btn-primary">
+						<span class="material-symbols-outlined" style="font-size:18px">search</span>
+						검색
+					</button>
+					<a th:href="@{/staff/content/notice/list}" class="btn btn-ghost">초기화</a>
+				</div>
 			</form>
 
 			<!-- 목록 테이블 -->

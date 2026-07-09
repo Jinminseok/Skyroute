@@ -783,12 +783,6 @@ to {
 
 /* ===== staff notice ===== */
 
-.notice-search-form {
-	padding-bottom: 16px;
-	border-bottom: 1px solid var(--border);
-	margin-bottom: 16px;
-}
-
 .notice-row-title {
 	display: block;
 	max-width: 100%;
@@ -1362,4 +1356,113 @@ a.btn:hover {
 
 .notice-data td:nth-child(4) {
 	white-space: nowrap;
+}
+
+ 
+.notice-filter {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 14px;
+	padding: 16px;
+	margin-bottom: 20px;
+	background: rgba(224, 242, 254, 0.35);
+	border: 1px solid var(--border);
+	border-radius: 12px;
+}
+ 
+/* 필드 그룹(라벨 + 컨트롤) */
+.filter-field {
+	display: flex;
+	flex-direction: column;
+	min-width: 140px;
+}
+ 
+/* 검색어 칸은 남는 폭 흡수 */
+.filter-field-grow {
+	flex: 1 1 240px;
+	min-width: 200px;
+}
+ 
+.filter-label {
+	margin-bottom: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-gray);
+}
+ 
+/* 공통 컨트롤 */
+.filter-select,
+.filter-input {
+	width: 100%;
+	height: 42px;
+	padding: 0 14px;
+	border: 1px solid var(--border);
+	border-radius: 9px;
+	background: #fff;
+	color: var(--text-dark);
+	font-family: inherit;
+	font-size: 14px;
+	outline: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+ 
+/* 셀렉트: 기본 화살표 제거 + 커스텀 쉐브론 */
+.filter-select {
+	appearance: none;
+	-webkit-appearance: none;
+	padding-right: 38px;
+	cursor: pointer;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	background-size: 16px;
+}
+ 
+.filter-select:focus,
+.filter-input:focus {
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+ 
+/* 검색 인풋(아이콘 내장) */
+.filter-search {
+	position: relative;
+}
+ 
+.filter-search-icon {
+	position: absolute;
+	left: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 20px;
+	color: var(--text-light);
+	pointer-events: none;
+}
+ 
+.filter-search .filter-input {
+	padding-left: 40px;
+}
+ 
+/* 액션 버튼: 오른쪽 정렬 + 컨트롤과 높이 맞춤 */
+.filter-actions {
+	display: flex;
+	gap: 8px;
+	margin-left: auto;
+}
+ 
+.filter-actions .btn {
+	height: 42px;
+}
+ 
+/* 좁은 화면: 액션도 전체폭으로 자연스럽게 */
+@media (max-width: 640px) {
+	.filter-actions {
+		margin-left: 0;
+		width: 100%;
+	}
+ 
+	.filter-actions .btn {
+		flex: 1;
+	}
 }
