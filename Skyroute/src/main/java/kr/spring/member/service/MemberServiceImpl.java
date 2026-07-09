@@ -37,5 +37,10 @@ public class MemberServiceImpl implements MemberService{
 		memberMapper.updateMemberProfile(member);
 	}
 
+	@Override
+	public List<Map<String, Object>> selectAirportList() {
+		return memberMapper.selectAirportList();
+	}
+
 
 }

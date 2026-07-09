@@ -17,6 +17,99 @@
 			text-decoration: none;
 			text-align: center;
 		}
+		.passenger-picker-container {
+			position: relative;
+			z-index: 10000;
+		}
+		.passenger-display-trigger {
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			padding: 4px 0;
+			color: #000;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+		.passenger-layer {
+		    display: none;
+		    position: fixed !important;
+		    top: 50% !important;        
+		    left: 50% !important;
+		    transform: translate(-50%, -50%);
+		    width: 320px;
+		    background: #ffffff;
+		    border: 1px solid #cbd5e1;
+		    border-radius: 12px;
+		    box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
+		    padding: 20px;
+		    z-index: 999999 !important; 
+		}
+		.passenger-layer-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20px;
+			border-bottom: 1px solid #f1f5f9;
+			padding-bottom: 10px;
+		}
+		.passenger-layer-header h4 {
+			margin: 0;
+			font-size: 15px;
+			color: #0f172a;
+			font-weight: 600;
+		}
+		.passenger-layer-close {
+			cursor: pointer;
+			font-size: 18px;
+			color: #64748b;
+			font-weight: bold;
+		}
+		.passenger-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 16px;
+		}
+		.passenger-type-info label {
+			font-size: 14px;
+			font-weight: 600;
+			color: #1e293b;
+			display: block;
+		}
+		.passenger-type-info span {
+			font-size: 11px;
+			color: #94a3b8;
+		}
+		.counter-ctrl {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		.btn-counter {
+			width: 28px;
+			height: 28px;
+			border-radius: 50%;
+			border: 1px solid #cbd5e1;
+			background: #fff;
+			font-size: 16px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			user-select: none;
+			color: #334155;
+		}
+		.btn-counter:active {
+			background: #f8fafc;
+		}
+		.counter-value {
+			width: 20px;
+			text-align: center;
+			font-size: 15px;
+			font-weight: 600;
+			color: #0f172a;
+		}
 	</style>
 </head>
 <body>
@@ -29,50 +122,137 @@
 			<h1>어디로 떠나시나요?</h1>
 			<p>출발지·도착지와 날짜를 선택하면 운항편과 운임을 한눈에 비교할 수 있어요.</p>
 
-			<div class="searchcard">
-				<div class="triptabs">
-					<label><input type="radio" name="trip" checked><span>왕복</span></label>
-					<label><input type="radio" name="trip"><span>편도</span></label>
-					<label><input type="radio" name="trip"><span>다구간</span></label>
+			<form action="/member/member_flight_list" method="get" id="flightSearchForm">
+				<div class="searchcard">
+					
+					<!-- 왕복/편도 선택 -->
+					<div class="triptabs">
+						<label>
+							<input type="radio" name="tripType" value="ROUNDTRIP" checked onchange="toggleReturnDate()">
+							<span>왕복</span>
+						</label>
+						<label>
+							<input type="radio" name="tripType" value="ONEWAY" onchange="toggleReturnDate()">
+							<span>편도</span>
+						</label>
+					</div>
+
+					<div class="fields" style="align-items: center;">
+						<!-- 출발지 선택 -->
+						<div class="field">
+							<label>출발</label>
+							<select name="departureAirport" required style="width: 100%; border: none; font-size: 18px; font-weight: 600; outline: none; background: transparent; cursor: pointer;">
+								<option value="">출발지 선택</option>
+								<option th:each="airport : ${airportList}" 
+								        th:value="${airport.IATA_CODE}" 
+								        th:text="|${airport.IATA_CODE} ${airport.AIRPORT_NAME}|">
+								</option>
+							</select>
+							<div class="swap" onclick="triggerSwapEffect()" style="cursor: pointer;" title="출발/도착지 변경">⇄</div>
+						</div>
+
+						<!-- 도착지 선택 -->
+						<div class="field">
+							<label>도착</label>
+							<select name="arrivalAirport" required style="width: 100%; border: none; font-size: 18px; font-weight: 600; outline: none; background: transparent; cursor: pointer;">
+								<option value="">도착지 선택</option>
+								<option th:each="airport : ${airportList}" 
+								        th:value="${airport.IATA_CODE}" 
+								        th:text="|${airport.IATA_CODE} ${airport.AIRPORT_NAME}|">
+								</option>
+							</select>
+						</div>
+
+						<!-- 여정 -->
+						<div class="field" style="display: flex; flex-direction: column;">
+							<label>여정</label>
+							<div style="display: flex; gap: 5px; align-items: center; margin-top: 4px;">
+								<input type="date" name="departureDate" id="departureDate" required style="border: none; font-size: 15px; font-weight: 600; outline: none; background: transparent; cursor: pointer; font-family: inherit;">
+								<span id="dateSeparator" style="font-weight: 600;"> — </span>
+								<input type="date" name="returnDate" id="returnDate" required style="border: none; font-size: 15px; font-weight: 600; outline: none; background: transparent; cursor: pointer; font-family: inherit;">
+							</div>
+						</div>
+
+						<!-- 🌟 3. 인원 및 좌석 등급 선택 (대한항공 커스텀 디자인 반영 구역) -->
+						<div class="field" style="display: flex; flex-direction: column; overflow: visible;">
+							<label>인원 · 좌석</label>
+							
+							<div class="passenger-picker-container" style="margin-top: 4px;">
+								<!-- 화면 출력 버튼용 트리거 -->
+								<div class="passenger-display-trigger" id="passengerTrigger" onclick="togglePassengerLayer()">
+									<span id="passengerDisplayText">성인 1</span>
+									<span style="font-size: 11px; margin-left: 4px; color: #64748b;">▼</span>
+								</div>
+
+								<!-- 🚨 대한항공st 히든 팝업창 레이어 구역 -->
+								<div class="passenger-layer" id="passengerLayer">
+									<div class="passenger-layer-header">
+										<h4>승객 선택</h4>
+										<span class="passenger-layer-close" onclick="togglePassengerLayer()">×</span>
+									</div>
+									
+									<!-- 성인 수 카운터 -->
+									<div class="passenger-row">
+										<div class="passenger-type-info">
+											<label>성인</label>
+											<span>만 12세 이상</span>
+										</div>
+										<div class="counter-ctrl">
+											<div class="btn-counter" onclick="changeCount('adult', -1)">-</div>
+											<span class="counter-value" id="valAdult">1</span>
+											<div class="btn-counter" onclick="changeCount('adult', 1)">+</div>
+										</div>
+									</div>
+
+									<!-- 소아 수 카운터 -->
+									<div class="passenger-row">
+										<div class="passenger-type-info">
+											<label>소아</label>
+											<span>만 2세 ~ 11세</span>
+										</div>
+										<div class="counter-ctrl">
+											<div class="btn-counter" onclick="changeCount('child', -1)">-</div>
+											<span class="counter-value" id="valChild">0</span>
+											<div class="btn-counter" onclick="changeCount('child', 1)">+</div>
+										</div>
+									</div>
+
+									<!-- 유아 수 카운터 -->
+									<div class="passenger-row" style="margin-bottom: 0;">
+										<div class="passenger-type-info">
+											<label>유아</label>
+											<span>만 2세 미만</span>
+										</div>
+										<div class="counter-ctrl">
+											<div class="btn-counter" onclick="changeCount('infant', -1)">-</div>
+											<span class="counter-value" id="valInfant">0</span>
+											<div class="btn-counter" onclick="changeCount('infant', 1)">+</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- 🌟 실제 서버(Controller)로 전송될 인원수 hidden input 태그 -->
+							<input type="hidden" name="adultCount" id="adultCount" value="1">
+							<input type="hidden" name="childCount" id="childCount" value="0">
+							<input type="hidden" name="infantCount" id="infantCount" value="0">
+
+							<!-- 🌟 좌석 조건 세팅: 이코노미, 비즈니스, 1등석 3개로 압축 완료 -->
+							<select name="seatClass" required style="border: none; font-size: 13px; outline: none; background: transparent; cursor: pointer; color: var(--mut); margin-top: 4px;">
+								<option value="ECONOMY">이코노미</option>
+								<option value="BUSINESS">비즈니스</option>
+								<option value="FIRST">1등석</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="searchrow">
+						<div class="opts">
+						</div>
+						<button type="submit" class="btn" style="border: none; cursor: pointer; font-family: inherit; font-size: 16px; font-weight: 600;">항공권 검색</button>
+					</div>
 				</div>
-
-				<div class="fields">
-					<div class="field">
-						<label>출발</label>
-						<div class="big">ICN 서울/인천</div>
-						<div class="sub">Incheon Intl</div>
-						<div class="swap" onclick="triggerSwapEffect()">⇄</div>
-					</div>
-
-					<div class="field">
-						<label>도착</label>
-						<div class="big">JFK 뉴욕</div>
-						<div class="sub">John F. Kennedy</div>
-					</div>
-
-					<div class="field">
-						<label>여정</label>
-						<div class="big">12.20 — 12.27</div>
-						<div class="sub">금요일 출발 · 7박</div>
-					</div>
-
-					<div class="field">
-						<label>인원 · 좌석</label>
-						<div class="big">성인 1</div>
-						<div class="sub">이코노미</div>
-					</div>
-				</div>
-
-				<div class="searchrow">
-					<div class="opts">
-						<span>직항만 <b>OFF</b></span>
-						<span>최저가 달력</span>
-						<span>마일리지로 예약</span>
-					</div>
-
-					<a th:href="@{/member/member_flight_list}" class="btn">항공권 검색</a>
-				</div>
-			</div>
+			</form>
 
 			<div class="quick" style="margin-bottom: 40px;">
 				<a>인천 → 도쿄 NRT</a>
@@ -81,6 +261,7 @@
 				<a>인천 → 파리 CDG</a>
 				<a>인천 → 다낭 DAD</a>
 			</div>
+
 
 			<div class="event-banner-area"
 			     id="mainEventSlider"
@@ -295,8 +476,33 @@
 	</section>
 
 <script>
+	function toggleReturnDate() {
+		const tripType = document.querySelector('input[name="tripType"]:checked').value;
+		const returnDateInput = document.getElementById('returnDate');
+		const dateSeparator = document.getElementById('dateSeparator');
 
+		if (tripType === 'ONEWAY') {
+			returnDateInput.style.display = 'none';
+			dateSeparator.style.display = 'none';
+			returnDateInput.removeAttribute('required'); 
+			returnDateInput.value = ''; 
+		} else {
+			returnDateInput.style.display = 'inline-block';
+			dateSeparator.style.display = 'inline-block';
+			returnDateInput.setAttribute('required', 'required'); 
+		}
+	}
 
+	function triggerSwapEffect() {
+		const depSelect = document.querySelector('select[name="departureAirport"]');
+		const arrSelect = document.querySelector('select[name="arrivalAirport"]');
+		
+		const tempValue = depSelect.value;
+		depSelect.value = arrSelect.value;
+		arrSelect.value = tempValue;
+	}
+
+	// 이벤트 배너 스크립트
 	document.addEventListener('DOMContentLoaded', function() {
 		const slider = document.getElementById('mainEventSlider');
 
@@ -379,6 +585,93 @@
 		startAutoSlide();
 
 	});
+	
+	// 🌟 승객 레이어 열고 닫기 토글 함수
+	function togglePassengerLayer() {
+        const layer = document.getElementById('passengerLayer');
+        const trigger = document.getElementById('passengerTrigger');
+        
+        // 디버깅용 로그 추가 (콘솔창 확인)
+        console.log("버튼 클릭됨"); 
+        
+        if (layer.style.display === 'block') {
+            layer.style.display = 'none';
+        } else {
+            layer.style.display = 'block';
+            // 팝업 위치를 트리거 바로 아래로 강제 조정
+            const rect = trigger.getBoundingClientRect();
+            layer.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+            layer.style.left = (rect.left + window.scrollX) + 'px';
+        }
+    }
+
+	// 🌟 대한항공st 카운터 조절 스크립트 (성인 최소 1명, 총합 제한 규정)
+	function changeCount(type, amount) {
+		const targetVal = document.getElementById('val' + type.charAt(0).toUpperCase() + type.slice(1));
+		const targetInput = document.getElementById(type + 'Count');
+		
+		let current = parseInt(targetVal.innerText);
+		let next = current + amount;
+
+		// 유효성 가드 라인
+		if (type === 'adult' && next < 1) return; // 성인은 최소 1명 필수
+		if (type !== 'adult' && next < 0) return; // 소아, 유아는 음수 불가
+		if (next > 9) return; // 항공 표준 최대 단일 예약 인원 9명 제한 예시
+
+		// 데이터 주입
+		targetVal.innerText = next;
+		targetInput.value = next;
+
+		// 메인 메인 필드 텍스트 동적 업데이트 연동
+		updatePassengerDisplayText();
+	}
+
+	// 🌟 화면 트리거 텍스트 가독성 최적화 처리
+	function updatePassengerDisplayText() {
+		const adult = parseInt(document.getElementById('adultCount').value);
+		const child = parseInt(document.getElementById('childCount').value);
+		const infant = parseInt(document.getElementById('infantCount').value);
+
+		let text = `성인 ${adult}`;
+		if (child > 0) text += `, 소아 ${child}`;
+		if (infant > 0) text += `, 유아 ${infant}`;
+
+		document.getElementById('passengerDisplayText').innerText = text;
+	}
+
+	// 외부 클릭 시 승객 레이어 닫히는 센스 가드
+	document.addEventListener('click', function(e) {
+		const container = document.querySelector('.passenger-picker-container');
+		const layer = document.getElementById('passengerLayer');
+		if (container && !container.contains(e.target)) {
+			layer.style.display = 'none';
+		}
+	});
+
+	function toggleReturnDate() {
+		const tripType = document.querySelector('input[name="tripType"]:checked').value;
+		const returnDateInput = document.getElementById('returnDate');
+		const dateSeparator = document.getElementById('dateSeparator');
+
+		if (tripType === 'ONEWAY') {
+			returnDateInput.style.display = 'none';
+			dateSeparator.style.display = 'none';
+			returnDateInput.removeAttribute('required'); 
+			returnDateInput.value = ''; 
+		} else {
+			returnDateInput.style.display = 'inline-block';
+			dateSeparator.style.display = 'inline-block';
+			returnDateInput.setAttribute('required', 'required'); 
+		}
+	}
+
+	function triggerSwapEffect() {
+		const depSelect = document.querySelector('select[name="departureAirport"]');
+		const arrSelect = document.querySelector('select[name="arrivalAirport"]');
+		const tempValue = depSelect.value;
+		depSelect.value = arrSelect.value;
+		arrSelect.value = tempValue;
+	}
 </script>
 
 </div>

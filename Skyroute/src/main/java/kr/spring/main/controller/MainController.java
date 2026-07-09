@@ -1,5 +1,8 @@
 package kr.spring.main.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -42,6 +45,11 @@ public class MainController {
 	@GetMapping("/main/home")
 	public String main(Model model) {
 		model.addAttribute("eventList", staffEventService.selectActiveEventList());
+		
+		//항공권 검색
+		List<Map<String, Object>> airportList = memberService.selectAirportList();
+		model.addAttribute("airportList", airportList);
+		
 		return "thviews/main/main";
 	}
 

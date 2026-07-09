@@ -30,4 +30,6 @@ public interface MemberMapper {
 	//회원정보 수정
 	public void updateMemberProfile(MemberVO member);
 
+	//메인 화면 공항 리스트 조회
+	public List<Map<String, Object>> selectAirportList();
 }
