@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">    
+
+<mapper namespace="kr.spring.staff.content.dao.StaffFaqMapper"> 
+
+    <sql id="faqSearch">
+        <where>
+            <if test="category != null and category != ''">
+                category = #{category}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (question LIKE '%' || #{keyword} || '%' OR answer LIKE '%' || #{keyword} || '%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectFaqList" parameterType="map" resultType="kr.spring.staff.content.vo.StaffFaqVO">
+        SELECT * FROM (
+            SELECT a.*, rownum rnum FROM (
+                SELECT 
+                    faq_id,
+                    category,
+                    question,
+                    answer,
+                    is_visible,
+                    TO_CHAR(created_at, 'YYYY-MM-DD HH24:MI') AS created_at
+                FROM FAQ
+                <include refid="faqSearch"></include>
+                ORDER BY faq_id DESC
+            ) a
+        )
+        <![CDATA[
+        WHERE rnum >= #{start} AND rnum <= #{end}
+        ]]>
+    </select>
+
+    <select id="selectRowCount" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM FAQ
+        <include refid="faqSearch"></include>
+    </select>
+
+    <select id="selectFaq" parameterType="int" resultType="kr.spring.staff.content.vo.StaffFaqVO">
+        SELECT * FROM FAQ WHERE faq_id = #{faq_id}
+    </select>
+
+    <insert id="insertFaq" parameterType="kr.spring.staff.content.vo.StaffFaqVO">
+        INSERT INTO FAQ (
+            category,
+            question,
+            answer,
+            is_visible
+        ) VALUES (
+            #{category},
+            #{question},
+            #{answer},
+            #{is_visible}
+        )
+    </insert>
+
+    <update id="updateFaq" parameterType="kr.spring.staff.content.vo.StaffFaqVO">
+        UPDATE FAQ
+        SET 
+            category = #{category},
+            question = #{question},
+            answer = #{answer},
+            is_visible = #{is_visible}
+        WHERE faq_id = #{faq_id}
+    </update>
+
+    <delete id="deleteFaq" parameterType="int">
+        DELETE FROM FAQ WHERE faq_id = #{faq_id}
+    </delete>
+
+    <update id="updateFaqVisible" parameterType="map">
+        UPDATE FAQ
+        SET is_visible = #{is_visible}
+        WHERE faq_id = #{faq_id}
+    </update>
+
+</mapper>
