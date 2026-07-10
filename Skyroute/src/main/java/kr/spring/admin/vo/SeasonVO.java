@@ -8,6 +8,7 @@ public class SeasonVO {
     private String seasonName;
     private String startDate;
     private String endDate;
+    private double seasonRatio;
     private String isActive;
     
     public int getSeasonId() { return this.seasonId; }

@@ -8,7 +8,7 @@
 			season_name AS seasonName,
 			TO_CHAR(start_date, 'YYYY-MM-DD') AS startDate,
 			TO_CHAR(end_date, 'YYYY-MM-DD') AS endDate,
-			is_active AS isActive
+			season_ratio AS seasonRatio, is_active AS isActive
 		FROM SEASON
 		ORDER BY season_id ASC
 	</select>
@@ -19,7 +19,7 @@
 			season_name AS seasonName,
 			TO_CHAR(start_date, 'YYYY-MM-DD') AS startDate,
 			TO_CHAR(end_date, 'YYYY-MM-DD') AS endDate,
-			is_active AS isActive
+			season_ratio AS seasonRatio, is_active AS isActive
 		FROM SEASON
 		WHERE season_id = #{seasonId}
 	</select>
@@ -29,12 +29,12 @@
 			season_name,
 			start_date,
 			end_date,
-			is_active
+			season_ratio, is_active
 		) VALUES (
 			#{seasonName},
 			TO_DATE(#{startDate}, 'YYYY-MM-DD'),
 			TO_DATE(#{endDate}, 'YYYY-MM-DD'),
-			NVL(#{isActive, jdbcType=VARCHAR}, 'Y')
+			#{seasonRatio}, NVL(#{isActive, jdbcType=VARCHAR}, 'Y')
 		)
 	</insert>
 
@@ -44,7 +44,7 @@
 			season_name = #{seasonName},
 			start_date = TO_DATE(#{startDate}, 'YYYY-MM-DD'),
 			end_date = TO_DATE(#{endDate}, 'YYYY-MM-DD'),
-			is_active = #{isActive}
+			season_ratio = #{seasonRatio}, is_active = #{isActive}
 		WHERE season_id = #{seasonId}
 	</update>
 
