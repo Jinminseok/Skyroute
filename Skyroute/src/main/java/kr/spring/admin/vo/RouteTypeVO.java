@@ -6,6 +6,6 @@ import lombok.Data;
 public class RouteTypeVO {
 	private int routeTypeId;
 	private String typeName;
+	private int routePrice;
 	private String isActive;
-	
 }

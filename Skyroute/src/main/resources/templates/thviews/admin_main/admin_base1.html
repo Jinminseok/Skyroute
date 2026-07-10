@@ -120,7 +120,7 @@
 								<tr>
 									<th>노선유형 ID</th>
 									<th>유형명</th>
-									<th>사용 여부</th>
+									<th>기본 운임</th> <th>사용 여부</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -128,7 +128,7 @@
 									th:if="${stat.index < 3}">
 									<td th:text="${routeType.routeTypeId}"></td>
 									<td th:text="${routeType.typeName}"></td>
-									<td>
+									<td th:text="${#numbers.formatInteger(routeType.routePrice, 1, 'COMMA')} + '원'"></td> <td>
 										<div class="toggle"
 											th:classappend="${routeType.isActive == 'Y'} ? 'on' : ''"
 											th:attr="onclick=|toggleRouteTypeActiveStatus(this, ${routeType.routeTypeId}, '${routeType.isActive}')|">
@@ -136,7 +136,7 @@
 									</td>
 								</tr>
 								<tr th:if="${#lists.isEmpty(routeTypeList)}">
-									<td colspan="3" style="text-align: center; padding: 20px;">등록된
+									<td colspan="4" style="text-align: center; padding: 20px;">등록된
 										노선 유형이 없습니다.</td>
 								</tr>
 							</tbody>
@@ -223,6 +223,7 @@
 			</form>
 		</div>
 	</div>
+
 	<div id="routeTypeModal" class="modal-overlay" style="display: none;">
 		<div class="modal-content-large">
 			<div class="modal-header">
@@ -235,6 +236,8 @@
 				style="display: flex; gap: 10px; margin-bottom: 20px;">
 				<input type="text" name="typeName" class="form-input"
 					placeholder="새로운 노선 유형명 입력" required style="margin-bottom: 0;">
+				<input type="number" name="routePrice" class="form-input"
+					placeholder="기본 운임(숫자)" required style="margin-bottom: 0; width: 140px;">
 				<button type="submit" class="btn btn-primary"
 					style="white-space: nowrap;">유형 등록</button>
 			</form>
@@ -245,7 +248,7 @@
 						<tr>
 							<th>ID</th>
 							<th>유형명</th>
-							<th>상태</th>
+							<th>기본 운임</th> <th>상태</th>
 							<th>관리</th>
 						</tr>
 					</thead>
@@ -253,16 +256,15 @@
 						<tr th:each="routeType : ${routeTypeList}">
 							<td th:text="${routeType.routeTypeId}"></td>
 							<td th:text="${routeType.typeName}"></td>
-							<td th:id="'modal-route-status-' + ${routeType.routeTypeId}"
+							<td th:text="${#numbers.formatInteger(routeType.routePrice, 1, 'COMMA')} + '원'"></td> <td th:id="'modal-route-status-' + ${routeType.routeTypeId}"
 								th:text="${routeType.isActive == 'Y' ? '사용 (Y)' : '미사용 (N)'}"></td>
 							<td style="display: flex; gap: 5px;">
 								<button type="button" class="btn btn-ghost btn-sm"
 									th:id="'modal-route-edit-btn-' + ${routeType.routeTypeId}"
 									th:data-name="${routeType.typeName}"
-									th:attr="onclick=|openEditRouteTypeModal('${routeType.routeTypeId}', this.getAttribute('data-name'), '${routeType.isActive}')|">
-									수정</button>
-
-								<button type="button" class="btn btn-ghost btn-sm"
+									th:data-price="${routeType.routePrice}" 
+									th:attr="onclick=|openEditRouteTypeModal('${routeType.routeTypeId}', this.getAttribute('data-name'), this.getAttribute('data-price'), '${routeType.isActive}')|">
+									수정</button> <button type="button" class="btn btn-ghost btn-sm"
 									style="color: #ef4444; border-color: #fca5a5;"
 									th:attr="onclick=|if(confirm('정말 삭제하시겠습니까?')) location.href='/admin/routeType/delete?routeTypeId=${routeType.routeTypeId}'|">
 									삭제</button>
@@ -278,18 +280,21 @@
 		style="display: none;">
 		<div class="modal-content-small">
 			<div class="modal-header">
-				<h2 class="modal-title">노선 유형명 수정</h2>
+				<h2 class="modal-title">노선 유형 수정</h2>
 				<button type="button" class="close-btn"
 					onclick="closeEditRouteTypeModal()">✕</button>
 			</div>
 			<form th:action="@{/admin/routeType/update}" method="post">
 				<input type="hidden" id="editRouteTypeId" name="routeTypeId">
 
-				<label for="editTypeName" class="input-label">유형명</label> <input
-					type="text" id="editTypeName" name="typeName" class="form-input"
-					required> <label for="editRouteIsActive"
-					class="input-label">사용 여부</label> <select id="editRouteIsActive"
-					name="isActive" class="form-input">
+				<label for="editTypeName" class="input-label">유형명</label> 
+				<input type="text" id="editTypeName" name="typeName" class="form-input" required> 
+				
+				<label for="editRoutePrice" class="input-label">기본 운임(숫자)</label> 
+				<input type="number" id="editRoutePrice" name="routePrice" class="form-input" required> 
+
+				<label for="editRouteIsActive" class="input-label">사용 여부</label> 
+				<select id="editRouteIsActive" name="isActive" class="form-input">
 					<option value="Y">사용 (Y)</option>
 					<option value="N">미사용 (N)</option>
 				</select>
@@ -302,6 +307,7 @@
 			</form>
 		</div>
 	</div>
+
 	<div id="gateModal" class="modal-overlay" style="display: none;">
 		<div class="modal-content-large">
 			<div class="modal-header">
@@ -499,13 +505,16 @@
 	    		alert("통신 중 오류가 발생했습니다.");
 	    	});
 	    }
-	 // ====== 노선 유형 모달 제어 함수 ======
+        
+	    // ====== 노선 유형 모달 제어 함수 ======
 	    function openRouteTypeModal() { document.getElementById('routeTypeModal').style.display = 'flex'; }
 	    function closeRouteTypeModal() { document.getElementById('routeTypeModal').style.display = 'none'; }
 
-	    function openEditRouteTypeModal(id, name, isActive) {
+        // 파라미터에 price를 추가로 받도록 수정
+	    function openEditRouteTypeModal(id, name, price, isActive) {
 	        document.getElementById('editRouteTypeId').value = id;
 	        document.getElementById('editTypeName').value = name;
+	        document.getElementById('editRoutePrice').value = price; // 가격 추가
 	        document.getElementById('editRouteIsActive').value = isActive;
 	        document.getElementById('editRouteTypeModal').style.display = 'flex';
 	    }
@@ -546,11 +555,12 @@
 	                const modalStatusTd = document.getElementById('modal-route-status-' + routeTypeId);
 	                if (modalStatusTd) modalStatusTd.innerText = (newStatus === 'Y') ? '사용 (Y)' : '미사용 (N)';
 
-	                // 모달 내 수정 버튼 속성 업데이트
+	                // 모달 내 수정 버튼 속성 업데이트 (가격 데이터 함께 전달)
 	                const modalEditBtn = document.getElementById('modal-route-edit-btn-' + routeTypeId);
 	                if (modalEditBtn) {
 	                    const typeName = modalEditBtn.getAttribute('data-name');
-	                    modalEditBtn.setAttribute('onclick', `openEditRouteTypeModal('${routeTypeId}', '${typeName}', '${newStatus}')`);
+	                    const price = modalEditBtn.getAttribute('data-price');
+	                    modalEditBtn.setAttribute('onclick', `openEditRouteTypeModal('${routeTypeId}', '${typeName}', '${price}', '${newStatus}')`);
 	                }
 	            } else {
 	                alert("상태 변경 처리에 실패했습니다. (서버 내부 오류)");
