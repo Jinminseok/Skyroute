@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.spring.member.booking.dao.FlightSearchMapper">
+
+
+	<resultMap id="airportOptionResultMap" type="kr.spring.member.booking.vo.AirportOptionVO">
+		<id property="airportId" column="airport_id"/>
+		<result property="iataCode" column="iata_code"/>
+		<result property="airportName" column="airport_name"/>
+		<result property="country" column="country"/>
+		<result property="flightType" column="flight_type"/>
+	</resultMap>
+
+	<resultMap id="seatClassOptionResultMap" type="kr.spring.member.booking.vo.SeatClassOptionVO">
+		<id property="seatClassId" column="seat_class_id"/>
+		<result property="className" column="class_name"/>
+		<result property="sortOrder" column="sort_order"/>
+	</resultMap>
+
+
+	<resultMap id="flightSearchResultMap" type="kr.spring.member.booking.vo.FlightSearchResultVO">
+		<id property="flightId" column="flight_id"/>
+		<result property="flightNo" column="flight_no"/>
+		<result property="departureAirportId" column="departure_airport_id"/>
+		<result property="departureIataCode" column="departure_iata_code"/>
+		<result property="departureAirportName" column="departure_airport_name"/>
+		<result property="arrivalAirportId" column="arrival_airport_id"/>
+		<result property="arrivalIataCode" column="arrival_iata_code"/>
+		<result property="arrivalAirportName" column="arrival_airport_name"/>
+		<result property="departureTime" column="departure_time"/>
+		<result property="arrivalTime" column="arrival_time"/>
+		<result property="flightStatus" column="flight_status"/>
+		<result property="delayMinutes" column="delay_minutes"/>
+		<result property="aircraftModel" column="aircraft_model"/>
+		<result property="departureGateCode" column="departure_gate_code"/>
+		<result property="arrivalGateCode" column="arrival_gate_code"/>
+		<result property="seatClassId" column="seat_class_id"/>
+		<result property="seatClassName" column="seat_class_name"/>
+		<result property="price" column="price"/>
+		<result property="remainingSeats" column="remaining_seats"/>
+	</resultMap>
+
+
+	<!-- 활성 공항 목록 -->
+	<select id="selectActiveAirportList" resultMap="airportOptionResultMap">
+		SELECT
+			airport_id,
+			TRIM(iata_code) AS iata_code,
+			airport_name,
+			country,
+			flight_type
+		FROM AIRPORT
+		WHERE is_active = 'Y'
+		ORDER BY
+			CASE
+				WHEN country = '대한민국'
+					THEN 0
+				ELSE 1
+			END,
+			airport_name
+	</select>
+
+
+	<!--
+		현재 SkyRoute.zip의 base.sql에는
+		SEAT_CLASS.is_active가 없기 때문에
+		바로 실행 가능한 형태로 작성한다.
+	-->
+	<select id="selectSeatClassList" resultMap="seatClassOptionResultMap">
+
+		SELECT
+			seat_class_id,
+			class_name,
+			sort_order
+		FROM SEAT_CLASS
+		ORDER BY sort_order
+
+	</select>
+
+
+	<!-- 출발지와 도착지가 모두 활성 공항인지 확인 -->
+	<select id="countActiveAirportPair" resultType="int">
+
+		SELECT COUNT(*)
+		FROM AIRPORT
+		WHERE is_active = 'Y'
+		  AND airport_id IN (
+			#{departureAirportId},
+			#{arrivalAirportId}
+		  )
+
+	</select>
+
+
+	<!-- 좌석 등급 존재 여부 확인 -->
+	<select id="countSeatClass" resultType="int">
+
+		SELECT COUNT(*)
+		FROM SEAT_CLASS
+		WHERE seat_class_id =
+			#{seatClassId}
+
+	</select>
+
+
+	<!--
+		잔여 좌석 계산
+
+		잔여 좌석 =
+		선택 항공기의 선택 좌석 등급 활성 좌석
+		- CONFIRMED 좌석
+		- 만료되지 않은 HOLDING 좌석
+	-->
+	<select id="selectFlightList" parameterType="kr.spring.member.booking.vo.FlightSearchQueryVO" resultMap="flightSearchResultMap">
+
+		WITH seat_inventory AS (
+
+			SELECT
+				f2.flight_id,
+
+				COUNT(
+					DISTINCT s.seat_id
+				) AS total_seats,
+
+				COUNT(
+					DISTINCT t.seat_id
+				) AS occupied_seats
+
+			FROM FLIGHT f2
+
+			JOIN SEAT s
+			  ON s.aircraft_id =
+					f2.aircraft_id
+
+			 AND s.seat_class_id =
+					#{seatClassId}
+
+			 AND s.is_active = 'Y'
+
+
+			LEFT JOIN TICKET t
+			  ON t.flight_id =
+					f2.flight_id
+
+			 AND t.seat_id =
+					s.seat_id
+
+			 AND (
+					t.hold_status =
+						'CONFIRMED'
+
+					OR (
+						t.hold_status =
+							'HOLDING'
+
+						AND (
+							t.expired_at
+								IS NULL
+
+							OR t.expired_at
+								&gt;
+								SYSTIMESTAMP
+						)
+					)
+				)
+
+			GROUP BY
+				f2.flight_id
+		)
+
+
+		SELECT
+			f.flight_id,
+			f.flight_no,
+
+
+			dep.airport_id
+				AS departure_airport_id,
+
+			TRIM(dep.iata_code)
+				AS departure_iata_code,
+
+			dep.airport_name
+				AS departure_airport_name,
+
+
+			arr.airport_id
+				AS arrival_airport_id,
+
+			TRIM(arr.iata_code)
+				AS arrival_iata_code,
+
+			arr.airport_name
+				AS arrival_airport_name,
+
+
+			f.departure_time,
+			f.arrival_time,
+			f.flight_status,
+
+			NVL(
+				f.delay_minutes,
+				0
+			) AS delay_minutes,
+
+
+			ac.model_name
+				AS aircraft_model,
+
+			departure_gate.gate_code
+				AS departure_gate_code,
+
+			arrival_gate.gate_code
+				AS arrival_gate_code,
+
+
+			sc.seat_class_id,
+
+			sc.class_name
+				AS seat_class_name,
+
+			ff.price,
+
+			(
+				inventory.total_seats
+				-
+				inventory.occupied_seats
+			) AS remaining_seats
+
+
+		FROM FLIGHT f
+
+
+		JOIN ROUTE r
+		  ON r.route_id =
+				f.route_id
+
+		 AND r.is_active = 'Y'
+
+
+		JOIN AIRPORT dep
+		  ON dep.airport_id =
+				r.departure_airport_id
+
+		 AND dep.is_active = 'Y'
+
+
+		JOIN AIRPORT arr
+		  ON arr.airport_id =
+				r.arrival_airport_id
+
+		 AND arr.is_active = 'Y'
+
+
+		JOIN AIRCRAFT ac
+		  ON ac.aircraft_id =
+				f.aircraft_id
+
+		 AND ac.is_active = 'Y'
+
+		 AND ac.status_name =
+				'운항가능'
+
+
+		JOIN FLIGHT_FARE ff
+		  ON ff.flight_id =
+				f.flight_id
+
+		 AND ff.seat_class_id =
+				#{seatClassId}
+
+
+		JOIN SEAT_CLASS sc
+		  ON sc.seat_class_id =
+				ff.seat_class_id
+
+
+		JOIN seat_inventory inventory
+		  ON inventory.flight_id =
+				f.flight_id
+
+
+		LEFT JOIN GATE departure_gate
+		  ON departure_gate.gate_id =
+				f.departure_gate_id
+
+
+		LEFT JOIN GATE arrival_gate
+		  ON arrival_gate.gate_id =
+				f.arrival_gate_id
+
+
+		WHERE r.departure_airport_id =
+				#{departureAirportId}
+
+		  AND r.arrival_airport_id =
+				#{arrivalAirportId}
+
+
+		  AND f.departure_time
+				&gt;=
+				#{departureStart,
+				  jdbcType=TIMESTAMP}
+
+		  AND f.departure_time
+				&lt;
+				#{departureEnd,
+				  jdbcType=TIMESTAMP}
+
+
+		  AND f.departure_time
+				&gt;
+				SYSTIMESTAMP
+
+
+		  AND f.flight_status IN (
+				'SCHEDULED',
+				'DELAYED'
+		  )
+
+
+		  AND f.is_deleted = 'N'
+
+
+		  AND (
+				inventory.total_seats
+				-
+				inventory.occupied_seats
+		  ) &gt;= #{passengerCount}
+
+
+		ORDER BY
+			f.departure_time,
+			ff.price
+
+	</select>
+
+</mapper>

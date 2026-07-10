@@ -1,5 +1,6 @@
 package kr.spring.main.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import kr.spring.member.booking.service.FlightSearchService;
+import kr.spring.member.booking.vo.FlightSearchForm;
+import kr.spring.member.booking.vo.SeatClassOptionVO;
 import kr.spring.member.service.MemberService;
 import kr.spring.member.vo.PrincipalDetails;
 import kr.spring.staff.content.service.StaffEventService;
@@ -22,8 +26,12 @@ public class MainController {
 	private MemberService memberService;
 
 	@Autowired
+	private FlightSearchService flightSearchService;
+
+	@Autowired
 	private StaffEventService staffEventService;
 
+	//사이트 최초 진입
 	@GetMapping("/")
 	public String init(@AuthenticationPrincipal PrincipalDetails principal) {
 		if (principal != null && principal.getMemberVO() != null) {
@@ -42,14 +50,40 @@ public class MainController {
 		return "redirect:/main/home";
 	}
 
+	//사용자 메인 화면
 	@GetMapping("/main/home")
 	public String main(Model model) {
+		List<SeatClassOptionVO>seatClassList = flightSearchService.selectSeatClassList();
+
+		FlightSearchForm flightSearchForm = new FlightSearchForm();
+
+		/*
+		 * 메인 화면 기본 날짜
+		 */
+		flightSearchForm.setDepartureDate(LocalDate.now().plusDays(1));
+
+		flightSearchForm.setReturnDate(LocalDate.now().plusDays(3));
+
+		/*
+		 * 이코노미를 기본 선택한다.
+		 * 없으면 첫 번째 좌석 등급 선택
+		 */
+		if (!seatClassList.isEmpty()) {
+
+			SeatClassOptionVO defaultSeatClass = seatClassList.stream().filter(
+					seatClass -> seatClass.getClassName().contains("이코노미")).findFirst().orElse(seatClassList.get(0));
+
+			flightSearchForm.setSeatClassId(defaultSeatClass.getSeatClassId());
+		}
+
+
 		model.addAttribute("eventList", staffEventService.selectActiveEventList());
-		
-		//항공권 검색
-		List<Map<String, Object>> airportList = memberService.selectAirportList();
-		model.addAttribute("airportList", airportList);
-		
+		model.addAttribute("airportList", flightSearchService.selectActiveAirportList());
+		model.addAttribute("seatClassList", seatClassList);
+		model.addAttribute("flightSearchForm", flightSearchForm);
+		model.addAttribute("today", LocalDate.now());
+		model.addAttribute("activeMenu", "book");
+
 		return "thviews/main/main";
 	}
 

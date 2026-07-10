@@ -122,136 +122,451 @@
 			<h1>어디로 떠나시나요?</h1>
 			<p>출발지·도착지와 날짜를 선택하면 운항편과 운임을 한눈에 비교할 수 있어요.</p>
 
-			<form action="/member/member_flight_list" method="get" id="flightSearchForm">
+			<form th:action="@{/booking/flights/search}"
+				  th:object="${flightSearchForm}"
+				  method="get"
+				  id="flightSearchForm">
+			
 				<div class="searchcard">
-					
-					<!-- 왕복/편도 선택 -->
+			
+					<!-- 서버 검증 오류 -->
+					<div class="search-error-box"
+						 th:if="${#fields.hasAnyErrors()}"
+						 style="
+							margin: 10px 12px 16px;
+							padding: 12px 14px;
+							border: 1px solid #fecaca;
+							border-radius: 10px;
+							background: #fff1f2;
+							color: #be123c;
+							font-size: 13px;
+						 ">
+			
+						<div th:each="error : ${#fields.allErrors()}"
+							 th:text="${error}">
+							검색 조건을 확인해 주세요.
+						</div>
+					</div>
+			
+			
+					<!-- 편도 / 왕복 -->
 					<div class="triptabs">
+			
 						<label>
-							<input type="radio" name="tripType" value="ROUNDTRIP" checked onchange="toggleReturnDate()">
+							<input type="radio"
+								   th:field="*{tripType}"
+								   value="ROUNDTRIP"
+								   onchange="toggleReturnDate()">
+			
 							<span>왕복</span>
 						</label>
+			
+			
 						<label>
-							<input type="radio" name="tripType" value="ONEWAY" onchange="toggleReturnDate()">
+							<input type="radio"
+								   th:field="*{tripType}"
+								   value="ONEWAY"
+								   onchange="toggleReturnDate()">
+			
 							<span>편도</span>
 						</label>
+			
 					</div>
-
-					<div class="fields" style="align-items: center;">
-						<!-- 출발지 선택 -->
+			
+			
+					<div class="fields"
+						 style="align-items: center;">
+			
+			
+						<!-- 출발지 -->
 						<div class="field">
-							<label>출발</label>
-							<select name="departureAirport" required style="width: 100%; border: none; font-size: 18px; font-weight: 600; outline: none; background: transparent; cursor: pointer;">
-								<option value="">출발지 선택</option>
-								<option th:each="airport : ${airportList}" 
-								        th:value="${airport.IATA_CODE}" 
-								        th:text="|${airport.IATA_CODE} ${airport.AIRPORT_NAME}|">
+			
+							<label for="departureAirportId">
+								출발
+							</label>
+			
+							<select th:field="*{departureAirportId}"
+									id="departureAirportId"
+									required
+									style="
+										width: 100%;
+										border: none;
+										font-size: 18px;
+										font-weight: 600;
+										outline: none;
+										background: transparent;
+										cursor: pointer;
+									">
+			
+								<option value="">
+									출발지 선택
 								</option>
+			
+								<option th:each="airport : ${airportList}"
+										th:value="${airport.airportId}"
+										th:text="|${airport.iataCode} ${airport.airportName}|">
+								</option>
+			
 							</select>
-							<div class="swap" onclick="triggerSwapEffect()" style="cursor: pointer;" title="출발/도착지 변경">⇄</div>
+			
+			
+							<button type="button"
+									class="swap"
+									onclick="triggerSwapEffect()"
+									title="출발지와 도착지 변경"
+									style="
+										cursor: pointer;
+										border: 0;
+									">
+								⇄
+							</button>
+			
 						</div>
-
-						<!-- 도착지 선택 -->
+			
+			
+						<!-- 도착지 -->
 						<div class="field">
-							<label>도착</label>
-							<select name="arrivalAirport" required style="width: 100%; border: none; font-size: 18px; font-weight: 600; outline: none; background: transparent; cursor: pointer;">
-								<option value="">도착지 선택</option>
-								<option th:each="airport : ${airportList}" 
-								        th:value="${airport.IATA_CODE}" 
-								        th:text="|${airport.IATA_CODE} ${airport.AIRPORT_NAME}|">
+			
+							<label for="arrivalAirportId">
+								도착
+							</label>
+			
+							<select th:field="*{arrivalAirportId}"
+									id="arrivalAirportId"
+									required
+									style="
+										width: 100%;
+										border: none;
+										font-size: 18px;
+										font-weight: 600;
+										outline: none;
+										background: transparent;
+										cursor: pointer;
+									">
+			
+								<option value="">
+									도착지 선택
 								</option>
+			
+								<option th:each="airport : ${airportList}"
+										th:value="${airport.airportId}"
+										th:text="|${airport.iataCode} ${airport.airportName}|">
+								</option>
+			
 							</select>
+			
 						</div>
-
-						<!-- 여정 -->
-						<div class="field" style="display: flex; flex-direction: column;">
+			
+			
+						<!-- 출발일 / 귀국일 -->
+						<div class="field"
+							 style="
+								display: flex;
+								flex-direction: column;
+							 ">
+			
 							<label>여정</label>
-							<div style="display: flex; gap: 5px; align-items: center; margin-top: 4px;">
-								<input type="date" name="departureDate" id="departureDate" required style="border: none; font-size: 15px; font-weight: 600; outline: none; background: transparent; cursor: pointer; font-family: inherit;">
-								<span id="dateSeparator" style="font-weight: 600;"> — </span>
-								<input type="date" name="returnDate" id="returnDate" required style="border: none; font-size: 15px; font-weight: 600; outline: none; background: transparent; cursor: pointer; font-family: inherit;">
+			
+							<div style="
+								display: flex;
+								gap: 5px;
+								align-items: center;
+								margin-top: 4px;
+							">
+			
+								<input type="date"
+									   th:field="*{departureDate}"
+									   id="departureDate"
+									   th:attr="min=${today}"
+									   required
+									   style="
+										   border: none;
+										   font-size: 15px;
+										   font-weight: 600;
+										   outline: none;
+										   background: transparent;
+										   cursor: pointer;
+										   font-family: inherit;
+									   ">
+			
+			
+								<span id="dateSeparator"
+									  style="font-weight: 600;">
+									—
+								</span>
+			
+			
+								<input type="date"
+									   th:field="*{returnDate}"
+									   id="returnDate"
+									   th:attr="min=${today}"
+									   style="
+										   border: none;
+										   font-size: 15px;
+										   font-weight: 600;
+										   outline: none;
+										   background: transparent;
+										   cursor: pointer;
+										   font-family: inherit;
+									   ">
+			
 							</div>
+			
 						</div>
-
-						<!-- 🌟 3. 인원 및 좌석 등급 선택 (대한항공 커스텀 디자인 반영 구역) -->
-						<div class="field" style="display: flex; flex-direction: column; overflow: visible;">
+			
+			
+						<!-- 인원 / 좌석 등급 -->
+						<div class="field"
+							 style="
+								display: flex;
+								flex-direction: column;
+								overflow: visible;
+							 ">
+			
 							<label>인원 · 좌석</label>
-							
-							<div class="passenger-picker-container" style="margin-top: 4px;">
-								<!-- 화면 출력 버튼용 트리거 -->
-								<div class="passenger-display-trigger" id="passengerTrigger" onclick="togglePassengerLayer()">
-									<span id="passengerDisplayText">성인 1</span>
-									<span style="font-size: 11px; margin-left: 4px; color: #64748b;">▼</span>
-								</div>
-
-								<!-- 🚨 대한항공st 히든 팝업창 레이어 구역 -->
-								<div class="passenger-layer" id="passengerLayer">
+			
+			
+							<div class="passenger-picker-container"
+								 style="margin-top: 4px;">
+			
+			
+								<button type="button"
+										class="passenger-display-trigger"
+										id="passengerTrigger"
+										onclick="togglePassengerLayer()"
+										style="
+											width: 100%;
+											border: 0;
+											background: transparent;
+											font-family: inherit;
+										">
+			
+									<span id="passengerDisplayText">
+										성인 1
+									</span>
+			
+									<span style="
+										font-size: 11px;
+										margin-left: 4px;
+										color: #64748b;
+									">
+										▼
+									</span>
+			
+								</button>
+			
+			
+								<div class="passenger-layer"
+									 id="passengerLayer">
+			
+			
 									<div class="passenger-layer-header">
-										<h4>승객 선택</h4>
-										<span class="passenger-layer-close" onclick="togglePassengerLayer()">×</span>
+			
+										<h4>
+											승객 선택
+			
+											<small style="
+												font-weight: 400;
+												color: #94a3b8;
+											">
+												최대 9명
+											</small>
+										</h4>
+			
+										<button type="button"
+												class="passenger-layer-close"
+												onclick="togglePassengerLayer()"
+												style="
+													border: 0;
+													background: transparent;
+												">
+											×
+										</button>
+			
 									</div>
-									
-									<!-- 성인 수 카운터 -->
+			
+			
+									<!-- 성인 -->
 									<div class="passenger-row">
+			
 										<div class="passenger-type-info">
 											<label>성인</label>
 											<span>만 12세 이상</span>
 										</div>
+			
 										<div class="counter-ctrl">
-											<div class="btn-counter" onclick="changeCount('adult', -1)">-</div>
-											<span class="counter-value" id="valAdult">1</span>
-											<div class="btn-counter" onclick="changeCount('adult', 1)">+</div>
+			
+											<button type="button"
+													class="btn-counter"
+													onclick="changeCount('adult', -1)">
+												-
+											</button>
+			
+											<span class="counter-value"
+												  id="valAdult"
+												  th:text="*{adultCount}">
+												1
+											</span>
+			
+											<button type="button"
+													class="btn-counter"
+													onclick="changeCount('adult', 1)">
+												+
+											</button>
+			
 										</div>
+			
 									</div>
-
-									<!-- 소아 수 카운터 -->
+			
+			
+									<!-- 소아 -->
 									<div class="passenger-row">
+			
 										<div class="passenger-type-info">
 											<label>소아</label>
 											<span>만 2세 ~ 11세</span>
 										</div>
+			
 										<div class="counter-ctrl">
-											<div class="btn-counter" onclick="changeCount('child', -1)">-</div>
-											<span class="counter-value" id="valChild">0</span>
-											<div class="btn-counter" onclick="changeCount('child', 1)">+</div>
+			
+											<button type="button"
+													class="btn-counter"
+													onclick="changeCount('child', -1)">
+												-
+											</button>
+			
+											<span class="counter-value"
+												  id="valChild"
+												  th:text="*{childCount}">
+												0
+											</span>
+			
+											<button type="button"
+													class="btn-counter"
+													onclick="changeCount('child', 1)">
+												+
+											</button>
+			
 										</div>
+			
 									</div>
-
-									<!-- 유아 수 카운터 -->
-									<div class="passenger-row" style="margin-bottom: 0;">
+			
+			
+									<!-- 유아 -->
+									<div class="passenger-row"
+										 style="margin-bottom: 0;">
+			
 										<div class="passenger-type-info">
 											<label>유아</label>
-											<span>만 2세 미만</span>
+											<span>
+												만 2세 미만 · 성인 1명당 1명
+											</span>
 										</div>
+			
 										<div class="counter-ctrl">
-											<div class="btn-counter" onclick="changeCount('infant', -1)">-</div>
-											<span class="counter-value" id="valInfant">0</span>
-											<div class="btn-counter" onclick="changeCount('infant', 1)">+</div>
+			
+											<button type="button"
+													class="btn-counter"
+													onclick="changeCount('infant', -1)">
+												-
+											</button>
+			
+											<span class="counter-value"
+												  id="valInfant"
+												  th:text="*{infantCount}">
+												0
+											</span>
+			
+											<button type="button"
+													class="btn-counter"
+													onclick="changeCount('infant', 1)">
+												+
+											</button>
+			
 										</div>
+			
 									</div>
+			
 								</div>
+			
 							</div>
-
-							<!-- 🌟 실제 서버(Controller)로 전송될 인원수 hidden input 태그 -->
-							<input type="hidden" name="adultCount" id="adultCount" value="1">
-							<input type="hidden" name="childCount" id="childCount" value="0">
-							<input type="hidden" name="infantCount" id="infantCount" value="0">
-
-							<!-- 🌟 좌석 조건 세팅: 이코노미, 비즈니스, 1등석 3개로 압축 완료 -->
-							<select name="seatClass" required style="border: none; font-size: 13px; outline: none; background: transparent; cursor: pointer; color: var(--mut); margin-top: 4px;">
-								<option value="ECONOMY">이코노미</option>
-								<option value="BUSINESS">비즈니스</option>
-								<option value="FIRST">1등석</option>
+			
+			
+							<!-- 서버 전송용 인원수 -->
+							<input type="hidden"
+								   th:field="*{adultCount}"
+								   id="adultCount">
+			
+							<input type="hidden"
+								   th:field="*{childCount}"
+								   id="childCount">
+			
+							<input type="hidden"
+								   th:field="*{infantCount}"
+								   id="infantCount">
+			
+			
+							<!-- DB 좌석 등급 -->
+							<select th:field="*{seatClassId}"
+									id="seatClassId"
+									required
+									style="
+										border: none;
+										font-size: 13px;
+										outline: none;
+										background: transparent;
+										cursor: pointer;
+										color: var(--mut);
+										margin-top: 4px;
+									">
+			
+								<option value="">
+									좌석 등급 선택
+								</option>
+			
+								<option th:each="seatClass : ${seatClassList}"
+										th:value="${seatClass.seatClassId}"
+										th:text="${seatClass.className}">
+								</option>
+			
 							</select>
+			
 						</div>
+			
 					</div>
-
+			
+			
 					<div class="searchrow">
+			
 						<div class="opts">
+			
+							<span style="
+								font-size: 12px;
+								color: var(--mut);
+							">
+								선택한 좌석 등급의 1인 운임과
+								현재 잔여 좌석을 조회합니다.
+							</span>
+			
 						</div>
-						<button type="submit" class="btn" style="border: none; cursor: pointer; font-family: inherit; font-size: 16px; font-weight: 600;">항공권 검색</button>
+			
+			
+						<button type="submit"
+								class="btn"
+								style="
+									border: none;
+									cursor: pointer;
+									font-family: inherit;
+									font-size: 16px;
+									font-weight: 600;
+								">
+							항공권 검색
+						</button>
+			
 					</div>
+			
 				</div>
+			
 			</form>
 
 			<div class="quick" style="margin-bottom: 40px;">
@@ -476,202 +791,667 @@
 	</section>
 
 <script>
+	/*
+	 * 편도 / 왕복 귀국일 처리
+	 */
 	function toggleReturnDate() {
-		const tripType = document.querySelector('input[name="tripType"]:checked').value;
-		const returnDateInput = document.getElementById('returnDate');
-		const dateSeparator = document.getElementById('dateSeparator');
 
-		if (tripType === 'ONEWAY') {
-			returnDateInput.style.display = 'none';
-			dateSeparator.style.display = 'none';
-			returnDateInput.removeAttribute('required'); 
-			returnDateInput.value = ''; 
-		} else {
-			returnDateInput.style.display = 'inline-block';
-			dateSeparator.style.display = 'inline-block';
-			returnDateInput.setAttribute('required', 'required'); 
+		const tripType =
+			document.querySelector(
+				'input[name="tripType"]:checked'
+			)?.value;
+
+		const returnDateInput =
+			document.getElementById(
+				'returnDate'
+			);
+
+		const dateSeparator =
+			document.getElementById(
+				'dateSeparator'
+			);
+
+		if (!returnDateInput
+				|| !dateSeparator) {
+
+			return;
+		}
+
+		const isOneWay =
+			tripType === 'ONEWAY';
+
+		returnDateInput.style.display =
+			isOneWay
+				? 'none'
+				: 'inline-block';
+
+		dateSeparator.style.display =
+			isOneWay
+				? 'none'
+				: 'inline-block';
+
+		/*
+		 * disabled 필드는 서버로 전송되지 않는다.
+		 */
+		returnDateInput.disabled =
+			isOneWay;
+
+		returnDateInput.required =
+			!isOneWay;
+	}
+
+
+	/*
+	 * 출발지와 도착지 교환
+	 */
+	function triggerSwapEffect() {
+
+		const departure =
+			document.getElementById(
+				'departureAirportId'
+			);
+
+		const arrival =
+			document.getElementById(
+				'arrivalAirportId'
+			);
+
+		if (!departure || !arrival) {
+			return;
+		}
+
+		const temporaryValue =
+			departure.value;
+
+		departure.value =
+			arrival.value;
+
+		arrival.value =
+			temporaryValue;
+	}
+
+
+	/*
+	 * 승객 선택창 열기 / 닫기
+	 */
+	function togglePassengerLayer() {
+
+		const layer =
+			document.getElementById(
+				'passengerLayer'
+			);
+
+		if (!layer) {
+			return;
+		}
+
+		const isHidden =
+			window
+				.getComputedStyle(layer)
+				.display === 'none';
+
+		layer.style.display =
+			isHidden
+				? 'block'
+				: 'none';
+	}
+
+
+	/*
+	 * 승객 수 조회
+	 */
+	function getPassengerCount(type) {
+
+		const input =
+			document.getElementById(
+				type + 'Count'
+			);
+
+		if (!input) {
+			return 0;
+		}
+
+		return Number(
+			input.value || 0
+		);
+	}
+
+
+	/*
+	 * 승객 수 변경
+	 */
+	function changeCount(type, amount) {
+
+		const capitalizedType =
+			type.charAt(0).toUpperCase()
+			+ type.slice(1);
+
+		const targetText =
+			document.getElementById(
+				'val' + capitalizedType
+			);
+
+		const targetInput =
+			document.getElementById(
+				type + 'Count'
+			);
+
+		if (!targetText
+				|| !targetInput) {
+
+			return;
+		}
+
+
+		const current =
+			Number(
+				targetInput.value || 0
+			);
+
+		const next =
+			current + amount;
+
+		const minimum =
+			type === 'adult'
+				? 1
+				: 0;
+
+
+		if (next < minimum) {
+			return;
+		}
+
+
+		const adult =
+			type === 'adult'
+				? next
+				: getPassengerCount(
+					'adult'
+				);
+
+		const child =
+			type === 'child'
+				? next
+				: getPassengerCount(
+					'child'
+				);
+
+		const infant =
+			type === 'infant'
+				? next
+				: getPassengerCount(
+					'infant'
+				);
+
+		const total =
+			adult
+			+ child
+			+ infant;
+
+
+		if (total > 9) {
+
+			alert(
+				'전체 승객은 최대 9명까지 선택할 수 있습니다.'
+			);
+
+			return;
+		}
+
+
+		if (infant > adult) {
+
+			alert(
+				'유아는 성인 1명당 1명까지 선택할 수 있습니다.'
+			);
+
+			return;
+		}
+
+
+		targetInput.value =
+			next;
+
+		targetText.textContent =
+			next;
+
+		updatePassengerDisplayText();
+	}
+
+
+	/*
+	 * 승객 요약 문자열
+	 */
+	function updatePassengerDisplayText() {
+
+		const adult =
+			getPassengerCount(
+				'adult'
+			);
+
+		const child =
+			getPassengerCount(
+				'child'
+			);
+
+		const infant =
+			getPassengerCount(
+				'infant'
+			);
+
+		let text =
+			'성인 ' + adult;
+
+		if (child > 0) {
+			text +=
+				', 소아 ' + child;
+		}
+
+		if (infant > 0) {
+			text +=
+				', 유아 ' + infant;
+		}
+
+
+		const displayText =
+			document.getElementById(
+				'passengerDisplayText'
+			);
+
+		if (displayText) {
+			displayText.textContent =
+				text;
 		}
 	}
 
-	function triggerSwapEffect() {
-		const depSelect = document.querySelector('select[name="departureAirport"]');
-		const arrSelect = document.querySelector('select[name="arrivalAirport"]');
-		
-		const tempValue = depSelect.value;
-		depSelect.value = arrSelect.value;
-		arrSelect.value = tempValue;
+
+	/*
+	 * 출발일에 맞춰 귀국일 범위 설정
+	 */
+	function syncDateRange() {
+
+		const departureDate =
+			document.getElementById(
+				'departureDate'
+			);
+
+		const returnDate =
+			document.getElementById(
+				'returnDate'
+			);
+
+		if (!departureDate
+				|| !returnDate) {
+
+			return;
+		}
+
+
+		returnDate.min =
+			departureDate.value
+			|| departureDate.min;
+
+
+		if (returnDate.value
+				&& departureDate.value
+				&& returnDate.value
+					< departureDate.value) {
+
+			returnDate.value =
+				departureDate.value;
+		}
 	}
 
-	// 이벤트 배너 스크립트
-	document.addEventListener('DOMContentLoaded', function() {
-		const slider = document.getElementById('mainEventSlider');
+
+	/*
+	 * 검색 전 화면 검증
+	 */
+	function validateSearchForm(event) {
+
+		const departure =
+			document.getElementById(
+				'departureAirportId'
+			);
+
+		const arrival =
+			document.getElementById(
+				'arrivalAirportId'
+			);
+
+		const departureDate =
+			document.getElementById(
+				'departureDate'
+			);
+
+		const returnDate =
+			document.getElementById(
+				'returnDate'
+			);
+
+		const seatClass =
+			document.getElementById(
+				'seatClassId'
+			);
+
+		const tripType =
+			document.querySelector(
+				'input[name="tripType"]:checked'
+			)?.value;
+
+
+		let message = '';
+
+
+		if (!departure.value
+				|| !arrival.value) {
+
+			message =
+				'출발지와 도착지를 모두 선택해 주세요.';
+
+		} else if (
+			departure.value
+				=== arrival.value
+		) {
+
+			message =
+				'출발지와 도착지는 서로 달라야 합니다.';
+
+		} else if (
+			!departureDate.value
+		) {
+
+			message =
+				'출발일을 선택해 주세요.';
+
+		} else if (
+			tripType === 'ROUNDTRIP'
+			&& !returnDate.value
+		) {
+
+			message =
+				'왕복 여정은 귀국일을 선택해 주세요.';
+
+		} else if (
+			tripType === 'ROUNDTRIP'
+			&& returnDate.value
+				< departureDate.value
+		) {
+
+			message =
+				'귀국일은 출발일 이후여야 합니다.';
+
+		} else if (
+			!seatClass.value
+		) {
+
+			message =
+				'좌석 등급을 선택해 주세요.';
+		}
+
+
+		if (message) {
+
+			event.preventDefault();
+			alert(message);
+		}
+	}
+
+
+	/*
+	 * 기존 이벤트 슬라이더
+	 */
+	function initializeEventSlider() {
+
+		const slider =
+			document.getElementById(
+				'mainEventSlider'
+			);
 
 		if (!slider) {
 			return;
 		}
 
-		const slides = Array.from(slider.querySelectorAll('.event-slide'));
-		const dots = Array.from(slider.querySelectorAll('.event-dot'));
-		const prevButton = slider.querySelector('.event-prev');
-		const nextButton = slider.querySelector('.event-next');
+
+		const slides =
+			Array.from(
+				slider.querySelectorAll(
+					'.event-slide'
+				)
+			);
+
+		const dots =
+			Array.from(
+				slider.querySelectorAll(
+					'.event-dot'
+				)
+			);
+
+		const prevButton =
+			slider.querySelector(
+				'.event-prev'
+			);
+
+		const nextButton =
+			slider.querySelector(
+				'.event-next'
+			);
+
 
 		if (slides.length < 2) {
+
 			if (prevButton) {
-				prevButton.style.display = 'none';
+				prevButton.style.display =
+					'none';
 			}
 
 			if (nextButton) {
-				nextButton.style.display = 'none';
+				nextButton.style.display =
+					'none';
 			}
+
 			return;
 		}
 
+
 		let currentIndex = 0;
+
 		let timer;
 
-		function showSlide(nextIndex) {
-			currentIndex = (nextIndex + slides.length) % slides.length;
-			slides.forEach(function(slide, index) {
-				slide.classList.toggle('active', index === currentIndex);
-			});
 
-			dots.forEach(function(dot, index) {
-				dot.classList.toggle('active', index === currentIndex);
-			});
+		function showSlide(nextIndex) {
+
+			currentIndex =
+				(
+					nextIndex
+					+ slides.length
+				)
+				% slides.length;
+
+
+			slides.forEach(
+				function(slide, index) {
+
+					slide.classList.toggle(
+						'active',
+						index === currentIndex
+					);
+				}
+			);
+
+
+			dots.forEach(
+				function(dot, index) {
+
+					dot.classList.toggle(
+						'active',
+						index === currentIndex
+					);
+				}
+			);
 		}
+
 
 		function startAutoSlide() {
+
 			clearInterval(timer);
-			timer = setInterval(function() {
-				showSlide(currentIndex + 1);
-			}, 3000);
+
+			timer =
+				setInterval(
+					function() {
+
+						showSlide(
+							currentIndex + 1
+						);
+					},
+					3000
+				);
 		}
+
 
 		if (prevButton) {
-			prevButton.addEventListener('click', function(event) {
-				event.preventDefault();
-				event.stopPropagation();
-				showSlide(currentIndex - 1);
-				startAutoSlide();
-			});
+
+			prevButton.addEventListener(
+				'click',
+				function(event) {
+
+					event.preventDefault();
+
+					showSlide(
+						currentIndex - 1
+					);
+
+					startAutoSlide();
+				}
+			);
 		}
+
 
 		if (nextButton) {
-			nextButton.addEventListener('click', function(event) {
-				event.preventDefault();
-				event.stopPropagation();
-				showSlide(currentIndex + 1);
-				startAutoSlide();
-			});
+
+			nextButton.addEventListener(
+				'click',
+				function(event) {
+
+					event.preventDefault();
+
+					showSlide(
+						currentIndex + 1
+					);
+
+					startAutoSlide();
+				}
+			);
 		}
 
-		dots.forEach(function(dot, index) {
-			dot.addEventListener('click', function(event) {
-				event.preventDefault();
-				event.stopPropagation();
-				showSlide(index);
-				startAutoSlide();
-			});
-		});
 
-		slider.addEventListener('mouseenter', function() {
-			clearInterval(timer);
-		});
+		dots.forEach(
+			function(dot, index) {
 
-		slider.addEventListener('mouseleave', function() {
-			startAutoSlide();
-		});
+				dot.addEventListener(
+					'click',
+					function(event) {
+
+						event.preventDefault();
+
+						showSlide(index);
+
+						startAutoSlide();
+					}
+				);
+			}
+		);
+
+
+		slider.addEventListener(
+			'mouseenter',
+			function() {
+
+				clearInterval(timer);
+			}
+		);
+
+
+		slider.addEventListener(
+			'mouseleave',
+			startAutoSlide
+		);
+
 
 		startAutoSlide();
-
-	});
-	
-	// 🌟 승객 레이어 열고 닫기 토글 함수
-	function togglePassengerLayer() {
-        const layer = document.getElementById('passengerLayer');
-        const trigger = document.getElementById('passengerTrigger');
-        
-        // 디버깅용 로그 추가 (콘솔창 확인)
-        console.log("버튼 클릭됨"); 
-        
-        if (layer.style.display === 'block') {
-            layer.style.display = 'none';
-        } else {
-            layer.style.display = 'block';
-            // 팝업 위치를 트리거 바로 아래로 강제 조정
-            const rect = trigger.getBoundingClientRect();
-            layer.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-            layer.style.left = (rect.left + window.scrollX) + 'px';
-        }
-    }
-
-	// 🌟 대한항공st 카운터 조절 스크립트 (성인 최소 1명, 총합 제한 규정)
-	function changeCount(type, amount) {
-		const targetVal = document.getElementById('val' + type.charAt(0).toUpperCase() + type.slice(1));
-		const targetInput = document.getElementById(type + 'Count');
-		
-		let current = parseInt(targetVal.innerText);
-		let next = current + amount;
-
-		// 유효성 가드 라인
-		if (type === 'adult' && next < 1) return; // 성인은 최소 1명 필수
-		if (type !== 'adult' && next < 0) return; // 소아, 유아는 음수 불가
-		if (next > 9) return; // 항공 표준 최대 단일 예약 인원 9명 제한 예시
-
-		// 데이터 주입
-		targetVal.innerText = next;
-		targetInput.value = next;
-
-		// 메인 메인 필드 텍스트 동적 업데이트 연동
-		updatePassengerDisplayText();
 	}
 
-	// 🌟 화면 트리거 텍스트 가독성 최적화 처리
-	function updatePassengerDisplayText() {
-		const adult = parseInt(document.getElementById('adultCount').value);
-		const child = parseInt(document.getElementById('childCount').value);
-		const infant = parseInt(document.getElementById('infantCount').value);
 
-		let text = `성인 ${adult}`;
-		if (child > 0) text += `, 소아 ${child}`;
-		if (infant > 0) text += `, 유아 ${infant}`;
+	document.addEventListener(
+		'DOMContentLoaded',
+		function() {
 
-		document.getElementById('passengerDisplayText').innerText = text;
-	}
+			toggleReturnDate();
 
-	// 외부 클릭 시 승객 레이어 닫히는 센스 가드
-	document.addEventListener('click', function(e) {
-		const container = document.querySelector('.passenger-picker-container');
-		const layer = document.getElementById('passengerLayer');
-		if (container && !container.contains(e.target)) {
-			layer.style.display = 'none';
+			updatePassengerDisplayText();
+
+			syncDateRange();
+
+			initializeEventSlider();
+
+
+			const departureDate =
+				document.getElementById(
+					'departureDate'
+				);
+
+			if (departureDate) {
+
+				departureDate.addEventListener(
+					'change',
+					syncDateRange
+				);
+			}
+
+
+			const searchForm =
+				document.getElementById(
+					'flightSearchForm'
+				);
+
+			if (searchForm) {
+
+				searchForm.addEventListener(
+					'submit',
+					validateSearchForm
+				);
+			}
+
+
+			/*
+			 * 팝업 외부 클릭
+			 */
+			document.addEventListener(
+				'click',
+				function(event) {
+
+					const container =
+						document.querySelector(
+							'.passenger-picker-container'
+						);
+
+					const layer =
+						document.getElementById(
+							'passengerLayer'
+						);
+
+					if (container
+							&& layer
+							&& !container.contains(
+								event.target
+							)) {
+
+						layer.style.display =
+							'none';
+					}
+				}
+			);
 		}
-	});
-
-	function toggleReturnDate() {
-		const tripType = document.querySelector('input[name="tripType"]:checked').value;
-		const returnDateInput = document.getElementById('returnDate');
-		const dateSeparator = document.getElementById('dateSeparator');
-
-		if (tripType === 'ONEWAY') {
-			returnDateInput.style.display = 'none';
-			dateSeparator.style.display = 'none';
-			returnDateInput.removeAttribute('required'); 
-			returnDateInput.value = ''; 
-		} else {
-			returnDateInput.style.display = 'inline-block';
-			dateSeparator.style.display = 'inline-block';
-			returnDateInput.setAttribute('required', 'required'); 
-		}
-	}
-
-	function triggerSwapEffect() {
-		const depSelect = document.querySelector('select[name="departureAirport"]');
-		const arrSelect = document.querySelector('select[name="arrivalAirport"]');
-		const tempValue = depSelect.value;
-		depSelect.value = arrSelect.value;
-		arrSelect.value = tempValue;
-	}
+	);
 </script>
 
 </div>

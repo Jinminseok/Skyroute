@@ -269,7 +269,8 @@ public class MemberUserController {
 	//항공권 세부 검색 폼 호출
 	@GetMapping("/member_flight_list")
 	public String flightListForm() {
-		return "thviews/member/member_flight_list";
+		
+		return "redirect:/main/home";
 	}
 	
 	

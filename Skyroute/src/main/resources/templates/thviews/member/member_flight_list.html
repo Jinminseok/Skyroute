@@ -1,242 +1,875 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layouts/layout_basic}">
-<head>
-<meta charset="UTF-8">
-<title>에어누리 - 항공권 검색 결과</title>
-<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
-<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layouts/layout_basic}">
 
-<script type="text/javascript">
-    /* 승객 인원 카운터 핸들러 */
-    function updateCount(type, val) {
-        var el = document.getElementById(type + '-count');
-        var current = parseInt(el.innerText);
-        var next = current + val;
-        if (type === 'adult' && next < 1) return;
-        if (type !== 'adult' && next < 0) return;
-        el.innerText = next;
-    }
-</script>
+<head>
+	<meta charset="UTF-8">
+
+	<title>SkyRoute - 항공권 검색 결과</title>
+
+	<link rel="stylesheet"
+		  th:href="@{/assets/css/member.css}"
+		  type="text/css">
+
+	<style>
+		.search-summary-list {
+			display: grid;
+			gap: 12px;
+			margin: 16px 0 20px;
+		}
+
+		.search-summary-item {
+			display: flex;
+			justify-content: space-between;
+			gap: 16px;
+			padding-bottom: 10px;
+			border-bottom: 1px solid var(--line);
+			font-size: 13px;
+		}
+
+		.search-summary-item span {
+			color: var(--mut);
+		}
+
+		.search-summary-item b {
+			text-align: right;
+			font-weight: 600;
+		}
+
+		.direction-section {
+			margin-bottom: 34px;
+		}
+
+		.direction-heading {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-end;
+			margin-bottom: 14px;
+		}
+
+		.direction-heading h3 {
+			margin: 0;
+			font-size: 18px;
+		}
+
+		.direction-heading p {
+			margin: 4px 0 0;
+			color: var(--mut);
+			font-size: 12px;
+		}
+
+		.result-count {
+			color: var(--accent);
+			font-size: 13px;
+			font-weight: 600;
+		}
+
+		.flight-select-control {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+			gap: 8px;
+			margin-top: 10px;
+		}
+
+		.flight-select-control label {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			cursor: pointer;
+			font-size: 12px;
+			color: var(--accent);
+			font-weight: 600;
+		}
+
+		.flight-select-control input {
+			accent-color: var(--accent);
+		}
+
+		.status-normal {
+			color: var(--ok) !important;
+		}
+
+		.status-delayed {
+			color: var(--warn) !important;
+		}
+
+		.empty-result {
+			padding: 42px 20px;
+			border: 1px dashed var(--line);
+			border-radius: 12px;
+			text-align: center;
+			color: var(--mut);
+			background: #fff;
+		}
+
+		.empty-result small {
+			display: block;
+			margin-top: 6px;
+		}
+
+		.selection-footer {
+			position: sticky;
+			bottom: 16px;
+			z-index: 10;
+			margin-top: 24px;
+			padding: 16px 18px;
+			border: 1px solid var(--line);
+			border-radius: 14px;
+			background: rgba(255, 255, 255, .96);
+			box-shadow: 0 10px 30px rgba(15, 23, 42, .10);
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 20px;
+		}
+
+		.selection-footer p {
+			margin: 0;
+			color: var(--mut);
+			font-size: 12px;
+		}
+
+		.selection-footer .btn {
+			border: 0;
+			cursor: pointer;
+			white-space: nowrap;
+		}
+
+		.flight-date {
+			color: var(--mut);
+			font-size: 11px;
+			margin-bottom: 2px;
+		}
+
+		.seat-warning {
+			color: var(--warn) !important;
+			font-weight: 600 !important;
+		}
+
+		@media(max-width: 900px) {
+			.booking-container {
+				display: block;
+			}
+
+			.left-sidebar {
+				width: 100%;
+				margin-bottom: 24px;
+			}
+
+			.results-area {
+				width: 100%;
+			}
+
+			.selection-footer {
+				flex-direction: column;
+				align-items: stretch;
+			}
+		}
+	</style>
 </head>
+
+
 <body>
 
-	<div layout:fragment="panel">
-		<div class="wrap" style="padding-top: 40px;">
+<div layout:fragment="panel">
 
-			<div class="booking-container">
+	<div class="wrap"
+		 style="
+			padding-top: 40px;
+			padding-bottom: 80px;
+		 ">
 
-				<div class="left-sidebar">
+		<div class="booking-container">
 
-					<aside class="filter-sidebar">
-						<div class="filter-group mini-search">
-							<div class="filter-title">
-								<span class="material-symbols-outlined" style="font-size: 18px;">search</span>간편 재검색
+
+			<!-- 좌측 검색 조건 -->
+			<div class="left-sidebar">
+
+				<aside class="filter-sidebar">
+
+					<div class="filter-group"
+						 style="
+							border-bottom: 0;
+							margin-bottom: 0;
+							padding-bottom: 0;
+						 ">
+
+						<div class="filter-title">
+
+							<span class="material-symbols-outlined"
+								  style="font-size: 18px;">
+								travel_explore
+							</span>
+
+							검색 조건
+						</div>
+
+
+						<div class="search-summary-list">
+
+
+							<div class="search-summary-item">
+								<span>여정</span>
+
+								<b th:text="${flightSearchForm.roundTrip}
+									? '왕복'
+									: '편도'">
+									왕복
+								</b>
 							</div>
-							<div style="display: flex; margin-bottom: 12px;">
-								<label><input type="radio" name="mini_trip" checked><span>왕복</span></label> 
-                                <label><input type="radio" name="mini_trip"> <span>편도</span></label>
+
+
+							<div class="search-summary-item">
+								<span>구간</span>
+
+								<b th:text="|${departureAirport.displayName} → ${arrivalAirport.displayName}|">
+									GMP → CJU
+								</b>
 							</div>
-							
-                            <div>                                
-								<label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">출발지</label>
-								<input type="text" class="f-input" list="departure-airports" value="ICN 서울/인천" placeholder="도시 또는 공항 검색">
-                                <datalist id="departure-airports">
-                                    <option value="ICN 서울/인천"></option>
-                                    <option value="CJU 제주"></option>
-                                    <option value="GMP 서울/김포"></option>
-                                    <option value="PUS 부산/김해"></option>
-                                </datalist>
 
-                                
-								<label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">도착지</label>
-								<input type="text" class="f-input" list="arrival-airports" value="JFK 뉴욕" placeholder="도시 또는 공항 검색">
-                                <datalist id="arrival-airports">
-                                    <option value="JFK 뉴욕"></option>
-                                    <option value="NRT 도쿄/나리타"></option>
-                                    <option value="BKK 방콕/수완나품"></option>
-                                    <option value="CDG 파리/샤를드골"></option>
-                                </datalist>
 
-                                
-								<label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">탑승일자</label>
-								<input type="date" class="f-input" value="2026-12-20" style="font-family: var(--sans-eng);">
+							<div class="search-summary-item">
+								<span>출발일</span>
 
-                                
-								<label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 6px;">인원 선택</label> 
-								<div class="passenger-counter-container">
-                                    <div class="passenger-type-box">
-                                        <span class="passenger-type-label">성인</span>
-                                        <div class="counter-control">
-                                            <a class="btn-count-ctrl" onclick="updateCount('adult', -1)">-</a>
-                                            <span class="count-display" id="adult-count">1</span>
-                                            <a class="btn-count-ctrl" onclick="updateCount('adult', 1)">+</a>
-                                        </div>
-                                    </div>
-                                    <div class="passenger-type-box" style="border-left: 1px solid var(--line); border-right: 1px solid var(--line);">
-                                        <span class="passenger-type-label">소아</span>
-                                        <div class="counter-control">
-                                            <a class="btn-count-ctrl" onclick="updateCount('child', -1)">-</a>
-                                            <span class="count-display" id="child-count">0</span>
-                                            <a class="btn-count-ctrl" onclick="updateCount('child', 1)">+</a>
-                                        </div>
-                                    </div>
-                                    <div class="passenger-type-box">
-                                        <span class="passenger-type-label">유아</span>
-                                        <div class="counter-control">
-                                            <a class="btn-count-ctrl" onclick="updateCount('infant', -1)">-</a>
-                                            <span class="count-display" id="infant-count">0</span>
-                                            <a class="btn-count-ctrl" onclick="updateCount('infant', 1)">+</a>
-                                        </div>
-                                    </div>
-                                </div>
-
-							</div>							
-						</div>
-
-						<div class="filter-group">
-							<div class="filter-title">
-								<span class="material-symbols-outlined" style="font-size: 18px;">schedule</span>출발 시간대
+								<b th:text="${flightSearchForm.departureDate}">
+									2026-07-17
+								</b>
 							</div>
-							<label class="filter-item"><input type="checkbox" checked><span>새벽 00:00 - 06:00</span></label> 
-                            <label class="filter-item"><input type="checkbox" checked><span>오전 06:00 - 12:00</span></label> 
-                            <label class="filter-item"><input type="checkbox" checked><span>오후 12:00 - 18:00</span></label> 
-                            <label class="filter-item"><input type="checkbox" checked><span>야간 18:00 - 24:00</span></label>
-						</div>
 
-						<div class="filter-group">
-							<div class="filter-title">
-								<span class="material-symbols-outlined" style="font-size: 18px;">airline_seat_recline_extra</span>좌석 등급 필터
+
+							<div class="search-summary-item"
+								 th:if="${flightSearchForm.roundTrip}">
+
+								<span>귀국일</span>
+
+								<b th:text="${flightSearchForm.returnDate}">
+									2026-07-20
+								</b>
 							</div>
-							<label class="filter-item"><input type="checkbox" checked><span>이코노미 클래스</span></label> 
-							<label class="filter-item"><input type="checkbox"><span>비즈니스 클래스</span></label>
-							<label class="filter-item"><input type="checkbox"><span>퍼스트 클래스</span></label>
-						</div>
 
-						<div class="filter-group">
-							<div class="filter-title">
-								<span class="material-symbols-outlined" style="font-size: 18px;">payments</span>가격
-								범위 (편도기준)
+
+							<div class="search-summary-item">
+								<span>승객</span>
+
+								<b th:text="|총 ${passengerCount}명|">
+									총 1명
+								</b>
 							</div>
-							<div
-								style="font-size: 12px; color: var(--ink); margin-bottom: 8px; display: flex; justify-content: space-between;">
-								<span>최저 50,000원</span> <span>최대 4,000,000원</span>
+
+
+							<div class="search-summary-item">
+								<span>좌석 등급</span>
+
+								<b th:text="${selectedSeatClass.className}">
+									이코노미
+								</b>
 							</div>
-							<input type="range" min="50000" max="4000000" step="50000"
-								value="1500000" style="width: 100%; cursor: pointer;">
+
 						</div>
 
-						<a th:href="@{/booking/flightList}" class="btn btn-search-apply">검색적용</a>
-					</aside>
 
-					<div class="chatbot-sidebar-window" id="chatWindow">
-						<div class="chat-side-header">
-							<span class="material-symbols-outlined" style="font-size: 20px;">smart_toy</span>
-							<span>에어누리 AI 스마트 챗봇</span>
+						<a th:href="@{/main/home}"
+						   class="btn"
+						   style="
+							width: 100%;
+							text-align: center;
+							text-decoration: none;
+						   ">
+							검색 조건 변경
+						</a>
+
+					</div>
+
+				</aside>
+
+
+				<div class="note"
+					 style="margin-top: 14px;">
+
+					항공편 검색은 로그인 전에도 가능하지만,
+					예약은 USER 로그인 후 진행할 수 있습니다.
+
+				</div>
+
+			</div>
+
+
+			<!-- 우측 결과 -->
+			<main class="results-area">
+
+
+				<div class="htitle"
+					 style="
+						margin-top: 0;
+						margin-bottom: 22px;
+					 ">
+
+					<div>
+
+						<div class="eyebrow">
+							SEARCH RESULTS
 						</div>
-						<div class="chat-side-body">
-							<div class="chat-side-msg bot">안녕하세요! 에어누리 항공편 조회 및 예약 도우미입니다. 무엇을 도와드릴까요?</div>
-							<div class="chat-side-msg user">오늘 예약한 뉴욕행 항공권 정보 확인해줘.</div>
-							<div class="chat-side-msg bot">조회하신 PNR [NUX4K9] 항공권은 12월 20일 10:30 출발편으로 정상 결제 완료 상태입니다!</div>
-						</div>
-						<div class="chat-side-foot">
-							<input type="text" class="chat-side-input" placeholder="문의 사항 입력"> 
-                            <a th:href="@{#}" class="btn chat-side-send">전송</a>
-						</div>
+
+						<h2 style="
+							font-size: 22px;
+							font-weight: 600;
+							margin-top: 5px;
+							"
+							th:text="|${departureAirport.iataCode} ${departureAirport.airportName} → ${arrivalAirport.iataCode} ${arrivalAirport.airportName}|">
+
+							GMP 김포국제공항
+							→
+							CJU 제주국제공항
+						</h2>
+
+						<p style="
+							font-size: 13px;
+							color: var(--mut);
+							margin-top: 5px;
+							">
+
+							선택한 좌석 등급의 1인 운임과
+							현재 예약 가능한 잔여 좌석입니다.
+						</p>
+
 					</div>
 
 				</div>
 
-				<main class="results-area">
 
-					<div class="htitle" style="margin-top: 0;">
+				<form id="itinerarySelectionForm"
+					  onsubmit="return false;">
+
+
+					<input type="hidden"
+						   name="tripType"
+						   th:value="${flightSearchForm.tripType}">
+
+					<input type="hidden"
+						   name="adultCount"
+						   th:value="${flightSearchForm.adultCount}">
+
+					<input type="hidden"
+						   name="childCount"
+						   th:value="${flightSearchForm.childCount}">
+
+					<input type="hidden"
+						   name="infantCount"
+						   th:value="${flightSearchForm.infantCount}">
+
+					<input type="hidden"
+						   name="seatClassId"
+						   th:value="${flightSearchForm.seatClassId}">
+
+
+					<!-- 가는 편 -->
+					<section class="direction-section">
+
+
+						<div class="direction-heading">
+
+							<div>
+
+								<h3>가는 편</h3>
+
+								<p th:text="|${flightSearchForm.departureDate} · ${departureAirport.iataCode} → ${arrivalAirport.iataCode}|">
+									출발 여정
+								</p>
+
+							</div>
+
+
+							<span class="result-count"
+								  th:text="|${#lists.size(outboundFlightList)}개 항공편|">
+								0개 항공편
+							</span>
+
+						</div>
+
+
+						<div class="results"
+							 th:if="${!#lists.isEmpty(outboundFlightList)}">
+
+
+							<div class="flight"
+								 th:each="flight : ${outboundFlightList}">
+
+
+								<div class="carrier">
+
+									<div class="ci">
+										SR
+									</div>
+
+									<div>
+
+										<b>SkyRoute</b>
+
+										<div class="fno"
+											 th:text="${flight.flightNo}">
+											KE101
+										</div>
+
+										<div class="fno"
+											 th:text="${flight.aircraftModel}">
+											B737-800
+										</div>
+
+									</div>
+
+								</div>
+
+
+								<div class="route">
+
+
+									<div class="tnode">
+
+										<div class="flight-date"
+											 th:text="${flight.departureDateText}">
+											2026.07.17
+										</div>
+
+										<div class="t"
+											 th:text="${flight.departureTimeText}">
+											10:30
+										</div>
+
+										<div class="ap"
+											 th:text="|${flight.departureIataCode} ${flight.departureAirportName}|">
+											GMP 김포국제공항
+										</div>
+
+										<div class="fno"
+											 th:if="${flight.departureGateCode != null}"
+											 th:text="|Gate ${flight.departureGateCode}|">
+											Gate G1
+										</div>
+
+									</div>
+
+
+									<div class="leg">
+
+										<div class="dur"
+											 th:text="${flight.durationText}">
+											1시간 10분
+										</div>
+
+										<div class="bar"></div>
+
+										<div class="ns"
+											 th:classappend="${flight.flightStatus == 'DELAYED'}
+												? ' status-delayed'
+												: ' status-normal'"
+											 th:text="${flight.statusLabel}">
+
+											정상 운항
+										</div>
+
+									</div>
+
+
+									<div class="tnode r">
+
+										<div class="flight-date"
+											 th:text="${flight.arrivalDateText}">
+											2026.07.17
+										</div>
+
+										<div class="t"
+											 th:text="${flight.arrivalTimeText}">
+											11:40
+										</div>
+
+										<div class="ap"
+											 th:text="|${flight.arrivalIataCode} ${flight.arrivalAirportName}|">
+											CJU 제주국제공항
+										</div>
+
+										<div class="fno"
+											 th:if="${flight.arrivalGateCode != null}"
+											 th:text="|Gate ${flight.arrivalGateCode}|">
+											Gate C1
+										</div>
+
+									</div>
+
+								</div>
+
+
+								<div class="fare">
+
+									<div class="price">
+
+										<span th:text="${#numbers.formatInteger(
+											flight.price,
+											1,
+											'COMMA'
+										)}">
+											50,000
+										</span>
+
+										<small>원</small>
+
+									</div>
+
+
+									<div class="cls"
+										 th:text="|${flight.seatClassName} · 1인 운임|">
+										이코노미 · 1인 운임
+									</div>
+
+
+									<div class="cls"
+										 th:classappend="${flight.remainingSeats <= 5}
+											? ' seat-warning'
+											: ''"
+										 th:text="|잔여 ${flight.remainingSeats}석|">
+										잔여 8석
+									</div>
+
+
+									<div class="flight-select-control">
+
+										<label>
+
+											<input type="radio"
+												   name="outboundFlightId"
+												   th:value="${flight.flightId}">
+
+											가는 편 선택
+
+										</label>
+
+									</div>
+
+								</div>
+
+							</div>
+
+						</div>
+
+
+						<div class="empty-result"
+							 th:if="${#lists.isEmpty(outboundFlightList)}">
+
+							<span class="material-symbols-outlined"
+								  style="
+									font-size: 34px;
+									margin-bottom: 8px;
+								  ">
+								flight_takeoff
+							</span>
+
+							<div>
+								조건에 맞는 가는 편 항공편이 없습니다.
+							</div>
+
+							<small>
+								날짜, 공항, 좌석 등급 또는 인원을 변경해
+								다시 검색해 주세요.
+							</small>
+
+						</div>
+
+					</section>
+
+
+					<!-- 오는 편 -->
+					<section class="direction-section"
+							 th:if="${flightSearchForm.roundTrip}">
+
+
+						<div class="direction-heading">
+
+							<div>
+
+								<h3>오는 편</h3>
+
+								<p th:text="|${flightSearchForm.returnDate} · ${arrivalAirport.iataCode} → ${departureAirport.iataCode}|">
+									귀국 여정
+								</p>
+
+							</div>
+
+
+							<span class="result-count"
+								  th:text="|${#lists.size(inboundFlightList)}개 항공편|">
+								0개 항공편
+							</span>
+
+						</div>
+
+
+						<div class="results"
+							 th:if="${!#lists.isEmpty(inboundFlightList)}">
+
+
+							<div class="flight"
+								 th:each="flight : ${inboundFlightList}">
+
+
+								<div class="carrier">
+
+									<div class="ci">
+										SR
+									</div>
+
+									<div>
+
+										<b>SkyRoute</b>
+
+										<div class="fno"
+											 th:text="${flight.flightNo}">
+											KE102
+										</div>
+
+										<div class="fno"
+											 th:text="${flight.aircraftModel}">
+											B737-800
+										</div>
+
+									</div>
+
+								</div>
+
+
+								<div class="route">
+
+
+									<div class="tnode">
+
+										<div class="flight-date"
+											 th:text="${flight.departureDateText}">
+											2026.07.20
+										</div>
+
+										<div class="t"
+											 th:text="${flight.departureTimeText}">
+											13:30
+										</div>
+
+										<div class="ap"
+											 th:text="|${flight.departureIataCode} ${flight.departureAirportName}|">
+											CJU 제주국제공항
+										</div>
+
+										<div class="fno"
+											 th:if="${flight.departureGateCode != null}"
+											 th:text="|Gate ${flight.departureGateCode}|">
+											Gate C1
+										</div>
+
+									</div>
+
+
+									<div class="leg">
+
+										<div class="dur"
+											 th:text="${flight.durationText}">
+											1시간 10분
+										</div>
+
+										<div class="bar"></div>
+
+										<div class="ns"
+											 th:classappend="${flight.flightStatus == 'DELAYED'}
+												? ' status-delayed'
+												: ' status-normal'"
+											 th:text="${flight.statusLabel}">
+
+											정상 운항
+										</div>
+
+									</div>
+
+
+									<div class="tnode r">
+
+										<div class="flight-date"
+											 th:text="${flight.arrivalDateText}">
+											2026.07.20
+										</div>
+
+										<div class="t"
+											 th:text="${flight.arrivalTimeText}">
+											14:40
+										</div>
+
+										<div class="ap"
+											 th:text="|${flight.arrivalIataCode} ${flight.arrivalAirportName}|">
+											GMP 김포국제공항
+										</div>
+
+										<div class="fno"
+											 th:if="${flight.arrivalGateCode != null}"
+											 th:text="|Gate ${flight.arrivalGateCode}|">
+											Gate G1
+										</div>
+
+									</div>
+
+								</div>
+
+
+								<div class="fare">
+
+									<div class="price">
+
+										<span th:text="${#numbers.formatInteger(
+											flight.price,
+											1,
+											'COMMA'
+										)}">
+											50,000
+										</span>
+
+										<small>원</small>
+
+									</div>
+
+
+									<div class="cls"
+										 th:text="|${flight.seatClassName} · 1인 운임|">
+										이코노미 · 1인 운임
+									</div>
+
+
+									<div class="cls"
+										 th:classappend="${flight.remainingSeats <= 5}
+											? ' seat-warning'
+											: ''"
+										 th:text="|잔여 ${flight.remainingSeats}석|">
+										잔여 8석
+									</div>
+
+
+									<div class="flight-select-control">
+
+										<label>
+
+											<input type="radio"
+												   name="inboundFlightId"
+												   th:value="${flight.flightId}">
+
+											오는 편 선택
+
+										</label>
+
+									</div>
+
+								</div>
+
+							</div>
+
+						</div>
+
+
+						<div class="empty-result"
+							 th:if="${#lists.isEmpty(inboundFlightList)}">
+
+							<span class="material-symbols-outlined"
+								  style="
+									font-size: 34px;
+									margin-bottom: 8px;
+								  ">
+								flight_land
+							</span>
+
+							<div>
+								조건에 맞는 오는 편 항공편이 없습니다.
+							</div>
+
+							<small>
+								귀국일이나 좌석 등급을 변경해
+								다시 검색해 주세요.
+							</small>
+
+						</div>
+
+					</section>
+
+
+					<!-- 선택 하단 -->
+					<div class="selection-footer"
+						 th:if="${!#lists.isEmpty(outboundFlightList)
+							and
+							(!flightSearchForm.roundTrip
+								or
+							 !#lists.isEmpty(inboundFlightList))}">
+
+
 						<div>
-							<div class="eyebrow">SEARCH RESULTS</div>
-							<h2 style="font-size: 22px; font-weight: 600; margin-top: 5px;">
-								<span th:text="${departureAirportName} ?: 'ICN 인천'">ICN 인천</span> → 
-                                <span th:text="${arrivalAirportName} ?: 'JFK 뉴욕'">JFK 뉴욕</span> · 
-                                <span th:text="${searchDate} ?: '12월 20일'">12월 20일</span>
-							</h2>
-						</div>						
-					</div>
 
-					<div class="results">
-						<div class="flight">
-							<div class="carrier">
-								<div class="ci">NU</div>
-								<div>
-									<b>에어누리</b>
-									<div class="fno">NU 101</div>
-								</div>
-							</div>
-							<div class="route">
-								<div class="tnode">
-									<div class="t">10:30</div>
-									<div class="ap">ICN 인천국제공항</div>
-								</div>
-								<div class="leg">
-									<div class="dur">14시간 20분</div>
-									<div class="bar"></div>
-									<div class="ns">직항</div>
-								</div>
-								<div class="tnode r">
-									<div class="t">11:50</div>
-									<div class="ap">JFK 존F케네디공항</div>
-								</div>
-							</div>
-							<div class="fare">
-								<div class="price">1,284,000<small>원</small></div>
-								<div class="cls">이코노미 · Y클래스</div>
-								<div style="margin-top: 8px;">
-									<a th:href="@{/member/member_booking_passenger}" class="btn sm">여정 선택</a>
-								</div>
-							</div>
+							<b style="
+								display: block;
+								margin-bottom: 3px;
+								">
+								여정을 선택해 주세요.
+							</b>
+
+							<p>
+								예약 단계에서는 선택 항공편의 운항 상태,
+								운임과 잔여 좌석을 서버에서 다시 검증해야 합니다.
+							</p>
+
 						</div>
 
-						<div class="flight">
-							<div class="carrier">
-								<div class="ci">NU</div>
-								<div>
-									<b>에어누리</b>
-									<div class="fno">NU 103</div>
-								</div>
-							</div>
-							<div class="route">
-								<div class="tnode">
-									<div class="t">19:05</div>
-									<div class="ap">ICN 인천국제공항</div>
-								</div>
-								<div class="leg">
-									<div class="dur">14시간 35분</div>
-									<div class="bar"></div>
-									<div class="ns" style="color: var(--warn)">지연 (20분)</div>
-								</div>
-								<div class="tnode r">
-									<div class="t">20:40</div>
-									<div class="ap">JFK 존F케네디공항</div>
-								</div>
-							</div>
-							<div class="fare">
-								<div class="price">3,420,000<small>원</small></div>
-								<div class="cls">비즈니스 · J클래스</div>
-								<div style="margin-top: 8px;">
-									<a th:href="@{/member/member_booking_passenger}" class="btn sm">여정 선택</a>
-								</div>
-							</div>
-						</div>
+
+						<!-- USER 로그인 상태 -->
+						<button sec:authorize="hasAuthority('USER')"
+								type="button"
+								class="btn"
+								disabled
+								title="다음 예약 생성 단계에서 연결합니다."
+								style="
+									opacity: .55;
+									cursor: not-allowed;
+								">
+
+							예약 생성 단계에서 연결
+
+						</button>
+
+
+						<!-- 비로그인 -->
+						<a sec:authorize="isAnonymous()"
+						   th:href="@{/member/login}"
+						   class="btn"
+						   style="text-decoration: none;">
+
+							로그인 후 예약
+
+						</a>
+
+
+						<!-- STAFF / ADMIN -->
+						<span sec:authorize=
+							"isAuthenticated() and !hasAuthority('USER')"
+							  style="
+								font-size: 12px;
+								color: var(--warn);
+							  ">
+
+							USER 계정만 예약할 수 있습니다.
+
+						</span>
+
 					</div>
 
-					<div class="note" style="margin-top: 20px;">💡 좌측 필터 패널과 챗봇을 한눈에 보며 실시간 상담과 필터링 조회가 동시에 가능합니다.</div>
-				</main>
-			</div>
+				</form>
+
+			</main>
 
 		</div>
+
 	</div>
+
+</div>
 
 </body>
 </html>
