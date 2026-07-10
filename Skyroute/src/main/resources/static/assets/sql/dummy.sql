@@ -54,6 +54,18 @@ VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='GMP'), 'G1',
 INSERT INTO GATE (airport_id, gate_code, gate_area_id, flight_type)
 VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='GMP'), 'G2',
         (SELECT gate_area_id FROM GATE_AREA WHERE area_name='B구역'), 'DOM');
+-- CJU 게이트 : KE102 출발 게이트로 사용 (C1)
+INSERT INTO GATE (airport_id, gate_code, gate_area_id, flight_type)
+VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='CJU'), 'C1',
+        (SELECT gate_area_id FROM GATE_AREA WHERE area_name='A구역'), 'DOM');
+INSERT INTO GATE (airport_id, gate_code, gate_area_id, flight_type)
+VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='CJU'), 'C2',
+        (SELECT gate_area_id FROM GATE_AREA WHERE area_name='B구역'), 'DOM');
+
+-- NRT 게이트 : KE201 도착 게이트로 사용 (국제선이라 flight_type='INT')
+INSERT INTO GATE (airport_id, gate_code, gate_area_id, flight_type)
+VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='NRT'), 'N1',
+        (SELECT gate_area_id FROM GATE_AREA WHERE area_name='C구역'), 'INT');
 
 -- CJU: C1(A구역), C2(B구역)
 INSERT INTO GATE (airport_id, gate_code, gate_area_id, flight_type)
@@ -107,8 +119,9 @@ VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='GMP'),
         (SELECT airport_id FROM AIRPORT WHERE iata_code='NRT'),
         'INT', (SELECT route_type_id FROM ROUTE_TYPE WHERE type_name='중거리'));
 
--- 9) 운임 FARE (route x seat_class x season, 스냅샷 계산) --------------------
---    price = route_price * season_ratio * class_ratio, 100원 단위 반올림
+-- 운임 FARE --------------------
+-- FARE 생성 : route x seat_class x season 유효 조합 자동 생성
+-- price = route_price * season_ratio * class_ratio, 100원 단위 반올림
 INSERT INTO FARE (route_id, seat_class_id, season_id, price, is_active)
 SELECT r.route_id, sc.seat_class_id, s.season_id,
        ROUND(rt.route_price * s.season_ratio * sc.class_ratio, -2), 'Y'
@@ -116,43 +129,68 @@ FROM ROUTE r
 JOIN ROUTE_TYPE rt ON rt.route_type_id = r.route_type_id
 CROSS JOIN SEASON s
 CROSS JOIN SEAT_CLASS sc
-WHERE r.is_active='Y' AND s.is_active='Y' AND sc.is_active='Y';
+WHERE r.is_active = 'Y' AND s.is_active = 'Y'
+  AND NOT EXISTS (
+      SELECT 1 FROM FARE f
+      WHERE f.route_id = r.route_id
+        AND f.seat_class_id = sc.seat_class_id
+        AND f.season_id = s.season_id
+  );
 
--- 10) 항공편 FLIGHT (항상 미래 시각으로 → SYSTIMESTAMP 기준) ------------------
---     KE101 GMP→CJU (편도/왕복 가는편), KE102 CJU→GMP (왕복 오는편), KE103 GMP→CJU (편도 대체편)
-INSERT INTO FLIGHT (flight_no, route_id, aircraft_id, departure_time, arrival_time)
+COMMIT;
+-- 항공편 FLIGHT (항상 미래 시각으로 → SYSTIMESTAMP 기준) ------------------
+-- KE101 GMP->CJU (HL8001) : 왕복 가는편 + 편도 테스트
+INSERT INTO FLIGHT (flight_no, route_id, aircraft_id,
+                    departure_gate_id, arrival_gate_id, departure_time, arrival_time)
 VALUES ('KE101',
         (SELECT route_id FROM ROUTE
           WHERE departure_airport_id=(SELECT airport_id FROM AIRPORT WHERE iata_code='GMP')
             AND arrival_airport_id  =(SELECT airport_id FROM AIRPORT WHERE iata_code='CJU')),
         (SELECT aircraft_id FROM AIRCRAFT WHERE reg_no='HL8001'),
+        (SELECT g.gate_id FROM GATE g JOIN AIRPORT a ON a.airport_id=g.airport_id
+          WHERE a.iata_code='GMP' AND g.gate_code='G1'),   -- 출발 GMP/G1
+        (SELECT g.gate_id FROM GATE g JOIN AIRPORT a ON a.airport_id=g.airport_id
+          WHERE a.iata_code='CJU' AND g.gate_code='C1'),                                               -- 도착 CJU 게이트 없음 → NULL
         SYSTIMESTAMP + INTERVAL '7' DAY,
         SYSTIMESTAMP + INTERVAL '7' DAY + INTERVAL '70' MINUTE);
-INSERT INTO FLIGHT (flight_no, route_id, aircraft_id, departure_time, arrival_time)
+
+-- KE102 CJU->GMP (HL8001) : 왕복 오는편
+INSERT INTO FLIGHT (flight_no, route_id, aircraft_id,
+                    departure_gate_id, arrival_gate_id, departure_time, arrival_time)
 VALUES ('KE102',
         (SELECT route_id FROM ROUTE
           WHERE departure_airport_id=(SELECT airport_id FROM AIRPORT WHERE iata_code='CJU')
             AND arrival_airport_id  =(SELECT airport_id FROM AIRPORT WHERE iata_code='GMP')),
         (SELECT aircraft_id FROM AIRCRAFT WHERE reg_no='HL8001'),
+        (SELECT g.gate_id FROM GATE g JOIN AIRPORT a ON a.airport_id=g.airport_id
+          WHERE a.iata_code='CJU' AND g.gate_code='C1'),                                               -- 출발 CJU 게이트 없음 → NULL
+        (SELECT g.gate_id FROM GATE g JOIN AIRPORT a ON a.airport_id=g.airport_id
+          WHERE a.iata_code='GMP' AND g.gate_code='G1'),   -- 도착 GMP/G1
         SYSTIMESTAMP + INTERVAL '10' DAY,
         SYSTIMESTAMP + INTERVAL '10' DAY + INTERVAL '70' MINUTE);
-INSERT INTO FLIGHT (flight_no, route_id, aircraft_id, departure_time, arrival_time)
-VALUES ('KE103',
+
+-- KE201 GMP->NRT (HL8003, 국제 중거리) : 국제선 케이스 (선택)
+INSERT INTO FLIGHT (flight_no, route_id, aircraft_id,
+                    departure_gate_id, arrival_gate_id, departure_time, arrival_time)
+VALUES ('KE201',
         (SELECT route_id FROM ROUTE
           WHERE departure_airport_id=(SELECT airport_id FROM AIRPORT WHERE iata_code='GMP')
-            AND arrival_airport_id  =(SELECT airport_id FROM AIRPORT WHERE iata_code='CJU')),
-        (SELECT aircraft_id FROM AIRCRAFT WHERE reg_no='HL8001'),
+            AND arrival_airport_id  =(SELECT airport_id FROM AIRPORT WHERE iata_code='NRT')),
+        (SELECT aircraft_id FROM AIRCRAFT WHERE reg_no='HL8003'),
+        (SELECT g.gate_id FROM GATE g JOIN AIRPORT a ON a.airport_id=g.airport_id
+          WHERE a.iata_code='GMP' AND g.gate_code='G2'),   -- 출발 GMP/G2
+        (SELECT g.gate_id FROM GATE g JOIN AIRPORT a ON a.airport_id=g.airport_id
+          WHERE a.iata_code='NRT' AND g.gate_code='A1'),                                               -- 도착 NRT 게이트 없음 → NULL
         SYSTIMESTAMP + INTERVAL '14' DAY,
-        SYSTIMESTAMP + INTERVAL '14' DAY + INTERVAL '70' MINUTE);
+        SYSTIMESTAMP + INTERVAL '14' DAY + INTERVAL '150' MINUTE);
 
--- 11) 항공편 운임 FLIGHT_FARE (항공편의 노선+출발일 시즌에 맞는 FARE 복사) --------
+-- 항공편 운임 FLIGHT_FARE (항공편의 노선+출발일 시즌에 맞는 FARE 복사) --------
 INSERT INTO FLIGHT_FARE (flight_id, seat_class_id, fare_id, price)
 SELECT f.flight_id, fa.seat_class_id, fa.fare_id, fa.price
 FROM FLIGHT f
 JOIN FARE fa   ON fa.route_id = f.route_id AND fa.is_active = 'Y'
 JOIN SEASON se ON fa.season_id = se.season_id
               AND CAST(f.departure_time AS DATE) BETWEEN se.start_date AND se.end_date;
-
 COMMIT;
 
 -- =============================================================================
