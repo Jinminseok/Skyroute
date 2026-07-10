@@ -2341,7 +2341,7 @@ function closeFlightModal() {
     document.getElementById('flightModal').style.display = 'none';
 }
 
-// 4. 스케줄 등록 수정
+// 4. 스케줄 등록/수정
 function saveFlightData() {
     const flightId = document.getElementById('modalFlightId').value;
     const requestData = {
@@ -2364,10 +2364,17 @@ function saveFlightData() {
     
     const csrfMeta = document.querySelector('meta[name="_csrf"]');
     const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-    const headers = { 'Content-Type': 'application/json' };
-    if (csrfMeta && csrfHeaderMeta) {
-        headers[csrfHeaderMeta.getAttribute('content')] = csrfMeta.getAttribute('content');
+    
+    if (!csrfMeta || !csrfHeaderMeta) {
+        alert('보안 토큰(CSRF)을 찾을 수 없습니다. HTML의 <head> 영역을 확인해주세요.');
+        return;
     }
+
+    const headers = { 
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest' // 서버가 AJAX임을 인식하도록 추가!
+    };
+    headers[csrfHeaderMeta.getAttribute('content')] = csrfMeta.getAttribute('content');
 
     fetch(url, {
         method: 'POST',
@@ -2382,6 +2389,10 @@ function saveFlightData() {
         } else {
             alert('저장에 실패했습니다.');
         }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('서버 통신 중 오류가 발생했습니다.');
     });
 }
 
@@ -2391,10 +2402,16 @@ function deleteFlight(flightId) {
     
     const csrfMeta = document.querySelector('meta[name="_csrf"]');
     const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-    const headers = {};
-    if (csrfMeta && csrfHeaderMeta) {
-        headers[csrfHeaderMeta.getAttribute('content')] = csrfMeta.getAttribute('content');
+    
+    if (!csrfMeta || !csrfHeaderMeta) {
+        alert('보안 토큰(CSRF)을 찾을 수 없습니다.');
+        return;
     }
+
+    const headers = {
+        'X-Requested-With': 'XMLHttpRequest'
+    };
+    headers[csrfHeaderMeta.getAttribute('content')] = csrfMeta.getAttribute('content');
 
     fetch('/staff/schedule/api/delete?flightId=' + flightId, {
         method: 'POST',
@@ -2408,6 +2425,10 @@ function deleteFlight(flightId) {
         } else {
             alert('삭제에 실패했습니다.');
         }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('서버 통신 중 오류가 발생했습니다.');
     });
 }
 
@@ -2420,15 +2441,23 @@ function changeFlightStatus(flightId, newStatus) {
         return;
     }
 
-    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+    const csrfMeta = document.querySelector('meta[name="_csrf"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+    
+    if (!csrfMeta || !csrfHeaderMeta) {
+        alert('보안 토큰(CSRF)을 찾을 수 없습니다.');
+        return;
+    }
+
+    const headers = { 
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest' // 서버가 AJAX임을 인식하도록 추가!
+    };
+    headers[csrfHeaderMeta.getAttribute('content')] = csrfMeta.getAttribute('content');
 
     fetch('/staff/schedule/api/status', {
         method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json', 
-            [csrfHeader]: csrfToken 
-        },
+        headers: headers,
         body: JSON.stringify({
             flight_id: parseInt(flightId),
             flight_status: newStatus
