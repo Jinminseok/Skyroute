@@ -1077,7 +1077,9 @@
 	    const activePage = document.getElementById(`tab-${prefix.charAt(0)}-${tabName}`);
 	    if (activePage) {
 	        activePage.classList.add('active');
+	        
 	    }
+	    localStorage.setItem('activeTab', tabName);
 	}
 
 	// ====================================================
@@ -1967,10 +1969,22 @@
 	    const classSelect = document.getElementById('modalFareSeatClassId');
 	    const seasonSelect = document.getElementById('modalFareSeasonId');
 
-	    // 3개의 select 박스 중 하나라도 값이 변하면 fetchCalculatedPrice 함수 실행
-	    [routeSelect, classSelect, seasonSelect].forEach(select => {
-	        select.addEventListener('change', fetchCalculatedPrice);
-	    });
+	    // 요소들이 실제로 화면에 존재할 때만 이벤트 리스너를 달아줍니다 (오류 방지)
+	    if (routeSelect && classSelect && seasonSelect) {
+	        [routeSelect, classSelect, seasonSelect].forEach(select => {
+	            select.addEventListener('change', fetchCalculatedPrice);
+	        });
+	    }
+	    const savedTab = localStorage.getItem('activeTab');
+	    if (savedTab) {
+	        const tabButtons = document.querySelectorAll('.tabs button');
+	        tabButtons.forEach(btn => {
+	            // 버튼의 onclick 속성에 저장된 탭 이름(예: 'fare', 'route' 등)이 포함되어 있다면
+	            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${savedTab}'`)) {
+	                btn.click(); // 시스템이 해당 탭 버튼을 자동으로 클릭하게 만듭니다.
+	            }
+	        });
+	    }
 	});
 
 	function fetchCalculatedPrice() {
