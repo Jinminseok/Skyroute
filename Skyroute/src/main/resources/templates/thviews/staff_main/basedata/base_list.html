@@ -1229,48 +1229,53 @@
         document.getElementById('seatModal').style.display = 'none';
     }
 
-	function saveAirportData() {
-	    const airportId = document.getElementById('modalAirportId').value;
-	    
-	    const requestData = {
-	        airportId: airportId ? parseInt(airportId) : null,
-	        iataCode: document.getElementById('modalIataCode').value,
-	        airportName: document.getElementById('modalAirportName').value,
-	        country: document.getElementById('modalCountry').value,
-	        timezone: document.getElementById('modalTimezone').value,
-	        regionId: parseInt(document.getElementById('modalRegionId').value),
-	        flightType: document.getElementById('modalFlightType').value,
-	        isActive: document.getElementById('modalIsActive').value
-	    };
+    function saveAirportData() {
+        const airportId = document.getElementById('modalAirportId').value;
+        
+        // 알림창에 띄워줄 값을 가져옵니다.
+        const iataCode = document.getElementById('modalIataCode').value;
+        const flightTypeVal = document.getElementById('modalFlightType').value;
+        const flightTypeText = flightTypeVal === 'DOM' ? '국내선' : '국제선';
 
-	    const url = airportId ? '/staff/basedata/airport/update' : '/staff/basedata/airport/insert';
-	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+        const requestData = {
+            airportId: airportId ? parseInt(airportId) : null,
+            iataCode: iataCode,
+            airportName: document.getElementById('modalAirportName').value,
+            country: document.getElementById('modalCountry').value,
+            timezone: document.getElementById('modalTimezone').value,
+            regionId: parseInt(document.getElementById('modalRegionId').value),
+            flightType: flightTypeVal,
+            isActive: document.getElementById('modalIsActive').value
+        };
 
-	    fetch(url, {
-	        method: 'POST',
-	        headers: {
-	            'Content-Type': 'application/json',
-	            [csrfHeader]: csrfToken
-	        },
-	        body: JSON.stringify(requestData)
-	    })
-	    .then(response => response.text())
-	    .then(result => {
-	        if (result === 'success') {
-	            alert('정상적으로 저장되었습니다.');
-	            closeModal();
-	            location.reload(); 
-	        } else if (result === 'duplicate'){
-	            alert('해당 IATA 코드와 동일한 운항 구분(국내/국제선) 조합이 이미 등록되어 있습니다.');
-	        } else if (result === 'constraint') {
-	            alert('입력 형식이 올바르지 않습니다.');
-	        } else {
-	            alert('저장에 실패했습니다. 시스템 오류를 확인해주세요.');
-	        }
-	    })
-	    .catch(error => console.error('Error:', error));
-	}
+        const url = airportId ? '/staff/basedata/airport/update' : '/staff/basedata/airport/insert';
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.text())
+        .then(result => {
+            if (result === 'success') {
+                alert('정상적으로 저장되었습니다.');
+                closeModal();
+                location.reload(); 
+            } else if (result === 'duplicate') {
+                alert(`[중복 오류] 입력하신 IATA 코드 '${iataCode}'의 '${flightTypeText}' 조합이 이미 등록되어 있습니다.\n다른 코드를 입력하거나 운항 구분을 변경해 주세요.`);
+            } else if (result === 'constraint') {
+                alert('입력 형식이 올바르지 않습니다.');
+            } else {
+                alert('저장에 실패했습니다. 시스템 오류를 확인해주세요.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
 
 	function deleteAirport(airportId) {
 	    if (!confirm('정말 이 공항을 삭제하시겠습니까?')) return;
