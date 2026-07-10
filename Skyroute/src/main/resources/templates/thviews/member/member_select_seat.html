@@ -44,26 +44,7 @@
 					</div>
 
 					<div class="plane" id="plane">
-                        <div style="width: 60px; height: 16px; background: #e2e8f0; border-radius: 20px 20px 0 0; margin: 0 auto 30px;"></div>
-
-                        <div class="row" th:each="row : ${#numbers.sequence(1, 2)}" th:if="${totalSeats >= (row * 4)}">
-                            <div class="rn" th:text="${row}">1</div>
-                            <div class="seat">A</div><div class="seat">B</div><div></div>
-                            <div></div><div></div><div class="seat">E</div><div class="seat">F</div>
                         </div>
-
-                        <div class="row" th:each="row : ${#numbers.sequence(3, 6)}" th:if="${totalSeats >= (8 + (row - 2) * 4)}">
-                            <div class="rn" th:text="${row}">3</div>
-                            <div class="seat">A</div><div class="seat">B</div><div></div>
-                            <div></div><div></div><div class="seat">E</div><div class="seat">F</div>
-                        </div>
-
-                        <div class="row" th:each="row : ${#numbers.sequence(7, 27)}" th:if="${totalSeats >= (24 + (row - 6) * 6)}">
-                            <div class="rn" th:text="${row}">7</div>
-                            <div class="seat">A</div><div class="seat taken">B</div><div class="seat">C</div>
-                            <div></div><div class="seat">D</div><div class="seat">E</div><div class="seat">F</div>
-                        </div>
-					</div>
 				</div>
 
 				<aside class="summary">
@@ -132,27 +113,113 @@
 	</div>
 
     <script th:inline="javascript">
-    // 1. 결제 제어 및 알림창 처리 전역 함수
+    // 1. [DB 연동용 더미 데이터] 
+    // 나중에 백엔드 작업 시, 이 배열을 타임리프 모델 데이터로 덮어씌우면 됩니다.
+    // 예시: const seatDataList = /*[[${seatList}]]*/ []; 
+    const seatDataList = [];
+    for (let r = 20; r <= 30; r++) {
+        ['A', 'B', 'C', 'D', 'E', 'F'].forEach(col => {
+            // 테스트용: 무작위로 판매 완료(taken) 처리
+            const isTaken = Math.random() < 0.2 || (r === 24 && col === 'A') || (r === 26 && col === 'F');
+            seatDataList.push({
+                row: r,
+                col: col,
+                seatNo: r + col,
+                status: isTaken ? 'taken' : 'available'
+            });
+        });
+    }
+
+    // 2. 동적 좌석 렌더링 엔진
+    function renderSeats() {
+        const plane = document.getElementById('plane');
+        plane.innerHTML = ''; 
+
+        // 비행기 머리 부분 디자인
+        const head = document.createElement('div');
+        head.style.cssText = 'width: 60px; height: 16px; background: #e2e8f0; border-radius: 20px 20px 0 0; margin: 0 auto 30px;';
+        plane.appendChild(head);
+
+        // 행(Row)별로 데이터 그룹화
+        const rows = [...new Set(seatDataList.map(s => s.row))].sort((a,b) => a - b);
+
+        rows.forEach(rowNum => {
+            const rowSeats = seatDataList.filter(s => s.row === rowNum);
+            
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row';
+
+            // 행 번호
+            const rnDiv = document.createElement('div');
+            rnDiv.className = 'rn';
+            rnDiv.innerText = rowNum;
+            rowDiv.appendChild(rnDiv);
+
+            // 좌측 좌석 (A, B, C)
+            ['A', 'B', 'C'].forEach(col => {
+                const seat = rowSeats.find(s => s.col === col);
+                rowDiv.appendChild(createSeatElement(seat));
+            });
+
+            // 통로 (Aisle)
+            rowDiv.appendChild(document.createElement('div'));
+
+            // 우측 좌석 (D, E, F)
+            ['D', 'E', 'F'].forEach(col => {
+                const seat = rowSeats.find(s => s.col === col);
+                rowDiv.appendChild(createSeatElement(seat));
+            });
+
+            plane.appendChild(rowDiv);
+        });
+    }
+
+    // 3. 개별 좌석 엘리먼트 생성 및 클릭 이벤트
+    function createSeatElement(seatData) {
+        const div = document.createElement('div');
+        
+        // 데이터가 없는 칸은 빈 공간으로 유지
+        if (!seatData) return div; 
+
+        // 회원님의 member.css 클래스 적용
+        div.className = 'seat';
+        div.innerText = seatData.col;
+        
+        if (seatData.status === 'taken') {
+            div.classList.add('taken'); // 판매 완료 처리
+        } else {
+            // 선택 가능한 좌석만 클릭 이벤트 부여
+            div.addEventListener('click', function() {
+                // 이미 선택된 'pick' 클래스 모두 제거
+                document.querySelectorAll('.seat.pick').forEach(s => s.classList.remove('pick'));
+                
+                // 클릭한 좌석에 'pick' 추가
+                this.classList.add('pick');
+                
+                // 우측 요약 패널에 좌석 번호 업데이트
+                document.getElementById('selectedSeatDisplay').innerText = seatData.seatNo;
+            });
+        }
+
+        return div;
+    }
+
+    // 4. 결제 제어 로직 (기존 코드 유지)
     function handlePayment(element, event) {
-        // 브라우저의 즉시 이동 성향을 원천 차단
         event.preventDefault();
         event.stopPropagation();
 
         const display = document.getElementById('selectedSeatDisplay');
         
-        // 좌석 선택 여부 검증
+        // 좌석 선택 여부 1차 방어
         if (!display || display.innerText === '미선택') {
             alert('원하시는 항공기 좌석을 먼저 선택해 주세요.');
             return false;
         }
 
-        // 라디오 버튼 선택 값 추출
         const selectedPayType = document.querySelector('input[name="pay_type"]:checked').value;
-        
-        // 안전하게 파싱된 타임리프 오리지널 href 주소 추출
         const mainHomeUrl = element.getAttribute('href'); 
 
-        // 분기문 실행 후 자바스크립트로 리다이렉트 실행
         if (selectedPayType === 'CARD') {
             alert('신용/체크카드 결제가 정상적으로 승인 및 완료되었습니다.\n메인 화면으로 이동합니다.');
             window.location.href = mainHomeUrl;
@@ -167,21 +234,10 @@
         return false;
     }
 
-    // 2. 좌석 동적 선택 로직
+    // 5. 화면 렌더링 시작
     document.addEventListener('DOMContentLoaded', function() {
-        const seats = document.querySelectorAll('.seat:not(.taken)');
-        const display = document.getElementById('selectedSeatDisplay');
-
-        seats.forEach(seat => {
-            seat.addEventListener('click', function() {
-                document.querySelectorAll('.seat.pick').forEach(s => s.classList.remove('pick'));
-                this.classList.add('pick');
-                const rowNum = this.closest('.row').querySelector('.rn').innerText;
-                const seatLetter = this.innerText;
-                display.innerText = rowNum + seatLetter;
-            });
-        });
+        renderSeats();
     });
-</script>
+    </script>
 </body>
 </html>
