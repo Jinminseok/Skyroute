@@ -361,241 +361,6 @@ function nowText() {
   return new Date().toISOString().replace('T', ' ').slice(0, 16);
 }
 
-/* ==================== 1. 오늘 항공편 ==================== */
-/*function renderTodayBoard() {
-  const container = $('todayBoardRows');
-  if (!container) return;
-
-  const visibleFlights = state.flights.filter(flight => flight.is_deleted === 'N');
-
-  container.innerHTML = visibleFlights.map(flight => {
-    const status = getFlightStatusMeta(flight.flight_status);
-
-    return `
-      <div class="board-row">
-        <span class="fn">${flight.flight_no}</span>
-        <span>${shortRouteName(flight.route_name || getRouteName(flight.route_id))}</span>
-        <span class="mono">${toTime(flight.departure_time)}</span>
-        <span class="mono">게이트 ${flight.departure_gate_id || '-'}</span>
-        <span class="mono">${flight.aircraft_model || getAircraftModel(flight.aircraft_id)}</span>
-        <div>
-          <span class="badge ${status.cls}">${status.text}</span>
-        </div>
-        <div class="btn-action-group">
-          <button class="btn btn-ghost btn-sm" onclick="changeFlightStatus(${flight.id}, 'BOARDING')">탑승처리</button>
-          <button class="btn btn-ghost btn-sm" onclick="changeFlightStatus(${flight.id}, 'DEPARTED')">출발완료</button>
-          <button class="btn btn-ghost btn-sm" onclick="changeFlightStatus(${flight.id}, 'ARRIVED')">도착완료</button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function changeFlightStatus(id, nextStatus) {
-  const flight = state.flights.find(item => item.id === Number(id));
-  if (!flight) {
-    toast('대상 항공편을 찾을 수 없습니다.');
-    return;
-  }
-
-  if (flight.flight_status === 'CANCELLED') {
-    toast('결항 항공편은 운항 상태를 변경할 수 없습니다.');
-    return;
-  }
-
-  flight.flight_status = nextStatus;
-
-  toast(`${flight.flight_no} 항공편의 운항 상태가 변경되었습니다.`);
-
-  renderTodayBoard();
-  renderFlightSchedule();
-}*/
-
-/* ==================== 2. 운항 스케줄 ==================== */
-/*function renderFlightSchedule() {
-  const container = $('flightScheduleTable');
-  if (!container) return;
-
-  const visibleFlights = state.flights.filter(flight => flight.is_deleted === 'N');
-
-  container.innerHTML = visibleFlights.map(flight => {
-    const status = getFlightStatusMeta(flight.flight_status);
-
-    return `
-      <tr>
-        <td class="mono" style="color:var(--primary)">${flight.flight_no}</td>
-        <td>노선 ${flight.route_id}</td>
-        <td>기재 ${flight.aircraft_id} (${flight.aircraft_model || getAircraftModel(flight.aircraft_id)})</td>
-        <td class="mono">${flight.departure_gate_id || '미지정'}</td>
-        <td class="mono">${flight.arrival_gate_id || '미지정'}</td>
-        <td class="mono">${flight.departure_time} → ${flight.arrival_time}</td>
-        <td>
-          <span class="badge ${status.cls}">${status.text}</span>
-        </td>
-        <td class="mono">${flight.delay_minutes || 0}분</td>
-        <td>
-          <div class="btn-action-group">
-            <button class="btn btn-ghost btn-sm" onclick="openFlightEditModal(${flight.id})">
-              <span class="material-symbols-outlined" style="font-size:14px">edit</span>
-              수정
-            </button>
-            <button class="btn btn-danger btn-sm" onclick="softDeleteFlight(${flight.id})">
-              스케줄 취소
-            </button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function softDeleteFlight(id) {
-  const flight = state.flights.find(item => item.id === Number(id));
-  if (!flight) {
-    toast('대상 스케줄을 찾을 수 없습니다.');
-    return;
-  }
-
-  flight.is_deleted = 'Y';
-
-  toast(`${flight.flight_no} 항공편 스케줄이 soft delete 처리되었습니다.`);
-
-  renderFlightSchedule();
-  renderTodayBoard();
-}
-
-let activeContext = {
-  type: '',
-  action: '',
-  id: null
-};
-
-function openModal() {
-  const modal = $('globalModal');
-  if (!modal) return;
-
-  modal.classList.add('open');
-}
-
-function closeModal() {
-  const modal = $('globalModal');
-  if (!modal) return;
-
-  modal.classList.remove('open');
-}
-
-function openFlightAddModal() {
-  activeContext = {
-    type: 'flight',
-    action: '등록',
-    id: null
-  };
-
-  setHtml('globalModalTitle', '새 운항 스케줄 등록');
-
-  setHtml('globalModalBody', `
-    <div class="form-grid">
-      <div class="field">
-        <label>항공편 번호 *</label>
-        <input class="input" id="m_f_no" placeholder="예: HJ-7777">
-      </div>
-
-      <div class="field">
-        <label>노선 ID *</label>
-        <input class="input" type="number" id="m_f_route" value="1">
-      </div>
-
-      <div class="field">
-        <label>항공기 ID *</label>
-        <input class="input" type="number" id="m_f_aircraft" value="1">
-      </div>
-
-      <div class="field">
-        <label>출발 게이트 ID</label>
-        <input class="input" type="number" id="m_f_dgate" value="11">
-      </div>
-
-      <div class="field">
-        <label>도착 게이트 ID</label>
-        <input class="input" type="number" id="m_f_agate" value="3">
-      </div>
-
-      <div class="field full">
-        <label>출발 일시 *</label>
-        <input class="input" id="m_f_dtime" value="2026-06-25 11:00">
-      </div>
-
-      <div class="field full">
-        <label>도착 일시 *</label>
-        <input class="input" id="m_f_atime" value="2026-06-25 12:15">
-      </div>
-    </div>
-  `);
-
-  openModal();
-}
-
-function openFlightEditModal(id) {
-  const flight = state.flights.find(item => item.id === Number(id));
-  if (!flight) {
-    toast('대상 스케줄을 찾을 수 없습니다.');
-    return;
-  }
-
-  activeContext = {
-    type: 'flight',
-    action: '수정',
-    id: Number(id)
-  };
-
-  setHtml('globalModalTitle', `운항 스케줄 수정 - ${flight.flight_no}`);
-
-  setHtml('globalModalBody', `
-    <p style="margin-bottom:12px; color:var(--primary); font-size:12px;">
-      ※ 항공편 번호는 식별값이므로 수정하지 않는 기준으로 둡니다.
-    </p>
-
-    <div class="form-grid">
-      <div class="field">
-        <label>항공편 번호</label>
-        <input class="input" id="m_f_no" value="${flight.flight_no}" disabled>
-      </div>
-
-      <div class="field">
-        <label>노선 ID *</label>
-        <input class="input" type="number" id="m_f_route" value="${flight.route_id}">
-      </div>
-
-      <div class="field">
-        <label>항공기 ID *</label>
-        <input class="input" type="number" id="m_f_aircraft" value="${flight.aircraft_id}">
-      </div>
-
-      <div class="field">
-        <label>출발 게이트 ID</label>
-        <input class="input" type="number" id="m_f_dgate" value="${flight.departure_gate_id}">
-      </div>
-
-      <div class="field">
-        <label>도착 게이트 ID</label>
-        <input class="input" type="number" id="m_f_agate" value="${flight.arrival_gate_id}">
-      </div>
-
-      <div class="field full">
-        <label>출발 일시 *</label>
-        <input class="input" id="m_f_dtime" value="${flight.departure_time}">
-      </div>
-
-      <div class="field full">
-        <label>도착 일시 *</label>
-        <input class="input" id="m_f_atime" value="${flight.arrival_time}">
-      </div>
-    </div>
-  `);
-
-  openModal();
-}*/
-
 /* ==================== 3. 승객/체크인/탑승/노쇼 ==================== */
 function loadPaxData() {
   const selector = $('paxFlightSelector');
@@ -2316,6 +2081,7 @@ function openFlightAddModal() {
     document.getElementById('flightForm').reset();
     document.getElementById('modalFlightId').value = '';
     document.getElementById('flightModalTitle').innerText = '새 운항 스케줄 등록';
+	filterGatesByRoute();
     document.getElementById('flightModal').style.display = 'flex';
 }
 
@@ -2328,12 +2094,46 @@ function openFlightEditModal(btn) {
     document.getElementById('modalFlightNo').value = btn.getAttribute('data-no');
     document.getElementById('modalRouteId').value = btn.getAttribute('data-route');
     document.getElementById('modalAircraftId').value = btn.getAttribute('data-ac');
+	// 목록 필터링
+	filterGatesByRoute();
     document.getElementById('modalDepGateId').value = btn.getAttribute('data-dgate') || 0;
     document.getElementById('modalArrGateId').value = btn.getAttribute('data-agate') || 0;
     document.getElementById('modalDepTime').value = btn.getAttribute('data-dtime');
     document.getElementById('modalArrTime').value = btn.getAttribute('data-atime');
 
     document.getElementById('flightModal').style.display = 'flex';
+}
+
+// 노선에 맞는 출발/도착 공항 게이트
+function filterGatesByRoute() {
+    const routeSelect = document.getElementById('modalRouteId');
+    const selectedOption = routeSelect.options[routeSelect.selectedIndex];
+
+    const depAirportId = selectedOption.getAttribute('data-dep-id');
+    const arrAirportId = selectedOption.getAttribute('data-arr-id');
+
+    const depGateSelect = document.getElementById('modalDepGateId');
+    const arrGateSelect = document.getElementById('modalArrGateId');
+
+    // 출발 게이트 필터링 (숨김/표시)
+    Array.from(depGateSelect.options).forEach(opt => {
+        if (opt.value === "0") return;
+        const isMatch = opt.getAttribute('data-airport-id') === depAirportId;
+        opt.hidden = !isMatch;     // 옵션 숨기기
+        opt.disabled = !isMatch;
+    });
+
+    // 도착 게이트 필터링 (숨김/표시)
+    Array.from(arrGateSelect.options).forEach(opt => {
+        if (opt.value === "0") return;
+        const isMatch = opt.getAttribute('data-airport-id') === arrAirportId;
+        opt.hidden = !isMatch;
+        opt.disabled = !isMatch;
+    });
+
+    // 만약 현재 선택되어 있던 게이트가 숨김 처리되었다면 미정으로 초기화
+    if (depGateSelect.options[depGateSelect.selectedIndex]?.hidden) depGateSelect.value = "0";
+    if (arrGateSelect.options[arrGateSelect.selectedIndex]?.hidden) arrGateSelect.value = "0";
 }
 
 // 3. 모달 닫기

@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
 <title>에어 - 오늘 항공편</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,12 +32,12 @@
 
 			<div class="stat">
 				<div class="label">
-					<span class="material-symbols-outlined" style="font-size:18px">
-						flight_takeoff
+					<span class="material-symbols-outlined" style="font-size:18px; color:var(--primary)">
+						flight
 					</span>
-					총 운항 예정
+					오늘 전체 항공편
 				</div>
-				<div class="value">
+				<div class="value" style="color:var(--primary)">
 					<span th:text="${totalCnt}">0</span>
 					<span class="unit">편</span>
 				</div>
@@ -43,36 +46,36 @@
 			<div class="stat">
 				<div class="label">
 					<span class="material-symbols-outlined" style="font-size:18px; color:var(--ok)">
-						check_circle
+						flight_takeoff
 					</span>
-					정상/예정 상태
+					출발 대기 / 탑승중
 				</div>
 				<div class="value" style="color:var(--ok)">
-					<span th:text="${normalCnt}">0</span><span class="unit">편</span>
+					<span th:text="${readyCnt}">0</span><span class="unit">편</span>
 				</div>
 			</div>
 
 			<div class="stat">
 				<div class="label">
-					<span class="material-symbols-outlined" style="font-size:18px; color:var(--warn)">
-						schedule
+					<span class="material-symbols-outlined" style="font-size:18px; color:#475569">
+						flight_land
 					</span>
-					지연 상태
+					운항 / 도착 완료
 				</div>
-				<div class="value" style="color:var(--warn)">
-					<span th:text="${delayedCnt}">0</span><span class="unit">편</span>
+				<div class="value" style="color:#475569">
+					<span th:text="${doneCnt}">0</span><span class="unit">편</span>
 				</div>
 			</div>
 
 			<div class="stat">
 				<div class="label">
 					<span class="material-symbols-outlined" style="font-size:18px; color:var(--danger)">
-						cancel
+						warning
 					</span>
-					결항 상태
+					비정상 (지연 / 결항)
 				</div>
 				<div class="value" style="color:var(--danger)">
-					<span th:text="${canceledCnt}">0</span><span class="unit">편</span>
+					<span th:text="${issueCnt}">0</span><span class="unit">편</span>
 				</div>
 			</div>
 
@@ -135,7 +138,6 @@
 					<span>
 						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
 						        th:onchange="changeFlightStatus([[${f.flight_id}]], this.value)">
-							<option value="">상태 변경</option>
 							<option value="SCHEDULED" th:selected="${f.flight_status == 'SCHEDULED'}">정상/예정</option>
 							<option value="BOARDING" th:selected="${f.flight_status == 'BOARDING'}">탑승중</option>
 							<option value="DEPARTED" th:selected="${f.flight_status == 'DEPARTED'}">출발완료</option>
