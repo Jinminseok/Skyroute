@@ -1,28 +1,23 @@
 -- =============================================================================
 -- SkyRoute 예약/결제 병렬 개발용 최소 더미데이터
--- 전제: DDL 방금 새로 돌려서 관련 테이블이 비어있는 상태
---       MEMBER는 a팀이 이미 시드해둔 상태(BOOKING 등에서 참조)
--- 범위: 지상직(운항/운임) 미구현분을 대신해 예약이 참조하는 상류 데이터만 채움
---       BOOKING/TICKET/PAYMENT는 d/e팀 코드가 생성하므로 비워둠
--- 게이트는 nullable이라 GATE/GATE_AREA 생략
 -- =============================================================================
 
--- 1) 노선 유형 ------------------------------------------------------------
+-- 노선 유형 ------------------------------------------------------------
 INSERT INTO ROUTE_TYPE (type_name, route_price) VALUES ('단거리', 50000);
 INSERT INTO ROUTE_TYPE (type_name, route_price) VALUES ('중거리', 120000);
 INSERT INTO ROUTE_TYPE (type_name, route_price) VALUES ('장거리', 200000);
 
--- 2) 권역 ----------------------------------------------------------------
+-- 권역 ----------------------------------------------------------------
 INSERT INTO REGION (region_name) VALUES ('국내');
 INSERT INTO REGION (region_name) VALUES ('아시아');
+INSERT INTO REGION (region_name) VALUES ('유럽');
 
--- 3) 좌석 등급 (class_ratio: 등급 보정값) -----------------------------------
-INSERT INTO SEAT_CLASS (class_name, "ROWS", "COLUMNS", class_ratio, sort_order)
-VALUES ('비즈니스', 5, 4, 2.0, 1);
-INSERT INTO SEAT_CLASS (class_name, "ROWS", "COLUMNS", class_ratio, sort_order)
-VALUES ('이코노미', 20, 6, 1.0, 2);
+-- 게이트 구역 -----------------------------------
+INSERT INTO GATE_AREA (area_name) VALUES ('A구역');
+INSERT INTO GATE_AREA (area_name) VALUES ('B구역');
+INSERT INTO GATE_AREA (area_name) VALUES ('C구역');
 
--- 4) 시즌 (더미는 1개로 통일 → FARE 계산 시 시즌 모호성 없음) ------------------
+-- 시즌 ------------------
 INSERT INTO SEASON (season_name, start_date, end_date, season_ratio)
 VALUES ('2026년 성수기', DATE '2026-01-01', DATE '2026-07-31', 1.8);
 INSERT INTO SEASON (season_name, start_date, end_date, season_ratio)
@@ -30,17 +25,51 @@ VALUES ('2026년 일반', DATE '2026-08-01', DATE '2026-09-01', 1.0);
 INSERT INTO SEASON (season_name, start_date, end_date, season_ratio)
 VALUES ('2026년 비수기', DATE '2026-09-02', DATE '2026-10-31', 0.8);
 
--- 5) 공항 ----------------------------------------------------------------
+-- 공항 ----------------------------------------------------------------
 INSERT INTO AIRPORT (iata_code, airport_name, country, timezone, region_id, flight_type)
 VALUES ('GMP', '김포국제공항', '대한민국', 'Asia/Seoul',
         (SELECT region_id FROM REGION WHERE region_name='국내'), 'DOM');
 INSERT INTO AIRPORT (iata_code, airport_name, country, timezone, region_id, flight_type)
-VALUES ('CJU', '제주국제공항', '일본', 'Asia/Seoul',
-        (SELECT region_id FROM REGION WHERE region_name='아시아'), 'DOM');
-
--- 6) 항공기 (더미 좌석 8석과 맞춤) -----------------------------------------
+VALUES ('CJU', '제주국제공항', '대한민국', 'Asia/Seoul',
+        (SELECT region_id FROM REGION WHERE region_name='국내'), 'DOM');
+INSERT INTO AIRPORT (iata_code, airport_name, country, timezone, region_id, flight_type)
+VALUES ('PUS', '김해국제공항', '대한민국', 'Asia/Seoul',
+        (SELECT region_id FROM REGION WHERE region_name='국내'), 'DOM');
+INSERT INTO AIRPORT (iata_code, airport_name, country, timezone, region_id, flight_type)
+VALUES ('NRT', '도쿄 나리타 국제공항', '일본', 'Asia/Seoul',
+        (SELECT region_id FROM REGION WHERE region_name='아시아'), 'INT');
+        
+-- 항공기 -----------------------------------------
 INSERT INTO AIRCRAFT (reg_no, model_name, total_seats)
-VALUES ('HL8001', 'B737-800', 8);
+VALUES ('HL8001', 'B737-800', 150);
+INSERT INTO AIRCRAFT (reg_no, model_name, total_seats)
+VALUES ('HL8002', 'B7-800', 200);
+INSERT INTO AIRCRAFT (reg_no, model_name, total_seats)
+VALUES ('HL8003', 'B777-300', 250);
+
+-- 게이트 -----------------------------------------
+INSERT INTO GATE (airport_id, gate_code, gate_area_id, flight_type)
+VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='GMP'), 'G1',
+        (SELECT gate_area_id FROM GATE_AREA WHERE area_name='A구역'), 'DOM');
+INSERT INTO GATE (airport_id, gate_code, gate_area_id, flight_type)
+VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='GMP'), 'G2',
+        (SELECT gate_area_id FROM GATE_AREA WHERE area_name='B구역'), 'DOM');
+
+-- CJU: C1(A구역), C2(B구역)
+INSERT INTO GATE (airport_id, gate_code, gate_area_id, flight_type)
+VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='CJU'), 'C1',
+        (SELECT gate_area_id FROM GATE_AREA WHERE area_name='A구역'), 'DOM');
+INSERT INTO GATE (airport_id, gate_code, gate_area_id, flight_type)
+VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='CJU'), 'C2',
+        (SELECT gate_area_id FROM GATE_AREA WHERE area_name='B구역'), 'DOM');
+
+-- 좌석 등급 (class_ratio: 등급 보정값) -----------------------------------
+INSERT INTO SEAT_CLASS (class_name, class_ratio, sort_order)
+VALUES ('일등석', 3.0, 1);
+INSERT INTO SEAT_CLASS (class_name, class_ratio, sort_order)
+VALUES ('비즈니스', 2.0, 2);
+INSERT INTO SEAT_CLASS (class_name, class_ratio, sort_order)
+VALUES ('이코노미', 1.0, 3);
 
 -- 7) 좌석 (비즈 2 + 이코노미 6 = 8석) --------------------------------------
 INSERT INTO SEAT (aircraft_id, seat_no, seat_class_id)
@@ -59,15 +88,24 @@ JOIN (
 JOIN SEAT_CLASS sc ON sc.class_name = x.cls
 WHERE a.reg_no = 'HL8001';
 
--- 8) 노선 (왕복 테스트용 GMP<->CJU 양방향) ---------------------------------
+-- 노선 (왕복 테스트용 GMP<->CJU 양방향) ---------------------------------
+-- 1) GMP -> CJU (국내 단거리) : KE101, KE103 가는편
 INSERT INTO ROUTE (departure_airport_id, arrival_airport_id, flight_type, route_type_id)
 VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='GMP'),
         (SELECT airport_id FROM AIRPORT WHERE iata_code='CJU'),
-        'DOM', (SELECT route_type_id FROM ROUTE_TYPE WHERE type_name='국내선'));
+        'DOM', (SELECT route_type_id FROM ROUTE_TYPE WHERE type_name='단거리'));
+
+-- 2) CJU -> GMP (국내 단거리) : KE102 오는편 (왕복 테스트용)
 INSERT INTO ROUTE (departure_airport_id, arrival_airport_id, flight_type, route_type_id)
 VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='CJU'),
         (SELECT airport_id FROM AIRPORT WHERE iata_code='GMP'),
-        'DOM', (SELECT route_type_id FROM ROUTE_TYPE WHERE type_name='국내선'));
+        'DOM', (SELECT route_type_id FROM ROUTE_TYPE WHERE type_name='단거리'));
+
+-- 3) GMP -> NRT (국제 중거리) : 국제선 케이스용 (선택)
+INSERT INTO ROUTE (departure_airport_id, arrival_airport_id, flight_type, route_type_id)
+VALUES ((SELECT airport_id FROM AIRPORT WHERE iata_code='GMP'),
+        (SELECT airport_id FROM AIRPORT WHERE iata_code='NRT'),
+        'INT', (SELECT route_type_id FROM ROUTE_TYPE WHERE type_name='중거리'));
 
 -- 9) 운임 FARE (route x seat_class x season, 스냅샷 계산) --------------------
 --    price = route_price * season_ratio * class_ratio, 100원 단위 반올림
