@@ -161,20 +161,6 @@ public class MemberUserController {
 	    return "thviews/member/member_booking"; 
 	}
 	
-	
-	
-	
-	//출/도착지 및 스케쥴 폼 호출
-	@GetMapping("/member_schedule")
-	public String scheduleForm(@RequestParam(value = "tabType", required = false, defaultValue = "STATUS") String tabType,
-			Model model) {
-		model.addAttribute("tabType", tabType);
-		return "thviews/member/member_schedule";
-	}
-	
-	
-	
-	
 	//운항스케쥴 폼 조회
 	@GetMapping("/member_route")
 	public String routeForm(Model model) {
