@@ -55,7 +55,9 @@ public class SecurityConfig{
 								"/",
 								"/assets/**",
 								"/main/**",
-								"/member/member_route",  "/member/**"
+								"/member/member_route",
+								"/member/**",
+								"/member/member_schedule"
 						).permitAll()
 						
 						.requestMatchers("/member/findId", "/member/findPw").permitAll()
