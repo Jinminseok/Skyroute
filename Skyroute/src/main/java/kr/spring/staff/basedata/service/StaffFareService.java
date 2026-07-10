@@ -17,4 +17,8 @@ public interface StaffFareService {
     // Controller에서 호출할 때 예외 처리를 위해 boolean 반환
     public boolean disableFare(Long fare_id);
     public List<SeasonVO> getSeasonList();
+    
+    public int checkDuplicateFare(FareVO fareVO);
+    
+    public int calculateExpectedPrice(FareVO fareVO);
 }

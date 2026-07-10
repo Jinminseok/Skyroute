@@ -77,4 +77,14 @@ public class StaffFareServiceImpl implements StaffFareService{
 		return fareMapper.selectSeasonList();
 	}
 
+	@Override
+	public int checkDuplicateFare(FareVO fareVO) {
+		return fareMapper.checkDuplicateFare(fareVO);
+	}
+
+	@Override
+	public int calculateExpectedPrice(FareVO fareVO) {
+		return fareMapper.calculateExpectedPrice(fareVO);
+	}
+
 }

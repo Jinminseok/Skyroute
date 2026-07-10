@@ -30,4 +30,7 @@ public interface StaffFareMapper {
     public int checkFareInUse(Long fare_id);
     public List<SeasonVO> selectSeasonList();
 	
+    public int checkDuplicateFare(FareVO fareVO);
+    
+    public int calculateExpectedPrice(FareVO fareVO);
 }

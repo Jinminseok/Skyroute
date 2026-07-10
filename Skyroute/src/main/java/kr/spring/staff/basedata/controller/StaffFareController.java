@@ -25,10 +25,14 @@ public class StaffFareController {
     @ResponseBody
     public String insertFare(@RequestBody FareVO fareVO) {
         try {
-            log.info(">>>> 운임 등록 데이터: {}", fareVO);
+        	log.info(">>>> 운임 등록 데이터 (가격 자동계산됨): {}", fareVO);
+        	if (fareService.checkDuplicateFare(fareVO) > 0) {
+                return "duplicate"; 
+            }
             fareService.insertFare(fareVO);
             return "success";
         }catch(org.springframework.dao.DuplicateKeyException e) {
+        	log.error("DB 중복키 에러 상세 원인 (FARE_ID인지 확인!): ", e);
         	return "duplicate";
         }catch (Exception e) {
             log.error("운임 등록 오류", e);
@@ -82,5 +86,17 @@ public class StaffFareController {
             result.put("result", "error");
         }
         return result;
+    }
+ // 5. 프론트엔드 실시간 가격 계산용 API (AJAX)
+    @GetMapping("/calculatePrice")
+    @ResponseBody
+    public String calculatePrice(FareVO fareVO) {
+        try {
+            int expectedPrice = fareService.calculateExpectedPrice(fareVO);
+            return String.valueOf(expectedPrice);
+        } catch (Exception e) {
+            log.error("가격 실시간 계산 오류", e);
+            return "0";
+        }
     }
 }

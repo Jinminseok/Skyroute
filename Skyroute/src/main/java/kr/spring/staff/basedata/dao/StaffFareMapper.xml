@@ -1,110 +1,150 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper   
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
-<mapper namespace="kr.spring.staff.basedata.dao.StaffFareMapper"> 
-	<select id="selectFareList" parameterType="map" resultType="kr.spring.staff.basedata.vo.FareVO">
-        SELECT * FROM (
-            SELECT a.*, rownum rnum FROM (
-                SELECT 
-                    f.fare_id,
-                    f.price,
-                    f.is_active,
-                    dep.iata_code AS departure_airport_code,
-                    arr.iata_code AS arrival_airport_code,
-                    sc.class_name,
-                    s.season_name
-                FROM FARE f
-                JOIN ROUTE r ON f.route_id = r.route_id
-                JOIN AIRPORT dep ON r.departure_airport_id = dep.airport_id
-                JOIN AIRPORT arr ON r.arrival_airport_id = arr.airport_id
-                JOIN SEAT_CLASS sc ON f.seat_class_id = sc.seat_class_id
-                JOIN SEASON s ON f.season_id = s.season_id
-                <where>
-                    <if test="keyword != null and keyword != ''">
-                        <if test="keyfield == 1"> sc.class_name LIKE '%' || #{keyword} || '%'
-                        </if>
-                        <if test="keyfield == 2"> s.season_name LIKE '%' || #{keyword} || '%'
-                        </if>
-                    </if>
-                    <if test="is_active != null and is_active != ''">
-                        AND f.is_active = #{is_active}
-                    </if>
-                </where>
-                ORDER BY f.fare_id DESC
-            ) a
-        )
-        <![CDATA[
-        WHERE rnum >= #{start} AND rnum <= #{end}
-        ]]>
-    </select>
-
-    <select id="selectFareCount" parameterType="map" resultType="integer">
-        SELECT COUNT(*) 
-        FROM FARE f
-        JOIN SEAT_CLASS sc ON f.seat_class_id = sc.seat_class_id
-        JOIN SEASON s ON f.season_id = s.season_id
-        <where>
-            <if test="keyword != null and keyword != ''">
-                <if test="keyfield == 1">
-                    sc.class_name LIKE '%' || #{keyword} || '%'
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.spring.staff.basedata.dao.StaffFareMapper">
+	<select id="selectFareList" parameterType="map"
+		resultType="kr.spring.staff.basedata.vo.FareVO">
+		SELECT * FROM (
+        SELECT a.*, rownum rnum FROM (
+            SELECT 
+                f.fare_id,
+                f.route_id,         f.seat_class_id,    f.season_id,        f.price,
+                f.is_active,
+                dep.iata_code AS departure_airport_code,
+                arr.iata_code AS arrival_airport_code,
+                sc.class_name,
+                s.season_name
+            FROM FARE f
+            JOIN ROUTE r ON f.route_id = r.route_id
+            JOIN AIRPORT dep ON r.departure_airport_id = dep.airport_id
+            JOIN AIRPORT arr ON r.arrival_airport_id = arr.airport_id
+            JOIN SEAT_CLASS sc ON f.seat_class_id = sc.seat_class_id
+            JOIN SEASON s ON f.season_id = s.season_id
+            <where>
+                <if test="keyword != null and keyword != ''">
+                    <if test="keyfield == 1"> sc.class_name LIKE '%' || #{keyword} || '%' </if>
+                    <if test="keyfield == 2"> s.season_name LIKE '%' || #{keyword} || '%' </if>
                 </if>
-            </if>
-        </where>
-    </select>
-
-    <insert id="insertFare" parameterType="kr.spring.staff.basedata.vo.FareVO">
-        INSERT INTO FARE (
-            fare_id,
-            route_id,
-            seat_class_id,
-            season_id,
-            price,
-            is_active
-        ) VALUES (
-            CTEAM02.ISEQ$$_151399.nextval, #{route_id},
-            #{seat_class_id},
-            #{season_id},
-            #{price},
-            'Y'
-        )
-    </insert>
-
-    <select id="selectFare" parameterType="long" resultType="kr.spring.staff.basedata.vo.FareVO">
-        SELECT * FROM FARE WHERE fare_id = #{fare_id}
-    </select>
-
-    <update id="updateFare" parameterType="kr.spring.staff.basedata.vo.FareVO">
-        UPDATE FARE 
-        SET price = #{price}
-        WHERE fare_id = #{fare_id}
-    </update>
-	<update id="updateFareActive" parameterType="map">
-        UPDATE FARE 
-        SET is_active = #{is_active}
-        WHERE fare_id = #{fare_id}
-    </update>
-    <update id="disableFare" parameterType="long">
-        UPDATE FARE 
-        SET is_active = 'N'
-        WHERE fare_id = #{fare_id}
-    </update>
-
-    <select id="checkFareInUse" parameterType="long" resultType="integer">
-        SELECT COUNT(*) FROM FLIGHT_FARE WHERE fare_id = #{fare_id}
-    </select>
-    <select id="selectSeasonList" resultType="kr.spring.admin.vo.SeasonVO">
-    SELECT 
-        season_id AS seasonId, 
-        season_name AS seasonName, 
-        start_date AS startDate, 
-        end_date AS endDate, 
-        is_active AS isActive
-    FROM SEASON 
-    WHERE is_active = 'Y' 
-    ORDER BY start_date ASC
+                <if test="is_active != null and is_active != ''">
+                    AND f.is_active = #{is_active}
+                </if>
+            </where>
+            ORDER BY f.fare_id DESC
+        ) a
+    )
+    <![CDATA[
+    WHERE rnum >= #{start} AND rnum <= #{end}
+    ]]>
 </select>
 
+	<select id="selectFareCount" parameterType="map"
+		resultType="integer">
+		SELECT COUNT(*)
+		FROM FARE f
+		JOIN SEAT_CLASS sc ON f.seat_class_id = sc.seat_class_id
+		JOIN SEASON s ON f.season_id = s.season_id
+		<where>
+			<if test="keyword != null and keyword != ''">
+				<if test="keyfield == 1">
+					sc.class_name LIKE '%' || #{keyword} || '%'
+				</if>
+			</if>
+		</where>
+	</select>
+
+	<insert id="insertFare"
+		parameterType="kr.spring.staff.basedata.vo.FareVO">
+		INSERT INTO FARE (
+        fare_id,
+        route_id,
+        seat_class_id,
+        season_id,
+        price,
+        is_active
+    )
+    SELECT 
+        (SELECT NVL(MAX(fare_id), 0) + 1 FROM FARE), #{route_id},
+        #{seat_class_id},
+        #{season_id},
+        (rt.route_price * s.season_ratio * sc.class_ratio),
+        'Y'
+    FROM ROUTE r
+    JOIN ROUTE_TYPE rt ON r.route_type_id = rt.route_type_id
+    LEFT JOIN SEASON s ON s.season_id = #{season_id}
+    LEFT JOIN SEAT_CLASS sc ON sc.seat_class_id = #{seat_class_id}
+    WHERE r.route_id = #{route_id}
+	</insert>
+
+	<select id="selectFare" parameterType="long"
+		resultType="kr.spring.staff.basedata.vo.FareVO">
+		SELECT * FROM FARE WHERE fare_id = #{fare_id}
+	</select>
+
+	<update id="updateFare" parameterType="kr.spring.staff.basedata.vo.FareVO">
+    UPDATE FARE 
+    SET 
+        route_id = #{route_id},
+        seat_class_id = #{seat_class_id},
+        season_id = #{season_id},
+        price = (
+            SELECT (rt.route_price * s.season_ratio * sc.class_ratio)
+            FROM ROUTE r
+            JOIN ROUTE_TYPE rt ON r.route_type_id = rt.route_type_id
+            LEFT JOIN SEASON s ON s.season_id = #{season_id}
+            LEFT JOIN SEAT_CLASS sc ON sc.seat_class_id = #{seat_class_id}
+            WHERE r.route_id = #{route_id}
+        )
+    WHERE fare_id = #{fare_id}
+</update>
+	<update id="updateFareActive" parameterType="map">
+		UPDATE FARE
+		SET is_active = #{is_active}
+		WHERE fare_id = #{fare_id}
+	</update>
+	<update id="disableFare" parameterType="long">
+		UPDATE FARE
+		SET is_active = 'N'
+		WHERE fare_id = #{fare_id}
+	</update>
+
+	<select id="checkFareInUse" parameterType="long"
+		resultType="integer">
+		SELECT COUNT(*) FROM FLIGHT_FARE WHERE fare_id = #{fare_id}
+	</select>
+	<select id="selectSeasonList"
+		resultType="kr.spring.admin.vo.SeasonVO">
+		SELECT
+		season_id AS seasonId,
+		season_name AS seasonName,
+		start_date AS startDate,
+		end_date AS endDate,
+		is_active AS isActive
+		FROM SEASON
+		WHERE is_active = 'Y'
+		ORDER BY start_date ASC
+	</select>
+	<select id="checkDuplicateFare"
+		parameterType="kr.spring.staff.basedata.vo.FareVO" resultType="int">
+		SELECT COUNT(*)
+		FROM FARE
+		WHERE route_id = #{route_id}
+		AND seat_class_id = #{seat_class_id}
+		AND season_id = #{season_id}
+		AND is_active = 'Y'
+	</select>
+
+	<select id="calculateExpectedPrice"
+		parameterType="kr.spring.staff.basedata.vo.FareVO" resultType="int">
+		SELECT
+		NVL((SELECT route_price FROM ROUTE_TYPE WHERE route_type_id = (SELECT
+		route_type_id FROM ROUTE WHERE route_id = #{route_id})), 0)
+		* NVL((SELECT season_ratio FROM SEASON WHERE season_id = #{season_id}),
+		0)
+		* NVL((SELECT class_ratio FROM SEAT_CLASS WHERE seat_class_id =
+		#{seat_class_id}), 0)
+		FROM DUAL
+	</select>
 </mapper>
 
 
