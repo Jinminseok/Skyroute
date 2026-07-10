@@ -10,20 +10,30 @@
         WHERE class_name = #{className}
     </select>
 
+	<!-- 좌석 생성 -->
     <insert id="insertSeatClass" parameterType="kr.spring.staff.basedata.vo.SeatClassVO" 
             useGeneratedKeys="true" keyProperty="seat_class_id" keyColumn="seat_class_id">
         INSERT INTO SEAT_CLASS (
             class_name, 
-            "ROWS", 
-            "COLUMNS", 
+            class_ratio, 
             sort_order
         ) VALUES (
             #{class_name}, 
-            #{seat_rows},
-            #{seat_columns},
+            #{class_ratio},
             #{sort_order}
         )
     </insert>
+
+	<!-- 좌석 조회 -->
+    <select id="selectSeatClassList" resultType="kr.spring.staff.basedata.vo.SeatClassVO">
+        SELECT 
+            seat_class_id, 
+            class_name,
+            class_ratio,
+            sort_order
+        FROM SEAT_CLASS 
+        ORDER BY sort_order ASC
+    </select>
 
     <insert id="insertSeat" parameterType="kr.spring.staff.basedata.vo.SeatVO">
         INSERT INTO SEAT (
@@ -96,12 +106,5 @@
         WHERE aircraft_id = #{aircraftId}
     </delete>
     
-    <select id="selectSeatClassList" resultType="kr.spring.staff.basedata.vo.SeatClassVO">
-    SELECT 
-        seat_class_id AS seat_class_id, 
-        class_name AS class_name 
-    FROM SEAT_CLASS 
-    WHERE is_active = 'Y' 
-    ORDER BY sort_order ASC
-</select>
+    
 </mapper>
