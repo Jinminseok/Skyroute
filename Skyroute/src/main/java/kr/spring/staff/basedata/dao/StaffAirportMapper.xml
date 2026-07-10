@@ -71,7 +71,23 @@
     UPDATE AIRPORT
     SET is_active = #{isActive}
     WHERE airport_id = #{airportId}
-</update>
+	</update>
+	<select id="selectRegionList" resultType="map">
+    SELECT region_id AS "regionId", 
+           region_name AS "regionName"
+    FROM REGION
+    ORDER BY region_id ASC
+</select>
+
+<select id="checkDuplicateAirport" parameterType="kr.spring.staff.basedata.vo.AirportVO" resultType="int">
+    SELECT COUNT(*)
+    FROM AIRPORT
+    WHERE iata_code = #{iataCode}
+      AND flight_type = #{flightType}
+    <if test="airportId != null and airportId > 0">
+      AND airport_id != #{airportId}
+    </if>
+</select>
 </mapper>
 
 

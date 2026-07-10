@@ -1,6 +1,7 @@
 package kr.spring.staff.basedata.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -24,4 +25,9 @@ public interface StaffAirportMapper {
 		public void deleteAirport(int airportId);
 		
 		public void updateAirportActive(AirportVO airportVO);
+		
+		//권역 목록 조회
+		public List<Map<String,Object>> selectRegionList();
+		
+		public int checkDuplicateAirport(AirportVO airportVO);
 }

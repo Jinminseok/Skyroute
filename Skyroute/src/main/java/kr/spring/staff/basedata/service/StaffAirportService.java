@@ -1,6 +1,7 @@
 package kr.spring.staff.basedata.service;
 
 import java.util.List;
+import java.util.Map;
 
 import kr.spring.staff.basedata.vo.AirportVO;
 
@@ -11,5 +12,8 @@ public interface StaffAirportService {
     public void modifyAirport(AirportVO airportVO);
     public void removeAirport(int airportId);
     public void toggleAirportActive(AirportVO airportVO);
+    
+    public List<Map<String, Object>> getRegionList();
+    public int checkDuplicateAirport(AirportVO airportVO);
     
 }

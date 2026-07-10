@@ -743,11 +743,8 @@
 							<label>권역 선택 *</label> <select id="modalRegionId" name="regionId"
 								class="select" required>
 								<option value="">권역을 선택하세요</option>
-								<option value="1">국내선 (1)</option>
-								<option value="2">일본 (2)</option>
-								<option value="3">동남아 (3)</option>
-								<option value="4">미주 (4)</option>
-								<option value="5">유럽 (5)</option>
+								<option th:each="region : ${regionList}"
+									th:value="${region.regionId}" th:text="${region.regionName}"></option>
 							</select>
 						</div>
 						<div class="field">
@@ -987,72 +984,76 @@
 			</div>
 		</div>
 	</div>
-<div class="modal-overlay" id="fareModal" style="display: none;">
-    <div class="modal">
-        <div class="modal-head">
-            <div>
-                <h3 id="fareModalTitle">운임 기준 등록</h3>
-            </div>
-            <button type="button" class="modal-close" onclick="closeFareModal()">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
+	<div class="modal-overlay" id="fareModal" style="display: none;">
+		<div class="modal">
+			<div class="modal-head">
+				<div>
+					<h3 id="fareModalTitle">운임 기준 등록</h3>
+				</div>
+				<button type="button" class="modal-close" onclick="closeFareModal()">
+					<span class="material-symbols-outlined">close</span>
+				</button>
+			</div>
 
-        <div class="modal-body" id="fareModalBody">
-            <div style="background: #fffbeb; color: #b45309; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; line-height: 1.5; display: none;" id="fareEditNotice">
-                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: -3px;">info</span> 
-                <strong>수정 안내:</strong> 등록된 운임 조합(노선, 등급, 시즌)은 변경할 수 없으며, <strong>가격액만 수정 가능</strong>합니다.
-            </div>
+			<div class="modal-body" id="fareModalBody">
+				<div
+					style="background: #fffbeb; color: #b45309; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; line-height: 1.5; display: none;"
+					id="fareEditNotice">
+					<span class="material-symbols-outlined"
+						style="font-size: 16px; vertical-align: -3px;">info</span> <strong>수정
+						안내:</strong> 등록된 운임 조합(노선, 등급, 시즌)은 변경할 수 없으며, <strong>가격액만 수정 가능</strong>합니다.
+				</div>
 
-            <form id="fareForm">
-                <input type="hidden" id="modalFareId" name="fare_id">
+				<form id="fareForm">
+					<input type="hidden" id="modalFareId" name="fare_id">
 
-                <div class="form-grid">
-                    <div class="field full">
-                        <label>적용 노선 *</label> 
-                        <select id="modalFareRouteId" name="route_id" class="select" required>
-                            <option value="">노선을 선택하세요</option>
-                            <option th:each="route : ${routeList}"
-                                    th:value="${route.route_id}"
-                                    th:text="|${route.dep_airport_name} ➔ ${route.arr_airport_name} (${route.type_name})|"></option>
-                        </select>
-                    </div>
+					<div class="form-grid">
+						<div class="field full">
+							<label>적용 노선 *</label> <select id="modalFareRouteId"
+								name="route_id" class="select" required>
+								<option value="">노선을 선택하세요</option>
+								<option th:each="route : ${routeList}"
+									th:value="${route.route_id}"
+									th:text="|${route.dep_airport_name} ➔ ${route.arr_airport_name} (${route.type_name})|"></option>
+							</select>
+						</div>
 
-                    <div class="field">
-                        <label>좌석 등급 *</label> 
-                        <select id="modalFareSeatClassId" name="seat_class_id" class="select" required>
-                            <option value="">등급을 선택하세요</option>
-                            <option th:each="sc : ${seatClassList}" 
-                                    th:value="${sc.seat_class_id}" 
-                                    th:text="${sc.class_name}"></option>
-                        </select>
-                    </div>
+						<div class="field">
+							<label>좌석 등급 *</label> <select id="modalFareSeatClassId"
+								name="seat_class_id" class="select" required>
+								<option value="">등급을 선택하세요</option>
+								<option th:each="sc : ${seatClassList}"
+									th:value="${sc.seat_class_id}" th:text="${sc.class_name}"></option>
+							</select>
+						</div>
 
-                    <div class="field">
-                        <label>적용 시즌 *</label> 
-                        <select id="modalFareSeasonId" name="season_id" class="select" required>
-                            <option value="">시즌을 선택하세요</option>
-                            <option th:each="s : ${seasonList}" 
-                                    th:value="${s.seasonId}" 
-                                    th:text="${s.seasonName}"></option>
-                        </select>
-                    </div>
+						<div class="field">
+							<label>적용 시즌 *</label> <select id="modalFareSeasonId"
+								name="season_id" class="select" required>
+								<option value="">시즌을 선택하세요</option>
+								<option th:each="s : ${seasonList}" th:value="${s.seasonId}"
+									th:text="${s.seasonName}"></option>
+							</select>
+						</div>
 
-                    <div class="field full">
-                        <label>가격액 (원) *</label> 
-                        <input type="number" id="modalFarePrice" name="price" class="input" placeholder="예: 250000" required min="1000" step="1000">
-                    </div>
-                </div>
-            </form>
-        </div>
+						<div class="field full">
+							<label>가격액 (원) *</label> <input type="number" id="modalFarePrice"
+								name="price" class="input" placeholder="예: 250000" required
+								min="1000" step="1000">
+						</div>
+					</div>
+				</form>
+			</div>
 
-        <div class="modal-foot">
-            <button type="button" class="btn btn-ghost" onclick="closeFareModal()">취소</button>
-            <button type="button" class="btn btn-primary" onclick="saveFareData()">데이터 저장</button>
-        </div>
-    </div>
-</div>
-	
+			<div class="modal-foot">
+				<button type="button" class="btn btn-ghost"
+					onclick="closeFareModal()">취소</button>
+				<button type="button" class="btn btn-primary"
+					onclick="saveFareData()">데이터 저장</button>
+			</div>
+		</div>
+	</div>
+
 
 	<div class="toast-wrap" id="toasts"></div>
 
@@ -1260,10 +1261,10 @@
 	            alert('정상적으로 저장되었습니다.');
 	            closeModal();
 	            location.reload(); 
-	        } else if (result === 'duplicate') {
-	            alert('이미 등록된 IATA 코드 또는 공항명입니다. 다른 값을 입력해주세요.');
+	        } else if (result === 'duplicate'){
+	            alert('해당 IATA 코드와 동일한 운항 구분(국내/국제선) 조합이 이미 등록되어 있습니다.');
 	        } else if (result === 'constraint') {
-	            alert('입력 형식이 올바르지 않습니다. (IATA 코드는 영문 대문자 3자리여야 합니다.)');
+	            alert('입력 형식이 올바르지 않습니다.');
 	        } else {
 	            alert('저장에 실패했습니다. 시스템 오류를 확인해주세요.');
 	        }

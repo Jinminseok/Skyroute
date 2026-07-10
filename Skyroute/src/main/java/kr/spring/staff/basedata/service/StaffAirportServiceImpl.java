@@ -1,6 +1,7 @@
 package kr.spring.staff.basedata.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,16 @@ public class StaffAirportServiceImpl implements StaffAirportService{
 	public void toggleAirportActive(AirportVO airportVO) {
 		airportMapper.updateAirportActive(airportVO);
 		
+	}
+
+	@Override
+	public List<Map<String, Object>> getRegionList() {
+		return airportMapper.selectRegionList();
+	}
+
+	@Override
+	public int checkDuplicateAirport(AirportVO airportVO) {
+		return airportMapper.checkDuplicateAirport(airportVO);
 	}
 	
 

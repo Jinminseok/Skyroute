@@ -107,9 +107,11 @@ public class StaffAirportController {
         
         // 9. 시즌 리스트 (중복 선언 제거)
         List<SeatClassVO> seatClassList = staffSeatService.getSeatClassList();
-        
         model.addAttribute("seatClassList", (seatClassList == null) ? new java.util.ArrayList<>() : seatClassList);
 
+        //10. 권역 리스트 조회 및 모델 추가
+        List<Map<String, Object>> regionList = airportService.getRegionList();
+        model.addAttribute("regionList", (regionList != null) ? regionList : new java.util.ArrayList<>());
         
         return "thviews/staff_main/basedata/base_list"; 
     }
@@ -119,6 +121,9 @@ public class StaffAirportController {
     @ResponseBody
     public String insertAirport(@RequestBody AirportVO airportVO) {
         try {
+        	if (airportService.checkDuplicateAirport(airportVO) > 0) {
+                return "duplicate"; 
+            }
             airportService.registerAirport(airportVO);
             return "success";
         } catch (DuplicateKeyException e) {
@@ -136,6 +141,9 @@ public class StaffAirportController {
     @ResponseBody
     public String updateAirport(@RequestBody AirportVO airportVO) {
         try {
+        	if (airportService.checkDuplicateAirport(airportVO) > 0) {
+                return "duplicate"; 
+            }
             airportService.modifyAirport(airportVO);
             return "success";
         } catch (DuplicateKeyException e) {
