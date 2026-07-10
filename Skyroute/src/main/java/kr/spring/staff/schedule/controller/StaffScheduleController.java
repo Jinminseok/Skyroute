@@ -44,25 +44,45 @@ public class StaffScheduleController {
     // 오늘 항공편 화면 띄우기
     @GetMapping("/today")
     public String scheduleToday(Model model) {
-        // 메뉴 활성화
         model.addAttribute("activeMenu", "schedule"); 
         
         model.addAttribute("routeList", routeService.getRouteList());
         model.addAttribute("aircraftList", seatService.getAircraftList());
         model.addAttribute("gateList", gateService.getGateList(new GateVO()));
-        List<ScheduleVO> scheduleList = scheduleService.getScheduleList();
-        model.addAttribute("scheduleList", scheduleList);
         
-        long normalCnt = scheduleList.stream().filter(f -> "SCHEDULED".equals(f.getFlight_status())).count();
-        long delayedCnt = scheduleList.stream().filter(f -> "DELAYED".equals(f.getFlight_status())).count();
-        long canceledCnt = scheduleList.stream().filter(f -> "CANCELED".equals(f.getFlight_status())).count();
+        // 서버의 오늘 날짜 구하기
+        String todayStr = java.time.LocalDate.now().toString();
         
-        model.addAttribute("totalCnt", scheduleList.size());
-        model.addAttribute("normalCnt", normalCnt);
-        model.addAttribute("delayedCnt", delayedCnt);
-        model.addAttribute("canceledCnt", canceledCnt);
+        // 출발 시각이 오늘인 것만 필터링
+        List<ScheduleVO> allList = scheduleService.getScheduleList();
+        List<ScheduleVO> todayList = allList.stream()
+            .filter(f -> f.getDeparture_time() != null && f.getDeparture_time().startsWith(todayStr))
+            .collect(java.util.stream.Collectors.toList());
         
-        return "thviews/staff_main/schedule/schedule_today"; 
+        // 필터링된 오늘 리스트만 화면으로 넘김
+        model.addAttribute("scheduleList", todayList);
+        
+        // 통계수치 계산
+        long totalCnt = todayList.size(); // 1. 오늘 전체 항공편
+        
+        long readyCnt = todayList.stream().filter(f -> 
+            "SCHEDULED".equals(f.getFlight_status()) || "BOARDING".equals(f.getFlight_status())
+        ).count(); // 2. 출발 대기 및 탑승중
+        
+        long doneCnt = todayList.stream().filter(f -> 
+            "DEPARTED".equals(f.getFlight_status()) || "ARRIVED".equals(f.getFlight_status()) || "COMPLETED".equals(f.getFlight_status())
+        ).count(); // 3. 운항 중 및 도착 완료
+        
+        long issueCnt = todayList.stream().filter(f -> 
+            "DELAYED".equals(f.getFlight_status()) || "CANCELED".equals(f.getFlight_status()) || "CANCELLED".equals(f.getFlight_status())
+        ).count(); // 4. 비정상 (지연/결항)
+        
+        model.addAttribute("totalCnt", totalCnt);
+        model.addAttribute("readyCnt", readyCnt);
+        model.addAttribute("doneCnt", doneCnt);
+        model.addAttribute("issueCnt", issueCnt);
+        
+        return "thviews/staff_main/schedule/schedule_today";
     }
     
     

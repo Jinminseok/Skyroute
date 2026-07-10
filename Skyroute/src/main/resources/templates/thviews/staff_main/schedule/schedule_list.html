@@ -133,12 +133,16 @@
 						</div>
 
 						<div class="field full">
-							<label>운항 노선 *</label> 
-							<select id="modalRouteId" name="route_id" class="select" required>
-								<option value="">노선을 선택하세요</option>
-								<option th:each="route : ${routeList}" th:value="${route.route_id}" th:text="|${route.dep_airport_name} → ${route.arr_airport_name} (${route.type_name})|"></option>
-							</select>
-						</div>
+					        <label>운항 노선 *</label> 
+					        <select id="modalRouteId" name="route_id" class="select" required onchange="filterGatesByRoute()">
+					            <option value="" data-dep-id="" data-arr-id="">노선을 선택하세요</option>
+					            <option th:each="route : ${routeList}" 
+					                    th:value="${route.route_id}" 
+					                    th:data-dep-id="${route.departure_airport_id}" 
+					                    th:data-arr-id="${route.arrival_airport_id}"
+					                    th:text="|${route.dep_airport_name} → ${route.arr_airport_name} (${route.type_name})|"></option>
+					        </select>
+					    </div>
 
 						<div class="field full">
 							<label>투입 항공기 *</label> 
@@ -149,20 +153,26 @@
 						</div>
 
 						<div class="field">
-							<label>출발 게이트</label> 
-							<select id="modalDepGateId" name="departure_gate_id" class="select">
-								<option value="0">미정</option>
-								<option th:each="gate : ${gateList}" th:value="${gate.gateId}" th:text="|${gate.airportName} - ${gate.gateCode}|"></option>
-							</select>
-						</div>
+					        <label>출발 게이트</label> 
+					        <select id="modalDepGateId" name="departure_gate_id" class="select">
+					            <option value="0" data-airport-id="">미정</option>
+					            <option th:each="gate : ${gateList}" 
+					                    th:value="${gate.gateId}" 
+					                    th:data-airport-id="${gate.airportId}"
+					                    th:text="|${gate.airportName} - ${gate.gateCode}|"></option>
+					        </select>
+					    </div>
 
 						<div class="field">
-							<label>도착 게이트</label> 
-							<select id="modalArrGateId" name="arrival_gate_id" class="select">
-								<option value="0">미정</option>
-								<option th:each="gate : ${gateList}" th:value="${gate.gateId}" th:text="|${gate.airportName} - ${gate.gateCode}|"></option>
-							</select>
-						</div>
+					        <label>도착 게이트</label> 
+					        <select id="modalArrGateId" name="arrival_gate_id" class="select">
+					            <option value="0" data-airport-id="">미정</option>
+					            <option th:each="gate : ${gateList}" 
+					                    th:value="${gate.gateId}" 
+					                    th:data-airport-id="${gate.airportId}"
+					                    th:text="|${gate.airportName} - ${gate.gateCode}|"></option>
+					        </select>
+					    </div>
 
 						<div class="field">
 							<label>출발 시각 *</label> 
