@@ -60,7 +60,46 @@
 					</thead>
 
 					<tbody id="flightScheduleTable">
-						<!-- staff.js에서 하드코딩 데이터 바인딩 -->
+					    <tr th:each="f : ${scheduleList}">
+					        <td style="font-weight:bold; color:var(--primary);" class="mono" th:text="${f.flight_no}"></td>
+					        <td style="font-size:13px;" th:text="${f.route_name}"></td>
+					        <td style="font-size:13px;" th:text="${f.aircraft_name}"></td>
+					        <td class="mono" th:text="${f.dep_gate_code != null ? f.dep_gate_code : '미정'}"></td>
+					        <td class="mono" th:text="${f.arr_gate_code != null ? f.arr_gate_code : '미정'}"></td>
+					        <td style="font-size:13px;" class="mono">
+					            <span th:text="${#strings.replace(f.departure_time, 'T', ' ')}"></span> <br> 
+					            <span style="color:#94a3b8;" th:text="'➔ ' + ${#strings.replace(f.arrival_time, 'T', ' ')}"></span>
+					        </td>
+					        
+					        <td>
+					            <span th:if="${f.flight_status == 'SCHEDULED'}" class="badge badge-scheduled">운항예정</span>
+					            <span th:if="${f.flight_status == 'BOARDING'}" class="badge badge-boarding">탑승중</span>
+					            <span th:if="${f.flight_status == 'DEPARTED'}" class="badge badge-departed">출발완료</span>
+					            <span th:if="${f.flight_status == 'ARRIVED'}" class="badge badge-arrived">도착완료</span>
+					            <span th:if="${f.flight_status == 'DELAYED'}" class="badge badge-delayed">지연</span>
+					            <span th:if="${f.flight_status == 'CANCELLED' or f.flight_status == 'CANCELED'}" class="badge badge-cancelled">결항</span>
+					            <span th:if="${f.flight_status == 'COMPLETED'}" class="badge badge-completed">운항종료</span>
+					        </td>
+					        
+					        <td th:style="${f.delay_minutes > 0 ? 'color:var(--danger); font-weight:bold;' : ''}" class="mono" th:text="${f.delay_minutes > 0 ? f.delay_minutes + '분' : '-'}"></td>
+					        <td>
+					            <div class="btn-action-group">
+					                <button type="button" class="btn btn-ghost btn-sm" 
+					                    th:data-id="${f.flight_id}" th:data-no="${f.flight_no}" th:data-route="${f.route_id}" 
+					                    th:data-ac="${f.aircraft_id}" th:data-dgate="${f.departure_gate_id}" th:data-agate="${f.arrival_gate_id}" 
+					                    th:data-dtime="${f.departure_time}" th:data-atime="${f.arrival_time}"
+					                    onclick="openFlightEditModal(this)">
+					                    <span class="material-symbols-outlined" style="font-size:14px">edit</span> 수정
+					                </button>
+					                <button type="button" class="btn btn-danger btn-sm" th:onclick="deleteFlight([[${f.flight_id}]])">
+					                    스케줄 취소
+					                </button>
+					            </div>
+					        </td>
+					    </tr>
+					    <tr th:if="${#lists.isEmpty(scheduleList)}">
+					        <td colspan="9" style="text-align:center; padding:40px; color:#94a3b8;">등록된 운항 스케줄이 없습니다.</td>
+					    </tr>
 					</tbody>
 				</table>
 			</div>
@@ -68,41 +107,77 @@
 
 	</main>
 
-	<!-- 통합 동적 제어 편집 모달 -->
-	<div class="modal-overlay" id="globalModal">
+	<!-- 운항 스케쥴 등록 -->
+	<div class="modal-overlay" id="flightModal" style="display: none;">
 		<div class="modal">
-
 			<div class="modal-head">
 				<div>
-					<h3 id="globalModalTitle">운항 스케줄 등록/수정</h3>
+					<h3 id="flightModalTitle">운항 스케줄 등록</h3>
 				</div>
-
-				<button type="button"
-				        class="modal-close"
-				        onclick="closeModal()">
+				<button type="button" class="modal-close" onclick="closeFlightModal()">
 					<span class="material-symbols-outlined">close</span>
 				</button>
 			</div>
 
-			<div class="modal-body" id="globalModalBody">
-				<!-- staff.js에서 등록/수정 폼 동적 생성 -->
+			<div class="modal-body">
+				<form id="flightForm">
+					<input type="hidden" id="modalFlightId" name="flight_id">
+
+					<div class="form-grid">
+						<div class="field full">
+							<label>항공편 번호 (Flight No) *</label> 
+							<input type="text" id="modalFlightNo" name="flight_no" class="input" placeholder="예: HJ-1207" required>
+						</div>
+
+						<div class="field full">
+							<label>운항 노선 *</label> 
+							<select id="modalRouteId" name="route_id" class="select" required>
+								<option value="">노선을 선택하세요</option>
+								<option th:each="route : ${routeList}" th:value="${route.route_id}" th:text="|${route.dep_airport_name} → ${route.arr_airport_name} (${route.type_name})|"></option>
+							</select>
+						</div>
+
+						<div class="field full">
+							<label>투입 항공기 *</label> 
+							<select id="modalAircraftId" name="aircraft_id" class="select" required>
+								<option value="">항공기를 선택하세요</option>
+								<option th:each="ac : ${aircraftList}" th:value="${ac.aircraft_id}" th:text="|${ac.reg_no} (${ac.model_name}) - ${ac.status_name}|"></option>
+							</select>
+						</div>
+
+						<div class="field">
+							<label>출발 게이트</label> 
+							<select id="modalDepGateId" name="departure_gate_id" class="select">
+								<option value="0">미정</option>
+								<option th:each="gate : ${gateList}" th:value="${gate.gateId}" th:text="|${gate.airportName} - ${gate.gateCode}|"></option>
+							</select>
+						</div>
+
+						<div class="field">
+							<label>도착 게이트</label> 
+							<select id="modalArrGateId" name="arrival_gate_id" class="select">
+								<option value="0">미정</option>
+								<option th:each="gate : ${gateList}" th:value="${gate.gateId}" th:text="|${gate.airportName} - ${gate.gateCode}|"></option>
+							</select>
+						</div>
+
+						<div class="field">
+							<label>출발 시각 *</label> 
+							<input type="datetime-local" id="modalDepTime" name="departure_time" class="input" required>
+						</div>
+
+						<div class="field">
+							<label>도착 시각 *</label> 
+							<input type="datetime-local" id="modalArrTime" name="arrival_time" class="input" required>
+						</div>
+					</div>
+				</form>
 			</div>
 
 			<div class="modal-foot">
-				<button type="button"
-				        class="btn btn-ghost"
-				        onclick="closeModal()">
-					취소
-				</button>
-
-				<button type="button"
-				        class="btn btn-primary"
-				        id="globalModalSubmitBtn"
-				        onclick="saveGlobalModalData()">
-					데이터 저장
-				</button>
+				<button type="button" class="btn btn-ghost" onclick="closeFlightModal()">취소</button>
+				<button type="button" class="btn btn-primary" onclick="saveFlightData()">데이터 저장</button>
 			</div>
-
 		</div>
 	</div>
 

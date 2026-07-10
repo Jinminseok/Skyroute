@@ -35,7 +35,8 @@
 					총 운항 예정
 				</div>
 				<div class="value">
-					4<span class="unit">편</span>
+					<span th:text="${totalCnt}">0</span>
+					<span class="unit">편</span>
 				</div>
 			</div>
 
@@ -47,7 +48,7 @@
 					정상/예정 상태
 				</div>
 				<div class="value" style="color:var(--ok)">
-					3<span class="unit">편</span>
+					<span th:text="${normalCnt}">0</span><span class="unit">편</span>
 				</div>
 			</div>
 
@@ -59,7 +60,7 @@
 					지연 상태
 				</div>
 				<div class="value" style="color:var(--warn)">
-					0<span class="unit">편</span>
+					<span th:text="${delayedCnt}">0</span><span class="unit">편</span>
 				</div>
 			</div>
 
@@ -71,7 +72,7 @@
 					결항 상태
 				</div>
 				<div class="value" style="color:var(--danger)">
-					1<span class="unit">편</span>
+					<span th:text="${canceledCnt}">0</span><span class="unit">편</span>
 				</div>
 			</div>
 
@@ -100,7 +101,56 @@
 			</div>
 
 			<div id="todayBoardRows">
-				<!-- staff.js에서 하드코딩 데이터 바인딩 -->
+				<div class="board-row" th:each="f : ${scheduleList}">
+					
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;" th:text="${f.flight_no}"></span>
+					
+					<span style="color: #475569; font-weight: 500;" th:text="${f.route_name}"></span>
+					
+					<span style="font-size: 18px; font-weight: 700; color: var(--text-dark);" th:text="${#strings.arraySplit(f.departure_time, 'T')[1]}"></span>
+					
+					<span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 8px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 13px;" 
+						      th:text="${f.dep_gate_code != null ? f.dep_gate_code : '미정'}"></span>
+					</span>
+					
+					<span style="color: #64748b; font-size: 13px;" th:text="${f.aircraft_name}"></span>
+					
+					<span>
+						<span th:if="${f.flight_status == 'SCHEDULED' or f.flight_status == 'BOARDING' or f.flight_status == 'DEPARTED' or f.flight_status == 'ARRIVED' or f.flight_status == 'COMPLETED'}" 
+						      style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span th:text="${f.flight_status == 'SCHEDULED' ? '정상/예정' : (f.flight_status == 'BOARDING' ? '탑승중' : (f.flight_status == 'DEPARTED' ? '출발완료' : (f.flight_status == 'ARRIVED' ? '도착완료' : '운항종료')))}"></span>
+						</span>
+						
+						<span th:if="${f.flight_status == 'DELAYED'}" style="color: var(--warn); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> 지연
+						</span>
+						
+						<span th:if="${f.flight_status == 'CANCELLED' or f.flight_status == 'CANCELED'}" style="color: var(--danger); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">cancel</span> 결항
+						</span>
+					</span>
+					
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        th:onchange="changeFlightStatus([[${f.flight_id}]], this.value)">
+							<option value="">상태 변경</option>
+							<option value="SCHEDULED" th:selected="${f.flight_status == 'SCHEDULED'}">정상/예정</option>
+							<option value="BOARDING" th:selected="${f.flight_status == 'BOARDING'}">탑승중</option>
+							<option value="DEPARTED" th:selected="${f.flight_status == 'DEPARTED'}">출발완료</option>
+							<option value="ARRIVED" th:selected="${f.flight_status == 'ARRIVED'}">도착완료</option>
+							<option value="DELAYED" th:selected="${f.flight_status == 'DELAYED'}">지연(DELAY)</option>
+							<option value="CANCELLED" th:selected="${f.flight_status == 'CANCELLED' or f.flight_status == 'CANCELED'}">결항(CANCEL)</option>
+							<option value="COMPLETED" th:selected="${f.flight_status == 'COMPLETED'}">운항종료</option>
+						</select>
+					</span>
+					
+				</div>
+				
+				<div th:if="${#lists.isEmpty(scheduleList)}" style="display: flex; justify-content: center; padding: 40px; color: #94a3b8;">
+					오늘 운항 예정인 항공편이 없습니다.
+				</div>
 			</div>
 
 		</div>

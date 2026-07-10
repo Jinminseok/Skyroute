@@ -1,14 +1,77 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper   
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">    
+
 <mapper namespace="kr.spring.staff.schedule.dao.StaffScheduleMapper"> 
-	
+
+    <select id="selectScheduleList" resultType="kr.spring.staff.schedule.vo.ScheduleVO">
+        SELECT 
+            F.flight_id, 
+            F.flight_no, 
+            F.route_id, 
+            F.aircraft_id,
+            F.departure_gate_id, 
+            F.arrival_gate_id,
+            TO_CHAR(F.departure_time, 'YYYY-MM-DD"T"HH24:MI') AS departure_time,
+            TO_CHAR(F.arrival_time, 'YYYY-MM-DD"T"HH24:MI') AS arrival_time,
+            F.flight_status, 
+            F.delay_minutes, 
+            F.is_deleted,
+            AD.iata_code || ' → ' || AA.iata_code AS route_name,
+            AC.reg_no || ' (' || AC.model_name || ')' AS aircraft_name,
+            GD.gate_code AS dep_gate_code,
+            GA.gate_code AS arr_gate_code
+        FROM FLIGHT F
+        JOIN ROUTE R ON F.route_id = R.route_id
+        JOIN AIRPORT AD ON R.departure_airport_id = AD.airport_id
+        JOIN AIRPORT AA ON R.arrival_airport_id = AA.airport_id
+        JOIN AIRCRAFT AC ON F.aircraft_id = AC.aircraft_id
+        LEFT JOIN GATE GD ON F.departure_gate_id = GD.gate_id
+        LEFT JOIN GATE GA ON F.arrival_gate_id = GA.gate_id
+        WHERE F.is_deleted = 'N'
+        ORDER BY F.departure_time DESC
+    </select>
+
+    <insert id="insertSchedule" parameterType="kr.spring.staff.schedule.vo.ScheduleVO">
+        INSERT INTO FLIGHT (
+            flight_no, route_id, aircraft_id, 
+            departure_gate_id, arrival_gate_id, 
+            departure_time, arrival_time, 
+            flight_status, delay_minutes, is_deleted
+        ) VALUES (
+            #{flight_no}, #{route_id}, #{aircraft_id}, 
+            #{departure_gate_id}, #{arrival_gate_id}, 
+            TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI'), 
+            TO_DATE(REPLACE(#{arrival_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI'), 
+            'SCHEDULED', 0, 'N'
+        )
+    </insert>
+
+    <update id="updateSchedule" parameterType="kr.spring.staff.schedule.vo.ScheduleVO">
+        UPDATE FLIGHT 
+        SET route_id = #{route_id},
+            aircraft_id = #{aircraft_id},
+            departure_gate_id = #{departure_gate_id},
+            arrival_gate_id = #{arrival_gate_id},
+            departure_time = TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI'),
+            arrival_time = TO_DATE(REPLACE(#{arrival_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI')
+        WHERE flight_id = #{flight_id}
+    </update>
+
+    <update id="deleteSchedule" parameterType="int">
+        UPDATE FLIGHT 
+        SET is_deleted = 'Y' 
+        WHERE flight_id = #{flight_id}
+    </update>
+    
+    <update id="updateFlightStatus" parameterType="kr.spring.staff.schedule.vo.ScheduleVO">
+        UPDATE FLIGHT 
+        SET flight_status = #{flight_status} 
+        WHERE flight_id = #{flight_id}
+    </update>
+
 </mapper>
-
-
-
-
 
 
 

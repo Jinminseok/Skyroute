@@ -11,7 +11,7 @@
 
 /* ==================== 하드코딩 데이터 스토어 ==================== */
 const state = {
-  flights: [
+  /*flights: [
     {
       id: 1,
       flight_no: 'HJ-1207',
@@ -72,7 +72,7 @@ const state = {
       delay_minutes: 0,
       is_deleted: 'N'
     }
-  ],
+  ],*/
 
   tickets: [
     {
@@ -362,7 +362,7 @@ function nowText() {
 }
 
 /* ==================== 1. 오늘 항공편 ==================== */
-function renderTodayBoard() {
+/*function renderTodayBoard() {
   const container = $('todayBoardRows');
   if (!container) return;
 
@@ -409,10 +409,10 @@ function changeFlightStatus(id, nextStatus) {
 
   renderTodayBoard();
   renderFlightSchedule();
-}
+}*/
 
 /* ==================== 2. 운항 스케줄 ==================== */
-function renderFlightSchedule() {
+/*function renderFlightSchedule() {
   const container = $('flightScheduleTable');
   if (!container) return;
 
@@ -594,7 +594,7 @@ function openFlightEditModal(id) {
   `);
 
   openModal();
-}
+}*/
 
 /* ==================== 3. 승객/체크인/탑승/노쇼 ==================== */
 function loadPaxData() {
@@ -1132,11 +1132,11 @@ function openBaseModal(table, action, id = null) {
 function saveGlobalModalData() {
   const ctx = activeContext;
 
-  if (ctx.type === 'flight') {
+  /*if (ctx.type === 'flight') {
     saveFlightFromModal(ctx);
     closeModal();
     return;
-  }
+  }*/
 
   if (ctx.type && ctx.type.startsWith('base_')) {
     saveBaseFromModal(ctx);
@@ -1147,7 +1147,7 @@ function saveGlobalModalData() {
   toast('저장할 작업 정보를 찾을 수 없습니다.');
 }
 
-function saveFlightFromModal(ctx) {
+/*function saveFlightFromModal(ctx) {
   const flightNo = $('m_f_no') ? $('m_f_no').value.trim() : '';
   const routeId = Number($('m_f_route') ? $('m_f_route').value : 0);
   const aircraftId = Number($('m_f_aircraft') ? $('m_f_aircraft').value : 0);
@@ -1205,7 +1205,7 @@ function saveFlightFromModal(ctx) {
 
   renderFlightSchedule();
   renderTodayBoard();
-}
+}*/
 
 function saveBaseFromModal(ctx) {
   const table = ctx.type.replace('base_', '');
@@ -1445,8 +1445,8 @@ function toast(message) {
 
 /* ==================== 초기 실행 ==================== */
 function initStaffPage() {
-  renderTodayBoard();
-  renderFlightSchedule();
+  /*renderTodayBoard();
+  renderFlightSchedule();*/
   loadPaxData();
   renderNoticeHistory();
   renderBaseTables();
@@ -1720,11 +1720,11 @@ function saveChatReply(ctx) {
 function saveGlobalModalData() {
   const ctx = activeContext;
 
-  if (ctx.type === 'flight') {
+  /*if (ctx.type === 'flight') {
     saveFlightFromModal(ctx);
     closeModal();
     return;
-  }
+  }*/
 
   if (ctx.type && ctx.type.startsWith('base_')) {
     saveBaseFromModal(ctx);
@@ -2273,11 +2273,11 @@ function saveGlobalModalData() {
     return;
   }
 
-  if (ctx.type === 'flight') {
+  /*if (ctx.type === 'flight') {
     saveFlightFromModal(ctx);
     closeModal();
     return;
-  }
+  }*/
 
   if (ctx.type.startsWith('base_')) {
     saveBaseFromModal(ctx);
@@ -2304,3 +2304,147 @@ function saveGlobalModalData() {
 document.addEventListener('DOMContentLoaded', function() {
   renderCmsTables();
 });
+
+
+
+/* =========================================================
+   운항 스케줄, 오늘 항공편
+========================================================= */
+
+// 1. 등록 모달
+function openFlightAddModal() {
+    document.getElementById('flightForm').reset();
+    document.getElementById('modalFlightId').value = '';
+    document.getElementById('flightModalTitle').innerText = '새 운항 스케줄 등록';
+    document.getElementById('flightModal').style.display = 'flex';
+}
+
+// 2. 수정 모달 
+function openFlightEditModal(btn) {
+    document.getElementById('flightForm').reset();
+    document.getElementById('modalFlightId').value = btn.getAttribute('data-id');
+    document.getElementById('flightModalTitle').innerText = '운항 스케줄 수정';
+    
+    document.getElementById('modalFlightNo').value = btn.getAttribute('data-no');
+    document.getElementById('modalRouteId').value = btn.getAttribute('data-route');
+    document.getElementById('modalAircraftId').value = btn.getAttribute('data-ac');
+    document.getElementById('modalDepGateId').value = btn.getAttribute('data-dgate') || 0;
+    document.getElementById('modalArrGateId').value = btn.getAttribute('data-agate') || 0;
+    document.getElementById('modalDepTime').value = btn.getAttribute('data-dtime');
+    document.getElementById('modalArrTime').value = btn.getAttribute('data-atime');
+
+    document.getElementById('flightModal').style.display = 'flex';
+}
+
+// 3. 모달 닫기
+function closeFlightModal() {
+    document.getElementById('flightModal').style.display = 'none';
+}
+
+// 4. 스케줄 등록 수정
+function saveFlightData() {
+    const flightId = document.getElementById('modalFlightId').value;
+    const requestData = {
+        flight_id: flightId ? parseInt(flightId) : null,
+        flight_no: document.getElementById('modalFlightNo').value,
+        route_id: parseInt(document.getElementById('modalRouteId').value),
+        aircraft_id: parseInt(document.getElementById('modalAircraftId').value),
+        departure_gate_id: parseInt(document.getElementById('modalDepGateId').value) || null,
+        arrival_gate_id: parseInt(document.getElementById('modalArrGateId').value) || null,
+        departure_time: document.getElementById('modalDepTime').value,
+        arrival_time: document.getElementById('modalArrTime').value
+    };
+
+    if(!requestData.flight_no || !requestData.route_id || !requestData.aircraft_id || !requestData.departure_time || !requestData.arrival_time) {
+        alert('필수 항목(*)을 모두 입력해주세요.');
+        return;
+    }
+
+    const url = flightId ? '/staff/schedule/api/update' : '/staff/schedule/api/insert';
+    
+    const csrfMeta = document.querySelector('meta[name="_csrf"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+    const headers = { 'Content-Type': 'application/json' };
+    if (csrfMeta && csrfHeaderMeta) {
+        headers[csrfHeaderMeta.getAttribute('content')] = csrfMeta.getAttribute('content');
+    }
+
+    fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(requestData)
+    })
+    .then(res => res.text())
+    .then(result => {
+        if(result === 'success') {
+            alert('저장되었습니다.');
+            location.reload(); 
+        } else {
+            alert('저장에 실패했습니다.');
+        }
+    });
+}
+
+// 5. 스케줄 삭제
+function deleteFlight(flightId) {
+    if(!confirm('이 운항 스케줄을 정말 취소(삭제)하시겠습니까?')) return;
+    
+    const csrfMeta = document.querySelector('meta[name="_csrf"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+    const headers = {};
+    if (csrfMeta && csrfHeaderMeta) {
+        headers[csrfHeaderMeta.getAttribute('content')] = csrfMeta.getAttribute('content');
+    }
+
+    fetch('/staff/schedule/api/delete?flightId=' + flightId, {
+        method: 'POST',
+        headers: headers
+    })
+    .then(res => res.text())
+    .then(result => {
+        if(result === 'success') {
+            alert('삭제되었습니다.');
+            location.reload();
+        } else {
+            alert('삭제에 실패했습니다.');
+        }
+    });
+}
+
+// 6. 오늘 항공편 상태(정상/지연/결항) 변경
+function changeFlightStatus(flightId, newStatus) {
+    if(!newStatus) return;
+    
+    if(!confirm('해당 항공편의 상태를 변경하시겠습니까?')) {
+        location.reload();
+        return;
+    }
+
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    fetch('/staff/schedule/api/status', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json', 
+            [csrfHeader]: csrfToken 
+        },
+        body: JSON.stringify({
+            flight_id: parseInt(flightId),
+            flight_status: newStatus
+        })
+    })
+    .then(res => res.text())
+    .then(result => {
+        if(result === 'success') {
+            alert('상태가 정상적으로 변경되었습니다.');
+            location.reload();
+        } else {
+            alert('상태 변경에 실패했습니다.');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('서버 통신 중 오류가 발생했습니다.');
+    });
+}
