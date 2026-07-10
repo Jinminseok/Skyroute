@@ -20,5 +20,7 @@ public interface MemberService {
 	//메인 화면 공항 리스트 조회
 	public List<Map<String, Object>> selectAirportList();
 	
-	
+	//운항 조회
+	public List<Map<String, Object>> selectActiveRegionList();
+	public List<Map<String, Object>> selectActiveRouteList();
 }

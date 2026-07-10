@@ -52,5 +52,16 @@ public class MemberServiceImpl implements MemberService{
 		return memberMapper.selectCheckEmail(email);
 	}
 
+	@Override
+	public List<Map<String, Object>> selectActiveRegionList() {
+		return memberMapper.selectActiveRegionList();
+	}
+
+	@Override
+	public List<Map<String, Object>> selectActiveRouteList() {
+		return memberMapper.selectActiveRouteList();
+	}
+
+
 
 }

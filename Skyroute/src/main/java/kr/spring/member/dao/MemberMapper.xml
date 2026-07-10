@@ -98,6 +98,37 @@
 		WHERE 
 			EMAIL = #{email}
 	</select>
+	
+	
+	<!-- 운항 조회 -->
+	<select id="selectActiveRegionList" resultType="map">
+		SELECT 
+			region_id AS REGION_ID, 
+			region_name AS REGION_NAME 
+		FROM 
+			REGION 
+		WHERE 
+			is_active = 'Y'
+		ORDER BY 
+			region_id ASC
+	</select>
+
+	<select id="selectActiveRouteList" resultType="map">
+		SELECT 
+			A.iata_code AS IATA_CODE, 
+			A.airport_name AS AIRPORT_NAME, 
+			A.region_id AS REGION_ID,       
+			R.region_name AS REGION_NAME    
+		FROM 
+			AIRPORT A 
+		INNER JOIN 
+			REGION R ON A.region_id = R.region_id
+		WHERE 
+			A.is_active = 'Y' 
+		ORDER BY 
+			A.airport_name ASC
+	</select>
+	
 </mapper>
 
 

@@ -35,5 +35,11 @@ public interface MemberMapper {
 
 	//메인 페이지 공항 리스트 조회
 	public List<Map<String, Object>> selectAirportList();
+	
+	
+	
+	//운항 조회
+	public List<Map<String, Object>> selectActiveRegionList();
+	public List<Map<String, Object>> selectActiveRouteList();
 
 }

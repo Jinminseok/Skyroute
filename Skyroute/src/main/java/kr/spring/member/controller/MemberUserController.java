@@ -1,6 +1,7 @@
 package kr.spring.member.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,7 +177,14 @@ public class MemberUserController {
 	
 	//운항스케쥴 폼 조회
 	@GetMapping("/member_route")
-	public String routeForm() {
+	public String routeForm(Model model) {
+		
+		List<Map<String, Object>> regionList = memberService.selectActiveRegionList();
+		List<Map<String, Object>> routeList = memberService.selectActiveRouteList();
+		
+		model.addAttribute("regionList", regionList);
+		model.addAttribute("routeList", routeList);
+		
 		return "thviews/member/member_route";
 	}
 	
