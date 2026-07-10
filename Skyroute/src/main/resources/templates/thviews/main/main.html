@@ -110,13 +110,657 @@
 			font-weight: 600;
 			color: #0f172a;
 		}
+		/* ==================================================
+   메인 Hero
+================================================== */
+
+.home-main-hero {
+	padding: 58px 0 50px;
+}
+
+.home-main-hero h1 {
+	margin: 7px 0 8px;
+	font-family:
+		'Pretendard',
+		-apple-system,
+		BlinkMacSystemFont,
+		'Segoe UI',
+		sans-serif;
+	font-size: clamp(36px, 4vw, 46px);
+	font-weight: 700;
+	line-height: 1.18;
+	letter-spacing: -1.7px;
+}
+
+.home-main-hero > .wrap > p {
+	color: #475569;
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 1.65;
+	letter-spacing: -0.25px;
+}
+
+
+/* ==================================================
+   항공권 검색 폼
+================================================== */
+
+.home-search-form {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.home-search-form .searchcard {
+	margin-top: 28px;
+	padding: 12px 12px 20px;
+	border: 1px solid rgba(15, 23, 42, 0.08);
+	border-radius: 20px;
+	background: #ffffff;
+	box-shadow:
+		0 22px 55px rgba(15, 23, 42, 0.10),
+		0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+
+/* 오류 메시지 */
+
+.home-search-form .search-error-box {
+	margin: 2px 4px 14px;
+	padding: 12px 14px;
+	border: 1px solid #fecdd3;
+	border-radius: 12px;
+	background: #fff1f2;
+	color: #be123c;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.55;
+}
+
+
+/* 왕복 / 편도 */
+
+.home-search-form .home-trip-tabs {
+	display: inline-flex;
+	width: auto;
+	gap: 3px;
+	margin: 0 0 11px 2px;
+	padding: 4px;
+	border-radius: 12px;
+	background: #f1f5f9;
+}
+
+.home-search-form .home-trip-tabs span {
+	min-width: 68px;
+	padding: 8px 16px;
+	border-radius: 9px;
+	color: #64748b;
+	font-family: 'Pretendard', sans-serif;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.3;
+	letter-spacing: -0.2px;
+	text-align: center;
+	transition:
+		background 0.18s ease,
+		color 0.18s ease,
+		box-shadow 0.18s ease;
+}
+
+.home-search-form .home-trip-tabs input:checked + span {
+	background: #ffffff;
+	color: #0066e2;
+	font-weight: 700;
+	box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+
+/* 검색 필드 전체 */
+
+.home-search-form .home-search-fields {
+	grid-template-columns:
+		minmax(0, 1.12fr)
+		minmax(0, 1.12fr)
+		minmax(0, 1.45fr)
+		minmax(0, 1.05fr);
+
+	margin: 0;
+	border: 1px solid #dbe3ee;
+	border-radius: 16px;
+	background: #ffffff;
+	overflow: hidden;
+}
+
+.home-search-form .home-search-field {
+	min-width: 0;
+	min-height: 104px;
+	padding: 17px 20px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	border-right: 1px solid #dbe3ee;
+	background: #ffffff;
+	transition:
+		background 0.18s ease,
+		box-shadow 0.18s ease;
+}
+
+.home-search-form .home-search-field:last-child {
+	border-right: 0;
+}
+
+.home-search-form .home-search-field:focus-within {
+	background: #f8fbff;
+	box-shadow:
+		inset 0 0 0 2px rgba(0, 102, 226, 0.12);
+}
+
+
+/* 필드 라벨 */
+
+.home-search-form .home-search-field > label {
+	display: block;
+	margin: 0 0 9px;
+	color: #475569;
+	font-family: 'Pretendard', sans-serif;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.25;
+	letter-spacing: -0.15px;
+}
+
+
+/* 출발지 / 도착지 */
+
+.home-search-form .home-search-select {
+	width: 100%;
+	min-width: 0;
+	height: 32px;
+	margin: 0;
+	padding: 0 28px 0 0;
+	border: 0;
+	outline: 0;
+	background-color: transparent;
+	color: #0f172a;
+	font-family: 'Pretendard', sans-serif;
+	font-size: 17px;
+	font-weight: 700;
+	line-height: 1.4;
+	letter-spacing: -0.45px;
+	cursor: pointer;
+}
+
+.home-search-form .home-search-select option {
+	color: #1e293b;
+	font-size: 15px;
+	font-weight: 500;
+}
+
+
+/* 출발지 / 도착지 교환 */
+
+.home-search-form .home-swap {
+	right: -19px;
+	width: 38px;
+	height: 38px;
+	border: 1px solid #d7e0ec;
+	background: #ffffff;
+	color: #0066e2;
+	box-shadow: 0 5px 16px rgba(15, 23, 42, 0.12);
+}
+
+.home-search-form .home-swap:hover {
+	border-color: #0066e2;
+	background: #f0f6ff;
+}
+
+.home-search-form .home-swap .material-symbols-outlined {
+	font-size: 20px;
+	font-weight: 400;
+}
+
+
+/* 날짜 */
+
+.home-search-form .home-date-range {
+	display: grid;
+	grid-template-columns:
+		minmax(0, 1fr)
+		auto
+		minmax(0, 1fr);
+	align-items: center;
+	gap: 8px;
+}
+
+.home-search-form .home-date-input {
+	width: 100%;
+	min-width: 0;
+	height: 32px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	background: transparent;
+	color: #0f172a;
+	font-family: 'Pretendard', sans-serif;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.4;
+	letter-spacing: -0.25px;
+	font-variant-numeric: tabular-nums;
+	cursor: pointer;
+}
+
+.home-search-form .home-date-separator {
+	color: #94a3b8;
+	font-size: 15px;
+	font-weight: 500;
+}
+
+
+/* 승객 선택 */
+
+.home-search-form .home-passenger-field {
+	overflow: visible;
+}
+
+.home-search-form .passenger-picker-container {
+	margin: 0;
+}
+
+.home-search-form .home-passenger-trigger {
+	width: 100%;
+	height: 30px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: #0f172a;
+	font-family: 'Pretendard', sans-serif;
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1.4;
+	letter-spacing: -0.3px;
+	cursor: pointer;
+}
+
+.home-search-form .home-passenger-chevron {
+	color: #64748b;
+	font-size: 20px;
+	font-weight: 400;
+}
+
+.home-search-form .home-seat-select {
+	width: 100%;
+	height: 27px;
+	margin: 3px 0 0;
+	padding: 0 25px 0 0;
+	border: 0;
+	outline: 0;
+	background-color: transparent;
+	color: #64748b;
+	font-family: 'Pretendard', sans-serif;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.4;
+	letter-spacing: -0.2px;
+	cursor: pointer;
+}
+
+
+/* 승객 팝업 */
+
+.home-search-form .passenger-layer {
+	width: min(350px, calc(100vw - 32px));
+	padding: 22px;
+	border: 1px solid #dbe3ee;
+	border-radius: 18px;
+	box-shadow: 0 24px 65px rgba(15, 23, 42, 0.22);
+	font-family: 'Pretendard', sans-serif;
+}
+
+.home-search-form .passenger-layer-header {
+	margin-bottom: 18px;
+	padding-bottom: 13px;
+}
+
+.home-search-form .passenger-layer-header h4 {
+	color: #0f172a;
+	font-size: 17px;
+	font-weight: 700;
+	letter-spacing: -0.3px;
+}
+
+.home-search-form .passenger-layer-header small {
+	margin-left: 5px;
+	color: #94a3b8;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.home-search-form .passenger-layer-close {
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: #f8fafc;
+	color: #64748b;
+	font-family: inherit;
+	font-size: 20px;
+	line-height: 1;
+}
+
+.home-search-form .passenger-layer-close:hover {
+	background: #f1f5f9;
+	color: #0f172a;
+}
+
+.home-search-form .passenger-type-info label {
+	color: #1e293b;
+	font-size: 14px;
+	font-weight: 700;
+	letter-spacing: -0.15px;
+}
+
+.home-search-form .passenger-type-info span {
+	color: #94a3b8;
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.home-search-form .passenger-row-last {
+	margin-bottom: 0;
+}
+
+.home-search-form .btn-counter {
+	width: 32px;
+	height: 32px;
+	border-color: #cbd5e1;
+	color: #334155;
+	font-family: inherit;
+	font-size: 18px;
+	font-weight: 500;
+}
+
+.home-search-form .btn-counter:hover {
+	border-color: #0066e2;
+	background: #f0f6ff;
+	color: #0066e2;
+}
+
+.home-search-form .counter-value {
+	width: 24px;
+	color: #0f172a;
+	font-size: 16px;
+	font-weight: 700;
+}
+
+
+/* 검색 카드 하단 */
+
+.home-search-form .home-search-row {
+	margin: 18px 3px 0;
+}
+
+.home-search-form .home-search-note {
+	color: #64748b;
+	font-family: 'Pretendard', sans-serif;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.5;
+	letter-spacing: -0.15px;
+}
+
+.home-search-form .home-search-button {
+	min-width: 172px;
+	height: 50px;
+	padding: 0 28px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	border-radius: 14px;
+	font-family: 'Pretendard', sans-serif;
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -0.25px;
+	box-shadow: 0 8px 20px rgba(0, 102, 226, 0.22);
+	transition:
+		background 0.18s ease,
+		transform 0.18s ease,
+		box-shadow 0.18s ease;
+}
+
+.home-search-form .home-search-button:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 11px 25px rgba(0, 102, 226, 0.28);
+}
+
+.home-search-form .home-search-button .material-symbols-outlined {
+	font-size: 20px;
+}
+
+
+/* 빠른 노선 */
+
+.home-main-hero .home-quick {
+	margin: 21px 0 0;
+}
+
+.home-main-hero .home-quick a {
+	padding: 8px 16px;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: -0.15px;
+}
+
+
+
+.home-event-section {
+	padding: 52px 0 20px;
+	background: #ffffff;
+}
+
+.home-section-heading {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	margin-bottom: 19px;
+}
+
+.home-section-heading h2 {
+	margin: 5px 0 0;
+	color: #0f172a;
+	font-family: 'Pretendard', sans-serif;
+	font-size: 25px;
+	font-weight: 700;
+	line-height: 1.3;
+	letter-spacing: -0.8px;
+}
+
+.home-section-heading p {
+	margin: 6px 0 0;
+	color: #64748b;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.55;
+	letter-spacing: -0.2px;
+}
+
+.home-event-section .event-banner-area {
+	margin-top: 0;
+}
+
+.home-event-section .event-slider {
+	height: 360px;
+	border: 1px solid #e2e8f0;
+	border-radius: 20px;
+	background: #eef3fc;
+	box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+}
+
+
+/* 이미지 위 텍스트 가독성 */
+
+.home-event-section .event-slide::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	background:
+		linear-gradient(
+			90deg,
+			rgba(15, 23, 42, 0.76) 0%,
+			rgba(15, 23, 42, 0.52) 38%,
+			rgba(15, 23, 42, 0.18) 68%,
+			rgba(15, 23, 42, 0.04) 100%
+		);
+	pointer-events: none;
+}
+
+.home-event-section .event-slide-overlay {
+	z-index: 1;
+	padding: 42px 46px;
+}
+
+.home-event-section .event-slide-copy h2 {
+	font-family: 'Pretendard', sans-serif;
+	font-size: 34px;
+	font-weight: 700;
+	letter-spacing: -1.2px;
+	text-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
+}
+
+.home-event-section .event-period {
+	font-weight: 500;
+}
+
+.home-event-section .event-more {
+	font-weight: 700;
+}
+
+
+@media (max-width: 1100px) {
+
+	.home-search-form .home-search-fields {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.home-search-form .home-search-field {
+		border-bottom: 1px solid #dbe3ee;
+	}
+
+	.home-search-form .home-search-field:nth-child(2n) {
+		border-right: 0;
+	}
+
+	.home-search-form .home-search-field:nth-child(n + 3) {
+		border-bottom: 0;
+	}
+}
+
+
+@media (max-width: 720px) {
+
+	.home-main-hero {
+		padding: 42px 0 38px;
+	}
+
+	.home-main-hero h1 {
+		font-size: 34px;
+	}
+
+	.home-main-hero > .wrap > p {
+		font-size: 14px;
+	}
+
+	.home-search-form .searchcard {
+		padding: 10px 10px 16px;
+		border-radius: 17px;
+	}
+
+	.home-search-form .home-search-fields {
+		grid-template-columns: 1fr;
+	}
+
+	.home-search-form .home-search-field:nth-child(n) {
+		min-height: 92px;
+		border-right: 0;
+		border-bottom: 1px solid #dbe3ee;
+	}
+
+	.home-search-form .home-search-field:last-child {
+		border-bottom: 0;
+	}
+
+	.home-search-form .home-swap {
+		display: none;
+	}
+
+	.home-search-form .home-search-row {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 13px;
+	}
+
+	.home-search-form .home-search-button {
+		width: 100%;
+	}
+
+	.home-event-section {
+		padding: 40px 0 12px;
+	}
+
+	.home-section-heading h2 {
+		font-size: 22px;
+	}
+
+	.home-section-heading p {
+		font-size: 13px;
+	}
+
+	.home-event-section .event-slider {
+		height: 310px;
+	}
+
+	.home-event-section .event-slide-overlay {
+		padding: 27px;
+	}
+
+	.home-event-section .event-slide-copy h2 {
+		font-size: 26px;
+	}
+}
+
+
+@media (max-width: 480px) {
+
+	.home-search-form .home-date-range {
+		gap: 5px;
+	}
+
+	.home-search-form .home-date-input {
+		font-size: 14px;
+	}
+
+	.home-event-section .event-slider {
+		height: 285px;
+	}
+
+	.home-event-section .event-slide-copy h2 {
+		font-size: 23px;
+	}
+}
 	</style>
 </head>
 <body>
 
 <div layout:fragment="panel" class="panel on" id="book">
 
-	<div class="hero">
+	<div class="hero home-main-hero">
 		<div class="wrap">
 			<div class="eyebrow">BOOK YOUR FLIGHT</div>
 			<h1>어디로 떠나시나요?</h1>
@@ -125,451 +769,369 @@
 			<form th:action="@{/booking/flights/search}"
 				  th:object="${flightSearchForm}"
 				  method="get"
-				  id="flightSearchForm">
+				  id="flightSearchForm" class="home-search-form">
 			
 				<div class="searchcard">
-			
+
 					<!-- 서버 검증 오류 -->
 					<div class="search-error-box"
-						 th:if="${#fields.hasAnyErrors()}"
-						 style="
-							margin: 10px 12px 16px;
-							padding: 12px 14px;
-							border: 1px solid #fecaca;
-							border-radius: 10px;
-							background: #fff1f2;
-							color: #be123c;
-							font-size: 13px;
-						 ">
-			
+						 th:if="${#fields.hasAnyErrors()}">
+				
 						<div th:each="error : ${#fields.allErrors()}"
 							 th:text="${error}">
 							검색 조건을 확인해 주세요.
 						</div>
 					</div>
-			
-			
-					<!-- 편도 / 왕복 -->
-					<div class="triptabs">
-			
+				
+				
+					<!-- 왕복 / 편도 -->
+					<div class="triptabs home-trip-tabs">
+				
 						<label>
 							<input type="radio"
 								   th:field="*{tripType}"
 								   value="ROUNDTRIP"
 								   onchange="toggleReturnDate()">
-			
+				
 							<span>왕복</span>
 						</label>
-			
-			
+				
 						<label>
 							<input type="radio"
 								   th:field="*{tripType}"
 								   value="ONEWAY"
 								   onchange="toggleReturnDate()">
-			
+				
 							<span>편도</span>
 						</label>
-			
+				
 					</div>
-			
-			
-					<div class="fields"
-						 style="align-items: center;">
-			
-			
-						<!-- 출발지 -->
-						<div class="field">
-			
+				
+				
+					<div class="fields home-search-fields">
+				
+						<!-- 출발 공항 -->
+						<div class="field home-search-field">
+				
 							<label for="departureAirportId">
-								출발
+								출발지
 							</label>
-			
+				
 							<select th:field="*{departureAirportId}"
 									id="departureAirportId"
-									required
-									style="
-										width: 100%;
-										border: none;
-										font-size: 18px;
-										font-weight: 600;
-										outline: none;
-										background: transparent;
-										cursor: pointer;
-									">
-			
+									class="home-search-select"
+									required>
+				
 								<option value="">
-									출발지 선택
+									출발 공항 선택
 								</option>
-			
+				
 								<option th:each="airport : ${airportList}"
 										th:value="${airport.airportId}"
 										th:text="|${airport.iataCode} ${airport.airportName}|">
 								</option>
-			
+				
 							</select>
-			
-			
+				
+				
 							<button type="button"
-									class="swap"
+									class="swap home-swap"
 									onclick="triggerSwapEffect()"
 									title="출발지와 도착지 변경"
-									style="
-										cursor: pointer;
-										border: 0;
-									">
-								⇄
+									aria-label="출발지와 도착지 변경">
+				
+								<span class="material-symbols-outlined">
+									swap_horiz
+								</span>
+				
 							</button>
-			
+				
 						</div>
-			
-			
-						<!-- 도착지 -->
-						<div class="field">
-			
+				
+				
+						<!-- 도착 공항 -->
+						<div class="field home-search-field">
+				
 							<label for="arrivalAirportId">
-								도착
+								도착지
 							</label>
-			
+				
 							<select th:field="*{arrivalAirportId}"
 									id="arrivalAirportId"
-									required
-									style="
-										width: 100%;
-										border: none;
-										font-size: 18px;
-										font-weight: 600;
-										outline: none;
-										background: transparent;
-										cursor: pointer;
-									">
-			
+									class="home-search-select"
+									required>
+				
 								<option value="">
-									도착지 선택
+									도착 공항 선택
 								</option>
-			
+				
 								<option th:each="airport : ${airportList}"
 										th:value="${airport.airportId}"
 										th:text="|${airport.iataCode} ${airport.airportName}|">
 								</option>
-			
+				
 							</select>
-			
+				
 						</div>
-			
-			
+				
+				
 						<!-- 출발일 / 귀국일 -->
-						<div class="field"
-							 style="
-								display: flex;
-								flex-direction: column;
-							 ">
-			
-							<label>여정</label>
-			
-							<div style="
-								display: flex;
-								gap: 5px;
-								align-items: center;
-								margin-top: 4px;
-							">
-			
+						<div class="field home-search-field home-date-field">
+				
+							<label for="departureDate">
+								여행 일정
+							</label>
+				
+							<div class="home-date-range">
+				
 								<input type="date"
 									   th:field="*{departureDate}"
 									   id="departureDate"
+									   class="home-date-input"
 									   th:attr="min=${today}"
-									   required
-									   style="
-										   border: none;
-										   font-size: 15px;
-										   font-weight: 600;
-										   outline: none;
-										   background: transparent;
-										   cursor: pointer;
-										   font-family: inherit;
-									   ">
-			
-			
+									   aria-label="출발일"
+									   required>
+				
+				
 								<span id="dateSeparator"
-									  style="font-weight: 600;">
+									  class="home-date-separator">
 									—
 								</span>
-			
-			
+				
+				
 								<input type="date"
 									   th:field="*{returnDate}"
 									   id="returnDate"
+									   class="home-date-input"
 									   th:attr="min=${today}"
-									   style="
-										   border: none;
-										   font-size: 15px;
-										   font-weight: 600;
-										   outline: none;
-										   background: transparent;
-										   cursor: pointer;
-										   font-family: inherit;
-									   ">
-			
+									   aria-label="귀국일">
+				
 							</div>
-			
+				
 						</div>
-			
-			
-						<!-- 인원 / 좌석 등급 -->
-						<div class="field"
-							 style="
-								display: flex;
-								flex-direction: column;
-								overflow: visible;
-							 ">
-			
-							<label>인원 · 좌석</label>
-			
-			
-							<div class="passenger-picker-container"
-								 style="margin-top: 4px;">
-			
-			
+				
+				
+						<!-- 인원 / 좌석 -->
+						<div class="field home-search-field home-passenger-field">
+				
+							<label>
+								승객 · 좌석
+							</label>
+				
+				
+							<div class="passenger-picker-container">
+				
 								<button type="button"
-										class="passenger-display-trigger"
+										class="passenger-display-trigger home-passenger-trigger"
 										id="passengerTrigger"
-										onclick="togglePassengerLayer()"
-										style="
-											width: 100%;
-											border: 0;
-											background: transparent;
-											font-family: inherit;
-										">
-			
+										onclick="togglePassengerLayer()">
+				
 									<span id="passengerDisplayText">
 										성인 1
 									</span>
-			
-									<span style="
-										font-size: 11px;
-										margin-left: 4px;
-										color: #64748b;
-									">
-										▼
+				
+									<span class="material-symbols-outlined home-passenger-chevron">
+										expand_more
 									</span>
-			
+				
 								</button>
-			
-			
+				
+				
+								<!-- 승객 선택 팝업 -->
 								<div class="passenger-layer"
 									 id="passengerLayer">
-			
-			
+				
 									<div class="passenger-layer-header">
-			
+				
 										<h4>
 											승객 선택
-			
-											<small style="
-												font-weight: 400;
-												color: #94a3b8;
-											">
-												최대 9명
-											</small>
+											<small>최대 9명</small>
 										</h4>
-			
+				
 										<button type="button"
 												class="passenger-layer-close"
 												onclick="togglePassengerLayer()"
-												style="
-													border: 0;
-													background: transparent;
-												">
+												aria-label="승객 선택창 닫기">
 											×
 										</button>
-			
+				
 									</div>
-			
-			
+				
+				
 									<!-- 성인 -->
 									<div class="passenger-row">
-			
+				
 										<div class="passenger-type-info">
 											<label>성인</label>
 											<span>만 12세 이상</span>
 										</div>
-			
+				
 										<div class="counter-ctrl">
-			
+				
 											<button type="button"
 													class="btn-counter"
-													onclick="changeCount('adult', -1)">
-												-
+													onclick="changeCount('adult', -1)"
+													aria-label="성인 수 감소">
+												−
 											</button>
-			
+				
 											<span class="counter-value"
 												  id="valAdult"
 												  th:text="*{adultCount}">
 												1
 											</span>
-			
+				
 											<button type="button"
 													class="btn-counter"
-													onclick="changeCount('adult', 1)">
+													onclick="changeCount('adult', 1)"
+													aria-label="성인 수 증가">
 												+
 											</button>
-			
+				
 										</div>
-			
+				
 									</div>
-			
-			
+				
+				
 									<!-- 소아 -->
 									<div class="passenger-row">
-			
+				
 										<div class="passenger-type-info">
 											<label>소아</label>
-											<span>만 2세 ~ 11세</span>
+											<span>만 2세 이상 11세 이하</span>
 										</div>
-			
+				
 										<div class="counter-ctrl">
-			
+				
 											<button type="button"
 													class="btn-counter"
-													onclick="changeCount('child', -1)">
-												-
+													onclick="changeCount('child', -1)"
+													aria-label="소아 수 감소">
+												−
 											</button>
-			
+				
 											<span class="counter-value"
 												  id="valChild"
 												  th:text="*{childCount}">
 												0
 											</span>
-			
+				
 											<button type="button"
 													class="btn-counter"
-													onclick="changeCount('child', 1)">
+													onclick="changeCount('child', 1)"
+													aria-label="소아 수 증가">
 												+
 											</button>
-			
+				
 										</div>
-			
+				
 									</div>
-			
-			
+				
+				
 									<!-- 유아 -->
-									<div class="passenger-row"
-										 style="margin-bottom: 0;">
-			
+									<div class="passenger-row passenger-row-last">
+				
 										<div class="passenger-type-info">
 											<label>유아</label>
-											<span>
-												만 2세 미만 · 성인 1명당 1명
-											</span>
+											<span>만 2세 미만 · 성인 1명당 1명</span>
 										</div>
-			
+				
 										<div class="counter-ctrl">
-			
+				
 											<button type="button"
 													class="btn-counter"
-													onclick="changeCount('infant', -1)">
-												-
+													onclick="changeCount('infant', -1)"
+													aria-label="유아 수 감소">
+												−
 											</button>
-			
+				
 											<span class="counter-value"
 												  id="valInfant"
 												  th:text="*{infantCount}">
 												0
 											</span>
-			
+				
 											<button type="button"
 													class="btn-counter"
-													onclick="changeCount('infant', 1)">
+													onclick="changeCount('infant', 1)"
+													aria-label="유아 수 증가">
 												+
 											</button>
-			
+				
 										</div>
-			
+				
 									</div>
-			
+				
 								</div>
-			
+				
 							</div>
-			
-			
-							<!-- 서버 전송용 인원수 -->
+				
+				
+							<!-- 실제 서버 전송 값 -->
 							<input type="hidden"
 								   th:field="*{adultCount}"
 								   id="adultCount">
-			
+				
 							<input type="hidden"
 								   th:field="*{childCount}"
 								   id="childCount">
-			
+				
 							<input type="hidden"
 								   th:field="*{infantCount}"
 								   id="infantCount">
-			
-			
-							<!-- DB 좌석 등급 -->
+				
+				
 							<select th:field="*{seatClassId}"
 									id="seatClassId"
-									required
-									style="
-										border: none;
-										font-size: 13px;
-										outline: none;
-										background: transparent;
-										cursor: pointer;
-										color: var(--mut);
-										margin-top: 4px;
-									">
-			
+									class="home-seat-select"
+									aria-label="좌석 등급"
+									required>
+				
 								<option value="">
 									좌석 등급 선택
 								</option>
-			
+				
 								<option th:each="seatClass : ${seatClassList}"
 										th:value="${seatClass.seatClassId}"
 										th:text="${seatClass.className}">
 								</option>
-			
+				
 							</select>
-			
+				
 						</div>
-			
+				
 					</div>
-			
-			
-					<div class="searchrow">
-			
+				
+				
+					<div class="searchrow home-search-row">
+				
 						<div class="opts">
-			
-							<span style="
-								font-size: 12px;
-								color: var(--mut);
-							">
-								선택한 좌석 등급의 1인 운임과
-								현재 잔여 좌석을 조회합니다.
+				
+							<span class="home-search-note">
+								전체 승객은 최대 9명이며, 표시 운임은 1인 기준입니다.
 							</span>
-			
+				
 						</div>
-			
-			
+				
+				
 						<button type="submit"
-								class="btn"
-								style="
-									border: none;
-									cursor: pointer;
-									font-family: inherit;
-									font-size: 16px;
-									font-weight: 600;
-								">
+								class="btn home-search-button">
+				
+							<span class="material-symbols-outlined">
+								search
+							</span>
+				
 							항공권 검색
+				
 						</button>
-			
+				
 					</div>
-			
+				
 				</div>
 			
 			</form>
 
-			<div class="quick" style="margin-bottom: 40px;">
+			<div class="quick home-quick">
 				<a>인천 → 도쿄 NRT</a>
 				<a>김포 → 제주 CJU</a>
 				<a>인천 → 방콕 BKK</a>
@@ -577,10 +1139,40 @@
 				<a>인천 → 다낭 DAD</a>
 			</div>
 
+		</div>
+	</div>
+	<!-- hero 끝 -->
+
+
+	<!-- 흰색 이벤트 패널 -->
+	<section class="home-event-section"
+			 th:if="${!#lists.isEmpty(eventList)}">
+
+		<div class="wrap">
+
+			<div class="home-section-heading">
+
+				<div>
+
+					<div class="eyebrow">
+						EVENT &amp; BENEFITS
+					</div>
+
+					<h2>
+						진행 중인 이벤트
+					</h2>
+
+					<p>
+						SkyRoute에서 준비한 여행 혜택과 새로운 소식을 확인해 보세요.
+					</p>
+
+				</div>
+
+			</div>
+
 
 			<div class="event-banner-area"
-			     id="mainEventSlider"
-			     th:if="${!#lists.isEmpty(eventList)}">
+				 id="mainEventSlider">
 
 				<div class="event-slider">
 
@@ -590,58 +1182,96 @@
 					   th:href="@{/member/event/detail(event_id=${event.event_id})}">
 
 						<img th:src="@{/assets/upload/{file}(file=${event.image_url})}"
-						     th:alt="${event.title}">
+							 th:alt="${event.title}">
+
 
 						<div class="event-slide-overlay">
+
 							<div class="event-slide-copy">
-								<span class="event-label">EVENT</span>
 
-								<h2 th:text="${event.title}"></h2>
+								<span class="event-label">
+									EVENT
+								</span>
 
-								<!-- <p th:text="${event.content}"></p> -->
+
+								<h2 th:text="${event.title}">
+									이벤트 제목
+								</h2>
+
 
 								<div class="event-period">
-									<span th:text="${#dates.format(event.start_date, 'yyyy.MM.dd')}"></span>
+
+									<span th:text="${#dates.format(
+										event.start_date,
+										'yyyy.MM.dd'
+									)}">
+										2026.07.01
+									</span>
+
 									<span>~</span>
-									<span th:text="${#dates.format(event.end_date, 'yyyy.MM.dd')}"></span>
+
+									<span th:text="${#dates.format(
+										event.end_date,
+										'yyyy.MM.dd'
+									)}">
+										2026.07.31
+									</span>
+
 								</div>
+
 
 								<div class="event-more">
+
 									이벤트 자세히 보기
+
 									<span>→</span>
+
 								</div>
+
 							</div>
+
 						</div>
+
 					</a>
 
+
 					<button type="button"
-					        class="event-arrow event-prev"
-					        aria-label="이전 이벤트">
+							class="event-arrow event-prev"
+							aria-label="이전 이벤트">
 						‹
 					</button>
 
+
 					<button type="button"
-					        class="event-arrow event-next"
-					        aria-label="다음 이벤트">
+							class="event-arrow event-next"
+							aria-label="다음 이벤트">
 						›
 					</button>
 
+
 					<div class="event-dots">
+
 						<button type="button"
-						        class="event-dot"
-						        th:each="event, stat : ${eventList}"
-						        th:classappend="${stat.index == 0} ? ' active' : ''"
-						        th:attr="data-index=${stat.index},aria-label=|${stat.count}번째 이벤트|">
+								class="event-dot"
+								th:each="event, stat : ${eventList}"
+								th:classappend="${stat.index == 0} ? ' active' : ''"
+								th:attr="
+									data-index=${stat.index},
+									aria-label=|${stat.count}번째 이벤트|
+								">
 						</button>
+
 					</div>
 
 				</div>
+
 			</div>
 
 		</div>
-	</div>
 
-	<section class="block wrap" style="margin-top: 40px;">
+	</section>
+
+	<section class="block wrap">
 		<div class="htitle">
 			<div>
 				<div class="eyebrow">TODAY'S FLIGHT STATUS</div>
