@@ -338,7 +338,7 @@
 	
 	        <div class="form-group-edit">
 	          <label for="editNowPasswd" style="color:var(--accent); font-weight:600;">현재 비밀번호 확인</label>
-	          <input type="password" id="editNowPasswd" class="form-control-edit" placeholder="정보 수정을 위해 현재 비밀번호를 입력하세요" required style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	          <input type="password" id="editNowPasswd" class="form-control-edit" placeholder="정보 수정 및 탈퇴 시 현재 비밀번호를 입력하세요" required style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
 	        </div>
 	
 	        <div class="form-group-edit">
@@ -377,6 +377,14 @@
 	        <button type="button" id="btnSubmitEditProfile" class="btn-modal-submit" style="width: 100%; height: 44px; background: #000000; color: #ffffff; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 15px; transition: background 0.2s;">
 	            회원정보 수정 완료
 	        </button>
+
+	        <div style="margin-top: 25px; padding-top: 15px; border-top: 1px dashed #e2e8f0; text-align: right;">
+	          <span style="font-size: 12px; color: #94a3b8; margin-right: 8px;">서비스 이용이 불편하셨나요?</span>
+	          <a href="javascript:void(0);" id="btnSubmitDeleteAccount" style="font-size: 12px; color: #ef4444; font-weight: 600; text-decoration: underline; cursor: pointer;">
+	            회원 탈퇴하기
+	          </a>
+	        </div>
+
 	      </div>
 	      <div class="modal-result" id="editProfileResult" style="display:none; margin-top:15px; padding:10px; border-radius:8px; font-size:13px; text-align:center;"></div>
 	    </div>
@@ -496,6 +504,64 @@
 	      }
 	    };
 
+	 // [회원 탈퇴 비동기 격발 스크립트]
+	    var btnDeleteAccount = document.getElementById('btnSubmitDeleteAccount');
+	    if(btnDeleteAccount) {
+	      btnDeleteAccount.onclick = function(e) {
+	        e.preventDefault();
+
+	        var nowPasswd = document.getElementById('editNowPasswd').value;
+	        var resultBox = document.getElementById('editProfileResult');
+
+	        // 현재 비밀번호 검증 가드
+	        if(!nowPasswd) {
+	          alert("회원 탈퇴를 진행하려면 '현재 비밀번호 확인' 칸에 비밀번호를 먼저 입력해 주세요.");
+	          document.getElementById('editNowPasswd').focus();
+	          return;
+	        }
+
+	        // 오작동 방지 최종 의사 확인 더블 체크
+	        if(!confirm("정말로 에어누리 회원 탈퇴를 진행하시겠습니까?\n탈퇴 시 모든 예약 현황 및 회원 정보가 즉시 파기되며 복구가 불가능합니다.")) {
+	          return;
+	        }
+
+	        var paramName = document.getElementById('csrfParameterName').value;
+	        var tokenValue = document.getElementById('csrfToken').value;
+
+	        var formData = new URLSearchParams();
+	        formData.append('now_passwd', nowPasswd);
+	        formData.append(paramName, tokenValue);
+
+	        // 절대경로 매핑으로 회원 탈퇴 비동기 요청 전송
+	        fetch('/member/deleteAccount', {
+	          method: 'POST',
+	          headers: {
+	            'Content-Type': 'application/x-www-form-urlencoded'
+	          },
+	          body: formData.toString()
+	        })
+	        .then(function(res) { return res.text(); })
+	        .then(function(response) {
+	            resultBox.innerText = response;
+	            resultBox.style.display = 'block';
+	            
+	            if(response.includes("완료") || response.includes("성공")) {
+	              resultBox.style.background = "#fef2f2";
+	              resultBox.style.color = "#ef4444";
+	              alert("회원 탈퇴가 정상 처리되었습니다. 그동안 에어누리를 이용해 주셔서 감사합니다.");
+	              location.href = "/main/home"; // 탈퇴 성공 시 메인 페이지로 강제 축출
+	            } else {
+	              resultBox.style.background = "#fef2f2";
+	              resultBox.style.color = "#dc2626";
+	              alert(response); // 비밀번호 불일치 등의 경고 메시지 팝업
+	            }
+	        })
+	        .catch(function() {
+	            alert('탈퇴 처리 중 서버 에러가 발생했습니다.');
+	        });
+	      };
+	    }
+	    
 	  });
 
 	  function execDaumPostcode() {

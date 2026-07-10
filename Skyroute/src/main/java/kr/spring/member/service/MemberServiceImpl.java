@@ -42,5 +42,15 @@ public class MemberServiceImpl implements MemberService{
 		return memberMapper.selectAirportList();
 	}
 
+	@Override
+	public void deleteAccount(Long member_id) {
+		memberMapper.deleteAccount(member_id);
+	}
+
+	@Override
+	public MemberVO selectCheckEmail(String email) {		
+		return memberMapper.selectCheckEmail(email);
+	}
+
 
 }

@@ -1,8 +1,12 @@
 package kr.spring.member.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import kr.spring.member.service.MemberMailService;
 import kr.spring.member.service.MemberService;
@@ -79,6 +84,23 @@ public class MemberUserController {
 			       "location.href='" + homepageUrl + "';" +
 			       "</script>";
 		}
+		
+		//회원가입 이메일 중복 체크		
+		@PostMapping("/confirmEmail")
+		@ResponseBody
+		public Map<String, String> confirmEmail(@RequestParam("email") String email) {
+			Map<String, String> mapJson = new HashMap<String, String>();
+			
+			MemberVO member = memberService.selectCheckEmail(email);
+
+			if (member != null) {				
+				mapJson.put("result", "emailDuplicated");
+			} else {				
+				mapJson.put("result", "emailNotFound");
+			}
+
+			return mapJson;
+		}
 	
 	//아이디 찾기 처리
 		@PostMapping("/findId")
@@ -130,7 +152,7 @@ public class MemberUserController {
 			
 			return "입력하신 이메일 주소로 임시 비밀번호를 발송했습니다.";
 		}
-	
+		
 		
 	//예약 조회변경 폼 호출
 	@GetMapping("/member_booking")
@@ -218,6 +240,34 @@ public class MemberUserController {
 		principalDetails.setMemberVO(memberVO);
 
 		return "회원 정보 수정이 완료되었습니다."; 
+	}
+	
+	//회원 탈퇴 기능
+	@PostMapping("/deleteAccount") 
+	@ResponseBody
+	public String deleteAccount(@RequestParam("now_passwd") String nowPasswd,
+								@AuthenticationPrincipal PrincipalDetails principalDetails,
+								HttpServletRequest request) {
+		
+		if (principalDetails == null || principalDetails.getMemberVO() == null) {
+			return "로그인 세션이 만료되었습니다. 다시 로그인 후 시도해 주세요.";
+		}
+
+		MemberVO loginMember = principalDetails.getMemberVO();
+
+		if (!passwordEncoder.matches(nowPasswd, loginMember.getPassword())) {
+			return "현재 비밀번호가 일치하지 않습니다."; 
+		}
+
+		memberService.deleteAccount(loginMember.getMember_id());
+
+		SecurityContextHolder.clearContext();
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
+		
+		return "회원 탈퇴 처리가 완료되었습니다."; 
 	}
 	
 	

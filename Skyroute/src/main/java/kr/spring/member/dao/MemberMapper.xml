@@ -3,6 +3,29 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
 <mapper namespace="kr.spring.member.dao.MemberMapper"> 
+	<!-- 회원가입 -->
+	<insert id="insertMember" parameterType="kr.spring.member.vo.MemberVO">
+		INSERT INTO MEMBER (
+			LOGIN_ID,  PASSWORD,
+			NAME,
+			PHONE,
+			EMAIL,
+			ZIPCODE,
+			ADDRESS1,
+			ADDRESS2,
+			ROLE,
+			STATUS
+		) VALUES (
+			#{id},     #{password},
+			#{name},
+			#{phone},
+			#{email},
+			#{zipcode},
+			#{address1},
+			#{address2},
+			'USER',    'ACTIVE'   )
+	</insert>
+
 	<!-- 아이디 찾기 -->
 	<select id="findIdByNameAndEmail" resultType="string">
 		SELECT login_id  FROM MEMBER 
@@ -51,7 +74,30 @@
 			IATA_CODE ASC
 	</select>
 	
+	<!-- 회원 탈퇴 -->
+	<update id="deleteAccount" parameterType="long">
+		UPDATE 
+			MEMBER 
+		SET 
+			STATUS = 'DELETED',
+			UPDATED_AT = SYSTIMESTAMP
+		WHERE 
+			MEMBER_ID = #{member_id}
+	</update>
 	
+	<!-- 회원가입 이메일 중복체크 -->
+	<select id="selectCheckEmail" parameterType="string" resultType="kr.spring.member.vo.MemberVO">
+		SELECT 
+			MEMBER_ID,
+			LOGIN_ID,
+			NAME,
+			EMAIL,
+			STATUS
+		FROM 
+			MEMBER 
+		WHERE 
+			EMAIL = #{email}
+	</select>
 </mapper>
 
 

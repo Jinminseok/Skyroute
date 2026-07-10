@@ -84,8 +84,10 @@
       <!-- 🌟 에어누리 컨셉 전용 가드 박스 시작 -->
       <div class="register-box">
          <form th:action="@{registerUser}" th:object="${memberVO}" id="member_register" method="post">
+         
+         <input type="hidden" id="csrfParameterName" th:value="${_csrf != null ? _csrf.parameterName : '_csrf'}">
+         <input type="hidden" id="csrfToken" th:value="${_csrf != null ? _csrf.token : ''}">
             
-            <!-- 1. 아이디 -->
             <div class="form-group">
                <label for="id">아이디</label>
                <div class="input-btn-group">
@@ -96,35 +98,40 @@
                <span th:errors="*{id}" class="error-msg"></span>
             </div>
 
-            <!-- 2. 이름 -->
             <div class="form-group">
                <label for="name">이름</label>
                <input type="text" th:field="*{name}" th:errorclass="field-error" class="form-control" placeholder="성함을 입력해주세요">            
                <span th:errors="*{name}" class="error-msg"></span>
             </div>
 
-            <!-- 3. 비밀번호 -->
             <div class="form-group">
                <label for="password">비밀번호</label>
-               <input type="password" th:field="*{password}" th:errorclass="field-error" class="form-control" placeholder="비밀번호를 입력해주세요">            
+               <input type="password" th:field="*{password}" id="password" th:errorclass="field-error" class="form-control" placeholder="비밀번호를 입력해주세요">            
                <span th:errors="*{password}" class="error-msg"></span>
             </div>
 
-            <!-- 4. 전화번호 -->
+            <div class="form-group">
+               <label for="password_confirm">비밀번호 확인</label>
+               <input type="password" id="password_confirm" class="form-control" placeholder="비밀번호를 한 번 더 입력해주세요">            
+               <span id="message_password" style="display: block; font-size: 12px; margin-top: 5px; padding-left: 2px;"></span>
+            </div>
+
             <div class="form-group">
                <label for="phone">전화번호</label>
                <input type="text" th:field="*{phone}" th:errorclass="field-error" class="form-control" placeholder="EX) 010-1234-5678">            
                <span th:errors="*{phone}" class="error-msg"></span>
             </div>
 
-            <!-- 5. 이메일 -->
             <div class="form-group">
                <label for="email">이메일</label>
-               <input type="text" th:field="*{email}" th:errorclass="field-error" class="form-control" placeholder="EX) airnuri@sky.com">            
+               <div class="input-btn-group">
+                  <input type="text" th:field="*{email}" id="email" placeholder="EX) airnuri@sky.com" th:errorclass="field-error" class="form-control">
+                  <input type="button" id="confirm_email" value="중복체크" class="btn ghost sm" style="min-width: 100px; height: 42px; border-radius: 8px;">
+               </div>
+               <span id="message_email" style="display: block; font-size: 12px; margin-top: 5px; padding-left: 2px;"></span>
                <span th:errors="*{email}" class="error-msg"></span>
             </div>
 
-            <!-- 6. 우편번호 -->
             <div class="form-group">
                <label for="zipcode">우편번호</label>
                <div class="input-btn-group">
@@ -134,21 +141,18 @@
                <span th:errors="*{zipcode}" class="error-msg"></span>
             </div>
 
-            <!-- 7. 주소 -->
             <div class="form-group">
                <label for="address1">주소</label>
                <input type="text" th:field="*{address1}" th:errorclass="field-error" class="form-control" readonly placeholder="기본 주소">            
                <span th:errors="*{address1}" class="error-msg"></span>
             </div>
 
-            <!-- 8. 상세 주소 -->
             <div class="form-group" style="margin-bottom: 35px;">
                <label for="address2">상세 주소</label>
                <input type="text" th:field="*{address2}" th:errorclass="field-error" class="form-control" placeholder="상세 주소를 입력해주세요">            
                <span th:errors="*{address2}" class="error-msg"></span>
             </div>
 
-            <!-- 하단 제어 액션 바 -->
             <div style="display: flex; gap: 12px; justify-content: center;">
                <input type="submit" class="btn" value="가입하기" style="width: 50%; height: 45px; border-radius: 10px; font-weight: 600; cursor: pointer;">
                <input type="button" value="홈으로" class="btn ghost" style="width: 50%; height: 45px; border-radius: 10px; font-weight: 600; cursor: pointer;" th:onclick="|location.href='@{/main/home}'|">
@@ -223,6 +227,82 @@
         element_layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width)/2 - borderWidth) + 'px';
         element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
     }
+    
+ 	// 비밀번호 및 비밀번호 확인 실시간 일치 대조 스크립트
+    document.addEventListener("DOMContentLoaded", function() {
+        var pwInput = document.getElementById('password');
+        var pwConfirmInput = document.getElementById('password_confirm');
+        var pwMsg = document.getElementById('message_password');
+
+        function checkPasswordMatch() {
+            var val1 = pwInput.value;
+            var val2 = pwConfirmInput.value;
+
+            // 둘 중 하나라도 비어있으면 메시지 숨기기
+            if (!val1 || !val2) {
+                pwMsg.innerText = '';
+                return;
+            }
+
+            if (val1 === val2) {
+                pwMsg.innerText = '✓ 비밀번호가 일치합니다.';
+                pwMsg.style.color = 'var(--ok, #059669)'; // 승인 컬러
+            } else {
+                pwMsg.innerText = '✕ 비밀번호가 일치하지 않습니다.';
+                pwMsg.style.color = 'var(--bad, #dc2626)'; // 경고 컬러
+            }
+        }
+
+        // 타이핑 감지
+        if(pwInput && pwConfirmInput) {
+            pwInput.addEventListener('input', checkPasswordMatch);
+            pwConfirmInput.addEventListener('input', checkPasswordMatch);
+        }
+        
+    	 //이메일 중복체크
+        $('#confirm_email').click(function() {
+            var email = $('#email').val(); 
+            var message = $('#message_email');
+
+            if (!email || email.trim() === '') {
+               alert('이메일을 입력해 주세요.');
+               $('#email').focus();
+               return;
+            }
+
+            var emailReg = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailReg.test(email)) {
+               message.text('✕ 올바른 이메일 형식이 아닙니다.').css('color', 'var(--bad, #dc2626)');
+               return;
+            }
+
+            var paramName = $('#csrfParameterName').val();
+            var tokenValue = $('#csrfToken').val();
+
+            var sendData = { email: email };
+            if (paramName && tokenValue) {
+                sendData[paramName] = tokenValue; 
+            }
+
+            $.ajax({
+               url: '/member/confirmEmail',
+               type: 'post',
+               data: sendData,
+               dataType: 'json',
+               success: function(param) {
+                  if (param.result === 'emailNotFound') {
+                     message.text('✓ 사용 가능한 이메일입니다.').css('color', 'var(--ok, #059669)');
+                  } else if (param.result === 'emailDuplicated') {
+                     message.text('✕ 이미 사용된 이메일입니다.').css('color', 'var(--bad, #dc2626)');
+                     $('#email').val('').focus();
+                  }
+               },
+               error: function() {
+                  alert('네트워크 통신 에러가 발생했습니다.');
+               }
+            });
+        });
+    });
 </script>
 </div>
 </body>

@@ -12,15 +12,18 @@ import kr.spring.member.vo.MemberVO;
 @Mapper
 public interface MemberMapper {
 	// 아이디 중복 체크
-	@Select("SELECT * FROM member WHERE login_id = #{id}")
+	@Select("SELECT * FROM member WHERE login_id = #{id}")	
     public MemberVO selectCheckMember(String id);
 	// 회원 정보 조회
 	@Select("SELECT * FROM member WHERE member_id = #{member_id}")
     public MemberVO selectMember(Long member_id);
 	// 회원가입
-	@Insert("INSERT INTO member (login_id, password, name, phone, email, zipcode, address1, address2) "
-	          + "VALUES (#{id}, #{password}, #{name}, #{phone}, #{email}, #{zipcode}, #{address1}, #{address2})")
 	public void insertMember(MemberVO member);
+	//회원탈퇴
+	public void deleteAccount(Long member_id);
+	// 회원가입 - 이메일 중복 체크
+	public MemberVO selectCheckEmail(String email);
+	
 	// 이름과 이메일로 아이디 조회
 	public String findIdByNameAndEmail(@Param("name") String name, @Param("email") String email);
 	// 아이디, 이름, 이메일로 회원 존재 여부 확인 (true/false)
@@ -30,6 +33,7 @@ public interface MemberMapper {
 	//회원정보 수정
 	public void updateMemberProfile(MemberVO member);
 
-	//메인 화면 공항 리스트 조회
+	//메인 페이지 공항 리스트 조회
 	public List<Map<String, Object>> selectAirportList();
+
 }
