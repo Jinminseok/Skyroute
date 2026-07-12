@@ -43,6 +43,40 @@
 		<result property="remainingSeats" column="remaining_seats"/>
 	</resultMap>
 
+	<resultMap id="flightDetailResultMap" type="kr.spring.member.booking.vo.FlightDetailVO">	
+	    <id property="flightId" column="flight_id"/>
+	    <result property="flightNo" column="flight_no"/>	
+	    <result property="flightType" column="flight_type"/>
+	    <result property="departureIataCode" column="departure_iata_code"/>
+	    <result property="departureAirportName" column="departure_airport_name"/>
+	    <result property="departureCountry" column="departure_country"/>
+	    <result property="departureTime" column="departure_time"/>
+	    <result property="departureGateCode" column="departure_gate_code"/>
+	    <result property="departureGateAreaName" column="departure_gate_area_name"/>
+	    <result property="arrivalIataCode" column="arrival_iata_code"/>
+	    <result property="arrivalAirportName" column="arrival_airport_name"/>
+	    <result property="arrivalCountry" column="arrival_country"/>
+	    <result property="arrivalTime" column="arrival_time"/>
+	    <result property="arrivalGateCode" column="arrival_gate_code"/>
+	    <result property="arrivalGateAreaName" column="arrival_gate_area_name"/>
+	    <result property="flightStatus" column="flight_status"/>
+	    <result property="delayMinutes" column="delay_minutes"/>
+	    <result property="aircraftRegNo" column="aircraft_reg_no"/>
+	    <result property="aircraftModel" column="aircraft_model"/>
+	    <result property="totalSeats" column="total_seats"/>
+	</resultMap>
+	
+	
+	<resultMap id="flightFareDetailResultMap" type="kr.spring.member.booking.vo.FlightFareDetailVO">
+	    <id property="flightFareId" column="flight_fare_id"/>
+	    <result property="seatClassId" column="seat_class_id"/>
+	    <result property="seatClassName" column="seat_class_name"/>
+	    <result property="sortOrder" column="sort_order"/>
+	    <result property="price" column="price"/>
+	    <result property="totalSeats" column="total_seats"/>
+	    <result property="occupiedSeats" column="occupied_seats"/>
+	    <result property="remainingSeats" column="remaining_seats"/>
+	</resultMap>
 
 	<!-- 활성 공항 목록 -->
 	<select id="selectActiveAirportList" resultMap="airportOptionResultMap">
@@ -338,4 +372,186 @@
 
 	</select>
 
+	<!-- 항공편 상세 기본 정보 -->
+	<select id="selectFlightDetail" resultMap="flightDetailResultMap">
+	    SELECT
+	        f.flight_id,
+	        f.flight_no,
+	        r.flight_type,
+	
+	        TRIM(dep.iata_code)
+	            AS departure_iata_code,
+	
+	        dep.airport_name
+	            AS departure_airport_name,
+	
+	        dep.country
+	            AS departure_country,
+	
+	        f.departure_time,
+	
+	        departure_gate.gate_code
+	            AS departure_gate_code,
+	
+	        departure_area.area_name
+	            AS departure_gate_area_name,
+	
+	
+	        TRIM(arr.iata_code)
+	            AS arrival_iata_code,
+	
+	        arr.airport_name
+	            AS arrival_airport_name,
+	
+	        arr.country
+	            AS arrival_country,
+	
+	        f.arrival_time,
+	
+	        arrival_gate.gate_code
+	            AS arrival_gate_code,
+	
+	        arrival_area.area_name
+	            AS arrival_gate_area_name,
+	
+	
+	        f.flight_status,
+	
+	        NVL(f.delay_minutes, 0)
+	            AS delay_minutes,
+	
+	
+	        ac.reg_no
+	            AS aircraft_reg_no,
+	
+	        ac.model_name
+	            AS aircraft_model,
+	
+	        ac.total_seats
+	
+	    FROM FLIGHT f
+	
+	    JOIN ROUTE r
+	      ON r.route_id = f.route_id
+	
+	    JOIN AIRPORT dep
+	      ON dep.airport_id =
+	         r.departure_airport_id
+	
+	    JOIN AIRPORT arr
+	      ON arr.airport_id =
+	         r.arrival_airport_id
+	
+	    JOIN AIRCRAFT ac
+	      ON ac.aircraft_id =
+	         f.aircraft_id
+	
+	
+	    LEFT JOIN GATE departure_gate
+	      ON departure_gate.gate_id =
+	         f.departure_gate_id
+	
+	    LEFT JOIN GATE_AREA departure_area
+	      ON departure_area.gate_area_id =
+	         departure_gate.gate_area_id
+	
+	
+	    LEFT JOIN GATE arrival_gate
+	      ON arrival_gate.gate_id =
+	         f.arrival_gate_id
+	
+	    LEFT JOIN GATE_AREA arrival_area
+	      ON arrival_area.gate_area_id =
+	         arrival_gate.gate_area_id
+	
+	
+	    WHERE f.flight_id = #{flightId}
+	      AND f.is_deleted = 'N'	
+	</select>
+	
+	<!-- 좌석 등급별 운임 및 잔여 좌석 -->
+	<select id="selectFlightFareDetailList" resultMap="flightFareDetailResultMap">
+	    SELECT
+	        ff.flight_fare_id,
+	        sc.seat_class_id,
+	        sc.class_name
+	            AS seat_class_name,
+	
+	        sc.sort_order,
+	        ff.price,
+	
+	
+	        COUNT(DISTINCT s.seat_id)
+	            AS total_seats,
+	
+	
+	        COUNT(DISTINCT t.seat_id)
+	            AS occupied_seats,
+	
+	
+	        (
+	            COUNT(DISTINCT s.seat_id)
+	            -
+	            COUNT(DISTINCT t.seat_id)
+	        ) AS remaining_seats
+	
+	
+	    FROM FLIGHT f
+	
+	    JOIN FLIGHT_FARE ff
+	      ON ff.flight_id = f.flight_id
+	
+	    JOIN SEAT_CLASS sc
+	      ON sc.seat_class_id =
+	         ff.seat_class_id
+	
+	
+	    LEFT JOIN SEAT s
+	      ON s.aircraft_id =
+	         f.aircraft_id
+	
+	     AND s.seat_class_id =
+	         sc.seat_class_id
+	
+	     AND s.is_active = 'Y'
+	
+	
+	    LEFT JOIN TICKET t
+	      ON t.flight_id =
+	         f.flight_id
+	
+	     AND t.seat_id =
+	         s.seat_id
+	
+	     AND (
+	            t.hold_status = 'CONFIRMED'
+	
+	            OR
+	
+	            (
+	                t.hold_status = 'HOLDING'
+	
+	                AND (
+	                    t.expired_at IS NULL
+	                    OR
+	                    t.expired_at &gt; SYSTIMESTAMP
+	                )
+	            )
+	         )
+	
+	
+	    WHERE f.flight_id = #{flightId}
+	      AND f.is_deleted = 'N'
+	
+	
+	    GROUP BY
+	        ff.flight_fare_id,
+	        sc.seat_class_id,
+	        sc.class_name,
+	        sc.sort_order,
+	        ff.price
+	
+	
+	    ORDER BY sc.sort_order
+	</select>
 </mapper>

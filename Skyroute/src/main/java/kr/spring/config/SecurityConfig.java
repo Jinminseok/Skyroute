@@ -56,6 +56,7 @@ public class SecurityConfig{
 								"/assets/**",
 								"/main/**",
 								"/booking/flights/search",
+								"/booking/flights/detail",
 								"/member/member_route",
 								"/member/**",
 								"/member/member_schedule"

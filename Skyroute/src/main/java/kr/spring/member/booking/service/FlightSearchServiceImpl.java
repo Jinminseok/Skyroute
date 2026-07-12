@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.spring.member.booking.dao.FlightSearchMapper;
 import kr.spring.member.booking.vo.AirportOptionVO;
+import kr.spring.member.booking.vo.FlightDetailVO;
 import kr.spring.member.booking.vo.FlightSearchForm;
 import kr.spring.member.booking.vo.FlightSearchQueryVO;
 import kr.spring.member.booking.vo.FlightSearchResultVO;
@@ -21,20 +22,16 @@ public class FlightSearchServiceImpl implements FlightSearchService {
 
 	private final FlightSearchMapper flightSearchMapper;
 
-
 	@Override
 	public List<AirportOptionVO>selectActiveAirportList() {
-
 		return flightSearchMapper .selectActiveAirportList();
 	}
 
 
 	@Override
 	public List<SeatClassOptionVO>selectSeatClassList() {
-
 		return flightSearchMapper.selectSeatClassList();
 	}
-
 
 	@Override
 	public void validateReferenceData(FlightSearchForm form) {
@@ -96,5 +93,30 @@ public class FlightSearchServiceImpl implements FlightSearchService {
 											.departureStart(departureDate.atStartOfDay())
 											.departureEnd(departureDate.plusDays(1).atStartOfDay())
 											.build();
+	}
+
+
+	@Override
+	public FlightDetailVO selectFlightDetail(Long flightId) {
+
+	    FlightDetailVO flightDetail =
+	            flightSearchMapper.selectFlightDetail(flightId);
+
+	    /*
+	     * 존재하지 않거나 soft delete된 항공편
+	     */
+	    if (flightDetail == null) {
+	        return null;
+	    }
+
+	    /*
+	     * 좌석 등급별 가격 및 잔여 좌석 조회
+	     */
+	    flightDetail.setFareList(
+	            flightSearchMapper
+	                    .selectFlightFareDetailList(flightId)
+	    );
+
+	    return flightDetail;
 	}
 }

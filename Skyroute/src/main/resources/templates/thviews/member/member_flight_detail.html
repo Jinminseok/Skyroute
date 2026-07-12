@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>SkyRoute - 항공편 상세</title>
+
+    <link rel="stylesheet"
+          th:href="@{/assets/css/member.css}"
+          type="text/css">
+
+    <style>
+
+        .flight-detail-page {
+            padding: 48px 0 80px;
+        }
+
+        .detail-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-heading h2 {
+            margin: 5px 0 0;
+            color: var(--ink-700);
+            font-size: 26px;
+        }
+
+        .detail-heading p {
+            margin: 5px 0 0;
+            color: var(--mut);
+            font-size: 13px;
+        }
+
+        .detail-card {
+            padding: 28px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: var(--sh);
+        }
+
+        .flight-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .carrier-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .carrier-logo {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            background: var(--accent);
+            color: #fff;
+            font-family: var(--mono);
+            font-weight: 600;
+        }
+
+        .carrier-info b {
+            display: block;
+            color: var(--ink-700);
+        }
+
+        .carrier-info small {
+            color: var(--mut);
+            font-family: var(--sans-eng);
+        }
+
+        .status-badge {
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-badge.delayed {
+            background: #fff7ed;
+            color: var(--warn);
+        }
+
+        .flight-route {
+            display: grid;
+            grid-template-columns:
+                minmax(0, 1fr)
+                210px
+                minmax(0, 1fr);
+            align-items: center;
+            gap: 28px;
+            margin-top: 30px;
+        }
+
+        .airport-node.right {
+            text-align: right;
+        }
+
+        .airport-date {
+            color: var(--mut);
+            font-size: 12px;
+        }
+
+        .airport-time {
+            color: var(--ink-700);
+            font-family: var(--sans-eng);
+            font-size: 38px;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        .airport-code {
+            margin-top: 7px;
+            color: var(--ink-700);
+            font-family: var(--sans-eng);
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .airport-name {
+            color: var(--mut);
+            font-size: 13px;
+        }
+
+        .gate-info {
+            display: inline-flex;
+            margin-top: 9px;
+            padding: 5px 9px;
+            border-radius: 7px;
+            background: #f8fafc;
+            color: var(--ink-500);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .route-middle {
+            text-align: center;
+            color: var(--mut);
+            font-size: 12px;
+        }
+
+        .route-line {
+            height: 1px;
+            position: relative;
+            margin: 11px 0;
+            background: #cbd5e1;
+        }
+
+        .route-line::before,
+        .route-line::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 7px;
+            height: 7px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            background: #fff;
+            transform: translateY(-50%);
+        }
+
+        .route-line::before {
+            left: 0;
+        }
+
+        .route-line::after {
+            right: 0;
+        }
+
+        .route-plane {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            padding: 0 5px;
+            background: #fff;
+            color: var(--accent);
+            transform: translate(-50%, -50%);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .info-title {
+            margin: 0 0 18px;
+            color: var(--ink-700);
+            font-size: 17px;
+        }
+
+        .info-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .info-item {
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fbfdff;
+        }
+
+        .info-item span {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--mut);
+            font-size: 12px;
+        }
+
+        .info-item b {
+            color: var(--ink-700);
+            font-size: 14px;
+        }
+
+        .detail-summary {
+            height: fit-content;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--line);
+            font-size: 14px;
+        }
+
+        .summary-row span {
+            color: var(--mut);
+        }
+
+        .fare-section {
+            margin-top: 24px;
+        }
+
+        .fare-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .fare-heading h3 {
+            margin: 0;
+        }
+
+        .fare-heading p {
+            margin: 4px 0 0;
+            color: var(--mut);
+            font-size: 12px;
+        }
+
+        .fare-list {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .fare-item {
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .fare-item.sold-out {
+            background: #f8fafc;
+            opacity: .67;
+        }
+
+        .fare-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fare-class {
+            color: var(--ink-700);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .seat-badge {
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #ecfdf5;
+            color: var(--ok);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .seat-badge.sold-out {
+            background: #fef2f2;
+            color: var(--bad);
+        }
+
+        .fare-price {
+            margin-top: 14px;
+            color: var(--ink-700);
+            font-family: var(--sans-eng);
+            font-size: 27px;
+            font-weight: 700;
+        }
+
+        .fare-price small {
+            color: var(--mut);
+            font-family: 'Pretendard', sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .fare-meta {
+            margin-top: 13px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--line);
+            color: var(--mut);
+            font-size: 11px;
+        }
+
+        .empty-fare {
+            padding: 36px 20px;
+            border: 1px dashed var(--line);
+            border-radius: 12px;
+            color: var(--mut);
+            text-align: center;
+        }
+
+        .detail-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 900px) {
+
+            .flight-route,
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .airport-node.right {
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 620px) {
+
+            .flight-detail-page {
+                padding-top: 28px;
+            }
+
+            .detail-heading,
+            .flight-top,
+            .fare-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .info-list {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-actions {
+                flex-direction: column-reverse;
+            }
+
+            .detail-actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div layout:fragment="panel">
+
+    <section class="wrap flight-detail-page">
+
+
+        <div class="detail-heading">
+
+            <div>
+
+                <div class="eyebrow">
+                    FLIGHT DETAIL
+                </div>
+
+                <h2>항공편 상세 정보</h2>
+
+                <p>
+                    선택한 항공편의 운항 정보와 좌석 등급별 운임입니다.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <article class="detail-card">
+
+
+            <div class="flight-top">
+
+                <div class="carrier-info">
+
+                    <div class="carrier-logo">
+                        SR
+                    </div>
+
+                    <div>
+
+                        <b>SkyRoute</b>
+
+                        <small th:text="${flight.flightNo}">
+                            SR101
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <span class="status-badge"
+                      th:classappend="${flight.flightStatus == 'DELAYED'}
+                            ? ' delayed'
+                            : ''"
+                      th:text="${flight.statusLabel}">
+
+                    정상 운항
+
+                </span>
+
+            </div>
+
+
+            <div class="flight-route">
+
+
+                <div class="airport-node">
+
+                    <div class="airport-date"
+                         th:text="${flight.departureDateText}">
+                        2026.07.17
+                    </div>
+
+                    <div class="airport-time"
+                         th:text="${flight.departureTimeText}">
+                        10:30
+                    </div>
+
+                    <div class="airport-code"
+                         th:text="${flight.departureIataCode}">
+                        GMP
+                    </div>
+
+                    <div class="airport-name"
+                         th:text="|${flight.departureAirportName} · ${flight.departureCountry}|">
+                        김포국제공항 · 대한민국
+                    </div>
+
+                    <div class="gate-info"
+                         th:text="|Gate ${flight.departureGateDisplay}|">
+                        Gate A구역 · G1
+                    </div>
+
+                </div>
+
+
+                <div class="route-middle">
+
+                    <b th:text="${flight.durationText}">
+                        1시간 10분
+                    </b>
+
+                    <div class="route-line">
+
+                        <span class="route-plane">
+                            ✈
+                        </span>
+
+                    </div>
+
+                    <span>직항</span>
+
+                </div>
+
+
+                <div class="airport-node right">
+
+                    <div class="airport-date"
+                         th:text="${flight.arrivalDateText}">
+                        2026.07.17
+                    </div>
+
+                    <div class="airport-time"
+                         th:text="${flight.arrivalTimeText}">
+                        11:40
+                    </div>
+
+                    <div class="airport-code"
+                         th:text="${flight.arrivalIataCode}">
+                        CJU
+                    </div>
+
+                    <div class="airport-name"
+                         th:text="|${flight.arrivalAirportName} · ${flight.arrivalCountry}|">
+                        제주국제공항 · 대한민국
+                    </div>
+
+                    <div class="gate-info"
+                         th:text="|Gate ${flight.arrivalGateDisplay}|">
+                        Gate C구역 · C1
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </article>
+
+
+        <div class="detail-grid">
+
+
+            <article class="detail-card">
+
+                <h3 class="info-title">
+                    운항 상세
+                </h3>
+
+
+                <div class="info-list">
+
+
+                    <div class="info-item">
+
+                        <span>항공편 번호</span>
+
+                        <b th:text="${flight.flightNo}">
+                            SR101
+                        </b>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>노선 구분</span>
+
+                        <b th:text="${flight.flightTypeLabel}">
+                            국내선
+                        </b>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>항공기 모델</span>
+
+                        <b th:text="${flight.aircraftModel}">
+                            B737-800
+                        </b>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>항공기 등록번호</span>
+
+                        <b th:text="${flight.aircraftRegNo != null
+                                ? flight.aircraftRegNo
+                                : '미정'}">
+                            HL-SR001
+                        </b>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>출발 게이트</span>
+
+                        <b th:text="${flight.departureGateDisplay}">
+                            A구역 · G1
+                        </b>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>도착 게이트</span>
+
+                        <b th:text="${flight.arrivalGateDisplay}">
+                            C구역 · C1
+                        </b>
+
+                    </div>
+
+
+                </div>
+
+            </article>
+
+
+            <aside class="detail-card detail-summary">
+
+                <h3 class="info-title">
+                    항공편 요약
+                </h3>
+
+
+                <div class="summary-row">
+
+                    <span>운항 상태</span>
+
+                    <b th:text="${flight.statusLabel}">
+                        정상 운항
+                    </b>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>비행 시간</span>
+
+                    <b th:text="${flight.durationText}">
+                        1시간 10분
+                    </b>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>총 좌석 수</span>
+
+                    <b th:text="|${flight.totalSeats}석|">
+                        180석
+                    </b>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>출발</span>
+
+                    <b th:text="${flight.departureIataCode}">
+                        GMP
+                    </b>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>도착</span>
+
+                    <b th:text="${flight.arrivalIataCode}">
+                        CJU
+                    </b>
+
+                </div>
+
+            </aside>
+
+
+        </div>
+
+
+        <article class="detail-card fare-section">
+
+
+            <div class="fare-heading">
+
+                <div>
+
+                    <h3>좌석 등급별 운임</h3>
+
+                    <p>
+                        1인 기준 운임이며 잔여 좌석은 현재 시점 기준입니다.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="fare-list"
+                 th:if="${!#lists.isEmpty(flight.fareList)}">
+
+
+                <div class="fare-item"
+                     th:each="fare : ${flight.fareList}"
+                     th:classappend="${fare.soldOut}
+                            ? ' sold-out'
+                            : ''">
+
+
+                    <div class="fare-top">
+
+                        <span class="fare-class"
+                              th:text="${fare.seatClassName}">
+                            이코노미
+                        </span>
+
+
+                        <span class="seat-badge sold-out"
+                              th:if="${fare.soldOut}">
+                            매진
+                        </span>
+
+
+                        <span class="seat-badge"
+                              th:unless="${fare.soldOut}"
+                              th:text="|잔여 ${fare.remainingSeats}석|">
+                            잔여 12석
+                        </span>
+
+                    </div>
+
+
+                    <div class="fare-price">
+
+                        <span th:text="${#numbers.formatInteger(
+                                fare.price,
+                                1,
+                                'COMMA'
+                            )}">
+                            120,000
+                        </span>
+
+                        <small>원</small>
+
+                    </div>
+
+
+                    <div class="fare-meta"
+                         th:text="|전체 ${fare.totalSeats}석 · 사용 중 ${fare.occupiedSeats}석|">
+
+                        전체 120석 · 사용 중 108석
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            <div class="empty-fare"
+                 th:if="${#lists.isEmpty(flight.fareList)}">
+
+                등록된 좌석 등급별 운임이 없습니다.
+
+            </div>
+
+
+        </article>
+
+
+        <div class="detail-actions">
+
+            <a th:href="@{/main/home}"
+               class="btn ghost">
+
+                새로 검색
+
+            </a>
+
+
+            <a href="javascript:history.back();"
+               class="btn">
+
+                검색 결과로
+
+            </a>
+
+        </div>
+
+
+    </section>
+
+</div>
+
+</body>
+
+</html>
