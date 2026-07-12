@@ -9,77 +9,55 @@
 		<div class="sr-topbar">
 			<div class="sr-wrap sr-topbar-inner">
 
-				<div class="sr-topbar-left">
-					<a th:href="@{/member/member_functions}">기능 한눈에 보기</a>
-					<span class="sr-topbar-divider" aria-hidden="true"></span>
-					<a th:href="@{/member/member_route}">운항 노선</a>
-				</div>
+				<!-- 고객센터 드롭다운 -->
+				<div class="sr-topbar-dropdown">
+					<button type="button" class="sr-topbar-link" aria-haspopup="true" aria-expanded="false">
+						<span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
+						고객센터
+						<span class="material-symbols-outlined sr-topbar-arrow" aria-hidden="true">expand_more</span>
+					</button>
 
-				<div class="sr-topbar-right">
+					<div class="sr-topbar-menu">
+						<a th:href="@{/member/notice/list}">
+							<span class="material-symbols-outlined" aria-hidden="true">campaign</span>
+							<span>
+								<b>공지사항</b>
+								<small>서비스 소식과 이용 안내</small>
+							</span>
+						</a>
 
-					<a th:href="@{/member/notice/list}" class="sr-topbar-link">
-						<span class="material-symbols-outlined" aria-hidden="true">campaign</span>
-						공지사항
-					</a>
+						<a href="javascript:alert('FAQ 페이지는 준비 중입니다.');">
+							<span class="material-symbols-outlined" aria-hidden="true">help</span>
+							<span>
+								<b>자주 묻는 질문</b>
+								<small>FAQ 로 빠르게 확인</small>
+							</span>
+						</a>
 
-					<!-- 고객센터 드롭다운 -->
-					<div class="sr-topbar-dropdown">
-						<button type="button" class="sr-topbar-link" aria-haspopup="true" aria-expanded="false">
-							<span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
-							고객센터
-							<span class="material-symbols-outlined sr-topbar-arrow" aria-hidden="true">expand_more</span>
-						</button>
-
-						<div class="sr-topbar-menu">
-							<a href="javascript:alert('FAQ 페이지는 준비 중입니다.');">
-								<span class="material-symbols-outlined" aria-hidden="true">help</span>
-								<span>
-									<b>자주 묻는 질문</b>
-									<small>FAQ 로 빠르게 확인</small>
-								</span>
-							</a>
-
-							<a href="javascript:alert('1:1 문의 페이지는 준비 중입니다.');">
-								<span class="material-symbols-outlined" aria-hidden="true">forum</span>
-								<span>
-									<b>1:1 문의</b>
-									<small>문의 등록 및 답변 확인</small>
-								</span>
-							</a>
-
-							<a th:href="@{/member/notice/list}">
-								<span class="material-symbols-outlined" aria-hidden="true">newspaper</span>
-								<span>
-									<b>공지사항</b>
-									<small>서비스 소식과 이용 안내</small>
-								</span>
-							</a>
-						</div>
+						<a href="javascript:alert('1:1 문의 페이지는 준비 중입니다.');">
+							<span class="material-symbols-outlined" aria-hidden="true">forum</span>
+							<span>
+								<b>1:1 문의</b>
+								<small>문의 등록 및 답변 확인</small>
+							</span>
+						</a>
 					</div>
-
-					<span class="sr-topbar-divider" aria-hidden="true"></span>
-
-					<span class="sr-topbar-locale">
-						<span class="material-symbols-outlined" aria-hidden="true">language</span>
-						대한민국 <i>|</i> 한국어
-					</span>
-
-					<th:block sec:authorize="!isAuthenticated()">
-						<span class="sr-topbar-divider" aria-hidden="true"></span>
-						<a th:href="@{/member/registerUser}" class="sr-topbar-link">
-							<span class="material-symbols-outlined" aria-hidden="true">person_add</span>
-							회원가입
-						</a>
-					</th:block>
-
-					<th:block sec:authorize="isAuthenticated()">
-						<span class="sr-topbar-divider" aria-hidden="true"></span>
-						<a th:href="@{/member/member_mypage}" class="sr-topbar-link">
-							<span class="material-symbols-outlined" aria-hidden="true">card_membership</span>
-							마일리지
-						</a>
-					</th:block>
 				</div>
+
+				<span class="sr-topbar-divider" aria-hidden="true"></span>
+
+				<span class="sr-topbar-locale">
+					<span class="material-symbols-outlined" aria-hidden="true">language</span>
+					대한민국 <i>|</i> 한국어
+				</span>
+
+				<th:block sec:authorize="!isAuthenticated()">
+					<span class="sr-topbar-divider" aria-hidden="true"></span>
+					<a th:href="@{/member/registerUser}" class="sr-topbar-link">
+						<span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+						회원가입
+					</a>
+				</th:block>
 
 			</div>
 		</div>
@@ -88,39 +66,89 @@
 		<div class="sr-mainbar">
 			<div class="sr-wrap sr-mainbar-inner">
 
-				<!-- 로고 -->
+				<!-- 로고 : 회전하는 지구 위를 나는 항공기 -->
 				<a th:href="@{/main/home}" class="sr-brand" aria-label="SkyRoute 홈으로">
 
-					<svg class="sr-brand-mark" viewBox="0 0 46 46" role="img" aria-hidden="true" focusable="false">
+					<svg class="sr-brand-mark" viewBox="0 0 56 56" role="img" aria-hidden="true" focusable="false">
 						<defs>
-							<linearGradient id="srLogoGrad" x1="6" y1="40" x2="40" y2="8" gradientUnits="userSpaceOnUse">
-								<stop offset="0" stop-color="#38BDF8"/>
-								<stop offset="0.55" stop-color="#0A7AEA"/>
-								<stop offset="1" stop-color="#0F172A"/>
+							<linearGradient id="srGlobeGrad" x1="14" y1="14" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+								<stop offset="0" stop-color="#63CCFF"/>
+								<stop offset="0.55" stop-color="#0F86F0"/>
+								<stop offset="1" stop-color="#0047B3"/>
 							</linearGradient>
+
+							<clipPath id="srGlobeClip">
+								<circle cx="28" cy="28" r="14"/>
+							</clipPath>
+
+							<!-- 자전하는 지표면 타일 (가로 28 = 지구 지름) -->
+							<g id="srGlobeTile">
+								<g fill="#0B2D5E" opacity="0.45">
+									<path d="M2 18 c4 -2.5 8 -1.5 9 1 c1.2 2.6 -1.6 5 -5 4.6 c-3.4 -0.4 -6 -3.4 -4 -5.6 Z"/>
+									<path d="M14 30 c4 -3 9 -1.4 10 2 c1 3.2 -2.6 6.4 -6.4 5.6 c-3.8 -0.8 -6 -5 -3.6 -7.6 Z"/>
+									<path d="M4 33 c2.4 -0.8 4.4 1 3.8 3.2 c-0.6 2.2 -3.8 2.6 -4.8 0.6 c-1 -2 -0.6 -3.2 1 -3.8 Z"/>
+									<path d="M22 15 c2.6 -1.2 5.2 0.4 4.8 2.6 c-0.4 2.2 -3.6 3 -5.2 1.4 c-1.4 -1.4 -1.2 -3.2 0.4 -4 Z"/>
+								</g>
+								<g fill="none" stroke="#ffffff" stroke-width="0.7" opacity="0.35">
+									<path d="M3 13 C 1 21, 1 35, 3 43"/>
+									<path d="M10 13 C 8.6 21, 8.6 35, 10 43"/>
+									<path d="M17 13 C 16 21, 16 35, 17 43"/>
+									<path d="M24 13 C 22.6 21, 22.6 35, 24 43"/>
+								</g>
+							</g>
+
+							<!-- 항공기 -->
+							<g id="srPlane">
+								<path d="M0 -13 C 1.7 -13 2.6 -10.6 2.7 -6.4 L12.6 0.4 L12.6 3.6 L2.7 0.9
+										 L2.7 7.6 L6.1 10.6 L6.1 12.8 L0 11.1 L-6.1 12.8 L-6.1 10.6 L-2.7 7.6
+										 L-2.7 0.9 L-12.6 3.6 L-12.6 0.4 L-2.7 -6.4 C -2.6 -10.6 -1.7 -13 0 -13 Z"
+									  fill="#0F172A" stroke="#ffffff" stroke-width="2.4"
+									  stroke-linejoin="round" paint-order="stroke"/>
+							</g>
 						</defs>
 
-						<!-- 궤도 링 -->
-						<circle cx="23" cy="23" r="20.2" fill="none" stroke="#0066E2" stroke-width="1.3" opacity="0.18"/>
+						<!-- ===== 지구 뒤쪽 : 궤도 후반부 + 뒤로 지나가는 항공기 ===== -->
+						<g transform="rotate(-16 28 28)">
+							<path d="M 6,28 A 22,7 0 0,1 50,28" fill="none" stroke="#0066E2"
+								  stroke-width="1.1" opacity="0.28" stroke-dasharray="2 3"/>
 
-						<!-- 지나온 항로 -->
-						<path d="M8 33 C 13 20, 22 12, 31 11" fill="none"
-							  stroke="url(#srLogoGrad)" stroke-width="2.6" stroke-linecap="round"/>
+							<g class="sr-plane-back">
+								<g transform="rotate(90) scale(0.42)">
+									<use href="#srPlane"/>
+								</g>
+							</g>
+						</g>
 
-						<!-- 남은 항로 -->
-						<path d="M31 11 C 34.5 10.4, 37.4 11.8, 39.4 14.6" fill="none"
-							  stroke="#0066E2" stroke-width="2" stroke-linecap="round"
-							  stroke-dasharray="1.4 3.4" opacity="0.55"/>
+						<!-- ===== 지구 ===== -->
+						<circle cx="28" cy="28" r="14" fill="url(#srGlobeGrad)"/>
 
-						<!-- 출발 지점 -->
-						<circle cx="8" cy="33" r="3.2" fill="#fff" stroke="#0066E2" stroke-width="2.2"/>
+						<g clip-path="url(#srGlobeClip)">
+							<g class="sr-globe-spin">
+								<use href="#srGlobeTile" x="14"/>
+								<use href="#srGlobeTile" x="42"/>
+							</g>
+						</g>
 
-						<!-- 항공기 -->
-						<g transform="translate(30.6 11.4) rotate(54) scale(0.54)">
-							<path d="M0 -13 C 1.7 -13 2.6 -10.6 2.7 -6.4 L12.6 0.4 L12.6 3.6 L2.7 0.9
-									 L2.7 7.6 L6.1 10.6 L6.1 12.8 L0 11.1 L-6.1 12.8 L-6.1 10.6 L-2.7 7.6
-									 L-2.7 0.9 L-12.6 3.6 L-12.6 0.4 L-2.7 -6.4 C -2.6 -10.6 -1.7 -13 0 -13 Z"
-								  fill="#0F172A"/>
+						<g clip-path="url(#srGlobeClip)" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.4">
+							<line x1="14" y1="28" x2="42" y2="28"/>
+							<path d="M16 21 H40"/>
+							<path d="M16 35 H40"/>
+						</g>
+
+						<circle cx="28" cy="28" r="14" fill="none" stroke="#ffffff" stroke-width="0.9" opacity="0.45"/>
+						<path d="M19 19 a13 13 0 0 1 8 -4" fill="none" stroke="#ffffff"
+							  stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+
+						<!-- ===== 지구 앞쪽 : 궤도 전반부 + 앞으로 지나가는 항공기 ===== -->
+						<g transform="rotate(-16 28 28)">
+							<path d="M 50,28 A 22,7 0 0,1 6,28" fill="none" stroke="#0066E2"
+								  stroke-width="1.1" opacity="0.45" stroke-dasharray="2 3"/>
+
+							<g class="sr-plane-front">
+								<g transform="rotate(90) scale(0.42)">
+									<use href="#srPlane"/>
+								</g>
+							</g>
 						</g>
 					</svg>
 
@@ -134,17 +162,100 @@
 				<nav class="sr-nav" aria-label="주 메뉴">
 					<th:block sec:authorize="!isAuthenticated() || hasAuthority('USER')">
 
-						<a th:href="@{/main/home}"
-						   th:classappend="${activeMenu == 'book'} ? ' is-on'">항공권 예약</a>
+						<!-- 예약 -->
+						<div class="sr-nav-item">
+							<a th:href="@{/main/home}" class="sr-nav-link"
+							   th:classappend="${activeMenu == 'book' or activeMenu == 'lookup'} ? ' is-on'">예약</a>
 
-						<a th:href="@{/member/member_booking}"
-						   th:classappend="${activeMenu == 'lookup'} ? ' is-on'">예약 조회 · 변경</a>
+							<div class="sr-nav-menu">
+								<a th:href="@{/main/home}">
+									<span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>
+									<span>
+										<b>항공권 예약</b>
+										<small>출발지 · 도착지 검색</small>
+									</span>
+								</a>
+								<a th:href="@{/member/member_booking}">
+									<span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+									<span>
+										<b>예약 조회 · 변경</b>
+										<small>예약 확인 및 취소</small>
+									</span>
+								</a>
+							</div>
+						</div>
 
-						<a th:href="@{/member/member_schedule}"
-						   th:classappend="${activeMenu == 'schedule'} ? ' is-on'">출도착 · 스케줄</a>
+						<!-- 여행 준비 -->
+						<div class="sr-nav-item">
+							<a th:href="@{/member/member_schedule}" class="sr-nav-link"
+							   th:classappend="${activeMenu == 'schedule' or activeMenu == 'route' or activeMenu == 'feat'} ? ' is-on'">여행 준비</a>
 
-						<a th:href="@{/member/member_mypage}" sec:authorize="isAuthenticated()"
-						   th:classappend="${activeMenu == 'my'} ? ' is-on'">마이페이지</a>
+							<div class="sr-nav-menu">
+								<a th:href="@{/member/member_schedule}">
+									<span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+									<span>
+										<b>출도착 · 스케줄</b>
+										<small>실시간 운항 현황</small>
+									</span>
+								</a>
+								<a th:href="@{/member/member_route}">
+									<span class="material-symbols-outlined" aria-hidden="true">route</span>
+									<span>
+										<b>운항 노선</b>
+										<small>취항지 및 노선 안내</small>
+									</span>
+								</a>
+								<a th:href="@{/member/member_functions}">
+									<span class="material-symbols-outlined" aria-hidden="true">apps</span>
+									<span>
+										<b>기능 한눈에 보기</b>
+										<small>서비스 전체 기능</small>
+									</span>
+								</a>
+							</div>
+						</div>
+
+						<!-- 스카이클럽 -->
+						<div class="sr-nav-item">
+							<a th:href="@{/member/member_mypage}" class="sr-nav-link"
+							   th:classappend="${activeMenu == 'my'} ? ' is-on'">스카이클럽</a>
+
+							<div class="sr-nav-menu">
+								<th:block sec:authorize="isAuthenticated()">
+									<a th:href="@{/member/member_mypage}">
+										<span class="material-symbols-outlined" aria-hidden="true">person</span>
+										<span>
+											<b>마이페이지</b>
+											<small>회원 정보 관리</small>
+										</span>
+									</a>
+									<a th:href="@{/member/member_booking}">
+										<span class="material-symbols-outlined" aria-hidden="true">luggage</span>
+										<span>
+											<b>나의 여행</b>
+											<small>예약 내역 확인</small>
+										</span>
+									</a>
+								</th:block>
+
+								<th:block sec:authorize="!isAuthenticated()">
+									<a th:href="@{/member/login}">
+										<span class="material-symbols-outlined" aria-hidden="true">login</span>
+										<span>
+											<b>로그인</b>
+											<small>회원 서비스 이용</small>
+										</span>
+									</a>
+									<a th:href="@{/member/registerUser}">
+										<span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+										<span>
+											<b>회원가입</b>
+											<small>SkyRoute 멤버십 시작</small>
+										</span>
+									</a>
+								</th:block>
+							</div>
+						</div>
 
 					</th:block>
 				</nav>
@@ -174,12 +285,13 @@
 										 : #authentication.name}">회원</b>
 						</a>
 
-						<button type="button" class="sr-login-button is-ghost" id="logout">로그아웃</button>
+						<button type="button" class="sr-login-button" id="logout">로그아웃</button>
 
 						<form th:action="@{/member/logout}" method="post" id="frm_logout" hidden></form>
 					</th:block>
 
-					<button type="button" class="sr-menu-toggle" id="srMenuToggle" aria-label="메뉴 열기" aria-expanded="false">
+					<button type="button" class="sr-menu-toggle" id="srMenuToggle"
+							aria-label="메뉴 열기" aria-expanded="false">
 						<span class="material-symbols-outlined" aria-hidden="true">menu</span>
 					</button>
 				</div>
@@ -204,7 +316,7 @@
 
 	</header>
 
-	<script th:inline="javascript">
+	<script>
 		(() => {
 			/* 로그아웃 */
 			const logoutButton = document.getElementById("logout");

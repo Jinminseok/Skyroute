@@ -41,27 +41,8 @@
     height: 38px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-}
-
-.sr-topbar-left,
-.sr-topbar-right {
-    display: flex;
-    align-items: center;
+    justify-content: flex-end;
     gap: 12px;
-}
-
-.sr-topbar-left a {
-    color: #94a3b8;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: -0.2px;
-    transition: color 0.15s ease;
-}
-
-.sr-topbar-left a:hover {
-    color: #0066e2;
 }
 
 .sr-topbar-divider {
@@ -207,7 +188,7 @@
 ========================================================= */
 
 .sr-mainbar-inner {
-    height: 74px;
+    height: 84px;
     display: flex;
     align-items: center;
     gap: 28px;
@@ -223,14 +204,95 @@
 }
 
 .sr-brand-mark {
-    width: 42px;
-    height: 42px;
+    width: 70px;
+    height: 70px;
     flex: 0 0 auto;
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: visible;
 }
 
-.sr-brand:hover .sr-brand-mark {
-    transform: rotate(-8deg) scale(1.04);
+/* 지구 자전 : 지표면 타일을 지구 지름(28)만큼 왼쪽으로 무한 스크롤 */
+.sr-globe-spin {
+    animation: sr-globe-spin 14s linear infinite;
+}
+
+@keyframes sr-globe-spin {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-28px); }
+}
+
+/*
+   항공기 : 지구를 가로지르는 타원 궤도를 따라 비행
+
+   - 궤도 전반부(위쪽 반원) = 지구 뒤 → .sr-plane-back (지구보다 먼저 그려져 가려짐)
+   - 궤도 후반부(아래쪽 반원) = 지구 앞 → .sr-plane-front (지구 위에 그려짐)
+   두 항공기는 같은 경로를 같은 속도로 돌고, 절반씩 번갈아 보인다.
+*/
+.sr-plane-back,
+.sr-plane-front {
+    offset-path: path("M 6,28 A 22,7 0 0,1 50,28 A 22,7 0 0,1 6,28");
+    offset-rotate: auto;
+    animation-duration: 9s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.sr-plane-back {
+    animation-name: sr-plane-back;
+}
+
+.sr-plane-front {
+    animation-name: sr-plane-front;
+}
+
+@keyframes sr-plane-back {
+    0%     { offset-distance: 0%;    opacity: 1; }
+    49.5%  { offset-distance: 49.5%; opacity: 1; }
+    50%    { offset-distance: 50%;   opacity: 0; }
+    100%   { offset-distance: 100%;  opacity: 0; }
+}
+
+@keyframes sr-plane-front {
+    0%     { offset-distance: 0%;    opacity: 0; }
+    49.5%  { offset-distance: 49.5%; opacity: 0; }
+    50%    { offset-distance: 50%;   opacity: 1; }
+    100%   { offset-distance: 100%;  opacity: 1; }
+}
+
+/* offset-path 미지원 브라우저 : 항공기를 오른쪽 위에 고정 배치 */
+@supports not (offset-path: path("M 0,0 L 1,1")) {
+    .sr-plane-back {
+        display: none;
+    }
+
+    .sr-plane-front {
+        animation: none;
+        transform: translate(46px, 20px) rotate(38deg);
+    }
+}
+
+/* 모션 최소화 설정을 켠 사용자는 정지 상태로 본다 */
+@media (prefers-reduced-motion: reduce) {
+    .sr-globe-spin,
+    .sr-plane-back,
+    .sr-plane-front {
+        animation: none;
+    }
+
+    .sr-plane-back {
+        opacity: 0;
+    }
+
+    .sr-plane-front {
+        offset-distance: 72%;
+    }
+}
+
+/* ----- 워드마크 ----- */
+
+.sr-brand-text {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .sr-brand-text strong {
@@ -241,16 +303,29 @@
     font-weight: 600;
     letter-spacing: -0.6px;
     line-height: 1.15;
+    white-space: nowrap;
 }
 
+/* SkyRoute 아래 : ─── FLY YOUR ROUTE ─── */
 .sr-brand-text small {
-    display: block;
-    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
     color: #94a3b8;
     font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-size: 9px;
     font-weight: 400;
-    letter-spacing: 2.4px;
+    letter-spacing: 2.2px;
+    white-space: nowrap;
+}
+
+.sr-brand-text small::before,
+.sr-brand-text small::after {
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+    background: #cbd5e1;
 }
 
 /* ----- 주 메뉴 ----- */
@@ -268,11 +343,18 @@
     border-top: 0;
 }
 
-.sr-nav a {
+.sr-nav-item {
+    position: relative;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+}
+
+.sr-nav-link {
     position: relative;
     border: 0;
     border-bottom: 0;
-    padding: 10px 18px;
+    padding: 10px 20px;
     border-radius: 10px;
     color: #334155;
     font-size: 16px;
@@ -282,12 +364,12 @@
     transition: color 0.15s ease, background 0.15s ease;
 }
 
-.sr-nav a::after {
+.sr-nav-link::after {
     content: "";
     position: absolute;
-    left: 18px;
-    right: 18px;
-    bottom: 2px;
+    left: 20px;
+    right: 20px;
+    bottom: 0;
     height: 2px;
     border-radius: 2px;
     background: #0066e2;
@@ -295,17 +377,86 @@
     transition: transform 0.2s ease;
 }
 
-.sr-nav a:hover {
+.sr-nav-link:hover {
     color: #0066e2;
     background: #f5f9ff;
 }
 
-.sr-nav a.is-on {
+.sr-nav-link.is-on {
     color: #0066e2;
 }
 
-.sr-nav a.is-on::after {
+.sr-nav-link.is-on::after {
     transform: scaleX(1);
+}
+
+/* ----- 주 메뉴 드롭다운 ----- */
+
+.sr-nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    z-index: 20;
+    width: 252px;
+    padding: 8px;
+    display: grid;
+    gap: 2px;
+    border: 1px solid #e8edf3;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.14);
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -6px);
+    transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+}
+
+.sr-nav-item:hover .sr-nav-menu,
+.sr-nav-item:focus-within .sr-nav-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+.sr-nav-menu a {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 11px;
+    border-radius: 10px;
+    color: #334155;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sr-nav-menu a:hover {
+    background: #f0f6ff;
+    color: #0066e2;
+}
+
+.sr-nav-menu a > .material-symbols-outlined {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: #f1f5f9;
+    color: #0066e2;
+    font-size: 18px;
+}
+
+.sr-nav-menu b {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.sr-nav-menu small {
+    display: block;
+    margin-top: 1px;
+    color: #94a3b8;
+    font-size: 11.5px;
+    font-weight: 400;
 }
 
 /* ----- 우측 액션 ----- */
@@ -379,13 +530,13 @@
 
 .sr-login-button {
     height: 42px;
-    padding: 0 22px;
+    padding: 0 24px;
     display: inline-flex;
     align-items: center;
-    border: 1px solid #0f172a;
+    border: 1.5px solid #0f2e5c;
     border-radius: 999px;
-    background: #0f172a;
-    color: #ffffff;
+    background: #ffffff;
+    color: #0f2e5c;
     font-family: inherit;
     font-size: 14px;
     font-weight: 600;
@@ -395,22 +546,12 @@
     transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
 }
 
-.sr-login-button:hover {
-    background: #0066e2;
-    border-color: #0066e2;
-}
-
-.sr-login-button.is-ghost {
-    border-color: #e2e8f0;
-    background: #ffffff;
-    color: #475569;
-    padding: 0 16px;
-}
-
-.sr-login-button.is-ghost:hover {
-    border-color: #cbd5e1;
-    background: #f8fafc;
-    color: #0f172a;
+.sr-login-button:hover,
+.sr-login-button:focus-visible {
+    background: #0f2e5c;
+    border-color: #0f2e5c;
+    color: #ffffff;
+    outline: none;
 }
 
 .sr-profile {
@@ -495,21 +636,13 @@
         width: 180px;
     }
 
-    .sr-nav a {
-        padding: 10px 12px;
+    .sr-nav-link {
+        padding: 10px 14px;
         font-size: 15px;
     }
 }
 
 @media (max-width: 980px) {
-    .sr-topbar-left {
-        display: none;
-    }
-
-    .sr-topbar-inner {
-        justify-content: flex-end;
-    }
-
     .sr-nav,
     .sr-search {
         display: none;
@@ -535,8 +668,8 @@
     }
 
     .sr-brand-mark {
-        width: 36px;
-        height: 36px;
+        width: 50px;
+        height: 50px;
     }
 
     .sr-brand-text strong {
