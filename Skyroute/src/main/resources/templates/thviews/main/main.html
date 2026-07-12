@@ -1,2089 +1,662 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout_basic}">
 <head>
-	<meta charset="UTF-8">
-	<title>메인</title>
-	<link rel="stylesheet" th:href="@{/assets/css/member.css}">
-	<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
-	<style>
-		.searchrow .btn,
-		.summary .btn {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			text-decoration: none;
-			text-align: center;
-		}
-		.passenger-picker-container {
-			position: relative;
-			z-index: 10000;
-		}
-		.passenger-display-trigger {
-			font-size: 16px;
-			font-weight: 600;
-			cursor: pointer;
-			padding: 4px 0;
-			color: #000;
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-		}
-		.passenger-layer {
-		    display: none;
-		    position: fixed !important;
-		    top: 50% !important;        
-		    left: 50% !important;
-		    transform: translate(-50%, -50%);
-		    width: 320px;
-		    background: #ffffff;
-		    border: 1px solid #cbd5e1;
-		    border-radius: 12px;
-		    box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
-		    padding: 20px;
-		    z-index: 999999 !important; 
-		}
-		.passenger-layer-header {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			margin-bottom: 20px;
-			border-bottom: 1px solid #f1f5f9;
-			padding-bottom: 10px;
-		}
-		.passenger-layer-header h4 {
-			margin: 0;
-			font-size: 15px;
-			color: #0f172a;
-			font-weight: 600;
-		}
-		.passenger-layer-close {
-			cursor: pointer;
-			font-size: 18px;
-			color: #64748b;
-			font-weight: bold;
-		}
-		.passenger-row {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			margin-bottom: 16px;
-		}
-		.passenger-type-info label {
-			font-size: 14px;
-			font-weight: 600;
-			color: #1e293b;
-			display: block;
-		}
-		.passenger-type-info span {
-			font-size: 11px;
-			color: #94a3b8;
-		}
-		.counter-ctrl {
-			display: flex;
-			align-items: center;
-			gap: 12px;
-		}
-		.btn-counter {
-			width: 28px;
-			height: 28px;
-			border-radius: 50%;
-			border: 1px solid #cbd5e1;
-			background: #fff;
-			font-size: 16px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			cursor: pointer;
-			user-select: none;
-			color: #334155;
-		}
-		.btn-counter:active {
-			background: #f8fafc;
-		}
-		.counter-value {
-			width: 20px;
-			text-align: center;
-			font-size: 15px;
-			font-weight: 600;
-			color: #0f172a;
-		}
-		/* ==================================================
-   메인 Hero
-================================================== */
-
-.home-main-hero {
-	padding: 58px 0 50px;
-}
-
-.home-main-hero h1 {
-	margin: 7px 0 8px;
-	font-family:
-		'Pretendard',
-		-apple-system,
-		BlinkMacSystemFont,
-		'Segoe UI',
-		sans-serif;
-	font-size: clamp(36px, 4vw, 46px);
-	font-weight: 700;
-	line-height: 1.18;
-	letter-spacing: -1.7px;
-}
-
-.home-main-hero > .wrap > p {
-	color: #475569;
-	font-size: 16px;
-	font-weight: 400;
-	line-height: 1.65;
-	letter-spacing: -0.25px;
-}
-
-
-/* ==================================================
-   항공권 검색 폼
-================================================== */
-
-.home-search-form {
-	width: 100%;
-	margin: 0;
-	padding: 0;
-	border: 0;
-}
-
-.home-search-form .searchcard {
-	margin-top: 28px;
-	padding: 12px 12px 20px;
-	border: 1px solid rgba(15, 23, 42, 0.08);
-	border-radius: 20px;
-	background: #ffffff;
-	box-shadow:
-		0 22px 55px rgba(15, 23, 42, 0.10),
-		0 2px 8px rgba(15, 23, 42, 0.04);
-}
-
-
-/* 오류 메시지 */
-
-.home-search-form .search-error-box {
-	margin: 2px 4px 14px;
-	padding: 12px 14px;
-	border: 1px solid #fecdd3;
-	border-radius: 12px;
-	background: #fff1f2;
-	color: #be123c;
-	font-size: 13px;
-	font-weight: 500;
-	line-height: 1.55;
-}
-
-
-/* 왕복 / 편도 */
-
-.home-search-form .home-trip-tabs {
-	display: inline-flex;
-	width: auto;
-	gap: 3px;
-	margin: 0 0 11px 2px;
-	padding: 4px;
-	border-radius: 12px;
-	background: #f1f5f9;
-}
-
-.home-search-form .home-trip-tabs span {
-	min-width: 68px;
-	padding: 8px 16px;
-	border-radius: 9px;
-	color: #64748b;
-	font-family: 'Pretendard', sans-serif;
-	font-size: 14px;
-	font-weight: 600;
-	line-height: 1.3;
-	letter-spacing: -0.2px;
-	text-align: center;
-	transition:
-		background 0.18s ease,
-		color 0.18s ease,
-		box-shadow 0.18s ease;
-}
-
-.home-search-form .home-trip-tabs input:checked + span {
-	background: #ffffff;
-	color: #0066e2;
-	font-weight: 700;
-	box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-}
-
-
-/* 검색 필드 전체 */
-
-.home-search-form .home-search-fields {
-	grid-template-columns:
-		minmax(0, 1.12fr)
-		minmax(0, 1.12fr)
-		minmax(0, 1.45fr)
-		minmax(0, 1.05fr);
-
-	margin: 0;
-	border: 1px solid #dbe3ee;
-	border-radius: 16px;
-	background: #ffffff;
-	overflow: hidden;
-}
-
-.home-search-form .home-search-field {
-	min-width: 0;
-	min-height: 104px;
-	padding: 17px 20px;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	border-right: 1px solid #dbe3ee;
-	background: #ffffff;
-	transition:
-		background 0.18s ease,
-		box-shadow 0.18s ease;
-}
-
-.home-search-form .home-search-field:last-child {
-	border-right: 0;
-}
-
-.home-search-form .home-search-field:focus-within {
-	background: #f8fbff;
-	box-shadow:
-		inset 0 0 0 2px rgba(0, 102, 226, 0.12);
-}
-
-
-/* 필드 라벨 */
-
-.home-search-form .home-search-field > label {
-	display: block;
-	margin: 0 0 9px;
-	color: #475569;
-	font-family: 'Pretendard', sans-serif;
-	font-size: 13px;
-	font-weight: 700;
-	line-height: 1.25;
-	letter-spacing: -0.15px;
-}
-
-
-/* 출발지 / 도착지 */
-
-.home-search-form .home-search-select {
-	width: 100%;
-	min-width: 0;
-	height: 32px;
-	margin: 0;
-	padding: 0 28px 0 0;
-	border: 0;
-	outline: 0;
-	background-color: transparent;
-	color: #0f172a;
-	font-family: 'Pretendard', sans-serif;
-	font-size: 17px;
-	font-weight: 700;
-	line-height: 1.4;
-	letter-spacing: -0.45px;
-	cursor: pointer;
-}
-
-.home-search-form .home-search-select option {
-	color: #1e293b;
-	font-size: 15px;
-	font-weight: 500;
-}
-
-
-/* 출발지 / 도착지 교환 */
-
-.home-search-form .home-swap {
-	right: -19px;
-	width: 38px;
-	height: 38px;
-	border: 1px solid #d7e0ec;
-	background: #ffffff;
-	color: #0066e2;
-	box-shadow: 0 5px 16px rgba(15, 23, 42, 0.12);
-}
-
-.home-search-form .home-swap:hover {
-	border-color: #0066e2;
-	background: #f0f6ff;
-}
-
-.home-search-form .home-swap .material-symbols-outlined {
-	font-size: 20px;
-	font-weight: 400;
-}
-
-
-/* 날짜 */
-
-.home-search-form .home-date-range {
-	display: grid;
-	grid-template-columns:
-		minmax(0, 1fr)
-		auto
-		minmax(0, 1fr);
-	align-items: center;
-	gap: 8px;
-}
-
-.home-search-form .home-date-input {
-	width: 100%;
-	min-width: 0;
-	height: 32px;
-	margin: 0;
-	padding: 0;
-	border: 0;
-	outline: 0;
-	background: transparent;
-	color: #0f172a;
-	font-family: 'Pretendard', sans-serif;
-	font-size: 15px;
-	font-weight: 600;
-	line-height: 1.4;
-	letter-spacing: -0.25px;
-	font-variant-numeric: tabular-nums;
-	cursor: pointer;
-}
-
-.home-search-form .home-date-separator {
-	color: #94a3b8;
-	font-size: 15px;
-	font-weight: 500;
-}
-
-
-/* 승객 선택 */
-
-.home-search-form .home-passenger-field {
-	overflow: visible;
-}
-
-.home-search-form .passenger-picker-container {
-	margin: 0;
-}
-
-.home-search-form .home-passenger-trigger {
-	width: 100%;
-	height: 30px;
-	margin: 0;
-	padding: 0;
-	border: 0;
-	background: transparent;
-	color: #0f172a;
-	font-family: 'Pretendard', sans-serif;
-	font-size: 16px;
-	font-weight: 700;
-	line-height: 1.4;
-	letter-spacing: -0.3px;
-	cursor: pointer;
-}
-
-.home-search-form .home-passenger-chevron {
-	color: #64748b;
-	font-size: 20px;
-	font-weight: 400;
-}
-
-.home-search-form .home-seat-select {
-	width: 100%;
-	height: 27px;
-	margin: 3px 0 0;
-	padding: 0 25px 0 0;
-	border: 0;
-	outline: 0;
-	background-color: transparent;
-	color: #64748b;
-	font-family: 'Pretendard', sans-serif;
-	font-size: 14px;
-	font-weight: 600;
-	line-height: 1.4;
-	letter-spacing: -0.2px;
-	cursor: pointer;
-}
-
-
-/* 승객 팝업 */
-
-.home-search-form .passenger-layer {
-	width: min(350px, calc(100vw - 32px));
-	padding: 22px;
-	border: 1px solid #dbe3ee;
-	border-radius: 18px;
-	box-shadow: 0 24px 65px rgba(15, 23, 42, 0.22);
-	font-family: 'Pretendard', sans-serif;
-}
-
-.home-search-form .passenger-layer-header {
-	margin-bottom: 18px;
-	padding-bottom: 13px;
-}
-
-.home-search-form .passenger-layer-header h4 {
-	color: #0f172a;
-	font-size: 17px;
-	font-weight: 700;
-	letter-spacing: -0.3px;
-}
-
-.home-search-form .passenger-layer-header small {
-	margin-left: 5px;
-	color: #94a3b8;
-	font-size: 12px;
-	font-weight: 500;
-}
-
-.home-search-form .passenger-layer-close {
-	width: 30px;
-	height: 30px;
-	padding: 0;
-	border: 0;
-	border-radius: 50%;
-	background: #f8fafc;
-	color: #64748b;
-	font-family: inherit;
-	font-size: 20px;
-	line-height: 1;
-}
-
-.home-search-form .passenger-layer-close:hover {
-	background: #f1f5f9;
-	color: #0f172a;
-}
-
-.home-search-form .passenger-type-info label {
-	color: #1e293b;
-	font-size: 14px;
-	font-weight: 700;
-	letter-spacing: -0.15px;
-}
-
-.home-search-form .passenger-type-info span {
-	color: #94a3b8;
-	font-size: 12px;
-	font-weight: 400;
-}
-
-.home-search-form .passenger-row-last {
-	margin-bottom: 0;
-}
-
-.home-search-form .btn-counter {
-	width: 32px;
-	height: 32px;
-	border-color: #cbd5e1;
-	color: #334155;
-	font-family: inherit;
-	font-size: 18px;
-	font-weight: 500;
-}
-
-.home-search-form .btn-counter:hover {
-	border-color: #0066e2;
-	background: #f0f6ff;
-	color: #0066e2;
-}
-
-.home-search-form .counter-value {
-	width: 24px;
-	color: #0f172a;
-	font-size: 16px;
-	font-weight: 700;
-}
-
-
-/* 검색 카드 하단 */
-
-.home-search-form .home-search-row {
-	margin: 18px 3px 0;
-}
-
-.home-search-form .home-search-note {
-	color: #64748b;
-	font-family: 'Pretendard', sans-serif;
-	font-size: 13px;
-	font-weight: 500;
-	line-height: 1.5;
-	letter-spacing: -0.15px;
-}
-
-.home-search-form .home-search-button {
-	min-width: 172px;
-	height: 50px;
-	padding: 0 28px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 7px;
-	border-radius: 14px;
-	font-family: 'Pretendard', sans-serif;
-	font-size: 16px;
-	font-weight: 700;
-	line-height: 1;
-	letter-spacing: -0.25px;
-	box-shadow: 0 8px 20px rgba(0, 102, 226, 0.22);
-	transition:
-		background 0.18s ease,
-		transform 0.18s ease,
-		box-shadow 0.18s ease;
-}
-
-.home-search-form .home-search-button:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 11px 25px rgba(0, 102, 226, 0.28);
-}
-
-.home-search-form .home-search-button .material-symbols-outlined {
-	font-size: 20px;
-}
-
-
-/* 빠른 노선 */
-
-.home-main-hero .home-quick {
-	margin: 21px 0 0;
-}
-
-.home-main-hero .home-quick a {
-	padding: 8px 16px;
-	font-size: 13px;
-	font-weight: 600;
-	letter-spacing: -0.15px;
-}
-
-
-
-.home-event-section {
-	padding: 52px 0 20px;
-	background: #ffffff;
-}
-
-.home-section-heading {
-	display: flex;
-	align-items: flex-end;
-	justify-content: space-between;
-	margin-bottom: 19px;
-}
-
-.home-section-heading h2 {
-	margin: 5px 0 0;
-	color: #0f172a;
-	font-family: 'Pretendard', sans-serif;
-	font-size: 25px;
-	font-weight: 700;
-	line-height: 1.3;
-	letter-spacing: -0.8px;
-}
-
-.home-section-heading p {
-	margin: 6px 0 0;
-	color: #64748b;
-	font-size: 14px;
-	font-weight: 400;
-	line-height: 1.55;
-	letter-spacing: -0.2px;
-}
-
-.home-event-section .event-banner-area {
-	margin-top: 0;
-}
-
-.home-event-section .event-slider {
-	height: 360px;
-	border: 1px solid #e2e8f0;
-	border-radius: 20px;
-	background: #eef3fc;
-	box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
-}
-
-
-/* 이미지 위 텍스트 가독성 */
-
-.home-event-section .event-slide::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	z-index: 0;
-	background:
-		linear-gradient(
-			90deg,
-			rgba(15, 23, 42, 0.76) 0%,
-			rgba(15, 23, 42, 0.52) 38%,
-			rgba(15, 23, 42, 0.18) 68%,
-			rgba(15, 23, 42, 0.04) 100%
-		);
-	pointer-events: none;
-}
-
-.home-event-section .event-slide-overlay {
-	z-index: 1;
-	padding: 42px 46px;
-}
-
-.home-event-section .event-slide-copy h2 {
-	font-family: 'Pretendard', sans-serif;
-	font-size: 34px;
-	font-weight: 700;
-	letter-spacing: -1.2px;
-	text-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
-}
-
-.home-event-section .event-period {
-	font-weight: 500;
-}
-
-.home-event-section .event-more {
-	font-weight: 700;
-}
-
-
-@media (max-width: 1100px) {
-
-	.home-search-form .home-search-fields {
-		grid-template-columns: 1fr 1fr;
-	}
-
-	.home-search-form .home-search-field {
-		border-bottom: 1px solid #dbe3ee;
-	}
-
-	.home-search-form .home-search-field:nth-child(2n) {
-		border-right: 0;
-	}
-
-	.home-search-form .home-search-field:nth-child(n + 3) {
-		border-bottom: 0;
-	}
-}
-
-
-@media (max-width: 720px) {
-
-	.home-main-hero {
-		padding: 42px 0 38px;
-	}
-
-	.home-main-hero h1 {
-		font-size: 34px;
-	}
-
-	.home-main-hero > .wrap > p {
-		font-size: 14px;
-	}
-
-	.home-search-form .searchcard {
-		padding: 10px 10px 16px;
-		border-radius: 17px;
-	}
-
-	.home-search-form .home-search-fields {
-		grid-template-columns: 1fr;
-	}
-
-	.home-search-form .home-search-field:nth-child(n) {
-		min-height: 92px;
-		border-right: 0;
-		border-bottom: 1px solid #dbe3ee;
-	}
-
-	.home-search-form .home-search-field:last-child {
-		border-bottom: 0;
-	}
-
-	.home-search-form .home-swap {
-		display: none;
-	}
-
-	.home-search-form .home-search-row {
-		flex-direction: column;
-		align-items: stretch;
-		gap: 13px;
-	}
-
-	.home-search-form .home-search-button {
-		width: 100%;
-	}
-
-	.home-event-section {
-		padding: 40px 0 12px;
-	}
-
-	.home-section-heading h2 {
-		font-size: 22px;
-	}
-
-	.home-section-heading p {
-		font-size: 13px;
-	}
-
-	.home-event-section .event-slider {
-		height: 310px;
-	}
-
-	.home-event-section .event-slide-overlay {
-		padding: 27px;
-	}
-
-	.home-event-section .event-slide-copy h2 {
-		font-size: 26px;
-	}
-}
-
-
-@media (max-width: 480px) {
-
-	.home-search-form .home-date-range {
-		gap: 5px;
-	}
-
-	.home-search-form .home-date-input {
-		font-size: 14px;
-	}
-
-	.home-event-section .event-slider {
-		height: 285px;
-	}
-
-	.home-event-section .event-slide-copy h2 {
-		font-size: 23px;
-	}
-}
-	</style>
+    <meta charset="UTF-8">
+    <title>SkyRoute | 항공권 예약</title>
+    <link rel="stylesheet" th:href="@{/assets/css/main.css}" type="text/css">
+    <script defer th:src="@{/assets/js/main.js}"></script>
 </head>
 <body>
 
-<div layout:fragment="panel" class="panel on" id="book">
-
-	<div class="hero home-main-hero">
-		<div class="wrap">
-			<div class="eyebrow">BOOK YOUR FLIGHT</div>
-			<h1>어디로 떠나시나요?</h1>
-			<p>출발지·도착지와 날짜를 선택하면 운항편과 운임을 한눈에 비교할 수 있어요.</p>
-
-			<form th:action="@{/booking/flights/search}"
-				  th:object="${flightSearchForm}"
-				  method="get"
-				  id="flightSearchForm" class="home-search-form">
-			
-				<div class="searchcard">
-
-					<!-- 서버 검증 오류 -->
-					<div class="search-error-box"
-						 th:if="${#fields.hasAnyErrors()}">
-				
-						<div th:each="error : ${#fields.allErrors()}"
-							 th:text="${error}">
-							검색 조건을 확인해 주세요.
-						</div>
-					</div>
-				
-				
-					<!-- 왕복 / 편도 -->
-					<div class="triptabs home-trip-tabs">
-				
-						<label>
-							<input type="radio"
-								   th:field="*{tripType}"
-								   value="ROUNDTRIP"
-								   onchange="toggleReturnDate()">
-				
-							<span>왕복</span>
-						</label>
-				
-						<label>
-							<input type="radio"
-								   th:field="*{tripType}"
-								   value="ONEWAY"
-								   onchange="toggleReturnDate()">
-				
-							<span>편도</span>
-						</label>
-				
-					</div>
-				
-				
-					<div class="fields home-search-fields">
-				
-						<!-- 출발 공항 -->
-						<div class="field home-search-field">
-				
-							<label for="departureAirportId">
-								출발지
-							</label>
-				
-							<select th:field="*{departureAirportId}"
-									id="departureAirportId"
-									class="home-search-select"
-									required>
-				
-								<option value="">
-									출발 공항 선택
-								</option>
-				
-								<option th:each="airport : ${airportList}"
-										th:value="${airport.airportId}"
-										th:text="|${airport.iataCode} ${airport.airportName}|">
-								</option>
-				
-							</select>
-				
-				
-							<button type="button"
-									class="swap home-swap"
-									onclick="triggerSwapEffect()"
-									title="출발지와 도착지 변경"
-									aria-label="출발지와 도착지 변경">
-				
-								<span class="material-symbols-outlined">
-									swap_horiz
-								</span>
-				
-							</button>
-				
-						</div>
-				
-				
-						<!-- 도착 공항 -->
-						<div class="field home-search-field">
-				
-							<label for="arrivalAirportId">
-								도착지
-							</label>
-				
-							<select th:field="*{arrivalAirportId}"
-									id="arrivalAirportId"
-									class="home-search-select"
-									required>
-				
-								<option value="">
-									도착 공항 선택
-								</option>
-				
-								<option th:each="airport : ${airportList}"
-										th:value="${airport.airportId}"
-										th:text="|${airport.iataCode} ${airport.airportName}|">
-								</option>
-				
-							</select>
-				
-						</div>
-				
-				
-						<!-- 출발일 / 귀국일 -->
-						<div class="field home-search-field home-date-field">
-				
-							<label for="departureDate">
-								여행 일정
-							</label>
-				
-							<div class="home-date-range">
-				
-								<input type="date"
-									   th:field="*{departureDate}"
-									   id="departureDate"
-									   class="home-date-input"
-									   th:attr="min=${today}"
-									   aria-label="출발일"
-									   required>
-				
-				
-								<span id="dateSeparator"
-									  class="home-date-separator">
-									—
-								</span>
-				
-				
-								<input type="date"
-									   th:field="*{returnDate}"
-									   id="returnDate"
-									   class="home-date-input"
-									   th:attr="min=${today}"
-									   aria-label="귀국일">
-				
-							</div>
-				
-						</div>
-				
-				
-						<!-- 인원 / 좌석 -->
-						<div class="field home-search-field home-passenger-field">
-				
-							<label>
-								승객 · 좌석
-							</label>
-				
-				
-							<div class="passenger-picker-container">
-				
-								<button type="button"
-										class="passenger-display-trigger home-passenger-trigger"
-										id="passengerTrigger"
-										onclick="togglePassengerLayer()">
-				
-									<span id="passengerDisplayText">
-										성인 1
-									</span>
-				
-									<span class="material-symbols-outlined home-passenger-chevron">
-										expand_more
-									</span>
-				
-								</button>
-				
-				
-								<!-- 승객 선택 팝업 -->
-								<div class="passenger-layer"
-									 id="passengerLayer">
-				
-									<div class="passenger-layer-header">
-				
-										<h4>
-											승객 선택
-											<small>최대 9명</small>
-										</h4>
-				
-										<button type="button"
-												class="passenger-layer-close"
-												onclick="togglePassengerLayer()"
-												aria-label="승객 선택창 닫기">
-											×
-										</button>
-				
-									</div>
-				
-				
-									<!-- 성인 -->
-									<div class="passenger-row">
-				
-										<div class="passenger-type-info">
-											<label>성인</label>
-											<span>만 12세 이상</span>
-										</div>
-				
-										<div class="counter-ctrl">
-				
-											<button type="button"
-													class="btn-counter"
-													onclick="changeCount('adult', -1)"
-													aria-label="성인 수 감소">
-												−
-											</button>
-				
-											<span class="counter-value"
-												  id="valAdult"
-												  th:text="*{adultCount}">
-												1
-											</span>
-				
-											<button type="button"
-													class="btn-counter"
-													onclick="changeCount('adult', 1)"
-													aria-label="성인 수 증가">
-												+
-											</button>
-				
-										</div>
-				
-									</div>
-				
-				
-									<!-- 소아 -->
-									<div class="passenger-row">
-				
-										<div class="passenger-type-info">
-											<label>소아</label>
-											<span>만 2세 이상 11세 이하</span>
-										</div>
-				
-										<div class="counter-ctrl">
-				
-											<button type="button"
-													class="btn-counter"
-													onclick="changeCount('child', -1)"
-													aria-label="소아 수 감소">
-												−
-											</button>
-				
-											<span class="counter-value"
-												  id="valChild"
-												  th:text="*{childCount}">
-												0
-											</span>
-				
-											<button type="button"
-													class="btn-counter"
-													onclick="changeCount('child', 1)"
-													aria-label="소아 수 증가">
-												+
-											</button>
-				
-										</div>
-				
-									</div>
-				
-				
-									<!-- 유아 -->
-									<div class="passenger-row passenger-row-last">
-				
-										<div class="passenger-type-info">
-											<label>유아</label>
-											<span>만 2세 미만 · 성인 1명당 1명</span>
-										</div>
-				
-										<div class="counter-ctrl">
-				
-											<button type="button"
-													class="btn-counter"
-													onclick="changeCount('infant', -1)"
-													aria-label="유아 수 감소">
-												−
-											</button>
-				
-											<span class="counter-value"
-												  id="valInfant"
-												  th:text="*{infantCount}">
-												0
-											</span>
-				
-											<button type="button"
-													class="btn-counter"
-													onclick="changeCount('infant', 1)"
-													aria-label="유아 수 증가">
-												+
-											</button>
-				
-										</div>
-				
-									</div>
-				
-								</div>
-				
-							</div>
-				
-				
-							<!-- 실제 서버 전송 값 -->
-							<input type="hidden"
-								   th:field="*{adultCount}"
-								   id="adultCount">
-				
-							<input type="hidden"
-								   th:field="*{childCount}"
-								   id="childCount">
-				
-							<input type="hidden"
-								   th:field="*{infantCount}"
-								   id="infantCount">
-				
-				
-							<select th:field="*{seatClassId}"
-									id="seatClassId"
-									class="home-seat-select"
-									aria-label="좌석 등급"
-									required>
-				
-								<option value="">
-									좌석 등급 선택
-								</option>
-				
-								<option th:each="seatClass : ${seatClassList}"
-										th:value="${seatClass.seatClassId}"
-										th:text="${seatClass.className}">
-								</option>
-				
-							</select>
-				
-						</div>
-				
-					</div>
-				
-				
-					<div class="searchrow home-search-row">
-				
-						<div class="opts">
-				
-							<span class="home-search-note">
-								전체 승객은 최대 9명이며, 표시 운임은 1인 기준입니다.
-							</span>
-				
-						</div>
-				
-				
-						<button type="submit"
-								class="btn home-search-button">
-				
-							<span class="material-symbols-outlined">
-								search
-							</span>
-				
-							항공권 검색
-				
-						</button>
-				
-					</div>
-				
-				</div>
-			
-			</form>
-
-			<div class="quick home-quick">
-				<a>인천 → 도쿄 NRT</a>
-				<a>김포 → 제주 CJU</a>
-				<a>인천 → 방콕 BKK</a>
-				<a>인천 → 파리 CDG</a>
-				<a>인천 → 다낭 DAD</a>
-			</div>
-
-		</div>
-	</div>
-	<!-- hero 끝 -->
-
-
-	<!-- 흰색 이벤트 패널 -->
-	<section class="home-event-section"
-			 th:if="${!#lists.isEmpty(eventList)}">
-
-		<div class="wrap">
-
-			<div class="home-section-heading">
-
-				<div>
-
-					<div class="eyebrow">
-						EVENT &amp; BENEFITS
-					</div>
-
-					<h2>
-						진행 중인 이벤트
-					</h2>
-
-					<p>
-						SkyRoute에서 준비한 여행 혜택과 새로운 소식을 확인해 보세요.
-					</p>
-
-				</div>
-
-			</div>
-
-
-			<div class="event-banner-area"
-				 id="mainEventSlider">
-
-				<div class="event-slider">
-
-					<a class="event-slide"
-					   th:each="event, stat : ${eventList}"
-					   th:classappend="${stat.index == 0} ? ' active' : ''"
-					   th:href="@{/member/event/detail(event_id=${event.event_id})}">
-
-						<img th:src="@{/assets/upload/{file}(file=${event.image_url})}"
-							 th:alt="${event.title}">
-
-
-						<div class="event-slide-overlay">
-
-							<div class="event-slide-copy">
-
-								<span class="event-label">
-									EVENT
-								</span>
-
-
-								<h2 th:text="${event.title}">
-									이벤트 제목
-								</h2>
-
-
-								<div class="event-period">
-
-									<span th:text="${#dates.format(
-										event.start_date,
-										'yyyy.MM.dd'
-									)}">
-										2026.07.01
-									</span>
-
-									<span>~</span>
-
-									<span th:text="${#dates.format(
-										event.end_date,
-										'yyyy.MM.dd'
-									)}">
-										2026.07.31
-									</span>
-
-								</div>
-
-
-								<div class="event-more">
-
-									이벤트 자세히 보기
-
-									<span>→</span>
-
-								</div>
-
-							</div>
-
-						</div>
-
-					</a>
-
-
-					<button type="button"
-							class="event-arrow event-prev"
-							aria-label="이전 이벤트">
-						‹
-					</button>
-
-
-					<button type="button"
-							class="event-arrow event-next"
-							aria-label="다음 이벤트">
-						›
-					</button>
-
-
-					<div class="event-dots">
-
-						<button type="button"
-								class="event-dot"
-								th:each="event, stat : ${eventList}"
-								th:classappend="${stat.index == 0} ? ' active' : ''"
-								th:attr="
-									data-index=${stat.index},
-									aria-label=|${stat.count}번째 이벤트|
-								">
-						</button>
-
-					</div>
-
-				</div>
-
-			</div>
-
-		</div>
-
-	</section>
-
-	<section class="block wrap">
-		<div class="htitle">
-			<div>
-				<div class="eyebrow">TODAY'S FLIGHT STATUS</div>
-				<h2 style="font-size: 20px; font-weight: 600;">오늘의 실시간 출/도착 현황</h2>
-				<p style="font-size: 13px; color: var(--mut); margin-top: 4px;">금일 에어누리 항공기의 실시간 터미널 및 게이트 상태입니다.</p>
-			</div>
-			<a th:href="@{/member/member_schedule(tabType='STATUS')}" class="more" style="color: var(--accent); text-decoration: none; font-size: 13px;">전체 운항편 보기 →</a>
-		</div>
-
-		<div class="results" style="margin-top: 16px;">
-			
-			<a th:href="@{/member/member_schedule(tabType='STATUS')}" class="flight" style="text-decoration: none; color: inherit; margin-bottom: 12px; display: grid;">
-				<div class="carrier">
-					<div class="ci" style="background: var(--accent-soft); color: var(--accent);">NU</div>
-					<div>
-						<b>NU 101</b>
-						<div class="fno" style="color: var(--ok); font-weight: 500;">출발 완료</div>
-					</div>
-				</div>
-
-				<div class="route" style="flex: 2;">
-					<div class="tnode">
-						<div class="t">10:30</div>
-						<div class="ap">ICN 인천</div>
-					</div>
-					<div class="leg">
-						<div class="dur" style="color: var(--accent);">T1 26번 게이트</div>
-						<div class="bar" style="background: var(--accent);"></div>
-						<div class="ns">직항</div>
-					</div>
-					<div class="tnode r">
-						<div class="t">11:50</div>
-						<div class="ap">JFK 뉴욕</div>
-					</div>
-				</div>
-
-				<div class="fare" style="justify-content: center; text-align: right; border-left: 1px solid var(--line);">
-					<span class="material-symbols-outlined" style="color: var(--line); font-size: 24px;">arrow_forward_ios</span>
-				</div>
-			</a>
-
-			<a th:href="@{/member/member_schedule(tabType='STATUS')}" class="flight" style="text-decoration: none; color: inherit; margin-bottom: 12px; display: grid;">
-				<div class="carrier">
-					<div class="ci" style="background: #f1f5f9; color: var(--mut);">NU</div>
-					<div>
-						<b>NU 204</b>
-						<div class="fno" style="color: var(--mut);">출발 전</div>
-					</div>
-				</div>
-
-				<div class="route" style="flex: 2;">
-					<div class="tnode">
-						<div class="t">18:15</div>
-						<div class="ap">ICN 인천</div>
-					</div>
-					<div class="leg">
-						<div class="dur" style="color: var(--mut);">T1 42번 게이트</div>
-						<div class="bar"></div>
-						<div class="ns">직항</div>
-					</div>
-					<div class="tnode r">
-						<div class="t">20:30</div>
-						<div class="ap">NRT 도쿄</div>
-					</div>
-				</div>
-
-				<div class="fare" style="justify-content: center; text-align: right; border-left: 1px solid var(--line);">
-					<span class="material-symbols-outlined" style="color: var(--line); font-size: 24px;">arrow_forward_ios</span>
-				</div>
-			</a>
-
-		</div>
-	</section>
-
-
-	<section class="block wrap" style="margin-top: 40px; padding-bottom: 80px;">
-		<div class="htitle">
-			<div>
-				<div class="eyebrow">CLOSING SOON</div>
-				<h2 style="font-size: 20px; font-weight: 600;">예약 마감 임박 항공권</h2>
-				<p style="font-size: 13px; color: var(--mut); margin-top: 4px;">금일 예약 발권 마감 시간이 임박한 항공편 목록입니다.</p>
-			</div>
-			<a th:href="@{/member/member_flight_list}" class="more" style="color: var(--accent); text-decoration: none; font-size: 13px; font-weight: 500;">전체 항공권 보기 →</a>
-		</div>
-
-		<div class="results" style="margin-top: 16px;">
-			
-			<a th:href="@{/member/member_flight_list}" class="flight" style="text-decoration: none; color: inherit; margin-bottom: 12px; display: grid;">
-				<div class="carrier">
-					<div class="ci" style="background: var(--accent-soft); color: var(--accent); font-weight: 600;">임박</div>
-					<div>
-						<b style="font-family: var(--mono);">NU 101</b>
-						<div class="fno" style="color: var(--accent); font-weight: 500;">⏳ 15분 뒤 마감</div>
-					</div>
-				</div>
-				<div class="route" style="flex: 2;">
-					<div class="tnode">
-						<div class="t" style="font-size: 15px;">오늘 21:05</div>
-						<div class="ap">인천 (ICN)</div>
-					</div>
-					<div class="leg">
-						<div class="dur" style="color: var(--accent); font-weight: 500;">이코노미 잔여 2석</div>
-						<div class="bar" style="background: var(--accent);"></div>
-						<div class="ns" style="color: var(--accent);">정상 운항</div>
-					</div>
-					<div class="tnode r">
-						<div class="t" style="font-size: 15px;">내일 22:40</div>
-						<div class="ap">뉴욕 (JFK)</div>
-					</div>
-				</div>
-				<div class="fare" style="min-width: 160px; justify-content: center; text-align: right; border-left: 1px solid var(--line); padding-right: 20px;">
-					<div class="price" style="font-size: 18px; font-weight: 600;">1,156,000<small style="font-size: 11px; margin-left: 1px;">원</small></div>
-					<div class="cls" style="font-size: 11px; color: var(--mut);">기본 운임 조건</div>
-				</div>
-			</a>
-
-			<a th:href="@{/member/member_flight_list}" class="flight" style="text-decoration: none; color: inherit; margin-bottom: 12px; display: grid;">
-				<div class="carrier">
-					<div class="ci" style="background: var(--accent-soft); color: var(--accent); font-weight: 600;">임박</div>
-					<div>
-						<b style="font-family: var(--mono);">NU 204</b>
-						<div class="fno" style="color: var(--mut);">⏳ 1시간 뒤 마감</div>
-					</div>
-				</div>
-				<div class="route" style="flex: 2;">
-					<div class="tnode">
-						<div class="t" style="font-size: 15px;">오늘 23:30</div>
-						<div class="ap">인천 (ICN)</div>
-					</div>
-					<div class="leg">
-						<div class="dur" style="color: var(--accent); font-weight: 500;">이코노미 잔여 5석</div>
-						<div class="bar" style="background: var(--accent);"></div>
-						<div class="ns" style="color: var(--accent);">정상 운항</div>
-					</div>
-					<div class="tnode r">
-						<div class="t" style="font-size: 15px;">내일 01:45</div>
-						<div class="ap">도쿄 (NRT)</div>
-					</div>
-				</div>
-				<div class="fare" style="min-width: 160px; justify-content: center; text-align: right; border-left: 1px solid var(--line); padding-right: 20px;">
-					<div class="price" style="font-size: 18px; font-weight: 600;">324,000<small style="font-size: 11px; margin-left: 1px;">원</small></div>
-					<div class="cls" style="font-size: 11px; color: var(--mut);">기본 운임 조건</div>
-				</div>
-			</a>
-
-		</div>
-	</section>
-
-<script>
-	/*
-	 * 편도 / 왕복 귀국일 처리
-	 */
-	function toggleReturnDate() {
-
-		const tripType =
-			document.querySelector(
-				'input[name="tripType"]:checked'
-			)?.value;
-
-		const returnDateInput =
-			document.getElementById(
-				'returnDate'
-			);
-
-		const dateSeparator =
-			document.getElementById(
-				'dateSeparator'
-			);
-
-		if (!returnDateInput
-				|| !dateSeparator) {
-
-			return;
-		}
-
-		const isOneWay =
-			tripType === 'ONEWAY';
-
-		returnDateInput.style.display =
-			isOneWay
-				? 'none'
-				: 'inline-block';
-
-		dateSeparator.style.display =
-			isOneWay
-				? 'none'
-				: 'inline-block';
-
-		/*
-		 * disabled 필드는 서버로 전송되지 않는다.
-		 */
-		returnDateInput.disabled =
-			isOneWay;
-
-		returnDateInput.required =
-			!isOneWay;
-	}
-
-
-	/*
-	 * 출발지와 도착지 교환
-	 */
-	function triggerSwapEffect() {
-
-		const departure =
-			document.getElementById(
-				'departureAirportId'
-			);
-
-		const arrival =
-			document.getElementById(
-				'arrivalAirportId'
-			);
-
-		if (!departure || !arrival) {
-			return;
-		}
-
-		const temporaryValue =
-			departure.value;
-
-		departure.value =
-			arrival.value;
-
-		arrival.value =
-			temporaryValue;
-	}
-
-
-	/*
-	 * 승객 선택창 열기 / 닫기
-	 */
-	function togglePassengerLayer() {
-
-		const layer =
-			document.getElementById(
-				'passengerLayer'
-			);
-
-		if (!layer) {
-			return;
-		}
-
-		const isHidden =
-			window
-				.getComputedStyle(layer)
-				.display === 'none';
-
-		layer.style.display =
-			isHidden
-				? 'block'
-				: 'none';
-	}
-
-
-	/*
-	 * 승객 수 조회
-	 */
-	function getPassengerCount(type) {
-
-		const input =
-			document.getElementById(
-				type + 'Count'
-			);
-
-		if (!input) {
-			return 0;
-		}
-
-		return Number(
-			input.value || 0
-		);
-	}
-
-
-	/*
-	 * 승객 수 변경
-	 */
-	function changeCount(type, amount) {
-
-		const capitalizedType =
-			type.charAt(0).toUpperCase()
-			+ type.slice(1);
-
-		const targetText =
-			document.getElementById(
-				'val' + capitalizedType
-			);
-
-		const targetInput =
-			document.getElementById(
-				type + 'Count'
-			);
-
-		if (!targetText
-				|| !targetInput) {
-
-			return;
-		}
-
-
-		const current =
-			Number(
-				targetInput.value || 0
-			);
-
-		const next =
-			current + amount;
-
-		const minimum =
-			type === 'adult'
-				? 1
-				: 0;
-
-
-		if (next < minimum) {
-			return;
-		}
-
-
-		const adult =
-			type === 'adult'
-				? next
-				: getPassengerCount(
-					'adult'
-				);
-
-		const child =
-			type === 'child'
-				? next
-				: getPassengerCount(
-					'child'
-				);
-
-		const infant =
-			type === 'infant'
-				? next
-				: getPassengerCount(
-					'infant'
-				);
-
-		const total =
-			adult
-			+ child
-			+ infant;
-
-
-		if (total > 9) {
-
-			alert(
-				'전체 승객은 최대 9명까지 선택할 수 있습니다.'
-			);
-
-			return;
-		}
-
-
-		if (infant > adult) {
-
-			alert(
-				'유아는 성인 1명당 1명까지 선택할 수 있습니다.'
-			);
-
-			return;
-		}
-
-
-		targetInput.value =
-			next;
-
-		targetText.textContent =
-			next;
-
-		updatePassengerDisplayText();
-	}
-
-
-	/*
-	 * 승객 요약 문자열
-	 */
-	function updatePassengerDisplayText() {
-
-		const adult =
-			getPassengerCount(
-				'adult'
-			);
-
-		const child =
-			getPassengerCount(
-				'child'
-			);
-
-		const infant =
-			getPassengerCount(
-				'infant'
-			);
-
-		let text =
-			'성인 ' + adult;
-
-		if (child > 0) {
-			text +=
-				', 소아 ' + child;
-		}
-
-		if (infant > 0) {
-			text +=
-				', 유아 ' + infant;
-		}
-
-
-		const displayText =
-			document.getElementById(
-				'passengerDisplayText'
-			);
-
-		if (displayText) {
-			displayText.textContent =
-				text;
-		}
-	}
-
-
-	/*
-	 * 출발일에 맞춰 귀국일 범위 설정
-	 */
-	function syncDateRange() {
-
-		const departureDate =
-			document.getElementById(
-				'departureDate'
-			);
-
-		const returnDate =
-			document.getElementById(
-				'returnDate'
-			);
-
-		if (!departureDate
-				|| !returnDate) {
-
-			return;
-		}
-
-
-		returnDate.min =
-			departureDate.value
-			|| departureDate.min;
-
-
-		if (returnDate.value
-				&& departureDate.value
-				&& returnDate.value
-					< departureDate.value) {
-
-			returnDate.value =
-				departureDate.value;
-		}
-	}
-
-
-	/*
-	 * 검색 전 화면 검증
-	 */
-	function validateSearchForm(event) {
-
-		const departure =
-			document.getElementById(
-				'departureAirportId'
-			);
-
-		const arrival =
-			document.getElementById(
-				'arrivalAirportId'
-			);
-
-		const departureDate =
-			document.getElementById(
-				'departureDate'
-			);
-
-		const returnDate =
-			document.getElementById(
-				'returnDate'
-			);
-
-		const seatClass =
-			document.getElementById(
-				'seatClassId'
-			);
-
-		const tripType =
-			document.querySelector(
-				'input[name="tripType"]:checked'
-			)?.value;
-
-
-		let message = '';
-
-
-		if (!departure.value
-				|| !arrival.value) {
-
-			message =
-				'출발지와 도착지를 모두 선택해 주세요.';
-
-		} else if (
-			departure.value
-				=== arrival.value
-		) {
-
-			message =
-				'출발지와 도착지는 서로 달라야 합니다.';
-
-		} else if (
-			!departureDate.value
-		) {
-
-			message =
-				'출발일을 선택해 주세요.';
-
-		} else if (
-			tripType === 'ROUNDTRIP'
-			&& !returnDate.value
-		) {
-
-			message =
-				'왕복 여정은 귀국일을 선택해 주세요.';
-
-		} else if (
-			tripType === 'ROUNDTRIP'
-			&& returnDate.value
-				< departureDate.value
-		) {
-
-			message =
-				'귀국일은 출발일 이후여야 합니다.';
-
-		} else if (
-			!seatClass.value
-		) {
-
-			message =
-				'좌석 등급을 선택해 주세요.';
-		}
-
-
-		if (message) {
-
-			event.preventDefault();
-			alert(message);
-		}
-	}
-
-
-	/*
-	 * 기존 이벤트 슬라이더
-	 */
-	function initializeEventSlider() {
-
-		const slider =
-			document.getElementById(
-				'mainEventSlider'
-			);
-
-		if (!slider) {
-			return;
-		}
-
-
-		const slides =
-			Array.from(
-				slider.querySelectorAll(
-					'.event-slide'
-				)
-			);
-
-		const dots =
-			Array.from(
-				slider.querySelectorAll(
-					'.event-dot'
-				)
-			);
-
-		const prevButton =
-			slider.querySelector(
-				'.event-prev'
-			);
-
-		const nextButton =
-			slider.querySelector(
-				'.event-next'
-			);
-
-
-		if (slides.length < 2) {
-
-			if (prevButton) {
-				prevButton.style.display =
-					'none';
-			}
-
-			if (nextButton) {
-				nextButton.style.display =
-					'none';
-			}
-
-			return;
-		}
-
-
-		let currentIndex = 0;
-
-		let timer;
-
-
-		function showSlide(nextIndex) {
-
-			currentIndex =
-				(
-					nextIndex
-					+ slides.length
-				)
-				% slides.length;
-
-
-			slides.forEach(
-				function(slide, index) {
-
-					slide.classList.toggle(
-						'active',
-						index === currentIndex
-					);
-				}
-			);
-
-
-			dots.forEach(
-				function(dot, index) {
-
-					dot.classList.toggle(
-						'active',
-						index === currentIndex
-					);
-				}
-			);
-		}
-
-
-		function startAutoSlide() {
-
-			clearInterval(timer);
-
-			timer =
-				setInterval(
-					function() {
-
-						showSlide(
-							currentIndex + 1
-						);
-					},
-					3000
-				);
-		}
-
-
-		if (prevButton) {
-
-			prevButton.addEventListener(
-				'click',
-				function(event) {
-
-					event.preventDefault();
-
-					showSlide(
-						currentIndex - 1
-					);
-
-					startAutoSlide();
-				}
-			);
-		}
-
-
-		if (nextButton) {
-
-			nextButton.addEventListener(
-				'click',
-				function(event) {
-
-					event.preventDefault();
-
-					showSlide(
-						currentIndex + 1
-					);
-
-					startAutoSlide();
-				}
-			);
-		}
-
-
-		dots.forEach(
-			function(dot, index) {
-
-				dot.addEventListener(
-					'click',
-					function(event) {
-
-						event.preventDefault();
-
-						showSlide(index);
-
-						startAutoSlide();
-					}
-				);
-			}
-		);
-
-
-		slider.addEventListener(
-			'mouseenter',
-			function() {
-
-				clearInterval(timer);
-			}
-		);
-
-
-		slider.addEventListener(
-			'mouseleave',
-			startAutoSlide
-		);
-
-
-		startAutoSlide();
-	}
-
-
-	document.addEventListener(
-		'DOMContentLoaded',
-		function() {
-
-			toggleReturnDate();
-
-			updatePassengerDisplayText();
-
-			syncDateRange();
-
-			initializeEventSlider();
-
-
-			const departureDate =
-				document.getElementById(
-					'departureDate'
-				);
-
-			if (departureDate) {
-
-				departureDate.addEventListener(
-					'change',
-					syncDateRange
-				);
-			}
-
-
-			const searchForm =
-				document.getElementById(
-					'flightSearchForm'
-				);
-
-			if (searchForm) {
-
-				searchForm.addEventListener(
-					'submit',
-					validateSearchForm
-				);
-			}
-
-
-			/*
-			 * 팝업 외부 클릭
-			 */
-			document.addEventListener(
-				'click',
-				function(event) {
-
-					const container =
-						document.querySelector(
-							'.passenger-picker-container'
-						);
-
-					const layer =
-						document.getElementById(
-							'passengerLayer'
-						);
-
-					if (container
-							&& layer
-							&& !container.contains(
-								event.target
-							)) {
-
-						layer.style.display =
-							'none';
-					}
-				}
-			);
-		}
-	);
-</script>
-
+<div layout:fragment="panel" class="panel on home-page" id="book">
+
+    <!-- 선택 패널 딤 배경 : 바깥 클릭 시 모달 닫기 -->
+    <div class="home-selector-backdrop" id="homeSelectorBackdrop" hidden></div>
+
+    <!-- 메인 소개 + 항공권 검색 -->
+    <section class="home-booking-hero">
+        <div class="home-wide-wrap">
+
+            <div class="home-hero-intro">
+                <div class="home-eyebrow">BOOK YOUR FLIGHT</div>
+                <h1>어디로 떠나시나요?</h1>
+                <p>출발지·도착지와 날짜를 선택하면 운항편과 운임을 한눈에 비교할 수 있어요.</p>
+            </div>
+
+            <div class="home-flight-notice">
+                <div class="home-flight-notice-copy">
+                    <span class="material-symbols-outlined" aria-hidden="true">campaign</span>
+                    <strong>운항 안내</strong>
+                    <span>공항 및 항공편 운항 정보는 출발 전에 다시 확인해 주세요.</span>
+                </div>
+                <a th:href="@{/member/notice/list}">
+                    공지사항 보기
+                    <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                </a>
+            </div>
+
+            <form th:action="@{/booking/flights/search}"
+                  th:object="${flightSearchForm}"
+                  method="get"
+                  id="flightSearchForm"
+                  class="home-booking-card"
+                  novalidate>
+
+                <h2 class="home-sr-only">항공권 검색</h2>
+
+                <div class="home-booking-tabs" role="navigation" aria-label="예약 주요 메뉴">
+                    <a th:href="@{/main/home}" class="home-booking-tab is-active" aria-current="page">
+                        <span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>
+                        <span>항공권 예매</span>
+                    </a>
+                    <a th:href="@{/member/member_booking}" class="home-booking-tab">
+                        <span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+                        <span>예약 조회</span>
+                    </a>
+                    <a th:href="@{/member/member_mypage}" class="home-booking-tab">
+                        <span class="material-symbols-outlined" aria-hidden="true">luggage</span>
+                        <span>나의 여행</span>
+                    </a>
+                    <a th:href="@{/member/member_schedule}" class="home-booking-tab">
+                        <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+                        <span>출도착 · 스케줄</span>
+                    </a>
+                </div>
+
+                <div class="home-booking-content">
+
+                    <div class="home-search-error" th:if="${#fields.hasAnyErrors()}">
+                        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+                        <div>
+                            <p th:each="error : ${#fields.allErrors()}" th:text="${error}">
+                                검색 조건을 확인해 주세요.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="home-booking-toolbar">
+                        <div class="home-trip-switch" role="radiogroup" aria-label="여정 유형">
+                            <label>
+                                <input type="radio" th:field="*{tripType}" value="ROUNDTRIP">
+                                <span>왕복</span>
+                            </label>
+                            <label>
+                                <input type="radio" th:field="*{tripType}" value="ONEWAY">
+                                <span>편도</span>
+                            </label>
+                        </div>
+
+                        <div class="home-search-guide">
+                            <span class="home-status-dot" aria-hidden="true"></span>
+                            실시간 운임과 잔여 좌석을 조회합니다.
+                        </div>
+                    </div>
+
+                    <div class="home-open-search">
+
+                        <button type="button"
+                                class="home-search-field home-search-airport"
+                                id="departureFieldButton"
+                                data-panel-open="airport"
+                                data-airport-target="departure"
+                                aria-label="출발지 선택"
+                                aria-expanded="false">
+                            <span class="home-search-field-copy home-search-airport-copy">
+                                <strong id="departureDisplayCode" class="home-airport-code">출발지</strong>
+                                <span id="departureDisplayName" class="home-airport-name" hidden></span>
+                            </span>
+                        </button>
+
+                        <button type="button" class="home-airport-swap" id="airportSwapButton" aria-label="출발지와 도착지 변경">
+                            <span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span>
+                        </button>
+
+                        <button type="button"
+                                class="home-search-field home-search-airport"
+                                id="arrivalFieldButton"
+                                data-panel-open="airport"
+                                data-airport-target="arrival"
+                                aria-label="도착지 선택"
+                                aria-expanded="false">
+                            <span class="home-search-field-copy home-search-airport-copy">
+                                <strong id="arrivalDisplayCode" class="home-airport-code">도착지</strong>
+                                <span id="arrivalDisplayName" class="home-airport-name" hidden></span>
+                            </span>
+                        </button>
+
+                        <button type="button"
+                                class="home-search-field home-search-date"
+                                id="dateFieldButton"
+                                data-panel-open="date"
+                                aria-expanded="false">
+                            <span class="material-symbols-outlined home-search-field-icon" aria-hidden="true">calendar_month</span>
+                            <span class="home-search-field-copy">
+                                <small>탑승일</small>
+                                <strong id="dateDisplayText">가는 날 · 오는 날</strong>
+                            </span>
+                            <span class="material-symbols-outlined home-search-field-chevron" aria-hidden="true">expand_more</span>
+                        </button>
+
+                        <button type="button"
+                                class="home-search-field home-search-passenger"
+                                id="passengerFieldButton"
+                                data-panel-open="passenger"
+                                aria-expanded="false">
+                            <span class="material-symbols-outlined home-search-field-icon" aria-hidden="true">group</span>
+                            <span class="home-search-field-copy">
+                                <small>탑승객</small>
+                                <strong id="passengerDisplayText">성인 1</strong>
+                            </span>
+                            <span class="material-symbols-outlined home-search-field-chevron" aria-hidden="true">expand_more</span>
+                        </button>
+
+                        <button type="button"
+                                class="home-search-field home-search-seat"
+                                id="seatFieldButton"
+                                data-panel-open="seat"
+                                aria-expanded="false">
+                            <span class="material-symbols-outlined home-search-field-icon" aria-hidden="true">airline_seat_recline_extra</span>
+                            <span class="home-search-field-copy">
+                                <small>좌석 등급</small>
+                                <strong id="seatDisplayText">좌석 등급</strong>
+                            </span>
+                            <span class="material-symbols-outlined home-search-field-chevron" aria-hidden="true">expand_more</span>
+                        </button>
+
+                        <button type="submit" class="home-search-submit">
+                            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                            <span>항공권 조회</span>
+                        </button>
+                    </div>
+
+                    <!-- 실제 서버 전송값 -->
+                    <input type="hidden" th:field="*{departureAirportId}" id="departureAirportId">
+                    <input type="hidden" th:field="*{arrivalAirportId}" id="arrivalAirportId">
+                    <input type="hidden" th:field="*{departureDate}" id="departureDate">
+                    <input type="hidden" th:field="*{returnDate}" id="returnDate">
+                    <input type="hidden" th:field="*{adultCount}" id="adultCount">
+                    <input type="hidden" th:field="*{childCount}" id="childCount">
+                    <input type="hidden" th:field="*{infantCount}" id="infantCount">
+                    <input type="hidden" th:field="*{seatClassId}" id="seatClassId">
+                </div>
+
+            <!-- 선택 모달 : 검색 카드 아래에 겹쳐 뜨며 아래 콘텐츠를 밀지 않는다 -->
+            <section class="home-selector-section" id="homeSelectorSection" role="dialog" aria-modal="true" hidden>
+                <div class="home-selector-shell">
+
+                <!-- 공항 선택 -->
+                <section class="home-selector-panel home-airport-panel" id="airportPanel" data-selector-panel="airport" hidden>
+                    <header class="home-selector-header">
+                        <div>
+                            <span class="home-panel-eyebrow">AIRPORT</span>
+                            <h2 id="airportPanelTitle">출발지 검색</h2>
+                        </div>
+                        <button type="button" class="home-selector-close" data-selector-close aria-label="공항 선택창 닫기">×</button>
+                    </header>
+
+                    <div class="home-airport-search-view" id="airportSearchView">
+                        <div class="home-airport-search-input">
+                            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                            <input type="search"
+                                   id="airportKeyword"
+                                   autocomplete="off"
+                                   placeholder="도시명, 공항명 또는 IATA 코드 검색"
+                                   aria-label="도시 또는 공항 검색">
+                            <button type="button" class="home-input-clear" id="airportKeywordClear" aria-label="검색어 지우기">×</button>
+                        </div>
+
+                        <div class="home-airport-result-heading">
+                            <strong>검색 결과</strong>
+                            <span id="airportResultCount">0개 공항</span>
+                        </div>
+
+                        <div class="home-airport-result-list" id="airportSearchResultList"></div>
+
+                        <button type="button" class="home-all-city-button" id="showAllCityButton">
+                            <span class="material-symbols-outlined" aria-hidden="true">public</span>
+                            전체 도시 보기
+                            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                        </button>
+                    </div>
+
+                    <div class="home-airport-city-view" id="airportCityView" hidden>
+                        <div class="home-city-view-toolbar">
+                            <button type="button" class="home-back-button" id="backToAirportSearchButton">
+                                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                                공항 검색으로 돌아가기
+                            </button>
+                        </div>
+
+                        <div class="home-city-layout">
+                            <aside class="home-region-list" id="airportRegionList" aria-label="지역 선택">
+                                <button type="button" class="home-region-button is-active" data-region="KOREA">한국</button>
+                                <button type="button" class="home-region-button" data-region="NORTHEAST_ASIA">동북아시아</button>
+                                <button type="button" class="home-region-button" data-region="SOUTHEAST_ASIA">동남아시아</button>
+                                <button type="button" class="home-region-button" data-region="AMERICAS">미주</button>
+                                <button type="button" class="home-region-button" data-region="EUROPE">유럽</button>
+                                <button type="button" class="home-region-button" data-region="OCEANIA">대양주</button>
+                                <button type="button" class="home-region-button" data-region="OTHER">기타</button>
+                            </aside>
+
+                            <section class="home-city-airports">
+                                <div class="home-city-column-title">
+                                    <h3>취항지</h3>
+                                    <span id="cityAirportCount">0개</span>
+                                </div>
+                                <div class="home-city-airport-list" id="cityAirportList"></div>
+                            </section>
+
+                            <aside class="home-recent-airports">
+                                <div class="home-city-column-title">
+                                    <h3>최근 검색</h3>
+                                    <button type="button" id="clearRecentAirportButton">전체 삭제</button>
+                                </div>
+                                <div class="home-recent-airport-list" id="recentAirportList"></div>
+                            </aside>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 날짜 선택 -->
+                <section class="home-selector-panel home-date-panel" id="datePanel" data-selector-panel="date" hidden>
+                    <header class="home-selector-header">
+                        <div>
+                            <span class="home-panel-eyebrow">TRAVEL DATE</span>
+                            <h2>탑승일 선택</h2>
+                        </div>
+                        <div class="home-date-header-actions">
+                            <button type="button" class="home-calendar-reset" id="calendarResetButton">
+                                <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+                                다시 선택
+                            </button>
+                            <button type="button" class="home-selector-close" data-selector-close aria-label="날짜 선택창 닫기">×</button>
+                        </div>
+                    </header>
+
+                    <div class="home-date-selection-summary">
+                        <div>
+                            <span>가는 날</span>
+                            <strong id="pendingDepartureText">선택 전</strong>
+                        </div>
+                        <span class="material-symbols-outlined" id="pendingDateArrow" aria-hidden="true">arrow_forward</span>
+                        <div id="pendingReturnSummary">
+                            <span>오는 날</span>
+                            <strong id="pendingReturnText">선택 전</strong>
+                        </div>
+                    </div>
+
+                    <div class="home-calendar-toolbar">
+                        <button type="button" class="home-calendar-nav" data-calendar-move="-1" aria-label="이전 달">
+                            <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                        </button>
+                        <strong id="calendarRangeTitle">달력</strong>
+                        <button type="button" class="home-calendar-nav" data-calendar-move="1" aria-label="다음 달">
+                            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                        </button>
+                    </div>
+
+                    <div class="home-two-month-calendar">
+                        <div class="home-calendar-month" id="calendarMonthLeft"></div>
+                        <div class="home-calendar-month" id="calendarMonthRight"></div>
+                    </div>
+
+                    <footer class="home-selector-footer">
+                        <p id="dateSelectionHelp">가는 날을 먼저 선택한 뒤 오는 날을 선택해 주세요.</p>
+                        <div class="home-selector-footer-actions">
+                            <button type="button" class="home-panel-secondary" data-date-apply="close">선택 완료</button>
+                            <button type="button" class="home-panel-primary" data-date-apply="passenger">다음 · 탑승객 선택</button>
+                        </div>
+                    </footer>
+                </section>
+
+                <!-- 승객 선택 -->
+                <section class="home-selector-panel home-passenger-panel" id="passengerPanel" data-selector-panel="passenger" hidden>
+                    <header class="home-selector-header">
+                        <div>
+                            <span class="home-panel-eyebrow">PASSENGERS</span>
+                            <h2>승객 선택</h2>
+                        </div>
+                        <button type="button" class="home-selector-close" data-selector-close aria-label="승객 선택창 닫기">×</button>
+                    </header>
+
+                    <div class="home-passenger-content">
+                        <div class="home-passenger-types">
+
+                            <article class="home-passenger-card">
+                                <div class="home-passenger-card-heading">
+                                    <div class="home-passenger-title">
+                                        <strong>성인</strong>
+                                        <span class="home-help-wrap">
+                                            <button type="button" class="home-help-button" aria-describedby="adultTooltip">?</button>
+                                            <span class="home-help-tooltip" id="adultTooltip" role="tooltip">
+                                                국제선은 만 12세 이상, 국내선은 만 13세 이상입니다.
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <span>만 12세 이상</span>
+                                </div>
+                                <div class="home-counter">
+                                    <button type="button" data-passenger-type="adult" data-count-delta="-1" aria-label="성인 수 감소">−</button>
+                                    <strong id="valAdult" th:text="${flightSearchForm.adultCount}">1</strong>
+                                    <button type="button" data-passenger-type="adult" data-count-delta="1" aria-label="성인 수 증가">+</button>
+                                </div>
+                            </article>
+
+                            <article class="home-passenger-card">
+                                <div class="home-passenger-card-heading">
+                                    <div class="home-passenger-title">
+                                        <strong>소아</strong>
+                                        <span class="home-help-wrap">
+                                            <button type="button" class="home-help-button" aria-describedby="childTooltip">?</button>
+                                            <span class="home-help-tooltip" id="childTooltip" role="tooltip">
+                                                국제선은 만 2세 이상 11세 이하, 국내선은 만 2세 이상 12세 이하입니다.
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <span>만 2세 이상</span>
+                                </div>
+                                <div class="home-counter">
+                                    <button type="button" data-passenger-type="child" data-count-delta="-1" aria-label="소아 수 감소">−</button>
+                                    <strong id="valChild" th:text="${flightSearchForm.childCount}">0</strong>
+                                    <button type="button" data-passenger-type="child" data-count-delta="1" aria-label="소아 수 증가">+</button>
+                                </div>
+                            </article>
+
+                            <article class="home-passenger-card">
+                                <div class="home-passenger-card-heading">
+                                    <div class="home-passenger-title">
+                                        <strong>유아</strong>
+                                        <span class="home-help-wrap">
+                                            <button type="button" class="home-help-button" aria-describedby="infantTooltip">?</button>
+                                            <span class="home-help-tooltip" id="infantTooltip" role="tooltip">
+                                                만 2세 미만이며 좌석을 점유하지 않는 유아는 성인 1명당 1명까지 예약할 수 있습니다.
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <span>만 2세 미만</span>
+                                </div>
+                                <div class="home-counter">
+                                    <button type="button" data-passenger-type="infant" data-count-delta="-1" aria-label="유아 수 감소">−</button>
+                                    <strong id="valInfant" th:text="${flightSearchForm.infantCount}">0</strong>
+                                    <button type="button" data-passenger-type="infant" data-count-delta="1" aria-label="유아 수 증가">+</button>
+                                </div>
+                            </article>
+                        </div>
+
+                        <section class="home-age-calculator">
+                            <button type="button" class="home-age-toggle" id="ageCalculatorToggle" aria-expanded="false">
+                                <span>나이 계산기</span>
+                                <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+                            </button>
+
+                            <div class="home-age-panel" id="ageCalculatorPanel" hidden>
+                                <div class="home-age-panel-heading">
+                                    <strong>생년월일로 승객 유형 확인</strong>
+                                    <span>가는 편 출발일을 기준으로 계산합니다.</span>
+                                </div>
+
+                                <div class="home-age-inputs">
+                                    <label>
+                                        <span>연도</span>
+                                        <select id="birthYear" aria-label="출생 연도"></select>
+                                    </label>
+                                    <label>
+                                        <span>월</span>
+                                        <select id="birthMonth" aria-label="출생 월"></select>
+                                    </label>
+                                    <label>
+                                        <span>일</span>
+                                        <select id="birthDay" aria-label="출생 일"></select>
+                                    </label>
+                                    <button type="button" class="home-age-calculate" id="ageCalculateButton">계산하기</button>
+                                </div>
+
+                                <div class="home-age-result" id="ageCalculatorResult" aria-live="polite">
+                                    생년월일을 선택하면 승객 유형을 안내해 드립니다.
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="home-passenger-notice">
+                            <h3>소아·유아 및 만 14세 미만 승객 안내</h3>
+                            <ul>
+                                <li>승객 구분은 첫 번째 항공편의 출발일을 기준으로 합니다.</li>
+                                <li>유아는 성인과 함께 탑승해야 하며, 성인 1명당 유아 1명까지 예약할 수 있습니다.</li>
+                                <li>유아 좌석 점유를 원하면 소아로 예약해 주세요.</li>
+                                <li>만 14세 미만 승객은 예약 과정에서 법정대리인의 동의와 확인이 필요할 수 있습니다.</li>
+                                <li>국제선은 목적지 국가 및 항공편에 따라 연령 기준이 달라질 수 있습니다.</li>
+                            </ul>
+                        </section>
+                    </div>
+
+                    <footer class="home-selector-footer">
+                        <p>전체 승객은 최대 9명이며 유아 수는 성인 수를 초과할 수 없습니다.</p>
+                        <button type="button" class="home-panel-primary" id="passengerApplyButton">선택 완료</button>
+                    </footer>
+                </section>
+
+                <!-- 좌석 등급 선택 -->
+                <section class="home-selector-panel home-seat-panel" id="seatPanel" data-selector-panel="seat" hidden>
+                    <header class="home-selector-header">
+                        <div>
+                            <span class="home-panel-eyebrow">CABIN CLASS</span>
+                            <h2>좌석 등급 선택</h2>
+                        </div>
+                        <button type="button" class="home-selector-close" data-selector-close aria-label="좌석 등급 선택창 닫기">×</button>
+                    </header>
+
+                    <div class="home-seat-content">
+                        <div class="home-seat-intro">
+                            <h3>출도착 전 구간에 적용할 좌석 등급을 선택해 주세요.</h3>
+                            <p>검색 결과에서 각 항공편의 실제 운임과 잔여 좌석을 다시 확인할 수 있습니다.</p>
+                        </div>
+
+                        <div class="home-seat-option-grid" id="seatClassOptionGrid">
+                            <button type="button"
+                                    class="home-seat-option"
+                                    th:each="seatClass : ${seatClassList}"
+                                    th:attr="data-seat-id=${seatClass.seatClassId},
+                                             data-seat-name=${seatClass.className}"
+                                    aria-pressed="false">
+                                <span class="material-symbols-outlined home-seat-option-check" aria-hidden="true">check</span>
+                                <strong th:text="${seatClass.className}">이코노미</strong>
+                                <span class="home-seat-option-description">좌석 등급 안내</span>
+                            </button>
+                        </div>
+
+                        <div class="home-seat-note">
+                            <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                            현재 검색 단계에서는 왕복 전 구간에 동일한 좌석 등급이 적용됩니다.
+                        </div>
+                    </div>
+
+                    <footer class="home-selector-footer">
+                        <p id="seatSelectionHelp">좌석 등급을 선택해 주세요.</p>
+                        <button type="button" class="home-panel-primary" id="seatApplyButton">선택 완료</button>
+                    </footer>
+                </section>
+                </div>
+            </section>
+            </form>
+
+            <!-- JavaScript 데이터 원본 -->
+            <div id="homePageConfig" hidden th:attr="data-today=${today}"></div>
+
+            <div id="airportDataSource" hidden>
+                <span class="js-airport-source"
+                      th:each="airport : ${airportList}"
+                      th:attr="data-id=${airport.airportId},
+                               data-code=${airport.iataCode},
+                               data-name=${airport.airportName},
+                               data-country=${airport.country},
+                               data-flight-type=${airport.flightType}"></span>
+            </div>
+
+            <div id="seatClassDataSource" hidden>
+                <span class="js-seat-source"
+                      th:each="seatClass : ${seatClassList}"
+                      th:attr="data-id=${seatClass.seatClassId},
+                               data-name=${seatClass.className},
+                               data-order=${seatClass.sortOrder}"></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 이벤트 배너 -->
+    <section class="home-event-section" th:if="${!#lists.isEmpty(eventList)}">
+        <div class="home-content-wrap">
+            <div class="home-section-heading">
+                <div>
+                    <div class="home-eyebrow">EVENT &amp; BENEFITS</div>
+                    <h2>진행 중인 이벤트</h2>
+                    <p>SkyRoute에서 준비한 여행 혜택과 새로운 소식을 확인해 보세요.</p>
+                </div>
+            </div>
+
+            <div class="event-banner-area" id="mainEventSlider">
+                <div class="event-slider">
+                    <a class="event-slide"
+                       th:each="event, stat : ${eventList}"
+                       th:classappend="${stat.index == 0} ? ' active' : ''"
+                       th:href="@{/member/event/detail(event_id=${event.event_id})}">
+
+                        <img th:if="${event.image_url != null and !#strings.isEmpty(event.image_url)}"
+                             th:src="@{/assets/upload/{file}(file=${event.image_url})}"
+                             th:alt="${event.title}">
+                        <div th:unless="${event.image_url != null and !#strings.isEmpty(event.image_url)}"
+                             class="event-image-fallback"></div>
+
+                        <div class="event-slide-overlay">
+                            <div class="event-slide-copy">
+                                <span class="event-label">EVENT</span>
+                                <h3 th:text="${event.title}">이벤트 제목</h3>
+                                <div class="event-period">
+                                    <span th:text="${#dates.format(event.start_date, 'yyyy.MM.dd')}">2026.07.01</span>
+                                    <span>~</span>
+                                    <span th:text="${#dates.format(event.end_date, 'yyyy.MM.dd')}">2026.07.31</span>
+                                </div>
+                                <span class="event-more">이벤트 자세히 보기 <span aria-hidden="true">→</span></span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <button type="button" class="event-arrow event-prev" aria-label="이전 이벤트">‹</button>
+                    <button type="button" class="event-arrow event-next" aria-label="다음 이벤트">›</button>
+
+                    <div class="event-dots" aria-label="이벤트 배너 선택">
+                        <button type="button"
+                                class="event-dot"
+                                th:each="event, stat : ${eventList}"
+                                th:classappend="${stat.index == 0} ? ' active' : ''"
+                                th:attr="data-index=${stat.index}, aria-label=|${stat.count}번째 이벤트|"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 오늘의 운항 현황 -->
+    <section class="home-information-section">
+        <div class="home-content-wrap">
+            <div class="home-section-heading home-section-heading-row">
+                <div>
+                    <div class="home-eyebrow">TODAY'S FLIGHT STATUS</div>
+                    <h2>오늘의 실시간 출/도착 현황</h2>
+                    <p>오늘 운항하는 SkyRoute 항공편의 터미널 및 게이트 상태를 확인하세요.</p>
+                </div>
+                <a th:href="@{/member/member_schedule(tabType='STATUS')}" class="home-section-more">
+                    전체 운항편 보기 <span aria-hidden="true">→</span>
+                </a>
+            </div>
+
+            <div class="home-flight-list">
+                <a th:href="@{/member/member_schedule(tabType='STATUS')}" class="home-flight-card">
+                    <div class="home-flight-carrier">
+                        <span class="home-flight-logo">SR</span>
+                        <div>
+                            <strong>SR 101</strong>
+                            <span class="home-flight-status is-complete">출발 완료</span>
+                        </div>
+                    </div>
+                    <div class="home-flight-route">
+                        <div class="home-flight-node"><strong>10:30</strong><span>ICN 인천</span></div>
+                        <div class="home-flight-leg"><span>T1 · 26번 게이트</span><i></i><small>직항</small></div>
+                        <div class="home-flight-node is-right"><strong>11:50</strong><span>JFK 뉴욕</span></div>
+                    </div>
+                    <span class="material-symbols-outlined home-flight-arrow" aria-hidden="true">chevron_right</span>
+                </a>
+
+                <a th:href="@{/member/member_schedule(tabType='STATUS')}" class="home-flight-card">
+                    <div class="home-flight-carrier">
+                        <span class="home-flight-logo is-muted">SR</span>
+                        <div>
+                            <strong>SR 204</strong>
+                            <span class="home-flight-status">출발 전</span>
+                        </div>
+                    </div>
+                    <div class="home-flight-route">
+                        <div class="home-flight-node"><strong>18:15</strong><span>ICN 인천</span></div>
+                        <div class="home-flight-leg is-muted"><span>T1 · 42번 게이트</span><i></i><small>직항</small></div>
+                        <div class="home-flight-node is-right"><strong>20:30</strong><span>NRT 도쿄</span></div>
+                    </div>
+                    <span class="material-symbols-outlined home-flight-arrow" aria-hidden="true">chevron_right</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 예약 마감 임박 -->
+    <section class="home-information-section home-closing-section">
+        <div class="home-content-wrap">
+            <div class="home-section-heading home-section-heading-row">
+                <div>
+                    <div class="home-eyebrow">CLOSING SOON</div>
+                    <h2>예약 마감 임박 항공권</h2>
+                    <p>발권 마감 시간이 가까운 항공편을 확인해 보세요.</p>
+                </div>
+                <a th:href="@{/main/home}" class="home-section-more">
+                    항공권 다시 검색 <span aria-hidden="true">→</span>
+                </a>
+            </div>
+
+            <div class="home-flight-list">
+                <a th:href="@{/main/home}" class="home-flight-card home-closing-card">
+                    <div class="home-flight-carrier">
+                        <span class="home-closing-badge">임박</span>
+                        <div>
+                            <strong>SR 101</strong>
+                            <span class="home-flight-status is-urgent">15분 뒤 마감</span>
+                        </div>
+                    </div>
+                    <div class="home-flight-route">
+                        <div class="home-flight-node"><strong class="home-flight-date">오늘 21:05</strong><span>인천 (ICN)</span></div>
+                        <div class="home-flight-leg"><span>이코노미 잔여 2석</span><i></i><small>정상 운항</small></div>
+                        <div class="home-flight-node is-right"><strong class="home-flight-date">내일 22:40</strong><span>뉴욕 (JFK)</span></div>
+                    </div>
+                    <div class="home-flight-price"><strong>1,156,000<small>원</small></strong><span>1인 기준</span></div>
+                </a>
+
+                <a th:href="@{/main/home}" class="home-flight-card home-closing-card">
+                    <div class="home-flight-carrier">
+                        <span class="home-closing-badge">임박</span>
+                        <div>
+                            <strong>SR 204</strong>
+                            <span class="home-flight-status">1시간 뒤 마감</span>
+                        </div>
+                    </div>
+                    <div class="home-flight-route">
+                        <div class="home-flight-node"><strong class="home-flight-date">오늘 23:30</strong><span>인천 (ICN)</span></div>
+                        <div class="home-flight-leg"><span>이코노미 잔여 5석</span><i></i><small>정상 운항</small></div>
+                        <div class="home-flight-node is-right"><strong class="home-flight-date">내일 01:45</strong><span>도쿄 (NRT)</span></div>
+                    </div>
+                    <div class="home-flight-price"><strong>324,000<small>원</small></strong><span>1인 기준</span></div>
+                </a>
+            </div>
+        </div>
+    </section>
 </div>
 
 </body>

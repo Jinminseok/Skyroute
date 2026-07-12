@@ -1,0 +1,355 @@
+@charset "UTF-8";
+
+.search-bar{
+	height:30px;
+	padding-bottom:15px;
+}
+.input-search{
+	display:block;
+	float:left;
+	background-color:#FFFFFF;
+	border:1px solid #CCCCCC;
+	/*상좌 상우 하우 하좌*/
+	border-radius:15px 0 0 15px;
+	box-shadow:0 1px 1px rgba(0,0,0,0.05);
+	width:350px;
+	height:35px;
+	padding:0 0 0 10px;
+	font-size:12px;
+	color:#555555;
+}
+.input-search:focus{
+	border-color:rgba(82,168,236,0.8);
+	/*border 바깥 외곽선*/
+	outline:0;
+	box-shadow:0 1px 1px rgba(0,0,0,0.05);
+}
+.input-search-submit{
+	width:50px;
+    height:35px;
+    /*상좌 상우 하우 하좌*/
+	    border-radius:0 15px 15px 0;
+	    border:1px solid #CCCCCC;
+	    margin-left:-1px;
+	}
+	.search-bar form{
+		width:400px;
+		padding:0;
+		border:none;
+	}
+	.input-search-submit{
+	cursor:pointer;
+}
+/* 카드 정렬
+--------------------------------*/
+.item-container {
+    width: 100%;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+.card {
+    background: white;
+    width: 22%;
+    margin: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease-in-out;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+.card-content {
+    padding: 15px;
+}
+.card-content a:hover {
+    text-decoration: none;
+}
+.card-content span {
+	display:block;
+    font-size: 18px;
+    font-weight:bold;
+}
+.card-content b {
+    font-size: 14px;
+    color: #666;
+}
+/* 다이얼로그 배경 */
+.dialog {
+  display: none; /* 기본적으로 다이얼로그는 보이지 않음 */
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 다이얼로그 콘텐츠 */
+.dialog-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 600px;
+  height: 400px;
+  position: relative;
+}
+
+/* 닫기 버튼 */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+.dialog-nav{
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	width: 800px;
+}
+.board_detail{
+	cursor: pointer;
+}
+.detail-content{
+	height:200px;
+	overflow:auto;
+}
+#left_btn{
+	color:#FFFFFF;
+	font-size:25pt;
+	margin-right:50px;
+	cursor: pointer;
+}
+#right_btn{
+    color:#FFFFFF;
+    font-size:25pt;
+	margin-left:50px;
+	cursor: pointer;
+}
+
+
+
+
+
+/* memberLogin */
+
+:root {
+    /* [source: 3] B2C 오리지널 컬러 명세 */
+    --ink: #1F2937; 
+    --ink-700: #0F172A; 
+    --ink-500: #4B5563;
+    --line: #E5E7EB; 
+    --accent: #0066E2; /* 사진과 일치하는 쨍한 블루 브랜드 컬러 */
+    --accent-700: #004BA3; 
+    --accent-soft: #F0F6FF;
+    --mut: #6B7280; 
+    --text-light: #9CA3AF;
+    
+    /* [source: 3] 사용자 화면 115도 사선 파스텔 그라데이션 */
+    --gradient-hero: linear-gradient(115deg, #EBF5FF 0%, #E8F0FE 35%, #FBF0F3 70%, #F5F9FF 100%);
+    
+    /* 사진 속 부드러운 박스 그림자 효과 */
+    --shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body { 
+    background: var(--gradient-hero); /* [source: 3] */
+    background-attachment: fixed;
+    color: var(--ink); 
+    font-family: 'Pretendard', sans-serif; 
+    font-weight: 400;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  /* [개편] image_15c35e.png 사진처럼 완벽하게 분리된 순백색 로그인 박스 */
+  .login-container {
+    width: 100%;
+    max-width: 440px;
+    background: #FFFFFF; /* 반투명 걷어내고 순도 100% 화이트 적용 */
+    border: 1px solid rgba(0, 102, 226, 0.08);
+    border-radius: 18px; /* 사진처럼 둥글고 정갈한 라운딩 */
+    padding: 56px 40px;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.35s ease-out forwards;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 로고 및 상단 헤더 타이틀 */
+  .logo-wrap {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .logo-wrap .logo-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    background: var(--accent);
+    display: grid;
+    place-items: center;
+    font-family: 'JetBrains Mono', monospace; /* [source: 3] */
+    font-weight: 500;
+    font-size: 16px;
+    color: #fff;
+    margin: 0 auto 12px;
+    transform: rotate(-8deg); /* [source: 3] 브랜드 아이덴티티 */
+  }
+  .logo-wrap h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink-700);
+    letter-spacing: -0.6px;
+  }
+  .logo-wrap p {
+    color: var(--mut);
+    font-size: 13px;
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  /* 입력 필드 레이아웃 (사진 구조 100% 반영) */
+  .form-group {
+    margin-bottom: 22px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-700);
+    margin-bottom: 8px;
+  }
+  
+  .input-wrap {
+    position: relative;
+  }
+  .input-wrap .material-symbols-outlined {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: 18px;
+  }
+  .input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+    background: #FFFFFF;
+    color: var(--ink);
+  }
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 102, 226, 0.1);
+  }
+  .input::placeholder {
+    color: #A3AED0; /* 사진 속 가이드 텍스트 색상 최적화 */
+  }
+
+  /* 하단 유틸리티 옵션 */
+  .options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 16px 0 24px 0;
+    font-size: 13px;
+  }
+  .options label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink-500);
+    cursor: pointer;
+  }
+  .options label input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+  }
+  .options .find-links {
+    display: flex;
+    gap: 8px;
+    color: var(--line);
+  }
+  .options a {
+    color: var(--ink-500);
+    text-decoration: none;
+  }
+  .options a:hover {
+    color: var(--accent);
+  }
+
+  /* 사진 속과 똑같이 꽉 차는 쨍한 버튼 스타일 */
+  .btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    box-shadow: 0 4px 14px rgba(0, 102, 226, 0.15);
+  }
+  .btn-submit:hover {
+    background: var(--accent-700);
+  }
+
+  .join-prompt {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--ink-500);
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
+  }
+  .join-prompt a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 4px;
+  }
+  .join-prompt a:hover {
+    text-decoration: underline;
+  }
