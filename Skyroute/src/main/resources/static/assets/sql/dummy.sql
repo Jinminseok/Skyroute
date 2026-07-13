@@ -190,7 +190,8 @@ SELECT f.flight_id, fa.seat_class_id, fa.fare_id, fa.price
 FROM FLIGHT f
 JOIN FARE fa   ON fa.route_id = f.route_id AND fa.is_active = 'Y'
 JOIN SEASON se ON fa.season_id = se.season_id
-              AND CAST(f.departure_time AS DATE) BETWEEN se.start_date AND se.end_date;
+              AND CAST(f.departure_time AS DATE) >= TRUNC(se.start_date)
+              AND CAST(f.departure_time AS DATE) < TRUNC(se.end_date) + 1;
 COMMIT;
 
 -- =============================================================================

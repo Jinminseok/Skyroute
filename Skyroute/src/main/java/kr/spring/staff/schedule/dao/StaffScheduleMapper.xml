@@ -130,8 +130,8 @@
         JOIN SEASON se
           ON se.season_id = fa.season_id
          AND se.is_active = 'Y'
-         AND CAST(f.departure_time AS DATE)
-             BETWEEN se.start_date AND se.end_date
+         AND CAST(f.departure_time AS DATE) >= TRUNC(se.start_date)
+		 AND CAST(f.departure_time AS DATE) &lt; TRUNC(se.end_date) + 1
         WHERE f.flight_id = #{flight_id}
     </insert>
 
@@ -155,8 +155,8 @@
         SELECT COUNT(*)
         FROM SEASON
         WHERE is_active = 'Y'
-          AND TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI')
-              BETWEEN start_date AND end_date
+          AND TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI') >= TRUNC(start_date)
+          AND TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI') &lt; TRUNC(end_date) + 1
     </select>
 
 
@@ -166,11 +166,11 @@
         FROM FARE fa
         JOIN SEASON se
           ON se.season_id = fa.season_id
-         AND se.is_active = 'Y'
-        WHERE fa.route_id = #{route_id}
+   		  AND se.is_active = 'Y'
+   		  WHERE fa.route_id = #{route_id}
           AND fa.is_active = 'Y'
-          AND TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI')
-              BETWEEN se.start_date AND se.end_date
+          AND TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI') >= TRUNC(se.start_date)
+    	  AND TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI') &lt; TRUNC(se.end_date) + 1
     </select>
 
 
