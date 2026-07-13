@@ -214,6 +214,46 @@
 								</a>
 							</div>
 						</div>
+						
+						<!-- 여행 -->
+						<div class="sr-nav-item">
+							<a th:href="@{/member/travel/airport}" class="sr-nav-link"
+							   th:classappend="${activeMenu == 'travel'} ? ' is-on'">여행</a>
+						
+							<div class="sr-nav-menu">
+								<a th:href="@{/member/travel/airport}">
+									<span class="material-symbols-outlined" aria-hidden="true">connecting_airports</span>
+									<span>
+										<b>공항에서</b>
+										<small>공항 위치와 탑승 안내</small>
+									</span>
+								</a>
+						
+								<a th:href="@{/member/travel/cabin}">
+									<span class="material-symbols-outlined" aria-hidden="true">airline_seat_recline_normal</span>
+									<span>
+										<b>기내에서</b>
+										<small>좌석 등급과 기내 서비스</small>
+									</span>
+								</a>
+						
+								<a th:href="@{/member/travel/aircraft}">
+									<span class="material-symbols-outlined" aria-hidden="true">flight</span>
+									<span>
+										<b>항공기 정보</b>
+										<small>운항 항공기와 좌석 구성</small>
+									</span>
+								</a>
+						
+								<a th:href="@{/member/travel/service}">
+									<span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+									<span>
+										<b>유료 부가서비스</b>
+										<small>좌석 지정과 추가 서비스</small>
+									</span>
+								</a>
+							</div>
+						</div>
 
 						<!-- 스카이클럽 -->
 						<div class="sr-nav-item">
@@ -308,6 +348,10 @@
 					<a th:href="@{/member/member_schedule}">출도착 · 스케줄</a>
 					<a th:href="@{/member/member_route}">운항 노선</a>
 					<a th:href="@{/member/member_functions}">기능 한눈에 보기</a>
+					<a th:href="@{/member/travel/airport}">공항에서</a>
+					<a th:href="@{/member/travel/cabin}">기내에서</a>
+					<a th:href="@{/member/travel/aircraft}">항공기 정보</a>
+					<a th:href="@{/member/travel/service}">유료 부가서비스</a>
 					<a th:href="@{/member/notice/list}">공지사항</a>
 					<a th:href="@{/member/member_mypage}" sec:authorize="isAuthenticated()">마이페이지</a>
 				</th:block>
