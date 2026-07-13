@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.spring.member.booking.dao.SHBookingMapper">
+
+
+	<resultMap id="seatMapHeaderResultMap" type="kr.spring.member.booking.vo.SHSeatMapVO">
+		<id     property="flightId"          column="flight_id"/>
+		<result property="flightNo"          column="flight_no"/>
+		<result property="departureIataCode" column="departure_iata_code"/>
+		<result property="arrivalIataCode"   column="arrival_iata_code"/>
+		<result property="departureTime"     column="departure_time"/>
+		<result property="arrivalTime"       column="arrival_time"/>
+		<result property="seatClassId"       column="seat_class_id"/>
+		<result property="seatClassName"     column="seat_class_name"/>
+		<result property="price"             column="price"/>
+	</resultMap>
+
+	<resultMap id="seatResultMap" type="kr.spring.member.booking.vo.SHSeatVO">
+		<id     property="seatId"      column="seat_id"/>
+		<result property="seatNo"      column="seat_no"/>
+		<result property="seatClassId" column="seat_class_id"/>
+		<result property="occupiedYn"  column="occupied_yn"/>
+	</resultMap>
+
+	<resultMap id="bookingResultMap" type="kr.spring.member.booking.vo.SHBookingVO">
+		<id     property="bookingId"             column="booking_id"/>
+		<result property="bookingNo"             column="booking_no"/>
+		<result property="memberId"              column="member_id"/>
+		<result property="tripType"              column="trip_type"/>
+		<result property="outboundFlightId"      column="outbound_flight_id"/>
+		<result property="inboundFlightId"       column="inbound_flight_id"/>
+		<result property="status"                column="status"/>
+		<result property="totalAmount"           column="total_amount"/>
+		<result property="createdAt"             column="created_at"/>
+		<result property="cancelledAt"           column="cancelled_at"/>
+		<result property="outboundFlightNo"      column="outbound_flight_no"/>
+		<result property="outboundDepartureIata" column="outbound_departure_iata"/>
+		<result property="outboundArrivalIata"   column="outbound_arrival_iata"/>
+		<result property="outboundDepartureTime" column="outbound_departure_time"/>
+		<result property="inboundFlightNo"       column="inbound_flight_no"/>
+		<result property="inboundDepartureIata"  column="inbound_departure_iata"/>
+		<result property="inboundArrivalIata"    column="inbound_arrival_iata"/>
+		<result property="inboundDepartureTime"  column="inbound_departure_time"/>
+		<result property="passengerCount"        column="passenger_count"/>
+		<result property="validAmount"           column="valid_amount"/>
+	</resultMap>
+
+	<resultMap id="ticketResultMap" type="kr.spring.member.booking.vo.SHTicketVO">
+		<id     property="ticketId"           column="ticket_id"/>
+		<result property="bookingId"          column="booking_id"/>
+		<result property="bookingPassengerId" column="booking_passenger_id"/>
+		<result property="flightId"           column="flight_id"/>
+		<result property="seatId"             column="seat_id"/>
+		<result property="legType"            column="leg_type"/>
+		<result property="fareAmount"         column="fare_amount"/>
+		<result property="holdStatus"         column="hold_status"/>
+		<result property="heldAt"             column="held_at"/>
+		<result property="expiredAt"          column="expired_at"/>
+		<result property="checkinStatus"      column="checkin_status"/>
+		<result property="passengerName"      column="passenger_name"/>
+		<result property="passengerBirthDate" column="passenger_birth_date"/>
+		<result property="passengerType"      column="passenger_type"/>
+		<result property="seatNo"             column="seat_no"/>
+		<result property="seatClassName"      column="seat_class_name"/>
+		<result property="flightNo"           column="flight_no"/>
+		<result property="departureIataCode"  column="departure_iata_code"/>
+		<result property="arrivalIataCode"    column="arrival_iata_code"/>
+		<result property="departureTime"      column="departure_time"/>
+		<result property="arrivalTime"        column="arrival_time"/>
+	</resultMap>
+
+	<resultMap id="paymentResultMap" type="kr.spring.member.booking.vo.SHPaymentVO">
+		<id     property="paymentId"    column="payment_id"/>
+		<result property="bookingId"    column="booking_id"/>
+		<result property="method"       column="method"/>
+		<result property="amount"       column="amount"/>
+		<result property="status"       column="status"/>
+		<result property="impUid"       column="imp_uid"/>
+		<result property="merchantUid"  column="merchant_uid"/>
+		<result property="paidAt"       column="paid_at"/>
+		<result property="refundAmount" column="refund_amount"/>
+		<result property="refundedAt"   column="refunded_at"/>
+		<result property="createdAt"    column="created_at"/>
+	</resultMap>
+
+	<resultMap id="savedPassengerResultMap" type="kr.spring.member.booking.vo.SHBookingPassengerVO">
+		<id     property="savedPassengerId" column="saved_passenger_id"/>
+		<result property="memberId"         column="member_id"/>
+		<result property="name"             column="name"/>
+		<result property="birthDate"        column="birth_date"/>
+		<result property="phone"            column="phone"/>
+		<result property="gender"           column="gender"/>
+		<result property="passportNo"       column="passport_no"/>
+		<result property="passportExpiry"   column="passport_expiry"/>
+	</resultMap>
+
+
+	<!--
+		좌석 점유 판정 공통 조건
+
+		HOLDING 중 만료되지 않은 것 + CONFIRMED 만 점유로 본다.
+		RELEASED / CANCELLED 는 재판매 가능.
+	-->
+	<sql id="activeTicketCondition">
+		t.hold_status = 'CONFIRMED'
+		OR (
+			t.hold_status = 'HOLDING'
+			AND (t.expired_at IS NULL OR t.expired_at &gt; SYSTIMESTAMP)
+		)
+	</sql>
+
+
+	<!-- ===================== 좌석 선택 ===================== -->
+
+	<select id="selectSeatMapHeader" resultMap="seatMapHeaderResultMap">
+
+		SELECT
+			f.flight_id,
+			f.flight_no,
+			TRIM(dep.iata_code) AS departure_iata_code,
+			TRIM(arr.iata_code) AS arrival_iata_code,
+			f.departure_time,
+			f.arrival_time,
+			sc.seat_class_id,
+			sc.class_name       AS seat_class_name,
+			ff.price
+		FROM FLIGHT f
+		JOIN ROUTE r        ON r.route_id = f.route_id
+		JOIN AIRPORT dep    ON dep.airport_id = r.departure_airport_id
+		JOIN AIRPORT arr    ON arr.airport_id = r.arrival_airport_id
+		JOIN FLIGHT_FARE ff ON ff.flight_id = f.flight_id
+		                   AND ff.seat_class_id = #{seatClassId}
+		JOIN SEAT_CLASS sc  ON sc.seat_class_id = ff.seat_class_id
+		WHERE f.flight_id = #{flightId}
+		  AND f.is_deleted = 'N'
+		  AND f.flight_status IN ('SCHEDULED', 'DELAYED')
+		  AND f.departure_time &gt; SYSTIMESTAMP
+
+	</select>
+
+
+	<select id="selectSeatList" resultMap="seatResultMap">
+
+		SELECT
+			s.seat_id,
+			s.seat_no,
+			s.seat_class_id,
+			CASE
+				WHEN EXISTS (
+					SELECT 1
+					FROM TICKET t
+					WHERE t.seat_id = s.seat_id
+					  AND t.flight_id = #{flightId}
+					  AND (<include refid="activeTicketCondition"/>)
+				)
+				THEN 'Y'
+				ELSE 'N'
+			END AS occupied_yn
+		FROM SEAT s
+		JOIN FLIGHT f ON f.aircraft_id = s.aircraft_id
+		WHERE f.flight_id = #{flightId}
+		  AND s.seat_class_id = #{seatClassId}
+		  AND s.is_active = 'Y'
+		ORDER BY
+			TO_NUMBER(REGEXP_SUBSTR(s.seat_no, '[0-9]+')),
+			REGEXP_SUBSTR(s.seat_no, '[A-Z]+')
+
+	</select>
+
+
+	<!-- HOLD 직전 재확인 : 이미 누가 잡았는가 -->
+	<select id="countOccupiedSeat" resultType="int">
+
+		SELECT COUNT(*)
+		FROM TICKET t
+		WHERE t.flight_id = #{flightId}
+		  AND t.seat_id IN
+			<foreach collection="seatIds" item="seatId" open="(" separator="," close=")">
+				#{seatId}
+			</foreach>
+		  AND (<include refid="activeTicketCondition"/>)
+
+	</select>
+
+
+	<!-- ===================== 예약 생성 ===================== -->
+
+	<insert id="insertBooking" parameterType="kr.spring.member.booking.vo.SHBookingVO"
+			useGeneratedKeys="true" keyProperty="bookingId" keyColumn="booking_id">
+
+		INSERT INTO BOOKING (
+			booking_no, member_id, trip_type,
+			outbound_flight_id, inbound_flight_id,
+			status, total_amount
+		) VALUES (
+			#{bookingNo}, #{memberId}, #{tripType},
+			#{outboundFlightId}, #{inboundFlightId,jdbcType=NUMERIC},
+			'PENDING', 0
+		)
+
+	</insert>
+
+
+	<insert id="insertBookingPassenger" parameterType="kr.spring.member.booking.vo.SHBookingPassengerVO"
+			useGeneratedKeys="true" keyProperty="bookingPassengerId" keyColumn="booking_passenger_id">
+
+		INSERT INTO BOOKING_PASSENGER (
+			booking_id, saved_passenger_id, name, birth_date,
+			phone, gender, passport_no, passport_expiry, passenger_type
+		) VALUES (
+			#{bookingId},
+			#{savedPassengerId,jdbcType=NUMERIC},
+			#{name},
+			#{birthDate,jdbcType=DATE},
+			#{phone,jdbcType=VARCHAR},
+			#{gender,jdbcType=CHAR},
+			#{passportNo,jdbcType=VARCHAR},
+			#{passportExpiry,jdbcType=DATE},
+			#{passengerType}
+		)
+
+	</insert>
+
+
+	<!--
+		좌석 HOLD
+
+		uq_ticket_active_seat 부분 유니크 인덱스가 걸려 있으므로
+		동시에 같은 좌석을 잡으면 여기서 ORA-00001 이 터진다.
+		→ 애플리케이션 락 없이 DB 가 경쟁을 막아 준다.
+	-->
+	<insert id="insertTicket" parameterType="kr.spring.member.booking.vo.SHTicketVO"
+			useGeneratedKeys="true" keyProperty="ticketId" keyColumn="ticket_id">
+
+		INSERT INTO TICKET (
+			booking_id, booking_passenger_id, flight_id, seat_id,
+			leg_type, fare_amount, hold_status, held_at, expired_at
+		) VALUES (
+			#{bookingId}, #{bookingPassengerId}, #{flightId}, #{seatId},
+			#{legType}, #{fareAmount}, 'HOLDING', SYSTIMESTAMP,
+			SYSTIMESTAMP + NUMTODSINTERVAL(#{holdMinutes}, 'MINUTE')
+		)
+
+	</insert>
+
+
+	<update id="updateBookingTotalAmount">
+
+		UPDATE BOOKING
+		SET total_amount = #{totalAmount}
+		WHERE booking_id = #{bookingId}
+
+	</update>
+
+
+	<!-- ===================== 결제 ===================== -->
+
+	<insert id="insertPayment" parameterType="kr.spring.member.booking.vo.SHPaymentVO"
+			useGeneratedKeys="true" keyProperty="paymentId" keyColumn="payment_id">
+
+		INSERT INTO PAYMENT (
+			booking_id, method, amount, status, merchant_uid
+		) VALUES (
+			#{bookingId}, #{method}, #{amount}, 'READY', #{merchantUid}
+		)
+
+	</insert>
+
+
+	<select id="selectPaymentByBooking" resultMap="paymentResultMap">
+
+		SELECT
+			payment_id, booking_id, method, amount, status,
+			imp_uid, merchant_uid, paid_at,
+			refund_amount, refunded_at, created_at
+		FROM PAYMENT
+		WHERE booking_id = #{bookingId}
+		ORDER BY payment_id DESC
+		FETCH FIRST 1 ROWS ONLY
+
+	</select>
+
+
+	<update id="updatePaymentPaid" parameterType="kr.spring.member.booking.vo.SHPaymentVO">
+
+		UPDATE PAYMENT
+		SET status  = 'PAID',
+			imp_uid = #{impUid},
+			method  = #{method},
+			paid_at = SYSTIMESTAMP
+		WHERE booking_id = #{bookingId}
+		  AND status = 'READY'
+
+	</update>
+
+
+	<update id="updatePaymentFailed">
+
+		UPDATE PAYMENT
+		SET status = 'FAILED'
+		WHERE booking_id = #{bookingId}
+		  AND status = 'READY'
+
+	</update>
+
+
+	<update id="confirmTickets">
+
+		UPDATE TICKET
+		SET hold_status = 'CONFIRMED',
+			expired_at  = NULL
+		WHERE booking_id = #{bookingId}
+		  AND hold_status = 'HOLDING'
+		  AND (expired_at IS NULL OR expired_at &gt; SYSTIMESTAMP)
+
+	</update>
+
+
+	<update id="updateBookingStatus">
+
+		UPDATE BOOKING
+		SET status = #{status},
+			cancelled_at = CASE
+				WHEN #{status} = 'CANCELLED' THEN SYSTIMESTAMP
+				ELSE cancelled_at
+			END
+		WHERE booking_id = #{bookingId}
+
+	</update>
+
+
+	<!-- ===================== 좌석 해제 ===================== -->
+
+	<update id="releaseTicketsByBooking">
+
+		UPDATE TICKET
+		SET hold_status = 'RELEASED'
+		WHERE booking_id = #{bookingId}
+		  AND hold_status = 'HOLDING'
+
+	</update>
+
+
+	<!--
+		만료된 HOLD 일괄 해제 (스케줄러 1분 주기)
+
+		expiry-aware 쿼리로 조회 시점에 걸러내고 있지만,
+		실제 행 상태도 정리해야 좌석맵의 점유 표시가 정확해진다.
+	-->
+	<update id="releaseExpiredTickets">
+
+		UPDATE TICKET
+		SET hold_status = 'RELEASED'
+		WHERE hold_status = 'HOLDING'
+		  AND expired_at IS NOT NULL
+		  AND expired_at &lt;= SYSTIMESTAMP
+
+	</update>
+
+
+	<update id="failEmptyPendingBookings">
+
+		UPDATE BOOKING b
+		SET b.status = 'FAILED'
+		WHERE b.status = 'PENDING'
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM TICKET t
+			WHERE t.booking_id = b.booking_id
+			  AND t.hold_status IN ('HOLDING', 'CONFIRMED')
+		  )
+
+	</update>
+
+
+	<!-- ===================== 예약 조회 ===================== -->
+
+	<select id="selectBookingList" resultMap="bookingResultMap">
+
+		SELECT
+			b.booking_id,
+			b.booking_no,
+			b.member_id,
+			b.trip_type,
+			b.outbound_flight_id,
+			b.inbound_flight_id,
+			b.status,
+			b.total_amount,
+			b.created_at,
+			b.cancelled_at,
+
+			of.flight_no           AS outbound_flight_no,
+			TRIM(odep.iata_code)   AS outbound_departure_iata,
+			TRIM(oarr.iata_code)   AS outbound_arrival_iata,
+			of.departure_time      AS outbound_departure_time,
+
+			inf.flight_no          AS inbound_flight_no,
+			TRIM(idep.iata_code)   AS inbound_departure_iata,
+			TRIM(iarr.iata_code)   AS inbound_arrival_iata,
+			inf.departure_time     AS inbound_departure_time,
+
+			(SELECT COUNT(*) FROM BOOKING_PASSENGER bp
+			  WHERE bp.booking_id = b.booking_id)              AS passenger_count,
+
+			NVL((SELECT SUM(t.fare_amount) FROM TICKET t
+				  WHERE t.booking_id = b.booking_id
+				    AND t.hold_status IN ('HOLDING', 'CONFIRMED')), 0) AS valid_amount
+
+		FROM BOOKING b
+		JOIN FLIGHT of      ON of.flight_id = b.outbound_flight_id
+		JOIN ROUTE oroute   ON oroute.route_id = of.route_id
+		JOIN AIRPORT odep   ON odep.airport_id = oroute.departure_airport_id
+		JOIN AIRPORT oarr   ON oarr.airport_id = oroute.arrival_airport_id
+
+		LEFT JOIN FLIGHT inf    ON inf.flight_id = b.inbound_flight_id
+		LEFT JOIN ROUTE iroute  ON iroute.route_id = inf.route_id
+		LEFT JOIN AIRPORT idep  ON idep.airport_id = iroute.departure_airport_id
+		LEFT JOIN AIRPORT iarr  ON iarr.airport_id = iroute.arrival_airport_id
+
+		WHERE b.member_id = #{memberId}
+		  AND b.status IN ('CONFIRMED', 'CANCELLED')
+		ORDER BY b.created_at DESC
+
+	</select>
+
+
+	<select id="selectBooking" resultMap="bookingResultMap">
+
+		SELECT
+			b.booking_id,
+			b.booking_no,
+			b.member_id,
+			b.trip_type,
+			b.outbound_flight_id,
+			b.inbound_flight_id,
+			b.status,
+			b.total_amount,
+			b.created_at,
+			b.cancelled_at,
+
+			of.flight_no           AS outbound_flight_no,
+			TRIM(odep.iata_code)   AS outbound_departure_iata,
+			TRIM(oarr.iata_code)   AS outbound_arrival_iata,
+			of.departure_time      AS outbound_departure_time,
+
+			inf.flight_no          AS inbound_flight_no,
+			TRIM(idep.iata_code)   AS inbound_departure_iata,
+			TRIM(iarr.iata_code)   AS inbound_arrival_iata,
+			inf.departure_time     AS inbound_departure_time,
+
+			(SELECT COUNT(*) FROM BOOKING_PASSENGER bp
+			  WHERE bp.booking_id = b.booking_id)              AS passenger_count,
+
+			NVL((SELECT SUM(t.fare_amount) FROM TICKET t
+				  WHERE t.booking_id = b.booking_id
+				    AND t.hold_status IN ('HOLDING', 'CONFIRMED')), 0) AS valid_amount
+
+		FROM BOOKING b
+		JOIN FLIGHT of      ON of.flight_id = b.outbound_flight_id
+		JOIN ROUTE oroute   ON oroute.route_id = of.route_id
+		JOIN AIRPORT odep   ON odep.airport_id = oroute.departure_airport_id
+		JOIN AIRPORT oarr   ON oarr.airport_id = oroute.arrival_airport_id
+
+		LEFT JOIN FLIGHT inf    ON inf.flight_id = b.inbound_flight_id
+		LEFT JOIN ROUTE iroute  ON iroute.route_id = inf.route_id
+		LEFT JOIN AIRPORT idep  ON idep.airport_id = iroute.departure_airport_id
+		LEFT JOIN AIRPORT iarr  ON iarr.airport_id = iroute.arrival_airport_id
+
+		WHERE b.booking_id = #{bookingId}
+		  AND b.member_id = #{memberId}
+
+	</select>
+
+
+	<select id="selectTicketList" resultMap="ticketResultMap">
+
+		SELECT
+			t.ticket_id,
+			t.booking_id,
+			t.booking_passenger_id,
+			t.flight_id,
+			t.seat_id,
+			t.leg_type,
+			t.fare_amount,
+			t.hold_status,
+			t.held_at,
+			t.expired_at,
+			t.checkin_status,
+
+			bp.name           AS passenger_name,
+			bp.birth_date     AS passenger_birth_date,
+			bp.passenger_type,
+
+			s.seat_no,
+			sc.class_name     AS seat_class_name,
+
+			f.flight_no,
+			TRIM(dep.iata_code) AS departure_iata_code,
+			TRIM(arr.iata_code) AS arrival_iata_code,
+			f.departure_time,
+			f.arrival_time
+
+		FROM TICKET t
+		JOIN BOOKING_PASSENGER bp ON bp.booking_passenger_id = t.booking_passenger_id
+		JOIN SEAT s               ON s.seat_id = t.seat_id
+		JOIN SEAT_CLASS sc        ON sc.seat_class_id = s.seat_class_id
+		JOIN FLIGHT f             ON f.flight_id = t.flight_id
+		JOIN ROUTE r              ON r.route_id = f.route_id
+		JOIN AIRPORT dep          ON dep.airport_id = r.departure_airport_id
+		JOIN AIRPORT arr          ON arr.airport_id = r.arrival_airport_id
+
+		WHERE t.booking_id = #{bookingId}
+		ORDER BY
+			CASE t.leg_type WHEN 'OUTBOUND' THEN 0 ELSE 1 END,
+			bp.booking_passenger_id
+
+	</select>
+
+
+	<!-- ===================== 취소 / 환불 ===================== -->
+
+	<!-- 취소 대상 티켓 (bookingPassengerId 가 null 이면 전체) -->
+	<select id="selectCancelableTicketList" resultMap="ticketResultMap">
+
+		SELECT
+			t.ticket_id,
+			t.booking_id,
+			t.booking_passenger_id,
+			t.fare_amount,
+			t.hold_status,
+			t.leg_type
+		FROM TICKET t
+		WHERE t.booking_id = #{bookingId}
+		  AND t.hold_status = 'CONFIRMED'
+		<if test="bookingPassengerId != null">
+		  AND t.booking_passenger_id = #{bookingPassengerId}
+		</if>
+
+	</select>
+
+
+	<update id="cancelTickets">
+
+		UPDATE TICKET
+		SET hold_status = 'CANCELLED'
+		WHERE booking_id = #{bookingId}
+		  AND hold_status = 'CONFIRMED'
+		<if test="bookingPassengerId != null">
+		  AND booking_passenger_id = #{bookingPassengerId}
+		</if>
+
+	</update>
+
+
+	<insert id="insertRefund">
+
+		INSERT INTO REFUND (
+			payment_id, ticket_id, amount, reason
+		) VALUES (
+			#{paymentId}, #{ticketId}, #{amount}, #{reason,jdbcType=VARCHAR}
+		)
+
+	</insert>
+
+
+	<update id="updatePaymentRefund">
+
+		UPDATE PAYMENT
+		SET refund_amount = NVL(refund_amount, 0) + #{refundAmount},
+			status        = #{status},
+			refunded_at   = SYSTIMESTAMP
+		WHERE payment_id = #{paymentId}
+
+	</update>
+
+
+	<select id="countActiveTicket" resultType="int">
+
+		SELECT COUNT(*)
+		FROM TICKET
+		WHERE booking_id = #{bookingId}
+		  AND hold_status IN ('HOLDING', 'CONFIRMED')
+
+	</select>
+
+
+	<!-- ===================== 저장된 탑승객 ===================== -->
+
+	<select id="selectSavedPassengerList" resultMap="savedPassengerResultMap">
+
+		SELECT
+			saved_passenger_id, member_id, name, birth_date,
+			phone, gender, passport_no, passport_expiry
+		FROM SAVED_PASSENGER
+		WHERE member_id = #{memberId}
+		ORDER BY created_at DESC
+
+	</select>
+
+
+	<insert id="insertSavedPassenger" parameterType="kr.spring.member.booking.vo.SHBookingPassengerVO">
+
+		INSERT INTO SAVED_PASSENGER (
+			member_id, name, birth_date, phone, gender, passport_no, passport_expiry
+		)
+		SELECT
+			#{memberId}, #{name}, #{birthDate,jdbcType=DATE},
+			#{phone,jdbcType=VARCHAR}, #{gender,jdbcType=CHAR},
+			#{passportNo,jdbcType=VARCHAR}, #{passportExpiry,jdbcType=DATE}
+		FROM DUAL
+		WHERE NOT EXISTS (
+			SELECT 1 FROM SAVED_PASSENGER sp
+			WHERE sp.member_id = #{memberId}
+			  AND sp.name = #{name}
+			  AND sp.birth_date = #{birthDate,jdbcType=DATE}
+		)
+
+	</insert>
+
+</mapper>
