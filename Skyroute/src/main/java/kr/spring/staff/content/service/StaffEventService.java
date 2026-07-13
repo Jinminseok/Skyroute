@@ -14,10 +14,11 @@ public interface StaffEventService {
 	public void updateEvent(EventVO event);
 	public void hideEvent(long event_id);
 	public void endEvent(long event_id);
-	public void showEvent(long event_id);
+	public int showEvent(long event_id);
 	public List<EventParticipationVO> selectParticipationList(long event_id);
 
 	public List<EventVO> selectActiveEventList();
+	public List<EventVO> selectUserEventList();
 
 	public void participateEvent(long event_id, long member_id);
 	public EventParticipationVO selectMyEventParticipation(long event_id, long member_id);
@@ -28,4 +29,6 @@ public interface StaffEventService {
 	public int selectEventRowCount(Map<String, Object> map);
 	public List<EventVO> selectEventSearchList(Map<String, Object> map);
 	public Map<String, Object> selectEventStats();
+	
+	
 }

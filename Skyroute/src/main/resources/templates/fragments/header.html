@@ -9,6 +9,14 @@
 		<div class="sr-topbar">
 			<div class="sr-wrap sr-topbar-inner">
 
+				<a th:href="@{/member/event/list}" class="sr-topbar-link">
+					<span class="material-symbols-outlined" aria-hidden="true">celebration</span>
+					이벤트
+				</a>
+			
+				<span class="sr-topbar-divider" aria-hidden="true"></span>
+				
+
 				<!-- 고객센터 드롭다운 -->
 				<div class="sr-topbar-dropdown">
 					<button type="button" class="sr-topbar-link" aria-haspopup="true" aria-expanded="false">
@@ -352,6 +360,7 @@
 					<a th:href="@{/member/travel/member_cabin}">기내에서</a>
 					<a th:href="@{/member/travel/member_aircraft}">항공기 정보</a>
 					<a th:href="@{/member/travel/member_service}">유료 부가서비스</a>
+					<a th:href="@{/member/event/list}">이벤트</a>
 					<a th:href="@{/member/notice/list}">공지사항</a>
 					<a th:href="@{/member/member_mypage}" sec:authorize="isAuthenticated()">마이페이지</a>
 				</th:block>

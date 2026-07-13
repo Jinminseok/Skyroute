@@ -14,7 +14,6 @@
 			AND E.IS_VISIBLE = 'Y'
 			AND E.IS_ENDED = 'N'
 			AND NVL(E.RESULT_STATUS, 'PENDING') = 'PENDING'
-			AND SYSDATE >= E.START_DATE
 			AND SYSDATE &lt; E.END_DATE + 1
 		</if>
 		<if test="status == 'ongoing'">
@@ -114,7 +113,6 @@
 				   WHEN E.IS_VISIBLE = 'Y'
 					AND E.IS_ENDED = 'N'
 					AND NVL(E.RESULT_STATUS, 'PENDING') = 'PENDING'
-					AND SYSDATE >= E.START_DATE
 					AND SYSDATE &lt; E.END_DATE + 1
 				   THEN 1
 				   ELSE 0
@@ -287,6 +285,28 @@ WINNER_COUNT = #{winner_count},
 		ORDER BY DISPLAY_ORDER ASC, CREATED_AT DESC
 	</select>
 	
+	<select id="selectUserEventList"
+			resultType="kr.spring.staff.content.vo.EventVO">
+		SELECT EVENT_ID,
+			   TITLE,
+			   CONTENT,
+			   START_DATE,
+			   END_DATE,
+			   IMAGE_URL,
+			   DISPLAY_ORDER,
+			   CASE
+				   WHEN SYSDATE &lt; START_DATE THEN 'SCHEDULED'
+				   ELSE 'ONGOING'
+			   END AS EVENT_STATUS
+		FROM EVENT
+		WHERE IS_VISIBLE = 'Y'
+		  AND IS_ENDED = 'N'
+		  AND NVL(RESULT_STATUS, 'PENDING') = 'PENDING'
+		  AND SYSDATE &lt; END_DATE + 1
+		ORDER BY DISPLAY_ORDER ASC,
+				 START_DATE ASC,
+				 CREATED_AT DESC
+	</select>
 	
 	<select id="selectParticipationList"
 			parameterType="long"

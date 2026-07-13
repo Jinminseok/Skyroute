@@ -77,7 +77,7 @@ public class MainController {
 		}
 
 
-		model.addAttribute("eventList", staffEventService.selectActiveEventList());
+		model.addAttribute("eventList", staffEventService.selectUserEventList());
 		model.addAttribute("airportList", flightSearchService.selectActiveAirportList());
 		model.addAttribute("seatClassList", seatClassList);
 		model.addAttribute("flightSearchForm", flightSearchForm);

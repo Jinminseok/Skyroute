@@ -63,9 +63,10 @@ public class StaffEventServiceImpl implements StaffEventService {
 	public void endEvent(long event_id) {
 		staffEventMapper.endEvent(event_id);
 	}
+	
 	@Override
-	public void showEvent(long event_id) {
-		staffEventMapper.showEvent(event_id);
+	public int showEvent(long event_id) {
+		return staffEventMapper.showEvent(event_id);
 	}
 
 	@Override
@@ -76,6 +77,11 @@ public class StaffEventServiceImpl implements StaffEventService {
 	@Override
 	public List<EventVO> selectActiveEventList() {
 		return staffEventMapper.selectActiveEventList();
+	}
+	
+	@Override
+	public List<EventVO> selectUserEventList() {
+		return staffEventMapper.selectUserEventList();
 	}
 
 	@Transactional
@@ -181,6 +187,8 @@ public class StaffEventServiceImpl implements StaffEventService {
 	public EventParticipationVO selectMyEventParticipation(long event_id, long member_id) {
 		return staffEventMapper.selectMyEventParticipation(event_id, member_id);
 	}
+	
+	
 	
 	
 }

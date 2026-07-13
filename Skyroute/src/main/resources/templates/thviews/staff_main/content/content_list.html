@@ -382,12 +382,16 @@
 							<td class="mono" th:text="${event.display_order}"></td>
 
 							<td>
-								<span class="badge"
-									  th:classappend="${event.display_visibility == '노출'} ? 'badge-ok' : 'badge-muted'"
-									  th:text="${event.display_visibility}">
+								<span th:if="${event.is_visible == 'Y'}"
+									  class="badge badge-ok">
+									노출
+								</span>
+							
+								<span th:unless="${event.is_visible == 'Y'}"
+									  class="badge badge-muted">
+									비노출
 								</span>
 							</td>
-
 							<td>
 								<span th:if="${event.progress_status == '진행 중'}"
 									  class="badge badge-ok">

@@ -291,14 +291,26 @@ public class StaffEventController {
 
 	@PostMapping("/show")
 	public String show(@RequestParam long event_id,
-					   @RequestParam(required = false) String returnUrl) {
-		staffEventService.showEvent(event_id);
+					   @RequestParam(required = false) String returnUrl,
+					   RedirectAttributes redirectAttributes) {
+
+		int updatedCount = staffEventService.showEvent(event_id);
+
+		if (updatedCount == 1) {
+			redirectAttributes.addFlashAttribute(
+					"message",
+					"이벤트를 노출 처리했습니다.");
+		} else {
+			redirectAttributes.addFlashAttribute(
+					"message",
+					"노출 처리에 실패했습니다. 이벤트 상태를 확인하세요.");
+		}
 
 		if (returnUrl != null && returnUrl.startsWith("/staff/content/")) {
 			return "redirect:" + returnUrl;
 		}
 
-		return "redirect:/staff/content/notice?tab=event";
+		return "redirect:/staff/content/notice/list?tab=event";
 	}
 	
 }

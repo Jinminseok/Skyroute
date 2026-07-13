@@ -23,7 +23,7 @@ public interface StaffEventMapper {
 	public void updateEvent(EventVO event);
 	public void hideEvent(@Param("event_id") long event_id);
 	public void endEvent(@Param("event_id") long event_id);
-	public void showEvent(@Param("event_id") long event_id);
+	public int showEvent(@Param("event_id") long event_id);
 	public void announceEventResult(@Param("event_id") long event_id);
 
 	public List<EventVO> selectActiveEventList();
@@ -41,5 +41,8 @@ public interface StaffEventMapper {
 	public EventParticipationVO selectMyEventParticipation(
 			@Param("event_id") long event_id,
 			@Param("member_id") long member_id);
+	
+	//사용자 이벤트 목록 전용 조회
+	public List<EventVO> selectUserEventList();
 	
 }
