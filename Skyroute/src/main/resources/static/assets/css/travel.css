@@ -1,0 +1,881 @@
+@charset "UTF-8";
+
+.travel-page {
+	width: 100%;
+	min-height: 560px;
+	background: var(--bg);
+	color: var(--ink);
+	font-family: "Pretendard", sans-serif;
+}
+
+.travel-wrap {
+	padding-top: 40px;
+	padding-bottom: 60px;
+}
+
+.travel-heading {
+	margin-bottom: 24px;
+}
+
+.travel-heading h2 {
+	margin: 5px 0 0;
+	color: var(--ink-700);
+	font-size: 22px;
+	font-weight: 600;
+	letter-spacing: -0.5px;
+}
+
+.travel-heading p {
+	margin: 8px 0 0;
+	color: var(--mut);
+	font-size: 13px;
+	font-weight: 300;
+	line-height: 1.6;
+}
+
+.travel-tabs {
+	display: flex;
+	gap: 20px;
+	margin-bottom: 28px;
+	padding-bottom: 12px;
+	border-bottom: 2px solid var(--line);
+}
+
+.travel-tabs a {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 0;
+	color: var(--mut);
+	font-size: 16px;
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.travel-tabs a:hover {
+	color: var(--accent);
+}
+
+.travel-tabs a.active {
+	color: var(--accent);
+	font-weight: 600;
+}
+
+.travel-tabs a.active::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: -14px;
+	left: 0;
+	height: 2px;
+	background: var(--accent);
+}
+
+.travel-content {
+	width: 100%;
+}
+
+.travel-title {
+	margin-bottom: 22px;
+}
+
+.travel-title-label {
+	margin: 0 0 7px;
+	color: var(--accent);
+	font-family: var(--sans-eng);
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+}
+
+.travel-title h2 {
+	margin: 0 0 7px;
+	color: var(--ink-700);
+	font-size: 20px;
+	font-weight: 600;
+	letter-spacing: -0.4px;
+}
+
+.travel-title p {
+	margin: 0;
+	color: var(--mut);
+	font-size: 13px;
+	font-weight: 300;
+	line-height: 1.65;
+}
+
+/* 공항 조회 */
+
+.airport-search {
+	display: grid;
+	grid-template-columns: 160px minmax(0, 1fr) 130px;
+	align-items: end;
+	gap: 0;
+	margin-bottom: 22px;
+	padding: 8px;
+	background: var(--paper);
+	border: 1px solid rgba(0, 102, 226, 0.08);
+	border-radius: 18px;
+	box-shadow: var(--sh);
+}
+
+.airport-search label {
+	display: flex;
+	align-items: center;
+	height: 58px;
+	padding: 0 18px;
+	color: var(--mut);
+	font-size: 12px;
+	font-weight: 400;
+	border-right: 1px solid var(--line);
+}
+
+.airport-search select {
+	width: 100%;
+	height: 58px;
+	padding: 0 18px;
+	color: var(--ink-700);
+	font-family: inherit;
+	font-size: 14px;
+	background: #ffffff;
+	border: 0;
+	outline: none;
+}
+
+.airport-search button {
+	align-self: center;
+	height: 42px;
+	margin: 0 12px;
+	padding: 0 26px;
+	color: #ffffff;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	background: var(--accent);
+	border: 0;
+	border-radius: 24px;
+	box-shadow: 0 4px 14px rgba(0, 102, 226, 0.15);
+	cursor: pointer;
+}
+
+.airport-search button:hover {
+	background: var(--accent-700);
+}
+
+.airport-info-empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 9px;
+	min-height: 72px;
+	padding: 18px 22px;
+	color: var(--mut);
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+}
+
+.airport-info-empty .material-symbols-outlined {
+	color: var(--accent);
+	font-size: 23px;
+}
+
+.airport-info-empty p {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 300;
+}
+
+.airport-info {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 14px;
+}
+
+.airport-info-card {
+	min-height: 138px;
+	padding: 22px;
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	transition: 0.15s;
+}
+
+.airport-info-card:hover {
+	border-color: var(--accent);
+	transform: translateY(-1px);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+}
+
+.airport-info-card .material-symbols-outlined {
+	display: grid;
+	place-items: center;
+	width: 40px;
+	height: 40px;
+	margin-bottom: 13px;
+	color: var(--accent);
+	font-size: 21px;
+	background: var(--accent-soft);
+	border-radius: 10px;
+}
+
+.airport-info-card h3 {
+	margin: 0 0 6px;
+	color: var(--mut);
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.airport-info-card p {
+	margin: 0;
+	color: var(--ink-700);
+	font-size: 16px;
+	font-weight: 500;
+	line-height: 1.5;
+}
+
+/* 기내 클래스 */
+
+.cabin-class-list {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 16px;
+	margin-top: 20px;
+}
+
+.cabin-class-card {
+	position: relative;
+	height: 230px;
+	padding: 0;
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	overflow: hidden;
+	cursor: pointer;
+	transition: 0.15s;
+}
+
+.cabin-class-card:hover {
+	border-color: var(--accent);
+	transform: translateY(-1px);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+}
+
+.cabin-class-card.is-selected {
+	border-color: var(--accent);
+	box-shadow: 0 0 0 1px var(--accent);
+}
+
+.cabin-class-card img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.3s ease;
+}
+
+.cabin-class-card:hover img {
+	transform: scale(1.03);
+}
+
+.cabin-class-card::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		to top,
+		rgba(15, 23, 42, 0.82),
+		rgba(15, 23, 42, 0.05) 65%
+	);
+}
+
+.cabin-class-overlay {
+	position: absolute;
+	right: 20px;
+	bottom: 18px;
+	left: 20px;
+	z-index: 1;
+	color: #ffffff;
+	text-align: left;
+}
+
+.cabin-class-overlay small {
+	display: block;
+	margin-bottom: 5px;
+	font-family: var(--sans-eng);
+	font-size: 10px;
+	font-style: normal;
+	font-weight: 500;
+	letter-spacing: 1.5px;
+	opacity: 0.85;
+}
+
+.cabin-class-overlay strong {
+	display: block;
+	font-size: 20px;
+	font-weight: 600;
+}
+
+.cabin-class-overlay i {
+	display: block;
+	margin-top: 7px;
+	font-size: 11px;
+	font-style: normal;
+	font-weight: 300;
+	opacity: 0.8;
+}
+
+.cabin-class-detail {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
+	margin-top: 22px;
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	overflow: hidden;
+}
+
+.cabin-detail-image {
+	min-height: 330px;
+	background: #f8fafc;
+}
+
+.cabin-detail-image img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	min-height: 330px;
+	object-fit: cover;
+}
+
+.cabin-detail-content {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 36px;
+}
+
+.cabin-detail-label {
+	margin: 0 0 9px;
+	color: var(--accent);
+	font-family: var(--sans-eng);
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 1.7px;
+}
+
+.cabin-detail-content h2 {
+	margin: 0 0 14px;
+	color: var(--ink-700);
+	font-size: 25px;
+	font-weight: 600;
+}
+
+.cabin-detail-description {
+	margin: 0;
+	color: var(--mut);
+	font-size: 14px;
+	font-weight: 300;
+	line-height: 1.75;
+	word-break: keep-all;
+}
+
+.cabin-feature-list {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 9px;
+	margin: 22px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cabin-feature-list li {
+	position: relative;
+	padding: 11px 10px 11px 33px;
+	color: var(--ink-500);
+	font-size: 13px;
+	font-weight: 400;
+	background: #ffffff;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+}
+
+.cabin-feature-list li::before {
+	content: "check";
+	position: absolute;
+	top: 50%;
+	left: 10px;
+	color: var(--accent);
+	font-family: "Material Symbols Outlined";
+	font-size: 17px;
+	transform: translateY(-50%);
+}
+
+.cabin-service-section,
+.aircraft-seat-section,
+.optional-guide-section {
+	margin-top: 48px;
+	padding-top: 38px;
+	border-top: 1px solid var(--line);
+}
+
+.cabin-service-list {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 16px;
+}
+
+.cabin-service-card {
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	overflow: hidden;
+	transition: 0.15s;
+}
+
+.cabin-service-card:hover {
+	border-color: var(--accent);
+	transform: translateY(-1px);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+}
+
+.cabin-service-image {
+	height: 185px;
+	overflow: hidden;
+	background: #f8fafc;
+}
+
+.cabin-service-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.cabin-service-content {
+	padding: 20px;
+}
+
+.cabin-service-content .material-symbols-outlined {
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	margin-bottom: 12px;
+	color: var(--accent);
+	background: var(--accent-soft);
+	border-radius: 9px;
+}
+
+.cabin-service-content small {
+	display: block;
+	margin-bottom: 5px;
+	color: var(--accent);
+	font-family: var(--sans-eng);
+	font-size: 10px;
+	font-weight: 500;
+	letter-spacing: 1.3px;
+}
+
+.cabin-service-content h3 {
+	margin: 0 0 8px;
+	color: var(--ink-700);
+	font-size: 16px;
+	font-weight: 500;
+}
+
+.cabin-service-content p {
+	margin: 0;
+	color: var(--mut);
+	font-size: 13px;
+	font-weight: 300;
+	line-height: 1.65;
+	word-break: keep-all;
+}
+
+/* 유료 부가서비스 */
+
+.optional-service-list {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 14px;
+	margin-top: 20px;
+}
+
+.optional-service-card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	min-height: 165px;
+	padding: 22px;
+	font-family: inherit;
+	text-align: left;
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	cursor: pointer;
+	transition: 0.15s;
+}
+
+.optional-service-card:hover {
+	border-color: var(--accent);
+	transform: translateY(-1px);
+}
+
+.optional-service-card.is-selected {
+	color: var(--accent);
+	background: var(--accent-soft);
+	border-color: var(--accent);
+}
+
+.optional-service-card .material-symbols-outlined {
+	display: grid;
+	place-items: center;
+	width: 40px;
+	height: 40px;
+	margin-bottom: 18px;
+	color: var(--accent);
+	background: var(--accent-soft);
+	border-radius: 10px;
+}
+
+.optional-service-card.is-selected .material-symbols-outlined {
+	color: #ffffff;
+	background: var(--accent);
+}
+
+.optional-service-card strong {
+	margin-bottom: 7px;
+	color: var(--ink-700);
+	font-size: 15px;
+	font-weight: 500;
+}
+
+.optional-service-card small {
+	color: var(--mut);
+	font-size: 12px;
+	font-weight: 300;
+	line-height: 1.55;
+}
+
+.optional-service-detail {
+	display: grid;
+	grid-template-columns: 220px minmax(0, 1fr);
+	margin-top: 22px;
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	overflow: hidden;
+}
+
+.optional-detail-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 360px;
+	background: var(--accent-soft);
+}
+
+.optional-detail-icon .material-symbols-outlined {
+	color: var(--accent);
+	font-size: 88px;
+	font-variation-settings: "wght" 200;
+}
+
+.optional-detail-content {
+	padding: 36px;
+}
+
+.optional-detail-label {
+	margin: 0 0 8px;
+	color: var(--accent);
+	font-family: var(--sans-eng);
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 1.6px;
+}
+
+.optional-detail-content h2 {
+	margin: 0 0 13px;
+	color: var(--ink-700);
+	font-size: 24px;
+	font-weight: 600;
+}
+
+.optional-detail-description {
+	margin: 0;
+	color: var(--mut);
+	font-size: 14px;
+	font-weight: 300;
+	line-height: 1.75;
+}
+
+.optional-feature-list {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 9px;
+	margin: 22px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.optional-feature-list li {
+	position: relative;
+	padding: 11px 10px 11px 33px;
+	color: var(--ink-500);
+	font-size: 13px;
+	background: #ffffff;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+}
+
+.optional-feature-list li::before {
+	content: "check";
+	position: absolute;
+	top: 50%;
+	left: 10px;
+	color: var(--accent);
+	font-family: "Material Symbols Outlined";
+	font-size: 17px;
+	transform: translateY(-50%);
+}
+
+.optional-service-notice {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin-top: 20px;
+	padding: 12px 14px;
+	color: var(--accent);
+	background: var(--accent-soft);
+	border: 1px solid var(--line);
+	border-radius: 10px;
+}
+
+.optional-service-notice .material-symbols-outlined {
+	flex-shrink: 0;
+	font-size: 18px;
+}
+
+.optional-service-notice p {
+	margin: 0;
+	font-size: 12px;
+	font-weight: 300;
+	line-height: 1.6;
+}
+
+.optional-service-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 20px;
+	padding: 10px 18px;
+	color: #ffffff;
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: none;
+	background: var(--accent);
+	border-radius: 22px;
+}
+
+.optional-service-link:hover {
+	background: var(--accent-700);
+}
+
+.optional-guide-list {
+	display: grid;
+	gap: 10px;
+}
+
+.optional-guide-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 18px;
+	padding: 18px 20px;
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+}
+
+.optional-guide-item > span {
+	color: var(--accent);
+	font-family: var(--sans-eng);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.optional-guide-item h3 {
+	margin: 0 0 5px;
+	color: var(--ink-700);
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.optional-guide-item p {
+	margin: 0;
+	color: var(--mut);
+	font-size: 12px;
+	font-weight: 300;
+	line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+	.travel-tabs {
+		gap: 15px;
+		overflow-x: auto;
+	}
+
+	.travel-tabs a {
+		flex-shrink: 0;
+		font-size: 14px;
+	}
+
+	.airport-search {
+		grid-template-columns: 1fr;
+		padding: 14px;
+	}
+
+	.airport-search label {
+		height: auto;
+		padding: 0 0 8px;
+		border-right: 0;
+	}
+
+	.airport-search select {
+		height: 44px;
+		border: 1px solid var(--line);
+		border-radius: 7px;
+	}
+
+	.airport-search button {
+		width: 100%;
+		margin: 12px 0 0;
+	}
+
+	.airport-info,
+	.cabin-class-list,
+	.cabin-service-list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.cabin-class-detail,
+	.optional-service-detail {
+		grid-template-columns: 1fr;
+	}
+
+	.optional-detail-icon {
+		min-height: 180px;
+	}
+
+	.optional-service-list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 600px) {
+	.travel-wrap {
+		padding-top: 30px;
+	}
+
+	.travel-heading h2 {
+		font-size: 20px;
+	}
+
+	.airport-info,
+	.cabin-class-list,
+	.cabin-service-list,
+	.optional-service-list {
+		grid-template-columns: 1fr;
+	}
+
+	.cabin-class-card {
+		height: 210px;
+	}
+
+	.cabin-detail-content,
+	.optional-detail-content {
+		padding: 24px 20px;
+	}
+
+	.cabin-feature-list,
+	.optional-feature-list {
+		grid-template-columns: 1fr;
+	}
+}
+
+.airport-guide-section {
+	margin-top: 48px;
+	padding-top: 38px;
+	border-top: 1px solid var(--line);
+}
+
+.airport-guide-list {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+}
+
+.airport-guide-item {
+	position: relative;
+	display: grid;
+	grid-template-columns: 42px minmax(0, 1fr);
+	gap: 14px;
+	padding: 22px;
+	background: var(--paper);
+	border: 1px solid var(--line);
+	border-radius: var(--r);
+	transition: 0.15s;
+}
+
+.airport-guide-item:hover {
+	border-color: var(--accent);
+	transform: translateY(-1px);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+}
+
+.airport-guide-number {
+	position: absolute;
+	top: 16px;
+	right: 18px;
+	color: #dbe8fa;
+	font-family: var(--sans-eng);
+	font-size: 24px;
+	font-weight: 600;
+}
+
+.airport-guide-icon {
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	color: var(--accent);
+	background: var(--accent-soft);
+	border-radius: 10px;
+}
+
+.airport-guide-icon .material-symbols-outlined {
+	font-size: 21px;
+}
+
+.airport-guide-content h3 {
+	margin: 1px 0 7px;
+	color: var(--ink-700);
+	font-size: 15px;
+	font-weight: 500;
+}
+
+.airport-guide-content p {
+	margin: 0;
+	padding-right: 24px;
+	color: var(--mut);
+	font-size: 12.5px;
+	font-weight: 300;
+	line-height: 1.65;
+	word-break: keep-all;
+}
+
+@media (max-width: 700px) {
+	.airport-guide-list {
+		grid-template-columns: 1fr;
+	}
+}

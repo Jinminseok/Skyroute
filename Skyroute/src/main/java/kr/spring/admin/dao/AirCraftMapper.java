@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import kr.spring.admin.vo.AirCraftSeatClassVO;
 import kr.spring.admin.vo.AirCraftVO;
 
 @Mapper
@@ -18,4 +19,13 @@ public interface AirCraftMapper {
     
     // 항공기 사용여부 상태 변경 (토글)
     public void updateAircraftStatus(@Param("aircraft_id") int aircraft_id, @Param("is_active") String is_active);
+    
+    
+    public List<AirCraftVO> selectActiveAircraftList();
+
+    public AirCraftVO selectActiveAircraft(
+    		@Param("aircraft_id") int aircraft_id);
+
+    public List<AirCraftSeatClassVO> selectSeatClassCountList(
+    		@Param("aircraft_id") int aircraft_id);
 }

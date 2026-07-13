@@ -16,4 +16,8 @@ public interface StaffAirportService {
     public List<Map<String, Object>> getRegionList();
     public int checkDuplicateAirport(AirportVO airportVO);
     
+    public List<AirportVO> getActiveAirportList();
+
+    public AirportVO getActiveAirport(int airportId);
+    
 }

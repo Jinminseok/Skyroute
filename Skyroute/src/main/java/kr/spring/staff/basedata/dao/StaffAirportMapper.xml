@@ -20,6 +20,45 @@
 		LEFT JOIN REGION R ON A.region_id = R.region_id
 		ORDER BY A.airport_id ASC
 	</select>
+	
+	<select id="selectActiveAirportList"
+		resultType="kr.spring.staff.basedata.vo.AirportVO">
+		SELECT
+			A.airport_id AS airportId,
+			A.iata_code AS iataCode,
+			A.airport_name AS airportName,
+			A.country AS country,
+			A.timezone AS timezone,
+			A.region_id AS regionId,
+			R.region_name AS regionName,
+			A.flight_type AS flightType,
+			A.is_active AS isActive
+		FROM AIRPORT A
+		LEFT JOIN REGION R
+			ON A.region_id = R.region_id
+		WHERE A.is_active = 'Y'
+		ORDER BY A.airport_name ASC, A.flight_type ASC
+	</select>
+	
+	<select id="selectActiveAirport"
+		parameterType="int"
+		resultType="kr.spring.staff.basedata.vo.AirportVO">
+		SELECT
+			A.airport_id AS airportId,
+			A.iata_code AS iataCode,
+			A.airport_name AS airportName,
+			A.country AS country,
+			A.timezone AS timezone,
+			A.region_id AS regionId,
+			R.region_name AS regionName,
+			A.flight_type AS flightType,
+			A.is_active AS isActive
+		FROM AIRPORT A
+		LEFT JOIN REGION R
+			ON A.region_id = R.region_id
+		WHERE A.airport_id = #{airportId}
+		  AND A.is_active = 'Y'
+	</select>
 	<select id="selectAirport" parameterType="int"
 		resultType="kr.spring.staff.basedata.vo.AirportVO">
 		SELECT

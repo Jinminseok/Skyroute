@@ -3,88 +3,269 @@
 	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	  layout:decorate="~{layouts/layout_basic}">
 <head>
-	<title>공항 안내</title>
-	<link rel="stylesheet" th:href="@{/assets/css/travel.css}" type="text/css">
+	<meta charset="UTF-8">
+	<title>SkyRoute - 공항 안내</title>
+	<link rel="stylesheet"
+		  th:href="@{/assets/css/travel.css}"
+		  type="text/css">
 </head>
 <body>
 
-<div layout:fragment="content" class="travel-page">
+<div layout:fragment="panel" class="panel on travel-page">
+	<div class="wrap travel-wrap">
 
-	<section class="travel-visual">
-		<div class="travel-visual-inner">
-			<p>TRAVEL INFORMATION</p>
-			<h1>공항에서</h1>
-			<span>공항 이용에 필요한 정보를 확인해 보세요.</span>
-		</div>
-	</section>
-
-	<nav class="travel-tabs">
-		<a th:href="@{/member/travel/member_airport}"
-		   th:classappend="${activeTravel == 'airport'} ? ' is-on'">
-			공항에서
-		</a>
-
-		<a th:href="@{/member/travel/member_cabin}"
-		   th:classappend="${activeTravel == 'cabin'} ? ' is-on'">
-			기내에서
-		</a>
-
-		<a th:href="@{/member/travel/member_aircraft}"
-		   th:classappend="${activeTravel == 'aircraft'} ? ' is-on'">
-			항공기 정보
-		</a>
-
-		<a th:href="@{/member/travel/member_service}"
-		   th:classappend="${activeTravel == 'service'} ? ' is-on'">
-			유료 부가서비스
-		</a>
-	</nav>
-
-	<section class="travel-content">
-		<div class="travel-title">
-			<h2>공항 안내</h2>
-			<p>출발 공항의 위치와 탑승 관련 정보를 확인할 수 있습니다.</p>
-		</div>
-
-		<div class="airport-search">
-			<label for="airportCode">공항 선택</label>
-			<select id="airportCode">
-				<option value="">공항을 선택해 주세요</option>
-				<option value="ICN">인천국제공항 ICN</option>
-				<option value="GMP">김포국제공항 GMP</option>
-				<option value="CJU">제주국제공항 CJU</option>
-			</select>
-
-			<button type="button">조회</button>
-		</div>
-
-		<div class="airport-info">
-			<div class="airport-info-card">
-				<span class="material-symbols-outlined">location_on</span>
-				<h3>공항 정보</h3>
-				<p>공항 위치와 터미널 정보를 확인할 수 있습니다.</p>
-			</div>
-
-			<div class="airport-info-card">
-				<span class="material-symbols-outlined">check_in_out</span>
-				<h3>체크인</h3>
-				<p>탑승수속 위치와 체크인 시간을 확인할 수 있습니다.</p>
-			</div>
-
-			<div class="airport-info-card">
-				<span class="material-symbols-outlined">luggage</span>
-				<h3>수하물</h3>
-				<p>수하물 위탁과 수취 관련 정보를 확인할 수 있습니다.</p>
-			</div>
-
-			<div class="airport-info-card">
-				<span class="material-symbols-outlined">flight_takeoff</span>
-				<h3>탑승 안내</h3>
-				<p>보안검색과 탑승구 이동 절차를 확인할 수 있습니다.</p>
+		<div class="htitle travel-heading">
+			<div>
+				<div class="eyebrow">AIRPORT INFORMATION</div>
+				<h2>공항 안내</h2>
+				<p>공항 이용에 필요한 기본 정보를 확인해 보세요.</p>
 			</div>
 		</div>
-	</section>
 
+		<div class="travel-tabs">
+			<a th:href="@{/member/travel/member_airport}"
+			   th:classappend="${activeTravel == 'airport'} ? ' active' : ''">
+				공항에서
+			</a>
+
+			<a th:href="@{/member/travel/member_cabin}"
+			   th:classappend="${activeTravel == 'cabin'} ? ' active' : ''">
+				기내에서
+			</a>
+
+			<a th:href="@{/member/travel/member_aircraft}"
+			   th:classappend="${activeTravel == 'aircraft'} ? ' active' : ''">
+				항공기 정보
+			</a>
+
+			<a th:href="@{/member/travel/member_service}"
+			   th:classappend="${activeTravel == 'service'} ? ' active' : ''">
+				유료 부가서비스
+			</a>
+		</div>
+
+		<section class="travel-content">
+
+			<div class="travel-title">
+				<div class="travel-title-label">SELECT AIRPORT</div>
+				<h2>공항 기본 정보 조회</h2>
+				<p>
+					등록된 공항을 선택하면 국가, 권역, 운항 구분과 시간대 정보를
+					확인할 수 있습니다.
+				</p>
+			</div>
+
+			<form th:action="@{/member/travel/member_airport}"
+				  method="get"
+				  class="airport-search">
+
+				<label for="airportId">공항 선택</label>
+
+				<select id="airportId"
+						name="airportId"
+						required>
+					<option value="">공항을 선택해 주세요</option>
+
+					<option th:each="airport : ${airportList}"
+							th:value="${airport.airportId}"
+							th:text="|${airport.airportName} (${airport.iataCode}) · ${airport.flightType == 'DOM' ? '국내선' : '국제선'}|"
+							th:selected="${selectedAirport != null
+								and selectedAirport.airportId == airport.airportId}">
+					</option>
+				</select>
+
+				<button type="submit">공항 조회</button>
+			</form>
+
+			<div class="airport-info-empty"
+				 th:if="${selectedAirport == null}">
+				<span class="material-symbols-outlined">
+					travel_explore
+				</span>
+
+				<p>공항을 선택하면 상세 정보가 표시됩니다.</p>
+			</div>
+
+			<div class="airport-info"
+				 th:if="${selectedAirport != null}">
+
+				<div class="airport-info-card">
+					<span class="material-symbols-outlined">
+						connecting_airports
+					</span>
+
+					<h3>공항명</h3>
+
+					<p th:text="${selectedAirport.airportName}">
+						인천국제공항
+					</p>
+				</div>
+
+				<div class="airport-info-card">
+					<span class="material-symbols-outlined">
+						tag
+					</span>
+
+					<h3>IATA 코드</h3>
+
+					<p th:text="${selectedAirport.iataCode}">
+						ICN
+					</p>
+				</div>
+
+				<div class="airport-info-card">
+					<span class="material-symbols-outlined">
+						public
+					</span>
+
+					<h3>국가 및 권역</h3>
+
+					<p>
+						<span th:text="${selectedAirport.country}">
+							대한민국
+						</span>
+
+						<span th:if="${selectedAirport.regionName != null}"
+							  th:text="| · ${selectedAirport.regionName}|">
+						</span>
+					</p>
+				</div>
+
+				<div class="airport-info-card">
+					<span class="material-symbols-outlined">
+						flight_takeoff
+					</span>
+
+					<h3>운항 구분</h3>
+
+					<p th:text="${selectedAirport.flightType == 'DOM'
+						? '국내선' : '국제선'}">
+						국내선
+					</p>
+				</div>
+
+				<div class="airport-info-card">
+					<span class="material-symbols-outlined">
+						schedule
+					</span>
+
+					<h3>시간대</h3>
+
+					<p th:text="${selectedAirport.timezone}">
+						Asia/Seoul
+					</p>
+				</div>
+
+				<div class="airport-info-card">
+					<span class="material-symbols-outlined">
+						check_circle
+					</span>
+
+					<h3>운영 상태</h3>
+
+					<p th:text="${selectedAirport.isActive == 'Y'
+						? '운영 중' : '운영 중지'}">
+						운영 중
+					</p>
+				</div>
+
+			</div>
+
+			<section class="airport-guide-section"
+					 th:if="${selectedAirport != null}">
+
+				<div class="travel-title">
+					<div class="travel-title-label">
+						AIRPORT GUIDE
+					</div>
+
+					<h2>공항 이용 안내</h2>
+
+					<p>
+						원활한 탑승을 위해 출발 전에 이용 절차를 확인해 주세요.
+					</p>
+				</div>
+
+				<div class="airport-guide-list">
+
+					<div class="airport-guide-item">
+						<div class="airport-guide-number">01</div>
+
+						<div class="airport-guide-icon">
+							<span class="material-symbols-outlined">
+								confirmation_number
+							</span>
+						</div>
+
+						<div class="airport-guide-content">
+							<h3>탑승 수속</h3>
+							<p>
+								항공편 출발 시간과 공항 혼잡도를 고려하여 여유 있게
+								공항에 도착해 주세요.
+							</p>
+						</div>
+					</div>
+
+					<div class="airport-guide-item">
+						<div class="airport-guide-number">02</div>
+
+						<div class="airport-guide-icon">
+							<span class="material-symbols-outlined">
+								luggage
+							</span>
+						</div>
+
+						<div class="airport-guide-content">
+							<h3>수하물 위탁</h3>
+							<p>
+								예약한 운임의 수하물 허용량과 운송 제한 품목을
+								미리 확인해 주세요.
+							</p>
+						</div>
+					</div>
+
+					<div class="airport-guide-item">
+						<div class="airport-guide-number">03</div>
+
+						<div class="airport-guide-icon">
+							<span class="material-symbols-outlined">
+								security
+							</span>
+						</div>
+
+						<div class="airport-guide-content">
+							<h3>보안 검색</h3>
+							<p>
+								신분증과 탑승권을 준비하고 액체류와 전자기기 관련
+								보안 규정을 확인해 주세요.
+							</p>
+						</div>
+					</div>
+
+					<div class="airport-guide-item">
+						<div class="airport-guide-number">04</div>
+
+						<div class="airport-guide-icon">
+							<span class="material-symbols-outlined">
+								door_open
+							</span>
+						</div>
+
+						<div class="airport-guide-content">
+							<h3>탑승구 이동</h3>
+							<p>
+								탑승권과 운항 현황에서 탑승구를 확인하고 탑승 시작
+								시간 전까지 이동해 주세요.
+							</p>
+						</div>
+					</div>
+
+				</div>
+			</section>
+
+		</section>
+
+	</div>
 </div>
 
 </body>

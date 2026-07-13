@@ -28,4 +28,50 @@
         WHERE aircraft_id = #{aircraft_id}
     </update>
 
+
+	<select id="selectActiveAircraftList"
+		resultType="kr.spring.admin.vo.AirCraftVO">
+		SELECT
+			aircraft_id,
+			reg_no,
+			model_name,
+			total_seats,
+			status_name,
+			is_active
+		FROM AIRCRAFT
+		WHERE is_active = 'Y'
+		ORDER BY model_name ASC, reg_no ASC
+	</select>
+	
+	<select id="selectActiveAircraft"
+		resultType="kr.spring.admin.vo.AirCraftVO">
+		SELECT
+			aircraft_id,
+			reg_no,
+			model_name,
+			total_seats,
+			status_name,
+			is_active
+		FROM AIRCRAFT
+		WHERE aircraft_id = #{aircraft_id}
+		  AND is_active = 'Y'
+	</select>
+	
+	<select id="selectSeatClassCountList"
+		resultType="kr.spring.admin.vo.AirCraftSeatClassVO">
+		SELECT
+			SC.seat_class_id,
+			SC.class_name,
+			COUNT(S.seat_id) AS seat_count
+		FROM SEAT S
+		JOIN SEAT_CLASS SC
+			ON S.seat_class_id = SC.seat_class_id
+		WHERE S.aircraft_id = #{aircraft_id}
+		  AND S.is_active = 'Y'
+		GROUP BY
+			SC.seat_class_id,
+			SC.class_name,
+			SC.sort_order
+		ORDER BY SC.sort_order ASC
+	</select>
 </mapper>

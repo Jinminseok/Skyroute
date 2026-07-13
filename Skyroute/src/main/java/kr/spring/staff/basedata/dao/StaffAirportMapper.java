@@ -12,6 +12,10 @@ public interface StaffAirportMapper {
 	//공항 목록 조회
 		public List<AirportVO> selectAirportList();
 		
+		public List<AirportVO> selectActiveAirportList();
+		
+		public AirportVO selectActiveAirport(int airportId);
+		
 		//공항 단일 조회
 		public AirportVO selectAirport(int airportId);
 		

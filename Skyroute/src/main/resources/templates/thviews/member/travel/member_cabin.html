@@ -3,88 +3,401 @@
 	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	  layout:decorate="~{layouts/layout_basic}">
 <head>
-	<title>공항 안내</title>
+	<meta charset="UTF-8">
+	<title>SkyRoute - 기내에서</title>
 	<link rel="stylesheet" th:href="@{/assets/css/travel.css}" type="text/css">
 </head>
 <body>
 
-<div layout:fragment="content" class="travel-page">
+<div layout:fragment="panel" class="panel on travel-page">
+	<div class="wrap travel-wrap">
 
-	<section class="travel-visual">
-		<div class="travel-visual-inner">
-			<p>TRAVEL INFORMATION</p>
-			<h1>기내에서</h1>
-			<span>좌석 등급과 기내 서비스를 확인해 보세요.</span>
-		</div>
-	</section>
-
-	<nav class="travel-tabs">
-		<a th:href="@{/member/travel/member_airport}"
-		   th:classappend="${activeTravel == 'airport'} ? ' is-on'">
-			공항에서
-		</a>
-
-		<a th:href="@{/member/travel/member_cabin}"
-		   th:classappend="${activeTravel == 'cabin'} ? ' is-on'">
-			기내에서
-		</a>
-
-		<a th:href="@{/member/travel/member_aircraft}"
-		   th:classappend="${activeTravel == 'aircraft'} ? ' is-on'">
-			항공기 정보
-		</a>
-
-		<a th:href="@{/member/travel/member_service}"
-		   th:classappend="${activeTravel == 'service'} ? ' is-on'">
-			유료 부가서비스
-		</a>
-	</nav>
-
-	<section class="travel-content">
-		<div class="travel-title">
-			<h2>공항 안내</h2>
-			<p>출발 공항의 위치와 탑승 관련 정보를 확인할 수 있습니다.</p>
-		</div>
-
-		<div class="airport-search">
-			<label for="airportCode">공항 선택</label>
-			<select id="airportCode">
-				<option value="">공항을 선택해 주세요</option>
-				<option value="ICN">인천국제공항 ICN</option>
-				<option value="GMP">김포국제공항 GMP</option>
-				<option value="CJU">제주국제공항 CJU</option>
-			</select>
-
-			<button type="button">조회</button>
-		</div>
-
-		<div class="airport-info">
-			<div class="airport-info-card">
-				<span class="material-symbols-outlined">location_on</span>
-				<h3>공항 정보</h3>
-				<p>공항 위치와 터미널 정보를 확인할 수 있습니다.</p>
-			</div>
-
-			<div class="airport-info-card">
-				<span class="material-symbols-outlined">check_in_out</span>
-				<h3>체크인</h3>
-				<p>탑승수속 위치와 체크인 시간을 확인할 수 있습니다.</p>
-			</div>
-
-			<div class="airport-info-card">
-				<span class="material-symbols-outlined">luggage</span>
-				<h3>수하물</h3>
-				<p>수하물 위탁과 수취 관련 정보를 확인할 수 있습니다.</p>
-			</div>
-
-			<div class="airport-info-card">
-				<span class="material-symbols-outlined">flight_takeoff</span>
-				<h3>탑승 안내</h3>
-				<p>보안검색과 탑승구 이동 절차를 확인할 수 있습니다.</p>
+		<div class="htitle travel-heading">
+			<div>
+				<div class="eyebrow">IN-FLIGHT SERVICE</div>
+				<h2>기내에서</h2>
+				<p>좌석 클래스와 클래스별 기내 서비스를 확인해 보세요.</p>
 			</div>
 		</div>
-	</section>
 
+		<div class="travel-tabs">
+			<a th:href="@{/member/travel/member_airport}"
+			   th:classappend="${activeTravel == 'airport'} ? ' active'">
+				공항에서
+			</a>
+
+			<a th:href="@{/member/travel/member_cabin}"
+			   th:classappend="${activeTravel == 'cabin'} ? ' active'">
+				기내에서
+			</a>
+
+			<a th:href="@{/member/travel/member_aircraft}"
+			   th:classappend="${activeTravel == 'aircraft'} ? ' active'">
+				항공기 정보
+			</a>
+
+			<a th:href="@{/member/travel/member_service}"
+			   th:classappend="${activeTravel == 'service'} ? ' active'">
+				유료 부가서비스
+			</a>
+		</div>
+
+		<section class="travel-content">
+
+			<div class="travel-title">
+				<div class="travel-title-label">CLASS INFORMATION</div>
+				<h2>클래스별 안내</h2>
+				<p>원하는 좌석 클래스를 선택하면 좌석과 기내 서비스 정보를 확인할 수 있습니다.</p>
+			</div>
+
+			<div class="cabin-class-list">
+				<button type="button"
+						class="cabin-class-card is-selected"
+						data-class="first">
+					<img th:src="@{/assets/images/travel/first-class.jpg}"
+						 alt="일등석 좌석">
+
+					<span class="cabin-class-overlay">
+						<small>FIRST CLASS</small>
+						<strong>일등석</strong>
+						<i>자세히 보기</i>
+					</span>
+				</button>
+
+				<button type="button"
+						class="cabin-class-card"
+						data-class="business">
+					<img th:src="@{/assets/images/travel/business-class.jpg}"
+						 alt="비즈니스 좌석">
+
+					<span class="cabin-class-overlay">
+						<small>BUSINESS CLASS</small>
+						<strong>비즈니스</strong>
+						<i>자세히 보기</i>
+					</span>
+				</button>
+
+				<button type="button"
+						class="cabin-class-card"
+						data-class="economy">
+					<img th:src="@{/assets/images/travel/economy-class.jpg}"
+						 alt="이코노미 좌석">
+
+					<span class="cabin-class-overlay">
+						<small>ECONOMY CLASS</small>
+						<strong>이코노미</strong>
+						<i>자세히 보기</i>
+					</span>
+				</button>
+			</div>
+
+			<section class="cabin-class-detail">
+				<div class="cabin-detail-image">
+					<img id="cabinDetailImage"
+						 th:src="@{/assets/images/travel/first-class.jpg}"
+						 alt="일등석 좌석">
+				</div>
+
+				<div class="cabin-detail-content">
+					<p id="cabinDetailEnglish" class="cabin-detail-label">
+						FIRST CLASS
+					</p>
+
+					<h2 id="cabinDetailTitle">일등석</h2>
+
+					<p id="cabinDetailDescription"
+					   class="cabin-detail-description">
+						완전히 독립된 공간과 침대형 좌석에서 최상의 프라이버시와 휴식을 누릴 수 있습니다.
+					</p>
+
+					<ul id="cabinDetailFeatures"
+						class="cabin-feature-list">
+						<li>독립형 프라이빗 스위트</li>
+						<li>180도 풀 플랫 침대형 좌석</li>
+						<li>32인치 개인 모니터</li>
+						<li>동반 좌석과 개인 수납공간</li>
+					</ul>
+				</div>
+			</section>
+
+			<section class="cabin-service-section">
+				<div class="travel-title">
+					<div class="travel-title-label">IN-FLIGHT SERVICE</div>
+					<h2>
+						<span id="cabinServiceClassName">일등석</span>
+						기내 서비스
+					</h2>
+					<p id="cabinServiceSummary">
+						최상의 휴식과 프라이버시를 위한 프리미엄 서비스를 제공합니다.
+					</p>
+				</div>
+
+				<div class="cabin-service-list">
+					<article class="cabin-service-card">
+						<div class="cabin-service-image">
+							<img id="cabinMealImage"
+								 th:src="@{/assets/images/travel/first-meal.jpg}"
+								 alt="일등석 기내식">
+						</div>
+
+						<div class="cabin-service-content">
+							<span class="material-symbols-outlined">restaurant</span>
+							<small>MEAL</small>
+							<h3 id="cabinMealTitle">프라이빗 코스 다이닝</h3>
+							<p id="cabinMealDescription">
+								엄선된 재료로 준비한 한식과 서양식 코스 요리를 원하는 순서와 시간에 맞춰 제공합니다.
+							</p>
+						</div>
+					</article>
+
+					<article class="cabin-service-card">
+						<div class="cabin-service-image">
+							<img id="cabinEntertainmentImage"
+								 th:src="@{/assets/images/travel/first-entertainment.jpg}"
+								 alt="일등석 엔터테인먼트">
+						</div>
+
+						<div class="cabin-service-content">
+							<span class="material-symbols-outlined">movie</span>
+							<small>ENTERTAINMENT</small>
+							<h3 id="cabinEntertainmentTitle">프리미엄 AVOD</h3>
+							<p id="cabinEntertainmentDescription">
+								대형 개인 모니터와 노이즈 캔슬링 헤드폰으로 영화와 음악을 즐길 수 있습니다.
+							</p>
+						</div>
+					</article>
+
+					<article class="cabin-service-card">
+						<div class="cabin-service-image">
+							<img id="cabinAmenityImage"
+								 th:src="@{/assets/images/travel/first-amenity.jpg}"
+								 alt="일등석 서비스용품">
+						</div>
+
+						<div class="cabin-service-content">
+							<span class="material-symbols-outlined">redeem</span>
+							<small>AMENITY</small>
+							<h3 id="cabinAmenityTitle">프리미엄 어메니티</h3>
+							<p id="cabinAmenityDescription">
+								고급 침구와 슬리퍼, 파우치 및 스킨케어 용품을 제공합니다.
+							</p>
+						</div>
+					</article>
+				</div>
+			</section>
+
+		</section>
+
+		<script>
+			const cabinClassData = {
+				first: {
+					english: "FIRST CLASS",
+					title: "일등석",
+					description: "완전히 독립된 공간과 침대형 좌석에서 최상의 프라이버시와 휴식을 누릴 수 있습니다.",
+					image: "/assets/images/travel/first-class.jpg",
+					features: [
+						"독립형 프라이빗 스위트",
+						"180도 풀 플랫 침대형 좌석",
+						"32인치 개인 모니터",
+						"동반 좌석과 개인 수납공간"
+					],
+					serviceSummary: "최상의 휴식과 프라이버시를 위한 프리미엄 서비스를 제공합니다.",
+					meal: {
+						image: "/assets/images/travel/first-meal.jpg",
+						title: "프라이빗 코스 다이닝",
+						description: "엄선된 재료로 준비한 한식과 서양식 코스 요리를 원하는 순서와 시간에 맞춰 제공합니다."
+					},
+					entertainment: {
+						image: "/assets/images/travel/first-entertainment.jpg",
+						title: "프리미엄 AVOD",
+						description: "대형 개인 모니터와 노이즈 캔슬링 헤드폰으로 최신 영화와 음악을 즐길 수 있습니다."
+					},
+					amenity: {
+						image: "/assets/images/travel/first-amenity.jpg",
+						title: "프리미엄 어메니티",
+						description: "고급 침구와 잠옷, 슬리퍼, 파우치 및 스킨케어 용품을 제공합니다."
+					}
+				},
+
+				business: {
+					english: "BUSINESS CLASS",
+					title: "비즈니스",
+					description: "넓은 개인 공간과 완전히 펼쳐지는 좌석으로 장거리 여행에서도 편안한 휴식을 제공합니다.",
+					image: "/assets/images/travel/business-class.jpg",
+					features: [
+						"180도 풀 플랫 좌석",
+						"좌석별 개별 통로",
+						"대형 개인용 AVOD",
+						"전원과 USB 충전 시설"
+					],
+					serviceSummary: "편안한 휴식과 품격 있는 식사를 함께 즐길 수 있는 서비스를 제공합니다.",
+					meal: {
+						image: "/assets/images/travel/business-meal.jpg",
+						title: "한식·서양식 코스 요리",
+						description: "전통 한식과 서양식 메뉴를 코스로 제공하며 와인과 다양한 음료를 함께 즐길 수 있습니다."
+					},
+					entertainment: {
+						image: "/assets/images/travel/business-entertainment.jpg",
+						title: "대형 개인 AVOD",
+						description: "개인 모니터를 통해 영화와 음악, 방송 및 게임을 원하는 시간에 이용할 수 있습니다."
+					},
+					amenity: {
+						image: "/assets/images/travel/business-amenity.jpg",
+						title: "비즈니스 어메니티",
+						description: "담요와 베개, 슬리퍼 및 여행용 편의용품이 담긴 어메니티 키트를 제공합니다."
+					}
+				},
+
+				economy: {
+					english: "ECONOMY CLASS",
+					title: "이코노미",
+					description: "실용적인 좌석 설계와 기본 편의 시설로 합리적이고 편안한 여행을 제공합니다.",
+					image: "/assets/images/travel/economy-class.jpg",
+					features: [
+						"인체공학적 리클라이닝 좌석",
+						"조절 가능한 헤드레스트",
+						"USB 또는 전원 충전 시설",
+						"개인 또는 무선 엔터테인먼트"
+					],
+					serviceSummary: "여행에 필요한 기본 기내 서비스와 다양한 콘텐츠를 편리하게 제공합니다.",
+					meal: {
+						image: "/assets/images/travel/economy-meal.jpg",
+						title: "노선별 기내식",
+						description: "운항 시간과 노선에 따라 한식 또는 서양식 메뉴와 음료를 트레이 형태로 제공합니다."
+					},
+					entertainment: {
+						image: "/assets/images/travel/economy-entertainment.jpg",
+						title: "기내 엔터테인먼트",
+						description: "기종에 따라 개인 모니터 또는 모바일 기기로 영화와 음악 콘텐츠를 이용할 수 있습니다."
+					},
+					amenity: {
+						image: "/assets/images/travel/economy-amenity.jpg",
+						title: "기본 편의용품",
+						description: "편안한 여행을 위해 담요와 베개, 이어폰 등 기본 편의용품을 제공합니다."
+					}
+				}
+			};
+
+			const classCards =
+				document.querySelectorAll(".cabin-class-card");
+
+			const detailImage =
+				document.getElementById("cabinDetailImage");
+
+			const detailEnglish =
+				document.getElementById("cabinDetailEnglish");
+
+			const detailTitle =
+				document.getElementById("cabinDetailTitle");
+
+			const detailDescription =
+				document.getElementById("cabinDetailDescription");
+
+			const detailFeatures =
+				document.getElementById("cabinDetailFeatures");
+
+			const serviceClassName =
+				document.getElementById("cabinServiceClassName");
+
+			const serviceSummary =
+				document.getElementById("cabinServiceSummary");
+
+			const mealImage =
+				document.getElementById("cabinMealImage");
+
+			const mealTitle =
+				document.getElementById("cabinMealTitle");
+
+			const mealDescription =
+				document.getElementById("cabinMealDescription");
+
+			const entertainmentImage =
+				document.getElementById("cabinEntertainmentImage");
+
+			const entertainmentTitle =
+				document.getElementById("cabinEntertainmentTitle");
+
+			const entertainmentDescription =
+				document.getElementById("cabinEntertainmentDescription");
+
+			const amenityImage =
+				document.getElementById("cabinAmenityImage");
+
+			const amenityTitle =
+				document.getElementById("cabinAmenityTitle");
+
+			const amenityDescription =
+				document.getElementById("cabinAmenityDescription");
+
+			const renderCabinClass = (classKey, moveToDetail) => {
+				const selectedData = cabinClassData[classKey];
+
+				classCards.forEach((card) => {
+					card.classList.toggle(
+						"is-selected",
+						card.dataset.class === classKey
+					);
+				});
+
+				detailImage.src = selectedData.image;
+				detailImage.alt = selectedData.title + " 좌석";
+				detailEnglish.textContent = selectedData.english;
+				detailTitle.textContent = selectedData.title;
+				detailDescription.textContent = selectedData.description;
+
+				detailFeatures.innerHTML = "";
+
+				selectedData.features.forEach((feature) => {
+					const item = document.createElement("li");
+					item.textContent = feature;
+					detailFeatures.appendChild(item);
+				});
+
+				serviceClassName.textContent = selectedData.title;
+				serviceSummary.textContent = selectedData.serviceSummary;
+
+				mealImage.src = selectedData.meal.image;
+				mealImage.alt = selectedData.title + " 기내식";
+				mealTitle.textContent = selectedData.meal.title;
+				mealDescription.textContent = selectedData.meal.description;
+
+				entertainmentImage.src =
+					selectedData.entertainment.image;
+
+				entertainmentImage.alt =
+					selectedData.title + " 엔터테인먼트";
+
+				entertainmentTitle.textContent =
+					selectedData.entertainment.title;
+
+				entertainmentDescription.textContent =
+					selectedData.entertainment.description;
+
+				amenityImage.src = selectedData.amenity.image;
+				amenityImage.alt = selectedData.title + " 서비스용품";
+				amenityTitle.textContent = selectedData.amenity.title;
+				amenityDescription.textContent =
+					selectedData.amenity.description;
+
+				if (moveToDetail) {
+					document.querySelector(".cabin-class-detail")
+						.scrollIntoView({
+							behavior: "smooth",
+							block: "start"
+						});
+				}
+			};
+
+			classCards.forEach((card) => {
+				card.addEventListener("click", () => {
+					renderCabinClass(card.dataset.class, true);
+				});
+			});
+
+			renderCabinClass("first", false);
+		</script>
+
+	</div>
 </div>
 
 </body>

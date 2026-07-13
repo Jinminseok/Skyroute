@@ -61,5 +61,14 @@ public class StaffAirportServiceImpl implements StaffAirportService{
 		return airportMapper.checkDuplicateAirport(airportVO);
 	}
 	
+	@Override
+	public List<AirportVO> getActiveAirportList() {
+		return airportMapper.selectActiveAirportList();
+	}
+
+	@Override
+	public AirportVO getActiveAirport(int airportId) {
+		return airportMapper.selectActiveAirport(airportId);
+	}
 
 }
