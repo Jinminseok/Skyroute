@@ -119,14 +119,15 @@
                                 <span class="pnr" th:text="${f.FLIGHT_NO}" style="font-weight: 500; font-family: var(--mono);">NU101</span>
                                 <span style="font-size: 12px; color: var(--accent); font-weight: 500;">
                                     <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: -2px;">door_open</span> 
-                                    출발 게이트: <th:block th:text="${f.DEP_GATE != null ? f.DEP_GATE + '번' : '미정'}"></th:block> | 
+                                    출발 게이트: <th:block th:text="${f.DEP_GATE != null ? f.DEP_GATE + '번' : '미정'}"></th:block> / 
                                     도착 게이트: <th:block th:text="${f.ARR_GATE != null ? f.ARR_GATE + '번' : '미정'}"></th:block>
                                 </span>
                             </div>
                             <div class="rt" style="font-weight: 500; font-size: 17px;" th:text="|${f.DEP_IATA} ${f.DEP_NAME} ➔ ${f.ARR_IATA} ${f.ARR_NAME}|">ICN 인천 ➔ JFK 뉴욕</div>
+                            
                             <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut);" 
-                                 th:text="|출발 일시: ${#dates.format(f.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')} | 도착 일시: ${#dates.format(f.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')} (지연: ${f.DELAY_MINUTES ?: 0}분)|">
-                            </div>
+							     th:text="'출발 일시: ' + ${#dates.format(f.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')} + ' - 도착 일시: ' + ${#dates.format(f.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')} + ' (지연: ' + (${f.DELAY_MINUTES != null ? f.DELAY_MINUTES : 0}) + '분)'">
+							</div>
                         </div>
                     </div>
                 </div>
@@ -193,7 +194,7 @@
                                 </div>
                                 <div class="rt" style="font-weight: 500; font-size: 16px;" th:text="|${s.DEP_IATA} ➔ ${s.ARR_IATA} (${s.DEP_NAME} ➔ ${s.ARR_NAME})|">ICN ➔ JFK</div>
                                 <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut) !important;" 
-                                     th:text="|출발: ${#dates.format(s.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')} — 도착: ${#dates.format(s.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')} | 기종: ${s.MODEL_NAME}|">시간대 정보</div>
+                                     th:text="'출발: ' + ${#dates.format(s.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')} + ' - 도착: ' + ${#dates.format(s.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')} + ' / 기종: ' + ${s.MODEL_NAME}">시간대 정보</div>
                             </div>
                             <div class="actions"><span class="material-symbols-outlined" style="color: var(--line);">arrow_forward_ios</span></div>
                         </a>
@@ -212,7 +213,7 @@
 								</div>
                                 <div class="rt" style="font-weight: 500; font-size: 16px;" th:text="|${s.DEP_IATA} ➔ ${s.ARR_IATA} (${s.DEP_NAME} ➔ ${s.ARR_NAME})|">JFK ➔ ICN</div>
                                 <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut) !important;" 
-                                     th:text="|출발: ${#dates.format(s.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')} — 도착: ${#dates.format(s.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')} | 기종: ${s.MODEL_NAME}|">시간대 정보</div>
+                                     th:text="'출발: ' + ${#dates.format(s.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')} + ' - 도착: ' + ${#dates.format(s.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')} + ' / 기종: ' + ${s.MODEL_NAME}">시간대 정보</div>
 							</div>
 							<div class="actions"><span class="material-symbols-outlined" style="color: var(--line);">arrow_forward_ios</span></div>
                         </a>
@@ -262,7 +263,7 @@
                     });
                 }
 
-                // 왕복 편도 토글 제어 (날짜 레이아웃 4칸 고정화 패치)
+                // 왕복 편도 토글 제어
                 var radioRT = document.querySelector('input[name="schedTripType"][value="RT"]');
                 var radioOW = document.querySelector('input[name="schedTripType"][value="OW"]');
                 var toggleBar = document.getElementById('roundTripToggleBar');

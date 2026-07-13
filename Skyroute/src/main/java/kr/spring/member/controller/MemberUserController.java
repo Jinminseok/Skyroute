@@ -266,12 +266,12 @@ public class MemberUserController {
 	
 	
 	
-	//항공권 세부 검색 폼 호출
-	@GetMapping("/member_flight_list")
-	public String flightListForm() {
-		
-		return "redirect:/main/home";
-	}
+//	//항공권 세부 검색 폼 호출
+//	@GetMapping("/member_flight_list")
+//	public String flightListForm() {
+//		
+//		return "redirect:/main/home";
+//	}
 	
 	
 	

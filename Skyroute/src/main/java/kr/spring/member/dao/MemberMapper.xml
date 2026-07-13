@@ -115,7 +115,7 @@
 
 	<select id="selectActiveRouteList" resultType="map">
 		SELECT 
-			A.iata_code AS IATA_CODE, 
+			A.airport_id AS AIRPORT_ID,      A.iata_code AS IATA_CODE, 
 			A.airport_name AS AIRPORT_NAME, 
 			A.region_id AS REGION_ID,       
 			R.region_name AS REGION_NAME    

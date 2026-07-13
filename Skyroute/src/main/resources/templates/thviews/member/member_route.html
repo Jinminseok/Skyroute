@@ -74,9 +74,19 @@
                         </div>
                     </div>
                     
-                    <div class="hover-overlay" style="border-radius: 12px;">
+					<div class="hover-overlay" style="border-radius: 12px;">
                         <a th:href="@{/member/member_schedule(tabType='SCHEDULE', arrival=${route.IATA_CODE})}" class="hover-link">스케줄 조회</a>
-                        <a th:href="@{/booking/flightList(departure='ICN', arrival=${route.IATA_CODE})}" class="hover-link">항공권 예매</a>
+                        
+                        <a th:href="@{/booking/flights/search(
+                                tripType='ONEWAY',
+                                departureAirportId=20, 
+                                arrivalAirportId=${route.AIRPORT_ID}, 
+                                departureDate=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')},
+                                adultCount=1,
+                                childCount=0,
+                                infantCount=0,
+                                seatClassId=6
+                           )}" class="hover-link">항공권 예매</a>
                     </div>
                 </div>
 
