@@ -492,6 +492,18 @@ ALTER TABLE BOOKING_PASSENGER ADD (
     passenger_type VARCHAR2(10) DEFAULT 'ADULT' NOT NULL
         CHECK (passenger_type IN ('ADULT', 'CHILD', 'INFANT'))
 );
-COMMIT;
+
+CREATE UNIQUE INDEX uq_ticket_active_seat ON TICKET (
+    CASE WHEN hold_status IN ('HOLDING', 'CONFIRMED') THEN flight_id END,
+    CASE WHEN hold_status IN ('HOLDING', 'CONFIRMED') THEN seat_id   END
+);
+
+CREATE INDEX idx_ticket_flight_status ON TICKET (flight_id, hold_status);
+CREATE INDEX idx_ticket_booking       ON TICKET (booking_id);
+CREATE INDEX idx_booking_member       ON BOOKING (member_id, created_at DESC);
+ 
+-- HOLD 만료 스케줄러가 매분 스캔하는 조건
+CREATE INDEX idx_ticket_expired ON TICKET (hold_status, expired_at);
+ 
 
 COMMIT;
