@@ -33,7 +33,34 @@
         ORDER BY F.departure_time DESC
     </select>
 
-    <insert id="insertSchedule" parameterType="kr.spring.staff.schedule.vo.ScheduleVO">
+
+    <!-- 단건 조회 : 수정 전/후 비교용 -->
+    <select id="selectSchedule" parameterType="int" resultType="kr.spring.staff.schedule.vo.ScheduleVO">
+        SELECT 
+            F.flight_id,
+            F.flight_no,
+            F.route_id,
+            F.aircraft_id,
+            F.departure_gate_id,
+            F.arrival_gate_id,
+            TO_CHAR(F.departure_time, 'YYYY-MM-DD"T"HH24:MI') AS departure_time,
+            TO_CHAR(F.arrival_time, 'YYYY-MM-DD"T"HH24:MI') AS arrival_time,
+            F.flight_status,
+            F.delay_minutes,
+            F.is_deleted
+        FROM FLIGHT F
+        WHERE F.flight_id = #{flight_id}
+    </select>
+
+
+    <!--
+        신규 스케줄 등록
+
+        useGeneratedKeys 로 IDENTITY PK 를 회수해야
+        곧바로 FLIGHT_FARE 를 만들 수 있다.
+    -->
+    <insert id="insertSchedule" parameterType="kr.spring.staff.schedule.vo.ScheduleVO"
+            useGeneratedKeys="true" keyProperty="flight_id" keyColumn="flight_id">
         INSERT INTO FLIGHT (
             flight_no, route_id, aircraft_id, 
             departure_gate_id, arrival_gate_id, 
@@ -48,6 +75,7 @@
         )
     </insert>
 
+
     <update id="updateSchedule" parameterType="kr.spring.staff.schedule.vo.ScheduleVO">
         UPDATE FLIGHT 
         SET route_id = #{route_id},
@@ -55,7 +83,8 @@
             departure_gate_id = #{departure_gate_id},
             arrival_gate_id = #{arrival_gate_id},
             departure_time = TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI'),
-            arrival_time = TO_DATE(REPLACE(#{arrival_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI')
+            arrival_time = TO_DATE(REPLACE(#{arrival_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI'),
+            updated_at = SYSTIMESTAMP
         WHERE flight_id = #{flight_id}
     </update>
 
@@ -71,7 +100,92 @@
         WHERE flight_id = #{flight_id}
     </update>
 
+
+    <!-- =====================================================================
+         운임(FLIGHT_FARE) : 항공편 등록/수정과 함께 관리되는 스냅샷
+         ===================================================================== -->
+
+    <!--
+        운임 스냅샷 생성
+
+        시즌은 "선택"하는 값이 아니라 출발일에서 "결정"되는 값이다.
+        FLIGHT 이 저장되면 route_id 가 확정되고,
+        departure_time 이 속한 SEASON 이 확정되므로
+        FARE 에 남는 자유도는 seat_class_id 뿐이다.
+        → 좌석 등급 수만큼 FLIGHT_FARE 행이 생성된다.
+    -->
+    <insert id="insertFlightFare" parameterType="int">
+        INSERT INTO FLIGHT_FARE (
+            flight_id, seat_class_id, fare_id, price
+        )
+        SELECT
+            f.flight_id,
+            fa.seat_class_id,
+            fa.fare_id,
+            fa.price
+        FROM FLIGHT f
+        JOIN FARE fa
+          ON fa.route_id = f.route_id
+         AND fa.is_active = 'Y'
+        JOIN SEASON se
+          ON se.season_id = fa.season_id
+         AND se.is_active = 'Y'
+         AND CAST(f.departure_time AS DATE)
+             BETWEEN se.start_date AND se.end_date
+        WHERE f.flight_id = #{flight_id}
+    </insert>
+
+
+    <!-- 운임 스냅샷 삭제 (재생성 전 단계) -->
+    <delete id="deleteFlightFare" parameterType="int">
+        DELETE FROM FLIGHT_FARE
+        WHERE flight_id = #{flight_id}
+    </delete>
+
+
+    <!--
+        출발일이 속한 시즌 개수 확인 (등록 전 사전 검증)
+
+        0  → 시즌 공백. 운임을 만들 수 없다.
+        1  → 정상
+        2+ → 시즌 구간 겹침. seat_class 당 2행이 생겨
+             uq_flight_fare_class 유니크 제약을 위반한다.
+    -->
+    <select id="countSeasonByDate" resultType="int">
+        SELECT COUNT(*)
+        FROM SEASON
+        WHERE is_active = 'Y'
+          AND TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI')
+              BETWEEN start_date AND end_date
+    </select>
+
+
+    <!-- 해당 노선 + 출발일 시즌에 등록된 운임(FARE) 개수 -->
+    <select id="countFareByRouteAndDate" resultType="int">
+        SELECT COUNT(*)
+        FROM FARE fa
+        JOIN SEASON se
+          ON se.season_id = fa.season_id
+         AND se.is_active = 'Y'
+        WHERE fa.route_id = #{route_id}
+          AND fa.is_active = 'Y'
+          AND TO_DATE(REPLACE(#{departure_time}, 'T', ' '), 'YYYY-MM-DD HH24:MI')
+              BETWEEN se.start_date AND se.end_date
+    </select>
+
+
+    <!--
+        좌석이 점유된 항공편인지 확인
+
+        예약이 걸린 항공편의 노선/출발일을 바꾸면
+        TICKET.fare_amount(결제 금액)와 운임이 어긋나
+        환불 계산 근거가 사라진다.
+    -->
+    <select id="countActiveTicket" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM TICKET
+        WHERE flight_id = #{flight_id}
+          AND hold_status IN ('HOLDING', 'CONFIRMED')
+    </select>
+
 </mapper>
-
-
-
