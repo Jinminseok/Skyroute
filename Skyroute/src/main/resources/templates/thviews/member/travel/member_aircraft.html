@@ -5,7 +5,9 @@
 <head>
 	<meta charset="UTF-8">
 	<title>SkyRoute - 항공기 정보</title>
-	<link rel="stylesheet" th:href="@{/assets/css/travel.css}" type="text/css">
+	<link rel="stylesheet"
+		  th:href="@{/assets/css/travel.css}"
+		  type="text/css">
 </head>
 <body>
 
@@ -16,7 +18,10 @@
 			<div>
 				<div class="eyebrow">AIRCRAFT INFORMATION</div>
 				<h2>항공기 정보</h2>
-				<p>SkyRoute가 운항하는 항공기의 기종과 좌석 구성을 확인해 보세요.</p>
+				<p>
+					SkyRoute가 운항하는 항공기의 기종과 좌석 구성을
+					확인해 보세요.
+				</p>
 			</div>
 		</div>
 
@@ -45,9 +50,15 @@
 		<section class="travel-content">
 
 			<div class="travel-title">
-				<div class="travel-title-label">SELECT AIRCRAFT</div>
+				<div class="travel-title-label">
+					SELECT AIRCRAFT
+				</div>
+
 				<h2>보유 항공기 안내</h2>
-				<p>운항 중인 항공기의 기종과 좌석 정보를 확인할 수 있습니다.</p>
+
+				<p>
+					운항 중인 항공기의 기종과 좌석 정보를 확인할 수 있습니다.
+				</p>
 			</div>
 
 			<form th:action="@{/member/travel/member_aircraft}"
@@ -59,39 +70,60 @@
 				<select id="aircraftId"
 						name="aircraftId"
 						required>
-					<option value="">항공기를 선택해 주세요</option>
+
+					<option value="">
+						항공기를 선택해 주세요
+					</option>
 
 					<option th:each="aircraft : ${aircraftList}"
 							th:value="${aircraft.aircraft_id}"
 							th:text="|${aircraft.model_name} (${aircraft.reg_no})|"
 							th:selected="${selectedAircraft != null
-								and selectedAircraft.aircraft_id == aircraft.aircraft_id}">
+								and selectedAircraft.aircraft_id
+								== aircraft.aircraft_id}">
 					</option>
 				</select>
 
-				<button type="submit">항공기 조회</button>
+				<button type="submit">
+					항공기 조회
+				</button>
 			</form>
 
 			<div class="airport-info-empty"
 				 th:if="${selectedAircraft == null}">
-				<span class="material-symbols-outlined">flight</span>
-				<p>항공기를 선택하면 상세 정보가 표시됩니다.</p>
+
+				<span class="material-symbols-outlined">
+					flight
+				</span>
+
+				<p>
+					항공기를 선택하면 상세 정보가 표시됩니다.
+				</p>
 			</div>
 
 			<th:block th:if="${selectedAircraft != null}">
 
 				<div class="airport-info">
+
 					<div class="airport-info-card">
-						<span class="material-symbols-outlined">flight</span>
+						<span class="material-symbols-outlined">
+							flight
+						</span>
+
 						<h3>기종명</h3>
+
 						<p th:text="${selectedAircraft.model_name}">
 							B777-300
 						</p>
 					</div>
 
 					<div class="airport-info-card">
-						<span class="material-symbols-outlined">tag</span>
+						<span class="material-symbols-outlined">
+							tag
+						</span>
+
 						<h3>항공기 등록번호</h3>
+
 						<p th:text="${selectedAircraft.reg_no}">
 							HL8003
 						</p>
@@ -101,7 +133,9 @@
 						<span class="material-symbols-outlined">
 							airline_seat_recline_normal
 						</span>
+
 						<h3>총 좌석 수</h3>
+
 						<p th:text="|${selectedAircraft.total_seats}석|">
 							250석
 						</p>
@@ -111,18 +145,28 @@
 						<span class="material-symbols-outlined">
 							flight_takeoff
 						</span>
+
 						<h3>운항 상태</h3>
+
 						<p th:text="${selectedAircraft.status_name}">
 							운항가능
 						</p>
 					</div>
+
 				</div>
 
 				<section class="aircraft-seat-section">
+
 					<div class="travel-title">
-						<div class="travel-title-label">SEAT CLASS</div>
+						<div class="travel-title-label">
+							SEAT CLASS
+						</div>
+
 						<h2>좌석 등급 구성</h2>
-						<p>선택한 항공기에 등록된 좌석의 등급별 개수입니다.</p>
+
+						<p>
+							선택한 항공기에 등록된 좌석의 등급별 개수입니다.
+						</p>
 					</div>
 
 					<div class="airport-info"
@@ -131,6 +175,7 @@
 
 						<div class="airport-info-card"
 							 th:each="seatClass : ${seatClassList}">
+
 							<span class="material-symbols-outlined">
 								event_seat
 							</span>
@@ -148,14 +193,502 @@
 					<div class="airport-info-empty"
 						 th:if="${seatClassList == null
 						 	or #lists.isEmpty(seatClassList)}">
+
 						<span class="material-symbols-outlined">
 							event_seat
 						</span>
-						<p>등록된 좌석 정보가 없습니다.</p>
+
+						<p>
+							등록된 좌석 정보가 없습니다.
+						</p>
 					</div>
+
 				</section>
 
+				<section class="member-seatmap-section"
+						 th:if="${seatList != null
+						 	and !#lists.isEmpty(seatList)}">
+
+					<div class="travel-title">
+						<div class="travel-title-label">
+							SEAT MAP
+						</div>
+
+						<h2>좌석 배치도</h2>
+
+						<p>
+							좌석 등급과 현재 이용 가능 상태를 확인할 수 있습니다.
+						</p>
+					</div>
+
+					<div class="member-seatmap-legend">
+						<div>
+							<span class="member-seatmap-color first"></span>
+							일등석
+						</div>
+
+						<div>
+							<span class="member-seatmap-color business"></span>
+							비즈니스
+						</div>
+
+						<div>
+							<span class="member-seatmap-color economy"></span>
+							이코노미
+						</div>
+
+						<div>
+							<span class="member-seatmap-color broken"></span>
+							이용 불가
+						</div>
+					</div>
+
+					<div id="memberSeatZoneTabs"
+						 class="member-seatmap-tabs">
+					</div>
+
+					<div class="member-seatmap-aircraft">
+						<div class="member-seatmap-front">
+							<span class="material-symbols-outlined">
+								flight
+							</span>
+							FRONT
+						</div>
+
+						<div id="memberSeatMapArea"
+							 class="member-seatmap-container">
+						</div>
+
+						<div class="member-seatmap-rear">
+							REAR
+						</div>
+					</div>
+
+				</section>
+
+				<div class="airport-info-empty"
+					 th:if="${seatList == null
+					 	or #lists.isEmpty(seatList)}">
+
+					<span class="material-symbols-outlined">
+						airline_seat_recline_normal
+					</span>
+
+					<p>
+						해당 항공기에 생성된 좌석 배치가 없습니다.
+					</p>
+				</div>
+
 			</th:block>
+
+			<script th:inline="javascript">
+				const memberSeatData = /*[[${seatList}]]*/ [];
+
+				function scrollMemberSeatClass(className) {
+					const target = document.getElementById(
+						`member-class-section-${className}`
+					);
+
+					if (target) {
+						target.scrollIntoView({
+							behavior: "smooth",
+							block: "center"
+						});
+					}
+				}
+
+				function renderMemberSeatMap() {
+					const mapArea =
+						document.getElementById("memberSeatMapArea");
+
+					const tabsArea =
+						document.getElementById("memberSeatZoneTabs");
+
+					if (!mapArea || !tabsArea || !memberSeatData) {
+						return;
+					}
+
+					if (memberSeatData.length === 0) {
+						return;
+					}
+
+					mapArea.innerHTML = "";
+					tabsArea.innerHTML = "";
+
+					const classes = [
+						...new Set(
+							memberSeatData.map(
+								seat => seat.class_name
+							)
+						)
+					];
+
+					classes.forEach(className => {
+						const tab =
+							document.createElement("button");
+
+						tab.type = "button";
+						tab.className = "member-seatmap-tab";
+						tab.textContent = className;
+
+						tab.addEventListener("click", () => {
+							scrollMemberSeatClass(className);
+						});
+
+						tabsArea.appendChild(tab);
+					});
+
+					const rows = {};
+					let maxColumns = 0;
+
+					memberSeatData.forEach(seat => {
+						const rowNumber =
+							parseInt(seat.seat_no, 10);
+
+						if (!rows[rowNumber]) {
+							rows[rowNumber] = [];
+						}
+
+						rows[rowNumber].push(seat);
+
+						if (rows[rowNumber].length > maxColumns) {
+							maxColumns = rows[rowNumber].length;
+						}
+					});
+
+					Object.values(rows).forEach(rowSeats => {
+						rowSeats.sort((firstSeat, secondSeat) => {
+							return firstSeat.seat_no.localeCompare(
+								secondSeat.seat_no,
+								undefined,
+								{
+									numeric: true
+								}
+							);
+						});
+					});
+
+					const isWideBody = maxColumns >= 7;
+
+					const sortedRows = Object.keys(rows)
+						.map(Number)
+						.sort((firstRow, secondRow) => {
+							return firstRow - secondRow;
+						});
+
+					let previousClass = null;
+
+					const isSingleClass =
+						classes.length === 1;
+
+					const middleRowIndex =
+						isSingleClass
+							? Math.floor(sortedRows.length / 2)
+							: -1;
+
+					sortedRows.forEach((rowNumber, index) => {
+						const rowSeats = rows[rowNumber];
+						const currentClass =
+							rowSeats[0].class_name;
+
+						const columnCount =
+							rowSeats.length;
+
+						if (
+							isSingleClass
+							&& index === middleRowIndex
+							&& index !== 0
+						) {
+							appendMemberExit(mapArea, false);
+						}
+
+						if (
+							!isSingleClass
+							&& previousClass !== null
+							&& previousClass !== currentClass
+						) {
+							appendMemberExit(mapArea, true);
+						}
+
+						const row =
+							document.createElement("div");
+
+						row.className =
+							"member-seatmap-row";
+
+						if (previousClass !== currentClass) {
+							row.id =
+								`member-class-section-${currentClass}`;
+						}
+
+						previousClass = currentClass;
+
+						const rowNumberElement =
+							document.createElement("div");
+
+						rowNumberElement.className =
+							"member-seatmap-row-number";
+
+						rowNumberElement.textContent =
+							rowNumber;
+
+						row.appendChild(rowNumberElement);
+
+						const createSeatElement = seat => {
+							const seatElement =
+								document.createElement("div");
+
+							let className =
+								"economy";
+
+							if (seat.class_name === "일등석") {
+								className = "first";
+							}
+
+							if (seat.class_name === "비즈니스") {
+								className = "business";
+							}
+
+							seatElement.className =
+								`member-seatmap-seat ${className}`;
+
+							if (seat.is_active === "N") {
+								seatElement.classList.add(
+									"broken"
+								);
+							}
+
+							seatElement.textContent =
+								seat.seat_no;
+
+							seatElement.title =
+								seat.is_active === "Y"
+									? `${seat.class_name} 이용 가능`
+									: `${seat.class_name} 이용 불가`;
+
+							return seatElement;
+						};
+
+						let leftCount = 0;
+						let centerCount = 0;
+						let rightCount = 0;
+
+						if (isWideBody) {
+							if (columnCount === 4) {
+								leftCount = 1;
+								centerCount = 2;
+								rightCount = 1;
+							} else if (columnCount === 6) {
+								leftCount = 2;
+								centerCount = 2;
+								rightCount = 2;
+							} else if (columnCount === 7) {
+								leftCount = 2;
+								centerCount = 3;
+								rightCount = 2;
+							} else if (columnCount === 8) {
+								leftCount = 2;
+								centerCount = 4;
+								rightCount = 2;
+							} else if (columnCount === 9) {
+								leftCount = 3;
+								centerCount = 3;
+								rightCount = 3;
+							} else if (columnCount === 10) {
+								leftCount = 3;
+								centerCount = 4;
+								rightCount = 3;
+							} else {
+								leftCount =
+									Math.floor(columnCount / 3);
+
+								rightCount =
+									Math.floor(columnCount / 3);
+
+								centerCount =
+									columnCount
+									- leftCount
+									- rightCount;
+							}
+						} else {
+							if (columnCount === 4) {
+								leftCount = 2;
+								rightCount = 2;
+							} else if (columnCount === 6) {
+								leftCount = 3;
+								rightCount = 3;
+							} else {
+								leftCount =
+									Math.floor(columnCount / 2);
+
+								rightCount =
+									columnCount - leftCount;
+							}
+						}
+
+						let seatIndex = 0;
+
+						if (isWideBody) {
+							const leftBlock =
+								createMemberSeatBlock("left");
+
+							const centerBlock =
+								createMemberSeatBlock("center");
+
+							const rightBlock =
+								createMemberSeatBlock("right");
+
+							for (
+								let seat = 0;
+								seat < leftCount;
+								seat++
+							) {
+								leftBlock.appendChild(
+									createSeatElement(
+										rowSeats[seatIndex++]
+									)
+								);
+							}
+
+							for (
+								let seat = 0;
+								seat < centerCount;
+								seat++
+							) {
+								centerBlock.appendChild(
+									createSeatElement(
+										rowSeats[seatIndex++]
+									)
+								);
+							}
+
+							for (
+								let seat = 0;
+								seat < rightCount;
+								seat++
+							) {
+								rightBlock.appendChild(
+									createSeatElement(
+										rowSeats[seatIndex++]
+									)
+								);
+							}
+
+							row.appendChild(leftBlock);
+							row.appendChild(centerBlock);
+							row.appendChild(rightBlock);
+						} else {
+							const leftBlock =
+								createMemberSeatBlock("narrow");
+
+							const rightBlock =
+								createMemberSeatBlock("narrow");
+
+							for (
+								let seat = 0;
+								seat < leftCount;
+								seat++
+							) {
+								leftBlock.appendChild(
+									createSeatElement(
+										rowSeats[seatIndex++]
+									)
+								);
+							}
+
+							for (
+								let seat = 0;
+								seat < rightCount;
+								seat++
+							) {
+								rightBlock.appendChild(
+									createSeatElement(
+										rowSeats[seatIndex++]
+									)
+								);
+							}
+
+							row.appendChild(leftBlock);
+							row.appendChild(rightBlock);
+						}
+
+						mapArea.appendChild(row);
+					});
+				}
+
+				function createMemberSeatBlock(type) {
+					const block =
+						document.createElement("div");
+
+					block.className =
+						`member-seatmap-block ${type}`;
+
+					return block;
+				}
+
+				function appendMemberExit(mapArea, withIcons) {
+					const separator =
+						document.createElement("div");
+
+					separator.className =
+						"member-seatmap-exit";
+
+					const leftDoor =
+						document.createElement("div");
+
+					leftDoor.className =
+						"member-seatmap-exit-door";
+
+					leftDoor.textContent = "EXIT";
+
+					const rightDoor =
+						document.createElement("div");
+
+					rightDoor.className =
+						"member-seatmap-exit-door";
+
+					rightDoor.textContent = "EXIT";
+
+					const firstLine =
+						document.createElement("div");
+
+					firstLine.className =
+						"member-seatmap-exit-line";
+
+					separator.appendChild(leftDoor);
+					separator.appendChild(firstLine);
+
+					if (withIcons) {
+						const icons =
+							document.createElement("div");
+
+						icons.className =
+							"member-seatmap-exit-icons";
+
+						icons.innerHTML = `
+							<span class="material-symbols-outlined">wc</span>
+							<span class="material-symbols-outlined">local_cafe</span>
+						`;
+
+						const secondLine =
+							document.createElement("div");
+
+						secondLine.className =
+							"member-seatmap-exit-line";
+
+						separator.appendChild(icons);
+						separator.appendChild(secondLine);
+					}
+
+					separator.appendChild(rightDoor);
+					mapArea.appendChild(separator);
+				}
+
+				document.addEventListener(
+					"DOMContentLoaded",
+					renderMemberSeatMap
+				);
+			</script>
 
 		</section>
 

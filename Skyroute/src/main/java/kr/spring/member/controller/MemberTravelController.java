@@ -13,6 +13,7 @@ import kr.spring.admin.service.AirCraftService;
 import kr.spring.admin.vo.AirCraftVO;
 import kr.spring.staff.basedata.service.StaffAirportService;
 import kr.spring.staff.basedata.vo.AirportVO;
+import kr.spring.staff.basedata.service.StaffSeatService;
 
 @Controller
 @RequestMapping("/member/travel")
@@ -59,16 +60,27 @@ public class MemberTravelController {
 		model.addAttribute("activeMenu", "travel");
 		model.addAttribute("activeTravel", "aircraft");
 		model.addAttribute("aircraftList", aircraftList);
+		model.addAttribute("seatList", List.of());
 
 		if (aircraftId != null) {
 			AirCraftVO selectedAircraft =
 					airCraftService.selectActiveAircraft(aircraftId);
 
 			if (selectedAircraft != null) {
-				model.addAttribute("selectedAircraft", selectedAircraft);
+				model.addAttribute(
+						"selectedAircraft",
+						selectedAircraft
+				);
+
 				model.addAttribute(
 						"seatClassList",
-						airCraftService.selectSeatClassCountList(aircraftId));
+						airCraftService.selectSeatClassCountList(aircraftId)
+				);
+
+				model.addAttribute(
+						"seatList",
+						staffSeatService.getSeatsByAircraft(aircraftId)
+				);
 			}
 		}
 
@@ -85,5 +97,11 @@ public class MemberTravelController {
 	
 	@Autowired
 	private AirCraftService airCraftService;
+	
+	
+	@Autowired
+	private StaffSeatService staffSeatService;
+	
+	
 	
 }
