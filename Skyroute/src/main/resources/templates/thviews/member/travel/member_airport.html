@@ -19,22 +19,22 @@
 	</section>
 
 	<nav class="travel-tabs">
-		<a th:href="@{/member/travel/airport}"
+		<a th:href="@{/member/travel/member_airport}"
 		   th:classappend="${activeTravel == 'airport'} ? ' is-on'">
 			공항에서
 		</a>
 
-		<a th:href="@{/member/travel/cabin}"
+		<a th:href="@{/member/travel/member_cabin}"
 		   th:classappend="${activeTravel == 'cabin'} ? ' is-on'">
 			기내에서
 		</a>
 
-		<a th:href="@{/member/travel/aircraft}"
+		<a th:href="@{/member/travel/member_aircraft}"
 		   th:classappend="${activeTravel == 'aircraft'} ? ' is-on'">
 			항공기 정보
 		</a>
 
-		<a th:href="@{/member/travel/service}"
+		<a th:href="@{/member/travel/member_service}"
 		   th:classappend="${activeTravel == 'service'} ? ' is-on'">
 			유료 부가서비스
 		</a>
