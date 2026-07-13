@@ -118,15 +118,15 @@
                                 <span th:text="${f.FLIGHT_STATUS}" th:class="|stat ${f.FLIGHT_STATUS == 'SCHEDULED' ? 'soon' : 'active'}|" style="padding: 2px 6px; border-radius:4px; font-size:12px;">SCHEDULED</span>
                                 <span class="pnr" th:text="${f.FLIGHT_NO}" style="font-weight: 500; font-family: var(--mono);">NU101</span>
                                 <span style="font-size: 12px; color: var(--accent); font-weight: 500;">
-                                    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: -2px;">door_open</span> 
-                                    출발 게이트: <th:block th:text="${f.DEP_GATE != null ? f.DEP_GATE + '번' : '미정'}"></th:block> / 
-                                    도착 게이트: <th:block th:text="${f.ARR_GATE != null ? f.ARR_GATE + '번' : '미정'}"></th:block>
-                                </span>
+								    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: -2px;">door_open</span> 
+								    출발 게이트: <th:block th:text="${f.get('DEP_GATE') != null ? f.get('DEP_GATE') + '번' : '미정'}"></th:block> / 
+								    도착 게이트: <th:block th:text="${f.get('ARR_GATE') != null ? f.get('ARR_GATE') + '번' : '미정'}"></th:block>
+								</span>
                             </div>
                             <div class="rt" style="font-weight: 500; font-size: 17px;" th:text="|${f.DEP_IATA} ${f.DEP_NAME} ➔ ${f.ARR_IATA} ${f.ARR_NAME}|">ICN 인천 ➔ JFK 뉴욕</div>
                             
                             <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut);" 
-							     th:text="'출발 일시: ' + ${#dates.format(f.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')} + ' - 도착 일시: ' + ${#dates.format(f.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')} + ' (지연: ' + (${f.DELAY_MINUTES != null ? f.DELAY_MINUTES : 0}) + '분)'">
+							     th:text="'출발 일시: ' + ${f.DEPARTURE_TIME} + ' - 도착 일시: ' + ${f.ARRIVAL_TIME} + ' (지연: ' + (${f.get('DELAY_MINUTES') != null} ? ${f.get('DELAY_MINUTES')} : 0) + '분)'">
 							</div>
                         </div>
                     </div>
@@ -181,39 +181,56 @@
                 </div>
 
                 <div class="results" style="margin-top: 12px;">
+                    
                     <div id="schedOutboundList" style="display: block;">
-                        <div th:if="${#lists.isEmpty(outboundSchedules)}" class="trip" style="text-align:center; color:var(--mut);">가는 편 스케줄 결과가 없습니다.</div>
+                        <div th:if="${#lists.isEmpty(outboundSchedules)}" class="trip" style="text-align:center; color:var(--mut);">
+                            해당 날짜 범위에 운항하는 가는 편 스케줄이 없습니다.
+                        </div>
+                        
                         <a href="javascript:void(0);" class="trip open-modal-trigger" 
                            th:each="s : ${outboundSchedules}"
-                           th:attr="data-flight=${s.FLIGHT_NO}, data-route=|${s.DEP_NAME} ➔ ${s.ARR_NAME}|, data-dep=${#dates.format(s.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')}, data-arr=${#dates.format(s.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')}, data-model=${s.MODEL_NAME}"
+                           th:attr="data-flight=${s.get('FLIGHT_NO')}, 
+                                    data-route=|${s.get('DEP_NAME')} ➔ ${s.get('ARR_NAME')}|, 
+                                    data-dep=${s.get('DEPARTURE_TIME')}, 
+                                    data-arr=${s.get('ARRIVAL_TIME')}, 
+                                    data-model=${s.get('MODEL_NAME')},
+                                    data-booking-url=@{/booking/flights/detail(flightId=${s.get('FLIGHT_ID')})}"
                            style="margin-bottom: 10px; display: flex; text-decoration: none; color: inherit; text-align: left;">
                             <div>
                                 <div style="display:flex; gap:10px; align-items:center; margin-bottom:4px">
                                     <span class="stat soon" style="background: var(--accent-soft); color: var(--accent);">정기운항</span>
-                                    <span class="pnr" th:text="${s.FLIGHT_NO}" style="font-weight: 500; font-family: var(--mono);">NU101</span>
+                                    <span class="pnr" th:text="${s.get('FLIGHT_NO')}" style="font-weight: 500; font-family: var(--mono);">NU101</span>
                                 </div>
-                                <div class="rt" style="font-weight: 500; font-size: 16px;" th:text="|${s.DEP_IATA} ➔ ${s.ARR_IATA} (${s.DEP_NAME} ➔ ${s.ARR_NAME})|">ICN ➔ JFK</div>
+                                <div class="rt" style="font-weight: 500; font-size: 16px;" th:text="|${s.get('DEP_IATA')} ➔ ${s.get('ARR_IATA')} (${s.get('DEP_NAME')} ➔ ${s.get('ARR_NAME')})|">ICN ➔ JFK</div>
                                 <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut) !important;" 
-                                     th:text="'출발: ' + ${#dates.format(s.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')} + ' - 도착: ' + ${#dates.format(s.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')} + ' / 기종: ' + ${s.MODEL_NAME}">시간대 정보</div>
+                                     th:text="'출발 일시: ' + ${s.get('DEPARTURE_TIME')} + ' - 도착 일시: ' + ${s.get('ARRIVAL_TIME')} + ' / 기종: ' + ${s.get('MODEL_NAME')}">시간대 정보</div>
                             </div>
                             <div class="actions"><span class="material-symbols-outlined" style="color: var(--line);">arrow_forward_ios</span></div>
                         </a>
                     </div>
 
                     <div id="schedInboundList" style="display: none;">
-                        <div th:if="${#lists.isEmpty(inboundSchedules)}" class="trip" style="text-align:center; color:var(--mut);">오는 편 스케줄 결과가 없습니다.</div>
+                        <div th:if="${#lists.isEmpty(inboundSchedules)}" class="trip" style="text-align:center; color:var(--mut);">
+                            해당 날짜 범위에 운항하는 오는 편 스케줄이 없습니다.
+                        </div>
+                        
                         <a href="javascript:void(0);" class="trip open-modal-trigger" 
                            th:each="s : ${inboundSchedules}"
-                           th:attr="data-flight=${s.FLIGHT_NO}, data-route=|${s.DEP_NAME} ➔ ${s.ARR_NAME}|, data-dep=${#dates.format(s.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')}, data-arr=${#dates.format(s.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')}, data-model=${s.MODEL_NAME}"
+                           th:attr="data-flight=${s.get('FLIGHT_NO')}, 
+                                    data-route=|${s.get('DEP_NAME')} ➔ ${s.get('ARR_NAME')}|, 
+                                    data-dep=${s.get('DEPARTURE_TIME')}, 
+                                    data-arr=${s.get('ARRIVAL_TIME')}, 
+                                    data-model=${s.get('MODEL_NAME')},
+                                    data-booking-url=@{/booking/flights/detail(flightId=${s.get('FLIGHT_ID')})}"
                            style="margin-bottom: 10px; display: flex; text-decoration: none; color: inherit; text-align: left;">
 							<div>
 								<div style="display:flex; gap:10px; align-items:center; margin-bottom:4px">
 									<span class="stat soon" style="background: var(--accent-soft); color: var(--accent);">정기운항</span>
-									<span class="pnr" th:text="${s.FLIGHT_NO}" style="font-weight: 500; font-family: var(--mono);">NU102</span>
+									<span class="pnr" th:text="${s.get('FLIGHT_NO')}" style="font-weight: 500; font-family: var(--mono);">NU102</span>
 								</div>
-                                <div class="rt" style="font-weight: 500; font-size: 16px;" th:text="|${s.DEP_IATA} ➔ ${s.ARR_IATA} (${s.DEP_NAME} ➔ ${s.ARR_NAME})|">JFK ➔ ICN</div>
+                                <div class="rt" style="font-weight: 500; font-size: 16px;" th:text="|${s.get('DEP_IATA')} ➔ ${s.get('ARR_IATA')} (${s.get('DEP_NAME')} ➔ ${s.get('ARR_NAME')})|">JFK ➔ ICN</div>
                                 <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut) !important;" 
-                                     th:text="'출발: ' + ${#dates.format(s.DEPARTURE_TIME, 'yyyy-MM-dd HH:mm')} + ' - 도착: ' + ${#dates.format(s.ARRIVAL_TIME, 'yyyy-MM-dd HH:mm')} + ' / 기종: ' + ${s.MODEL_NAME}">시간대 정보</div>
+                                     th:text="'출발 일시: ' + ${s.get('DEPARTURE_TIME')} + ' - 도착 일시: ' + ${s.get('ARRIVAL_TIME')} + ' / 기종: ' + ${s.get('MODEL_NAME')}">시간대 정보</div>
 							</div>
 							<div class="actions"><span class="material-symbols-outlined" style="color: var(--line);">arrow_forward_ios</span></div>
                         </a>
@@ -221,7 +238,7 @@
                 </div>
             </div>
 
-        </div> 
+        </div>
 
         <div id="schedDetailModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
             <div class="summary" style="background:#fff; width:480px; padding:30px; border-radius:16px; box-shadow: var(--sh); position:relative;">
@@ -235,14 +252,13 @@
                 </div>
                 <div style="display:flex; justify-content:flex-end; gap: 10px; margin-top:24px;">
                     <a href="javascript:void(0);" id="btnModalClose" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; width:100px; height: 38px;">닫기</a>
-                    <a th:href="@{/booking/flightList}" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; width:130px; height: 38px;">예매하러 가기</a>
+                    <a th:href="@{/booking/flights/search}" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; width:130px; height: 38px;">예매하러 가기</a>
                 </div>
             </div>
         </div>
 
         <script>
             document.addEventListener("DOMContentLoaded", function() {
-                // 서브탭 제어
                 var btnRoute = document.getElementById('subTabStatusRoute');
                 var btnFlight = document.getElementById('subTabStatusFlight');
                 var cardRoute = document.getElementById('statusRouteCard');
@@ -263,7 +279,6 @@
                     });
                 }
 
-                // 왕복 편도 토글 제어
                 var radioRT = document.querySelector('input[name="schedTripType"][value="RT"]');
                 var radioOW = document.querySelector('input[name="schedTripType"][value="OW"]');
                 var toggleBar = document.getElementById('roundTripToggleBar');
@@ -278,7 +293,6 @@
                     });
                 }
 
-                // 가는편/오는편 목록 토글
                 var btnOut = document.getElementById('btnSchedOutbound');
                 var btnIn = document.getElementById('btnSchedInbound');
                 var listOut = document.getElementById('schedOutboundList');
@@ -299,8 +313,9 @@
                     });
                 }
 
-                // 모달 작동 엔진
                 var modal = document.getElementById('schedDetailModal');
+                var btnModalBooking = document.getElementById('btnModalBooking');
+
                 document.querySelectorAll('.open-modal-trigger').forEach(function(trigger) {
                     trigger.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -309,6 +324,12 @@
                         document.getElementById('modalDepTime').innerText = trigger.getAttribute('data-dep');
                         document.getElementById('modalArrTime').innerText = trigger.getAttribute('data-arr');
                         document.getElementById('modalAircraftModel').innerText = trigger.getAttribute('data-model');
+                                                
+                        var bookingUrl = trigger.getAttribute('data-booking-url');
+                        if (btnModalBooking && bookingUrl) {
+                            btnModalBooking.setAttribute('href', bookingUrl);
+                        }
+                        
                         if (modal) modal.style.display = 'flex';
                     });
                 });

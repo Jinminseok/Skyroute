@@ -57,9 +57,10 @@
 
 	<select id="selectFlightScheduleList" parameterType="map" resultType="map">
 		SELECT 
-			F.FLIGHT_NO,
-			F.DEPARTURE_TIME,
-			F.ARRIVAL_TIME,
+			F.FLIGHT_ID,
+			F.FLIGHT_NO,			
+			TO_CHAR(F.DEPARTURE_TIME, 'YYYY-MM-DD HH24:MI') AS DEPARTURE_TIME,
+			TO_CHAR(F.ARRIVAL_TIME, 'YYYY-MM-DD HH24:MI') AS ARRIVAL_TIME,
 			DA.IATA_CODE AS DEP_IATA,
 			DA.AIRPORT_NAME AS DEP_NAME,
 			AA.IATA_CODE AS ARR_IATA,
@@ -83,6 +84,18 @@
 			<![CDATA[ AND TO_CHAR(F.DEPARTURE_TIME, 'YYYY-MM-DD') <= #{endDate} ]]>
 		</if>
 		ORDER BY F.DEPARTURE_TIME ASC
+	</select>
+	
+	<!-- 스케줄 조회 -->
+	<select id="selectScheduleList" resultType="map">
+	    SELECT 
+	        s.SCHEDULE_ID,
+	        s.FLIGHT_NAME,        s.DEPARTURE_AIRPORT,  s.ARRIVAL_AIRPORT,    s.DEPARTURE_TIME,     s.ARRIVAL_TIME,       s.AIRCRAFT_NAME,      s.BASE_PRICE,         DATE_FORMAT(s.FLIGHT_DATE, '%Y-%m-%d') AS FLIGHT_DATE
+	    FROM tbl_schedule s
+	    WHERE s.DEPARTURE_AIRPORT = #{departure}
+	      AND s.ARRIVAL_AIRPORT = #{arrival}
+	      AND s.FLIGHT_DATE = #{flightDate}
+	    ORDER BY s.DEPARTURE_TIME ASC
 	</select>
 </mapper>
 

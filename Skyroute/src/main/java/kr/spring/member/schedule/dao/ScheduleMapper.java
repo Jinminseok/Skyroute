@@ -15,4 +15,7 @@ public interface ScheduleMapper {
 		
 		// 3. 정기 운항 스케줄 조회
 		public List<Map<String, Object>> selectFlightScheduleList(Map<String, Object> map);
+		
+		// 출발지, 도착지, 날짜 조건으로 스케줄 리스트 조회
+	    List<Map<String, Object>> getScheduleList(String departure, String arrival, String flightDate);
 }

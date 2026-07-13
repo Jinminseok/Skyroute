@@ -89,4 +89,35 @@ public class MemberScheduleController {
 
 		return "thviews/member/member_schedule";
 	}
+	
+	@GetMapping("/member/schedule/search")
+	public String searchSchedule(
+	        @RequestParam("departure") String departure,
+	        @RequestParam("arrival") String arrival,
+	        @RequestParam("goingDate") String goingDate,
+	        @RequestParam(value = "returnDate", required = false) String returnDate,
+	        @RequestParam(value = "isRoundTrip", defaultValue = "true") boolean isRoundTrip,
+	        Model model) {
+
+	    // 1. 가는편 조회 (출발지 -> 도착지)
+	    List<Map<String, Object>> goingFlights = scheduleService.getScheduleList(departure, arrival, goingDate);
+	    model.addAttribute("goingFlights", goingFlights);
+
+	    // 2. 왕복일 경우에만 오는편 조회 (도착지 -> 출발지)
+	    if (isRoundTrip && returnDate != null && !returnDate.isEmpty()) {
+	        List<Map<String, Object>> returnFlights = scheduleService.getScheduleList(arrival, departure, returnDate);
+	        model.addAttribute("returnFlights", returnFlights);
+	        model.addAttribute("isRoundTrip", true);
+	    } else {
+	        model.addAttribute("isRoundTrip", false);
+	    }
+
+	    // 검색 조건 유지용 데이터
+	    model.addAttribute("searchDep", departure);
+	    model.addAttribute("searchArr", arrival);
+	    model.addAttribute("goingDate", goingDate);
+	    model.addAttribute("returnDate", returnDate);
+
+	    return "thviews/member/member_schedule"; 
+	}
 }
