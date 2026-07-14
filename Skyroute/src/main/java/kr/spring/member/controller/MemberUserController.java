@@ -187,8 +187,7 @@ public class MemberUserController {
 	
 	//마이페이지 폼 호출
 	@GetMapping("/member_mypage")
-	public String mypageForm(@AuthenticationPrincipal PrincipalDetails principalDetails,
-			Model model) {
+	public String mypageForm(@AuthenticationPrincipal PrincipalDetails principalDetails, Model model) {
 		if (principalDetails == null || principalDetails.getMemberVO() == null) {
 			return "redirect:/member/login";
 		}
@@ -197,6 +196,10 @@ public class MemberUserController {
 		long memberId = memberVO.getMember_id();
 
 		model.addAttribute("member", memberVO);
+
+		// SAVED_PASSENGER 여권 정보 보여주기
+		Map<String, Object> savedPassenger = memberService.selectSavedPassenger(memberId);
+		model.addAttribute("savedPassenger", savedPassenger);
 
 		model.addAttribute("eventParticipationList",
 				staffEventService.selectMyParticipationList(memberId));
@@ -288,6 +291,31 @@ public class MemberUserController {
 	@GetMapping("/member_select_seat")
 	public String selectSeatForm() {
 		return "thviews/member/member_select_seat";
+	}
+	
+	//마이페이지 여권정보 업데이트
+	@PostMapping("/updatePassport")
+	@ResponseBody
+	public String updatePassport(@AuthenticationPrincipal PrincipalDetails principalDetails,
+	                             @RequestParam Map<String, Object> paramMap) {
+		
+		if (principalDetails == null || principalDetails.getMemberVO() == null) {
+			return "로그인 세션이 만료되었습니다.";
+		}
+		
+		try {
+			// 현재 로그인한 사용자의 고유 ID 번호를 파라미터 맵에 강제 바인딩 가드
+			Long memberId = principalDetails.getMemberVO().getMember_id();
+			paramMap.put("memberId", memberId);
+			
+			// 서비스단으로 토스하여 MERGE INTO 격발
+			memberService.upsertPassportInfo(paramMap);
+			return "여권 정보 업데이트 완료";
+			
+		} catch (Exception e) {
+			log.error("여권 정보 저장 중 예외 발생: {}", e.getMessage());
+			return "서버 오류로 인해 저장에 실패했습니다.";
+		}
 	}
 	
 	
