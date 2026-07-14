@@ -2,7 +2,9 @@ package kr.spring.member.controller;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,6 +38,93 @@ public class MemberEventController {
 		return "thviews/member/event_list";
 	}
 
+	@GetMapping("/ended")
+	public String endedEventList(Model model) {
+		List<EventVO> eventList = staffEventService.selectEndedEventList();
+
+		model.addAttribute("eventList", eventList);
+		model.addAttribute("activeMenu", "event");
+
+		return "thviews/member/event_ended";
+	}
+	
+	@GetMapping("/winner")
+	public String winnerEventList(
+			@RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+			@RequestParam(value = "keyword", defaultValue = "") String keyword,
+			Model model) {
+
+		final int rowCount = 10;
+		final int pageBlock = 5;
+
+		keyword = keyword.trim();
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("keyword", keyword);
+
+		int winnerCount =
+				staffEventService.selectWinnerEventRowCount(map);
+
+		int winnerPageCount =
+				(int) Math.ceil((double) winnerCount / rowCount);
+
+		if (pageNum < 1) {
+			pageNum = 1;
+		}
+
+		if (winnerPageCount > 0 && pageNum > winnerPageCount) {
+			pageNum = winnerPageCount;
+		}
+
+		int skip = (pageNum - 1) * rowCount;
+		int endRow = pageNum * rowCount;
+
+		map.put("skip", skip);
+		map.put("endRow", endRow);
+
+		List<EventVO> eventList =
+				staffEventService.selectWinnerEventList(map);
+
+		int winnerStartPage =
+				((pageNum - 1) / pageBlock) * pageBlock + 1;
+
+		int winnerEndPage =
+				Math.min(
+						winnerStartPage + pageBlock - 1,
+						winnerPageCount);
+
+		model.addAttribute("eventList", eventList);
+		model.addAttribute("winnerCount", winnerCount);
+		model.addAttribute("winnerKeyword", keyword);
+		model.addAttribute("winnerPageNum", pageNum);
+		model.addAttribute("winnerPageCount", winnerPageCount);
+		model.addAttribute("winnerStartPage", winnerStartPage);
+		model.addAttribute("winnerEndPage", winnerEndPage);
+		model.addAttribute("activeMenu", "event");
+
+		return "thviews/member/event_winner";
+	}
+
+	@GetMapping("/winner/detail")
+	public String winnerDetail(@RequestParam("event_id") long event_id,
+							   Model model) {
+
+		EventVO event = staffEventService.selectEvent(event_id);
+
+		if (event == null || !"ANNOUNCED".equals(event.getResult_status())) {
+			return "redirect:/member/event/winner";
+		}
+
+		List<EventParticipationVO> winnerList =
+				staffEventService.selectWinnerList(event_id);
+
+		model.addAttribute("event", event);
+		model.addAttribute("winnerList", winnerList);
+		model.addAttribute("activeMenu", "event");
+
+		return "thviews/member/event_winner_detail";
+	}
+
 	@GetMapping("/detail")
 	public String detail(@RequestParam("event_id") long event_id,
 						 @AuthenticationPrincipal PrincipalDetails principalDetails,
@@ -66,16 +155,24 @@ public class MemberEventController {
 				staffEventService.selectActiveEvent(event_id) != null;
 
 		boolean scheduledEvent =
-				startDate != null && today.isBefore(startDate);
-
-		boolean userVisibleEvent =
 				"Y".equals(event.getIs_visible())
 				&& "N".equals(event.getIs_ended())
 				&& !"ANNOUNCED".equals(event.getResult_status())
-				&& endDate != null
-				&& !today.isAfter(endDate);
+				&& startDate != null
+				&& today.isBefore(startDate);
 
-		if (!userVisibleEvent && !participated) {
+		boolean endedPublicEvent =
+				"ANNOUNCED".equals(event.getResult_status())
+				|| (
+					"Y".equals(event.getIs_visible())
+					&& endDate != null
+					&& today.isAfter(endDate)
+				);
+
+		if (!activeEvent
+				&& !scheduledEvent
+				&& !endedPublicEvent
+				&& !participated) {
 			return "redirect:/main/home";
 		}
 

@@ -308,6 +308,98 @@ WINNER_COUNT = #{winner_count},
 				 CREATED_AT DESC
 	</select>
 	
+	<select id="selectEndedEventList"
+					resultType="kr.spring.staff.content.vo.EventVO">
+				SELECT EVENT_ID,
+					   TITLE,
+					   CONTENT,
+					   START_DATE,
+					   END_DATE,
+					   IMAGE_URL,
+					   DISPLAY_ORDER,
+					   RESULT_STATUS,
+					   RESULT_ANNOUNCED_AT,
+					   'ENDED' AS EVENT_STATUS
+				FROM EVENT
+				WHERE (
+						IS_ENDED = 'Y'
+						OR SYSDATE >= END_DATE + 1
+					  )
+				  AND (
+						IS_VISIBLE = 'Y'
+						OR RESULT_STATUS = 'ANNOUNCED'
+					  )
+				ORDER BY END_DATE DESC,
+						 CREATED_AT DESC
+			</select>
+			
+			<select id="selectWinnerEventRowCount"
+			parameterType="map"
+			resultType="int">
+		SELECT COUNT(*)
+		FROM EVENT E
+		WHERE E.RESULT_STATUS = 'ANNOUNCED'
+	
+		<if test="keyword != null and keyword != ''">
+			AND UPPER(E.TITLE)
+				LIKE '%' || UPPER(#{keyword}) || '%'
+		</if>
+	</select>
+	
+	<select id="selectWinnerEventList"
+			parameterType="map"
+			resultType="kr.spring.staff.content.vo.EventVO">
+		SELECT EVENT_ID,
+			   TITLE,
+			   IMAGE_URL,
+			   START_DATE,
+			   END_DATE,
+			   RESULT_STATUS,
+			   RESULT_ANNOUNCED_AT,
+			   CREATED_AT
+		FROM (
+			SELECT E.EVENT_ID,
+				   E.TITLE,
+				   E.IMAGE_URL,
+				   E.START_DATE,
+				   E.END_DATE,
+				   E.RESULT_STATUS,
+				   E.RESULT_ANNOUNCED_AT,
+				   E.CREATED_AT,
+				   ROW_NUMBER() OVER (
+					   ORDER BY E.RESULT_ANNOUNCED_AT DESC,
+								E.EVENT_ID DESC
+				   ) AS ROW_NUM
+			FROM EVENT E
+			WHERE E.RESULT_STATUS = 'ANNOUNCED'
+	
+			<if test="keyword != null and keyword != ''">
+				AND UPPER(E.TITLE)
+					LIKE '%' || UPPER(#{keyword}) || '%'
+			</if>
+		)
+		WHERE ROW_NUM > #{skip}
+		  AND ROW_NUM &lt;= #{endRow}
+		ORDER BY ROW_NUM
+	</select>
+
+	<select id="selectWinnerList"
+			parameterType="long"
+			resultType="kr.spring.staff.content.vo.EventParticipationVO">
+		SELECT EP.PARTICIPATION_ID,
+			   EP.EVENT_ID,
+			   EP.MEMBER_ID,
+			   EP.RESULT_STATUS,
+			   M.NAME,
+			   M.LOGIN_ID
+		FROM EVENT_PARTICIPATION EP
+		JOIN MEMBER M
+		  ON EP.MEMBER_ID = M.MEMBER_ID
+		WHERE EP.EVENT_ID = #{event_id}
+		  AND EP.RESULT_STATUS = 'WINNER'
+		ORDER BY EP.PARTICIPATION_ID
+	</select>
+	
 	<select id="selectParticipationList"
 			parameterType="long"
 			resultType="kr.spring.staff.content.vo.EventParticipationVO">

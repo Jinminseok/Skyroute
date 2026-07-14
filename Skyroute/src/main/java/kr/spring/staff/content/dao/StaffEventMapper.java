@@ -44,5 +44,11 @@ public interface StaffEventMapper {
 	
 	//사용자 이벤트 목록 전용 조회
 	public List<EventVO> selectUserEventList();
-	
+	public List<EventVO> selectEndedEventList();
+	public int selectWinnerEventRowCount(Map<String, Object> map);
+
+	public List<EventVO> selectWinnerEventList(Map<String, Object> map);
+
+	public List<EventParticipationVO> selectWinnerList(
+			@Param("event_id") long event_id);
 }

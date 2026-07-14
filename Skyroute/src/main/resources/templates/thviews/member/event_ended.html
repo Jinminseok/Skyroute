@@ -221,8 +221,8 @@
 		</section>
 
 		<nav class="user-event-tabs" aria-label="이벤트 메뉴">
-			<a th:href="@{/member/event/list}" class="is-active">이벤트 목록</a>
-			<a th:href="@{/member/event/ended}">종료된 이벤트</a>
+			<a th:href="@{/member/event/list}">이벤트 목록</a>
+			<a th:href="@{/member/event/ended}" class="is-active">종료된 이벤트</a>
 			<a th:href="@{/member/event/winner}">당첨자 발표</a>
 		</nav>
 
@@ -235,10 +235,7 @@
 					<div class="user-event-image">
 						<img th:src="@{/assets/upload/{filename}(filename=${event.image_url})}"
 							 th:alt="${event.title}">
-						<span class="user-event-badge"
-							  th:text="${event.event_status == 'SCHEDULED' ? '진행 예정' : '진행 중'}">
-							진행 중
-						</span>
+						<span class="user-event-badge">종료</span>
 					</div>
 
 					<div class="user-event-info">
@@ -262,8 +259,8 @@
 		<section th:if="${eventList == null or eventList.isEmpty()}"
 				 class="user-event-empty">
 			<span class="material-symbols-outlined" aria-hidden="true">event_busy</span>
-			<h2>진행 중인 이벤트가 없습니다.</h2>
-			<p>새로운 이벤트가 등록되면 이곳에서 확인할 수 있습니다.</p>
+			<h2>종료된 이벤트가 없습니다.</h2>
+			<p>종료된 이벤트가 생기면 이곳에서 확인할 수 있습니다.</p>
 		</section>
 
 	</main>

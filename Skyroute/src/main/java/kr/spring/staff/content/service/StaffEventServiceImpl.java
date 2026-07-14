@@ -188,7 +188,23 @@ public class StaffEventServiceImpl implements StaffEventService {
 		return staffEventMapper.selectMyEventParticipation(event_id, member_id);
 	}
 	
+	@Override
+	public List<EventVO> selectEndedEventList() {
+		return staffEventMapper.selectEndedEventList();
+	}
 	
-	
-	
+	@Override
+	public int selectWinnerEventRowCount(Map<String, Object> map) {
+		return staffEventMapper.selectWinnerEventRowCount(map);
+	}
+
+	@Override
+	public List<EventVO> selectWinnerEventList(Map<String, Object> map) {
+		return staffEventMapper.selectWinnerEventList(map);
+	}
+
+	@Override
+	public List<EventParticipationVO> selectWinnerList(long event_id) {
+		return staffEventMapper.selectWinnerList(event_id);
+	}
 }

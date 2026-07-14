@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layouts/layout_basic}">
+<head>
+	<meta charset="UTF-8">
+	<title>이벤트 당첨자 발표</title>
+</head>
+<body>
+
+<th:block layout:fragment="panel">
+
+	<style>
+		.user-event-page {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 70px 24px 100px;
+		}
+
+		.user-event-title-area {
+			margin-bottom: 42px;
+			text-align: center;
+		}
+
+		.user-event-title-area h1 {
+			margin: 0 0 14px;
+			color: #111827;
+			font-size: 38px;
+			font-weight: 800;
+		}
+
+		.user-event-title-area p {
+			margin: 0;
+			color: #64748b;
+			font-size: 16px;
+		}
+
+		.user-event-tabs {
+			display: flex;
+			justify-content: center;
+			margin-bottom: 50px;
+			border-bottom: 1px solid #dbe3ec;
+		}
+
+		.user-event-tabs a {
+			min-width: 190px;
+			padding: 19px 24px;
+			border-bottom: 3px solid transparent;
+			color: #64748b;
+			font-size: 16px;
+			font-weight: 600;
+			text-align: center;
+			text-decoration: none;
+		}
+
+		.user-event-tabs a:hover {
+			color: #0066e2;
+		}
+
+		.user-event-tabs a.is-active {
+			border-bottom-color: #0066e2;
+			color: #0066e2;
+			font-weight: 800;
+		}
+
+		.winner-detail-wrap {
+			max-width: 920px;
+			margin: 0 auto;
+		}
+
+		.winner-detail-card {
+			overflow: hidden;
+			border: 1px solid #e2e8f0;
+			border-radius: 18px;
+			background: #ffffff;
+			box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+		}
+
+		.winner-detail-image {
+			position: relative;
+			width: 100%;
+			aspect-ratio: 16 / 7;
+			overflow: hidden;
+			background: #e2e8f0;
+		}
+
+		.winner-detail-image img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.winner-detail-badge {
+			position: absolute;
+			top: 20px;
+			left: 20px;
+			padding: 8px 14px;
+			border-radius: 999px;
+			background: #0066e2;
+			color: #ffffff;
+			font-size: 13px;
+			font-weight: 700;
+		}
+
+		.winner-detail-body {
+			padding: 38px 42px 46px;
+		}
+
+		.winner-detail-title {
+			margin: 0;
+			color: #172033;
+			font-size: 30px;
+			font-weight: 800;
+			line-height: 1.45;
+			word-break: keep-all;
+		}
+
+		.winner-detail-info {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 16px;
+			margin-top: 28px;
+			padding: 22px 24px;
+			border-radius: 14px;
+			background: #f8fafc;
+		}
+
+		.winner-detail-info-item {
+			display: flex;
+			flex-direction: column;
+			gap: 7px;
+		}
+
+		.winner-detail-info-label {
+			color: #94a3b8;
+			font-size: 13px;
+			font-weight: 700;
+		}
+
+		.winner-detail-info-value {
+			color: #334155;
+			font-size: 15px;
+			font-weight: 700;
+		}
+
+		.winner-message {
+			margin-top: 34px;
+			padding: 25px;
+			border: 1px solid #bfdbfe;
+			border-radius: 14px;
+			background: #eff6ff;
+			text-align: center;
+		}
+
+		.winner-message strong {
+			display: block;
+			color: #0057c2;
+			font-size: 21px;
+			font-weight: 800;
+		}
+
+		.winner-message p {
+			margin: 10px 0 0;
+			color: #476582;
+			font-size: 14px;
+			line-height: 1.7;
+		}
+
+		.winner-list-area {
+			margin-top: 42px;
+		}
+
+		.winner-list-head {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 18px;
+		}
+
+		.winner-list-head h2 {
+			margin: 0;
+			color: #172033;
+			font-size: 23px;
+			font-weight: 800;
+		}
+
+		.winner-list-count {
+			color: #64748b;
+			font-size: 14px;
+		}
+
+		.winner-list-count strong {
+			color: #0066e2;
+		}
+
+		.winner-table-wrap {
+			overflow: hidden;
+			border: 1px solid #e2e8f0;
+			border-radius: 14px;
+		}
+
+		.winner-table {
+			width: 100%;
+			border-collapse: collapse;
+			table-layout: fixed;
+		}
+
+		.winner-table thead {
+			background: #f8fafc;
+		}
+
+		.winner-table th {
+			padding: 16px;
+			color: #64748b;
+			font-size: 14px;
+			font-weight: 800;
+			text-align: center;
+		}
+
+		.winner-table td {
+			padding: 18px 16px;
+			border-top: 1px solid #e2e8f0;
+			color: #334155;
+			font-size: 14px;
+			font-weight: 600;
+			text-align: center;
+		}
+
+		.winner-number {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			background: #0066e2;
+			color: #ffffff;
+			font-size: 13px;
+			font-weight: 800;
+		}
+
+		.winner-list-empty {
+			padding: 65px 20px;
+			border: 1px solid #e2e8f0;
+			border-radius: 14px;
+			background: #f8fafc;
+			color: #64748b;
+			text-align: center;
+		}
+
+		.winner-notice {
+			margin-top: 22px;
+			padding: 17px 20px;
+			border-radius: 12px;
+			background: #f8fafc;
+			color: #64748b;
+			font-size: 13px;
+			line-height: 1.7;
+		}
+
+		.winner-actions {
+			display: flex;
+			justify-content: center;
+			margin-top: 34px;
+		}
+
+		.winner-list-button {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 150px;
+			height: 48px;
+			padding: 0 25px;
+			border-radius: 10px;
+			background: #0066e2;
+			color: #ffffff;
+			font-size: 15px;
+			font-weight: 800;
+			text-decoration: none;
+		}
+
+		.winner-list-button:hover {
+			background: #0057c2;
+			color: #ffffff;
+		}
+
+		@media (max-width: 640px) {
+			.user-event-page {
+				padding: 45px 18px 70px;
+			}
+
+			.user-event-tabs {
+				justify-content: flex-start;
+				overflow-x: auto;
+			}
+
+			.user-event-tabs a {
+				min-width: 140px;
+				padding: 16px 12px;
+				white-space: nowrap;
+			}
+
+			.winner-detail-body {
+				padding: 28px 20px 34px;
+			}
+
+			.winner-detail-title {
+				font-size: 24px;
+			}
+
+			.winner-detail-info {
+				grid-template-columns: 1fr;
+			}
+
+			.winner-table th,
+			.winner-table td {
+				padding: 14px 8px;
+				font-size: 12px;
+			}
+		}
+	</style>
+
+	<main class="user-event-page">
+
+		<section class="user-event-title-area">
+			<h1>이벤트</h1>
+			<p>SkyRoute에서 준비한 다양한 이벤트를 확인해 보세요.</p>
+		</section>
+
+		<nav class="user-event-tabs" aria-label="이벤트 메뉴">
+			<a th:href="@{/member/event/list}">
+				이벤트 목록
+			</a>
+
+			<a th:href="@{/member/event/ended}">
+				종료된 이벤트
+			</a>
+
+			<a th:href="@{/member/event/winner}"
+			   class="is-active">
+				당첨자 발표
+			</a>
+		</nav>
+
+		<div class="winner-detail-wrap">
+
+			<section class="winner-detail-card">
+
+				<div class="winner-detail-image">
+
+					<img th:if="${event.image_url != null and !#strings.isEmpty(event.image_url)}"
+						 th:src="@{/assets/upload/{filename}(filename=${event.image_url})}"
+						 th:alt="${event.title}">
+
+					<span class="winner-detail-badge">
+						당첨자 발표
+					</span>
+
+				</div>
+
+				<div class="winner-detail-body">
+
+					<h2 class="winner-detail-title"
+						th:text="${event.title}">
+						이벤트 제목
+					</h2>
+
+					<div class="winner-detail-info">
+
+						<div class="winner-detail-info-item">
+
+							<span class="winner-detail-info-label">
+								이벤트 기간
+							</span>
+
+							<span class="winner-detail-info-value"
+								  th:text="${#dates.format(event.start_date, 'yyyy.MM.dd')
+											+ ' ~ '
+											+ #dates.format(event.end_date, 'yyyy.MM.dd')}">
+								2026.07.01 ~ 2026.07.31
+							</span>
+
+						</div>
+
+						<div class="winner-detail-info-item">
+
+							<span class="winner-detail-info-label">
+								당첨자 발표일
+							</span>
+
+							<span th:if="${event.result_announced_at != null}"
+								  class="winner-detail-info-value"
+								  th:text="${#dates.format(event.result_announced_at, 'yyyy.MM.dd')}">
+								2026.07.14
+							</span>
+
+							<span th:unless="${event.result_announced_at != null}"
+								  class="winner-detail-info-value">
+								-
+							</span>
+
+						</div>
+
+					</div>
+
+					<div class="winner-message">
+
+						<strong>
+							이벤트 당첨을 축하드립니다!
+						</strong>
+
+						<p>
+							아래 당첨자 명단을 확인해 주세요.
+							당첨자에게는 등록된 연락처 또는 이메일로 별도 안내될 수 있습니다.
+						</p>
+
+					</div>
+
+					<section class="winner-list-area">
+
+						<div class="winner-list-head">
+
+							<h2>당첨자 명단</h2>
+
+							<div class="winner-list-count">
+								총
+								<strong th:text="${winnerList == null
+													? 0
+													: #lists.size(winnerList)}">
+									0
+								</strong>명
+							</div>
+
+						</div>
+
+						<div th:if="${winnerList != null and !winnerList.isEmpty()}"
+							 class="winner-table-wrap">
+
+							<table class="winner-table">
+
+								<thead>
+									<tr>
+										<th>번호</th>
+										<th>당첨자</th>
+										<th>아이디</th>
+									</tr>
+								</thead>
+
+								<tbody>
+
+									<tr th:each="winner, stat : ${winnerList}">
+
+										<td>
+											<span class="winner-number"
+												  th:text="${stat.count}">
+												1
+											</span>
+										</td>
+
+										<td>
+
+											<span th:if="${winner.name != null
+															and !#strings.isEmpty(winner.name)}"
+												  th:text="${#strings.substring(winner.name, 0, 1) + '**'}">
+												류**
+											</span>
+
+											<span th:unless="${winner.name != null
+																and !#strings.isEmpty(winner.name)}">
+												당첨자
+											</span>
+
+										</td>
+
+										<td>
+
+											<span th:if="${winner.login_id != null
+															and !#strings.isEmpty(winner.login_id)}"
+												  th:text="${#strings.length(winner.login_id) > 3
+															? #strings.substring(winner.login_id, 0, 3) + '***'
+															: winner.login_id + '***'}">
+												abc***
+											</span>
+
+											<span th:unless="${winner.login_id != null
+																and !#strings.isEmpty(winner.login_id)}">
+												-
+											</span>
+
+										</td>
+
+									</tr>
+
+								</tbody>
+
+							</table>
+
+						</div>
+
+						<div th:if="${winnerList == null or winnerList.isEmpty()}"
+							 class="winner-list-empty">
+							등록된 당첨자가 없습니다.
+						</div>
+
+						<div class="winner-notice">
+							개인정보 보호를 위해 당첨자의 이름과 아이디 일부만 표시됩니다.
+							당첨 관련 자세한 안내는 등록된 연락처 또는 이메일을 확인해 주세요.
+						</div>
+
+					</section>
+
+					<div class="winner-actions">
+
+						<a th:href="@{/member/event/winner}"
+						   class="winner-list-button">
+							목록으로
+						</a>
+
+					</div>
+
+				</div>
+
+			</section>
+
+		</div>
+
+	</main>
+
+</th:block>
+
+</body>
+</html>

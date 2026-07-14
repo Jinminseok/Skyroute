@@ -19,6 +19,12 @@ public interface StaffEventService {
 
 	public List<EventVO> selectActiveEventList();
 	public List<EventVO> selectUserEventList();
+	public List<EventVO> selectEndedEventList();
+	public int selectWinnerEventRowCount(Map<String, Object> map);
+
+	public List<EventVO> selectWinnerEventList(Map<String, Object> map);
+
+	public List<EventParticipationVO> selectWinnerList(long event_id);
 
 	public void participateEvent(long event_id, long member_id);
 	public EventParticipationVO selectMyEventParticipation(long event_id, long member_id);
