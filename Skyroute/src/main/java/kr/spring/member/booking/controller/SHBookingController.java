@@ -212,38 +212,55 @@ public class SHBookingController {
 
 	@PostMapping("/seat")
 	public String submitSeat(
-			@ModelAttribute("shReserveForm")
-			SHReserveForm reserveForm,
-			@RequestParam(name = "outboundSeatIds")
-			List<Long> outboundSeatIds,
-			@RequestParam(
-				name = "inboundSeatIds",
-				required = false
-			)
-			List<Long> inboundSeatIds,
-			RedirectAttributes redirectAttributes) {
+	        @RequestParam(name = "outboundSeatIds", required = false)
+	        List<Long> outboundSeatIds,
+	        @RequestParam(name = "inboundSeatIds", required = false)
+	        List<Long> inboundSeatIds,
+	        @ModelAttribute("shReserveForm")
+	        SHReserveForm shReserveForm,
+	        RedirectAttributes redirectAttributes) {
 
-		reserveForm.setOutboundSeatIds(
-				outboundSeatIds
-		);
+	    int requiredSeatCount =
+	            shReserveForm.getSeatPassengerCount();
 
-		reserveForm.setInboundSeatIds(
-				inboundSeatIds != null
-					? inboundSeatIds
-					: new ArrayList<>()
-		);
+	    if (outboundSeatIds == null
+	            || outboundSeatIds.size() != requiredSeatCount) {
 
-		if (!reserveForm.isSeatReady()) {
+	        redirectAttributes.addFlashAttribute(
+	                "error",
+	                "가는 편 좌석을 모든 탑승객에게 선택해 주세요."
+	        );
 
-			redirectAttributes.addFlashAttribute(
-					"error",
-					"탑승객 수만큼 모든 구간의 좌석을 선택해 주세요."
-			);
+	        return "redirect:/booking/reserve/seat";
+	    }
 
-			return "redirect:/booking/reserve/seat";
-		}
+	    if (shReserveForm.isRoundTrip()
+	            && (inboundSeatIds == null
+	            || inboundSeatIds.size() != requiredSeatCount)) {
 
-		return "redirect:/booking/reserve/confirm";
+	        redirectAttributes.addFlashAttribute(
+	                "error",
+	                "오는 편 좌석을 모든 탑승객에게 선택해 주세요."
+	        );
+
+	        return "redirect:/booking/reserve/seat";
+	    }
+
+	    shReserveForm.setOutboundSeatIds(
+	            new ArrayList<>(outboundSeatIds)
+	    );
+
+	    if (shReserveForm.isRoundTrip()) {
+	        shReserveForm.setInboundSeatIds(
+	                new ArrayList<>(inboundSeatIds)
+	        );
+	    } else {
+	        shReserveForm.setInboundSeatIds(
+	                new ArrayList<>()
+	        );
+	    }
+
+	    return "redirect:/booking/reserve/confirm";
 	}
 	
 	//예약 확인

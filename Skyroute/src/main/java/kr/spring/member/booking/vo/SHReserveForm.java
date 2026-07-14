@@ -99,17 +99,22 @@ public class SHReserveForm implements Serializable {
 
 	/* 좌석 선택이 끝났는가 */
 	public boolean isSeatReady() {
+	    int requiredSeatCount = getSeatPassengerCount();
 
-		int need = getSeatPassengerCount();
+	    boolean outboundReady =
+	            outboundSeatIds != null
+	            && outboundSeatIds.size()
+	            == requiredSeatCount;
 
-		if (outboundSeatIds.size() != need) {
-			return false;
-		}
+	    if (!isRoundTrip()) {
+	        return outboundReady;
+	    }
 
-		if (isRoundTrip() && inboundSeatIds.size() != need) {
-			return false;
-		}
+	    boolean inboundReady =
+	            inboundSeatIds != null
+	            && inboundSeatIds.size()
+	            == requiredSeatCount;
 
-		return true;
+	    return outboundReady && inboundReady;
 	}
 }

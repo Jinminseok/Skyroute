@@ -1,11 +1,17 @@
 (() => {
     "use strict";
 
-    document.addEventListener("DOMContentLoaded", initializeSeatSelection);
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeSeatSelection
+    );
 
     function initializeSeatSelection() {
-        const form = document.getElementById("seatSelectionForm");
-        const submitButton = document.getElementById("seatSubmitButton");
+        const form =
+            document.getElementById("seatSelectionForm");
+
+        const submitButton =
+            document.getElementById("seatSubmitButton");
 
         if (!form || !submitButton) {
             return;
@@ -47,7 +53,7 @@
 
         syncSubmitButton();
 
-        form.addEventListener("submit", event => {
+        form.addEventListener("submit", function (event) {
             const outboundComplete =
                 outboundController !== null &&
                 outboundController.isComplete();
@@ -73,8 +79,10 @@
                 "예약 내용 확인 화면으로 이동 중...";
         });
 
-        window.addEventListener("pageshow", () => {
-            submitButton.textContent = "예약 내용 확인";
+        window.addEventListener("pageshow", function () {
+            submitButton.textContent =
+                "선택 내용 확인";
+
             syncSubmitButton();
         });
     }
@@ -103,7 +111,9 @@
         );
 
         const seatButtons = Array.from(
-            section.querySelectorAll(".seat-button:not(:disabled)")
+            section.querySelectorAll(
+                ".seat-button:not(:disabled)"
+            )
         );
 
         const hiddenContainer =
@@ -117,14 +127,14 @@
 
         let activePassengerIndex = 0;
 
-        passengerTabs.forEach((tab, index) => {
-            tab.addEventListener("click", () => {
+        passengerTabs.forEach(function (tab, index) {
+            tab.addEventListener("click", function () {
                 setActivePassenger(index);
             });
         });
 
-        seatButtons.forEach(button => {
-            button.addEventListener("click", () => {
+        seatButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
                 selectSeat(button);
             });
         });
@@ -139,19 +149,24 @@
 
             activePassengerIndex = index;
 
-            passengerTabs.forEach((tab, tabIndex) => {
-                tab.classList.toggle(
-                    "active",
-                    tabIndex === activePassengerIndex
-                );
-            });
+            passengerTabs.forEach(
+                function (tab, tabIndex) {
+                    tab.classList.toggle(
+                        "active",
+                        tabIndex === activePassengerIndex
+                    );
+                }
+            );
 
             renderSeatButtons();
         }
 
         function selectSeat(button) {
-            const seatId = button.dataset.seatId;
-            const seatNo = button.dataset.seatNo;
+            const seatId =
+                button.dataset.seatId;
+
+            const seatNo =
+                button.dataset.seatNo;
 
             if (!seatId || !seatNo) {
                 return;
@@ -162,7 +177,8 @@
 
             if (
                 assignedIndexValue !== undefined &&
-                Number(assignedIndexValue) !== activePassengerIndex
+                Number(assignedIndexValue) !==
+                    activePassengerIndex
             ) {
                 window.alert(
                     "이미 다른 탑승객에게 선택된 좌석입니다."
@@ -176,9 +192,11 @@
 
             if (
                 currentSelection &&
-                String(currentSelection.seatId) === seatId
+                String(currentSelection.seatId) ===
+                    String(seatId)
             ) {
-                selections[activePassengerIndex] = null;
+                selections[activePassengerIndex] =
+                    null;
 
                 delete button.dataset.assignedIndex;
 
@@ -187,20 +205,25 @@
             }
 
             if (currentSelection) {
-                const previousButton = seatButtons.find(
-                    seatButton =>
-                        seatButton.dataset.seatId ===
-                        String(currentSelection.seatId)
-                );
+                const previousButton =
+                    seatButtons.find(
+                        function (seatButton) {
+                            return (
+                                seatButton.dataset.seatId ===
+                                String(currentSelection.seatId)
+                            );
+                        }
+                    );
 
                 if (previousButton) {
-                    delete previousButton.dataset.assignedIndex;
+                    delete previousButton.dataset
+                        .assignedIndex;
                 }
             }
 
             selections[activePassengerIndex] = {
-                seatId,
-                seatNo
+                seatId: seatId,
+                seatNo: seatNo
             };
 
             button.dataset.assignedIndex =
@@ -223,7 +246,11 @@
             }
 
             const firstEmptyIndex =
-                selections.findIndex(selection => !selection);
+                selections.findIndex(
+                    function (selection) {
+                        return !selection;
+                    }
+                );
 
             if (firstEmptyIndex !== -1) {
                 setActivePassenger(firstEmptyIndex);
@@ -231,7 +258,7 @@
         }
 
         function renderSeatButtons() {
-            seatButtons.forEach(button => {
+            seatButtons.forEach(function (button) {
                 const assignedIndexValue =
                     button.dataset.assignedIndex;
 
@@ -256,19 +283,23 @@
         }
 
         function renderPassengerTabs() {
-            passengerTabs.forEach((tab, index) => {
-                const seatLabel =
-                    tab.querySelector(".passenger-tab-seat");
+            passengerTabs.forEach(
+                function (tab, index) {
+                    const seatLabel =
+                        tab.querySelector(
+                            ".passenger-tab-seat"
+                        );
 
-                if (!seatLabel) {
-                    return;
+                    if (!seatLabel) {
+                        return;
+                    }
+
+                    seatLabel.textContent =
+                        selections[index]
+                            ? selections[index].seatNo
+                            : "미선택";
                 }
-
-                seatLabel.textContent =
-                    selections[index]
-                        ? selections[index].seatNo
-                        : "미선택";
-            });
+            );
         }
 
         function renderHiddenInputs() {
@@ -278,7 +309,7 @@
 
             hiddenContainer.innerHTML = "";
 
-            selections.forEach(selection => {
+            selections.forEach(function (selection) {
                 if (!selection) {
                     return;
                 }
@@ -316,7 +347,7 @@
         render();
 
         return {
-            isComplete() {
+            isComplete: function () {
                 return (
                     selections.length > 0 &&
                     selections.every(Boolean)
