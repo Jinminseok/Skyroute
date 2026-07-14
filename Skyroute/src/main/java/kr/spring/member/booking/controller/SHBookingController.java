@@ -3,6 +3,7 @@ package kr.spring.member.booking.controller;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -24,9 +25,11 @@ import kr.spring.member.booking.vo.SHBookingVO;
 import kr.spring.member.booking.vo.SHPassengerForm;
 import kr.spring.member.booking.vo.SHReserveForm;
 import kr.spring.member.booking.vo.SHSeatMapVO;
+import kr.spring.member.booking.vo.SHSeatVO;
 import kr.spring.member.vo.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 
 /*
  * 예약 진행 컨트롤러 (회원 전용)
@@ -208,26 +211,144 @@ public class SHBookingController {
 
 
 	@PostMapping("/seat")
-	public String submitSeat(@ModelAttribute("shReserveForm") SHReserveForm reserveForm,
-							 @RequestParam(name = "outboundSeatIds") List<Long> outboundSeatIds,
-							 @RequestParam(name = "inboundSeatIds", required = false) List<Long> inboundSeatIds,
-							 RedirectAttributes redirectAttributes,
-							 Model model) {
+	public String submitSeat(
+			@ModelAttribute("shReserveForm")
+			SHReserveForm reserveForm,
+			@RequestParam(name = "outboundSeatIds")
+			List<Long> outboundSeatIds,
+			@RequestParam(
+				name = "inboundSeatIds",
+				required = false
+			)
+			List<Long> inboundSeatIds,
+			RedirectAttributes redirectAttributes) {
 
-		reserveForm.setOutboundSeatIds(outboundSeatIds);
+		reserveForm.setOutboundSeatIds(
+				outboundSeatIds
+		);
 
 		reserveForm.setInboundSeatIds(
-				inboundSeatIds != null ? inboundSeatIds : new ArrayList<>());
+				inboundSeatIds != null
+					? inboundSeatIds
+					: new ArrayList<>()
+		);
 
 		if (!reserveForm.isSeatReady()) {
 
-			redirectAttributes.addFlashAttribute("error",
-					"탑승객 수만큼 좌석을 선택해 주세요.");
+			redirectAttributes.addFlashAttribute(
+					"error",
+					"탑승객 수만큼 모든 구간의 좌석을 선택해 주세요."
+			);
 
 			return "redirect:/booking/reserve/seat";
 		}
 
-		return "redirect:/booking/reserve/payment";
+		return "redirect:/booking/reserve/confirm";
+	}
+	
+	//예약 확인
+	@GetMapping("/confirm")
+	public String confirm(
+			@ModelAttribute("shReserveForm")
+			SHReserveForm reserveForm,
+			Model model) {
+
+		if (!reserveForm.isSeatReady()) {
+			return "redirect:/booking/reserve/seat";
+		}
+
+		SHSeatMapVO outboundSeatMap =
+				shBookingService.getSeatMap(
+						reserveForm.getOutboundFlightId(),
+						reserveForm.getSeatClassId(),
+						"OUTBOUND"
+				);
+
+		List<SHSeatVO> outboundSelectedSeats =
+				findSelectedSeats(
+						outboundSeatMap,
+						reserveForm.getOutboundSeatIds()
+				);
+
+		SHSeatMapVO inboundSeatMap = null;
+
+		List<SHSeatVO> inboundSelectedSeats =
+				new ArrayList<>();
+
+		if (reserveForm.isRoundTrip()) {
+
+			inboundSeatMap =
+					shBookingService.getSeatMap(
+							reserveForm.getInboundFlightId(),
+							reserveForm.getSeatClassId(),
+							"INBOUND"
+					);
+
+			inboundSelectedSeats =
+					findSelectedSeats(
+							inboundSeatMap,
+							reserveForm.getInboundSeatIds()
+					);
+		}
+
+		long totalAmount =
+				outboundSeatMap.getPrice()
+				* reserveForm.getSeatPassengerCount();
+
+		if (reserveForm.isRoundTrip()) {
+
+			totalAmount +=
+					inboundSeatMap.getPrice()
+					* reserveForm.getSeatPassengerCount();
+		}
+
+		boolean requiresGuardianConsent =
+				requiresGuardianConsent(
+						reserveForm,
+						outboundSeatMap
+				);
+
+		model.addAttribute(
+				"outboundSeatMap",
+				outboundSeatMap
+		);
+
+		model.addAttribute(
+				"inboundSeatMap",
+				inboundSeatMap
+		);
+
+		model.addAttribute(
+				"outboundSelectedSeats",
+				outboundSelectedSeats
+		);
+
+		model.addAttribute(
+				"inboundSelectedSeats",
+				inboundSelectedSeats
+		);
+
+		model.addAttribute(
+				"seatPassengers",
+				reserveForm.getSeatPassengers()
+		);
+
+		model.addAttribute(
+				"totalAmount",
+				totalAmount
+		);
+
+		model.addAttribute(
+				"requiresGuardianConsent",
+				requiresGuardianConsent
+		);
+
+		model.addAttribute(
+				"activeMenu",
+				"book"
+		);
+
+		return "thviews/member/member_booking_confirm";
 	}
 
 
@@ -235,40 +356,146 @@ public class SHBookingController {
 	   [3] 결제 화면 — 여기서 좌석을 실제로 선점한다
 	   =================================================================== */
 
-	@GetMapping("/payment")
-	public String payment(@ModelAttribute("shReserveForm") SHReserveForm reserveForm,
-						  @AuthenticationPrincipal PrincipalDetails principal,
-						  RedirectAttributes redirectAttributes,
-						  Model model) {
+	@PostMapping("/hold")
+	public String hold(
+			@ModelAttribute("shReserveForm")
+			SHReserveForm reserveForm,
+			@RequestParam(
+				name = "agreeTerms",
+				defaultValue = "false"
+			)
+			boolean agreeTerms,
+			@RequestParam(
+				name = "agreeRefund",
+				defaultValue = "false"
+			)
+			boolean agreeRefund,
+			@RequestParam(
+				name = "guardianConsent",
+				defaultValue = "false"
+			)
+			boolean guardianConsent,
+			@AuthenticationPrincipal
+			PrincipalDetails principal,
+			RedirectAttributes redirectAttributes) {
 
 		if (!reserveForm.isSeatReady()) {
 			return "redirect:/booking/reserve/seat";
 		}
 
+		SHSeatMapVO outboundSeatMap =
+				shBookingService.getSeatMap(
+						reserveForm.getOutboundFlightId(),
+						reserveForm.getSeatClassId(),
+						"OUTBOUND"
+				);
+
+		boolean guardianRequired =
+				requiresGuardianConsent(
+						reserveForm,
+						outboundSeatMap
+				);
+
+		if (!agreeTerms || !agreeRefund) {
+
+			redirectAttributes.addFlashAttribute(
+					"error",
+					"필수 약관과 취소·환불 규정에 동의해 주세요."
+			);
+
+			return "redirect:/booking/reserve/confirm";
+		}
+
+		if (guardianRequired && !guardianConsent) {
+
+			redirectAttributes.addFlashAttribute(
+					"error",
+					"만 14세 미만 승객의 법정대리인 동의가 필요합니다."
+			);
+
+			return "redirect:/booking/reserve/confirm";
+		}
+
 		Long memberId = getMemberId(principal);
 
 		try {
-			/* BOOKING(PENDING) + BOOKING_PASSENGER + TICKET(HOLDING) 생성 */
-			Long bookingId = shBookingService.holdSeats(reserveForm, memberId);
 
-			SHBookingVO booking = shBookingService.getBookingDetail(bookingId, memberId);
+			Long bookingId =
+					shBookingService.holdSeats(
+							reserveForm,
+							memberId
+					);
 
-			model.addAttribute("booking", booking);
-			model.addAttribute("holdMinutes", 10);
-			model.addAttribute("activeMenu", "book");
-
-			return "thviews/member/sh_booking_payment";
+			return "redirect:/booking/reserve/payment?bookingId="
+					+ bookingId;
 
 		} catch (SHSeatTakenException e) {
 
-			redirectAttributes.addFlashAttribute("error", e.getMessage());
+			reserveForm.setOutboundSeatIds(
+					new ArrayList<>()
+			);
 
-			/* 좌석 선택을 초기화하고 좌석맵으로 되돌린다 */
-			reserveForm.setOutboundSeatIds(new ArrayList<>());
-			reserveForm.setInboundSeatIds(new ArrayList<>());
+			reserveForm.setInboundSeatIds(
+					new ArrayList<>()
+			);
+
+			redirectAttributes.addFlashAttribute(
+					"error",
+					e.getMessage()
+			);
 
 			return "redirect:/booking/reserve/seat";
+
+		} catch (IllegalStateException e) {
+
+			redirectAttributes.addFlashAttribute(
+					"error",
+					e.getMessage()
+			);
+
+			return "redirect:/booking/reserve/confirm";
 		}
+	}
+	
+	@GetMapping("/payment")
+	public String payment(
+			@RequestParam(name = "bookingId")
+			Long bookingId,
+			@AuthenticationPrincipal
+			PrincipalDetails principal,
+			Model model) {
+
+		Long memberId = getMemberId(principal);
+
+		SHBookingVO booking =
+				shBookingService.getBookingDetail(
+						bookingId,
+						memberId
+				);
+
+		if (
+			booking == null ||
+			!"PENDING".equals(booking.getStatus())
+		) {
+			return "redirect:/main/home";
+		}
+
+		model.addAttribute(
+				"booking",
+				booking
+		);
+
+		model.addAttribute(
+				"holdMinutes",
+				10
+		);
+
+		model.addAttribute(
+				"activeMenu",
+				"book"
+		);
+
+		return "thviews/member/sh_booking_payment";
 	}
 
 
@@ -323,5 +550,61 @@ public class SHBookingController {
 		}
 
 		return principal.getMemberVO().getMember_id();
+	}
+	
+	private List<SHSeatVO> findSelectedSeats(
+			SHSeatMapVO seatMap,
+			List<Long> seatIds) {
+
+		List<SHSeatVO> selectedSeats =
+				new ArrayList<>();
+
+		for (Long seatId : seatIds) {
+
+			SHSeatVO selectedSeat =
+					seatMap.getSeatList()
+						.stream()
+						.filter(seat ->
+							Objects.equals(
+									seat.getSeatId(),
+									seatId
+							)
+						)
+						.findFirst()
+						.orElseThrow(() ->
+							new IllegalStateException(
+									"선택한 좌석 정보를 찾을 수 없습니다."
+							)
+						);
+
+			selectedSeats.add(
+					selectedSeat
+			);
+		}
+
+		return selectedSeats;
+	}
+
+
+	private boolean requiresGuardianConsent(
+			SHReserveForm reserveForm,
+			SHSeatMapVO outboundSeatMap) {
+
+		LocalDate departureDate =
+				outboundSeatMap
+					.getDepartureTime()
+					.toLocalDate();
+
+		LocalDate ageCutoff =
+				departureDate.minusYears(14);
+
+		return reserveForm.getPassengers()
+				.stream()
+				.anyMatch(passenger ->
+					passenger.getBirthDate() != null
+					&& passenger
+						.getBirthDate()
+						.isAfter(ageCutoff)
+				);
 	}
 }

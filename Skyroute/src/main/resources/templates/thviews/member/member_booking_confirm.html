@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SkyRoute - 예약 내용 확인</title>
+    <link rel="stylesheet"
+          th:href="@{/assets/css/member.css}"
+          type="text/css">
+
+    <style>
+        .confirm-page {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .confirm-notice {
+            margin-bottom: 20px;
+            padding: 15px 17px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .confirm-error {
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            background: #fef2f2;
+            color: #b91c1c;
+            font-size: 13px;
+        }
+
+        .confirm-card {
+            margin-bottom: 20px;
+            padding: 22px;
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            background: #fff;
+        }
+
+        .confirm-card h3 {
+            margin: 0 0 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--line);
+            font-size: 16px;
+        }
+
+        .flight-summary {
+            display: grid;
+            grid-template-columns: 90px 1fr auto;
+            gap: 15px;
+            align-items: center;
+            padding: 14px 0;
+        }
+
+        .flight-summary + .flight-summary {
+            border-top: 1px solid var(--line);
+        }
+
+        .flight-badge {
+            display: inline-flex;
+            justify-content: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .flight-route {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .flight-time {
+            margin-top: 5px;
+            color: var(--mut);
+            font-size: 12px;
+        }
+
+        .flight-number {
+            color: var(--mut);
+            font-size: 12px;
+        }
+
+        .passenger-row {
+            display: grid;
+            grid-template-columns: 1.5fr 100px 100px;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+            font-size: 13px;
+        }
+
+        .passenger-row:last-child {
+            border-bottom: 0;
+        }
+
+        .passenger-name {
+            font-weight: 600;
+        }
+
+        .passenger-seat {
+            color: var(--accent);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .infant-info {
+            margin-top: 12px;
+            color: var(--mut);
+            font-size: 12px;
+        }
+
+        .amount-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+        }
+
+        .amount-value {
+            color: var(--accent);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .agreement-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .agreement-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            color: var(--ink);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .agreement-item input {
+            width: 17px;
+            height: 17px;
+            margin-top: 1px;
+            accent-color: var(--accent);
+        }
+
+        .confirm-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .confirm-actions .btn {
+            min-width: 190px;
+            height: 50px;
+            border: 0;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .confirm-actions .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media(max-width: 640px) {
+            .flight-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .passenger-row {
+                grid-template-columns: 1fr;
+            }
+
+            .passenger-seat {
+                text-align: left;
+            }
+
+            .confirm-actions {
+                flex-direction: column;
+            }
+
+            .confirm-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div layout:fragment="panel">
+
+    <div class="wrap"
+         style="padding-top: 40px; padding-bottom: 70px;">
+
+        <div class="confirm-page">
+
+            <div class="htitle"
+                 style="margin-bottom: 22px;">
+
+                <div>
+
+                    <div class="eyebrow">
+                        BOOKING CONFIRMATION
+                    </div>
+
+                    <h2 style="
+                        margin-top: 5px;
+                        font-size: 22px;
+                        font-weight: 600;
+                    ">
+                        예약 내용 확인
+                    </h2>
+
+                    <p style="
+                        margin-top: 7px;
+                        color: var(--mut);
+                        font-size: 13px;
+                    ">
+                        항공편, 탑승객과 좌석 정보를 확인해 주세요.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="confirm-notice">
+                아직 좌석이 확보된 상태가 아닙니다.
+                아래 결제하기 버튼을 누르면 선택한 모든 좌석을 서버에서 다시 확인하고,
+                성공한 경우 10분 동안 좌석을 임시 점유합니다.
+            </div>
+
+            <div class="confirm-error"
+                 th:if="${error != null}"
+                 th:text="${error}">
+                예약 확인 오류
+            </div>
+
+            <section class="confirm-card">
+
+                <h3>
+                    여정 정보
+                </h3>
+
+                <div class="flight-summary">
+
+                    <span class="flight-badge">
+                        가는 편
+                    </span>
+
+                    <div>
+
+                        <div class="flight-route"
+                             th:text="|${outboundSeatMap.departureIataCode} → ${outboundSeatMap.arrivalIataCode}|">
+                            GMP → NRT
+                        </div>
+
+                        <div class="flight-time"
+                             th:text="${#temporals.format(outboundSeatMap.departureTime, 'yyyy.MM.dd HH:mm')}">
+                            2026.07.29 08:24
+                        </div>
+
+                    </div>
+
+                    <span class="flight-number"
+                          th:text="${outboundSeatMap.flightNo}">
+                        SR101
+                    </span>
+
+                </div>
+
+                <div class="flight-summary"
+                     th:if="${shReserveForm.roundTrip}">
+
+                    <span class="flight-badge">
+                        오는 편
+                    </span>
+
+                    <div>
+
+                        <div class="flight-route"
+                             th:text="|${inboundSeatMap.departureIataCode} → ${inboundSeatMap.arrivalIataCode}|">
+                            NRT → GMP
+                        </div>
+
+                        <div class="flight-time"
+                             th:text="${#temporals.format(inboundSeatMap.departureTime, 'yyyy.MM.dd HH:mm')}">
+                            2026.08.01 17:19
+                        </div>
+
+                    </div>
+
+                    <span class="flight-number"
+                          th:text="${inboundSeatMap.flightNo}">
+                        SR102
+                    </span>
+
+                </div>
+
+            </section>
+
+            <section class="confirm-card">
+
+                <h3>
+                    탑승객 및 좌석
+                </h3>
+
+                <div class="passenger-row"
+                     th:each="passenger, stat : ${seatPassengers}">
+
+                    <div>
+
+                        <div class="passenger-name"
+                             th:text="${passenger.name}">
+                            HONG GILDONG
+                        </div>
+
+                        <small th:text="${passenger.passengerType == 'ADULT'
+                            ? '성인'
+                            : '소아'}">
+                            성인
+                        </small>
+
+                    </div>
+
+                    <div class="passenger-seat"
+                         th:text="|'가는 편 ' + ${outboundSelectedSeats[stat.index].seatNo}|">
+                        가는 편 12A
+                    </div>
+
+                    <div class="passenger-seat"
+                         th:if="${shReserveForm.roundTrip}"
+                         th:text="|'오는 편 ' + ${inboundSelectedSeats[stat.index].seatNo}|">
+                        오는 편 15A
+                    </div>
+
+                </div>
+
+                <div class="infant-info"
+                     th:if="${shReserveForm.infantCount > 0}"
+                     th:text="|유아 ${shReserveForm.infantCount}명은 좌석을 사용하지 않습니다.|">
+                    유아는 좌석을 사용하지 않습니다.
+                </div>
+
+            </section>
+
+            <section class="confirm-card">
+
+                <h3>
+                    결제 예정 금액
+                </h3>
+
+                <div class="amount-row">
+
+                    <span>
+                        총 결제금액
+                    </span>
+
+                    <span class="amount-value"
+                          th:text="|${#numbers.formatInteger(totalAmount, 1, 'COMMA')}원|">
+                        100,000원
+                    </span>
+
+                </div>
+
+            </section>
+
+            <form th:action="@{/booking/reserve/hold}"
+                  method="post"
+                  id="confirmForm">
+
+                <section class="confirm-card">
+
+                    <h3>
+                        필수 확인 및 동의
+                    </h3>
+
+                    <div class="agreement-list">
+
+                        <label class="agreement-item">
+
+                            <input type="checkbox"
+                                   name="agreeTerms"
+                                   value="true"
+                                   class="required-agreement">
+
+                            <span>
+                                운송 약관 및 개인정보 수집·이용에 동의합니다.
+                            </span>
+
+                        </label>
+
+                        <label class="agreement-item">
+
+                            <input type="checkbox"
+                                   name="agreeRefund"
+                                   value="true"
+                                   class="required-agreement">
+
+                            <span>
+                                취소·환불 규정과 수수료 기준을 확인했습니다.
+                            </span>
+
+                        </label>
+
+                        <label class="agreement-item"
+                               th:if="${requiresGuardianConsent}">
+
+                            <input type="checkbox"
+                                   name="guardianConsent"
+                                   value="true"
+                                   class="required-agreement">
+
+                            <span>
+                                만 14세 미만 승객의 법정대리인으로서 예약에 동의합니다.
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </section>
+
+                <div class="confirm-actions">
+
+                    <a th:href="@{/booking/reserve/seat}"
+                       class="btn ghost">
+                        좌석 다시 선택
+                    </a>
+
+                    <button type="submit"
+                            id="holdSubmitButton"
+                            class="btn"
+                            disabled>
+                        결제하기
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script layout:fragment="script">
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const form = document.getElementById("confirmForm");
+        const submitButton = document.getElementById(
+            "holdSubmitButton"
+        );
+
+        if (!form || !submitButton) {
+            return;
+        }
+
+        const agreements = Array.from(
+            form.querySelectorAll(".required-agreement")
+        );
+
+        function syncButton() {
+            submitButton.disabled = !agreements.every(
+                checkbox => checkbox.checked
+            );
+        }
+
+        agreements.forEach(checkbox => {
+            checkbox.addEventListener(
+                "change",
+                syncButton
+            );
+        });
+
+        form.addEventListener("submit", () => {
+            submitButton.disabled = true;
+            submitButton.textContent =
+                "좌석을 확인하는 중...";
+        });
+
+        syncButton();
+    });
+
+</script>
+
+</body>
+</html>
