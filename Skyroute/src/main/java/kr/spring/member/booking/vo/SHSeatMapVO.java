@@ -39,6 +39,13 @@ public class SHSeatMapVO {
 
 	/* FLIGHT_FARE 스냅샷 가격 (1인 1구간) */
 	private Long price;
+	
+	private Integer maxSeatColumns;
+	
+	public boolean isWideBody() {
+	    return maxSeatColumns != null
+	            && maxSeatColumns >= 7;
+	}
 
 	private List<SHSeatVO> seatList = new ArrayList<>();
 

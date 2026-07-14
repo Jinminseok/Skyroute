@@ -205,11 +205,24 @@
         }
 
         .seat-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 48px;
-        }
+		    display: grid;
+		    grid-template-columns: 34px auto;
+		    align-items: center;
+		    min-height: 48px;
+		}
+		
+		.seat-row-groups {
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    gap: 28px;
+		}
+		
+		.seat-block {
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		}
 
         .row-number {
             width: 34px;
@@ -234,9 +247,6 @@
             cursor: pointer;
         }
 
-        .seat-button.aisle-start {
-            margin-left: 28px;
-        }
 
         .seat-button:hover:not(:disabled) {
             border-color: var(--accent);
@@ -383,8 +393,9 @@
                   id="seatSelectionForm">
 
                 <section class="leg-section"
-                         data-leg-section="OUTBOUND"
-                         th:attr="data-passenger-count=${#lists.size(seatPassengers)}">
+				         data-leg-section="OUTBOUND"
+				         th:attr="data-passenger-count=${#lists.size(seatPassengers)},
+				                  data-wide-body=${outboundSeatMap.wideBody}">
 
                     <div class="leg-header">
 
@@ -470,25 +481,30 @@
                                 <div class="plane-head"></div>
 
                                 <div class="seat-row"
-                                     th:each="rowEntry : ${outboundSeatMap.seatRowMap}">
-
-                                    <span class="row-number"
-                                          th:text="${rowEntry.key}">
-                                        1
-                                    </span>
-
-                                    <button type="button"
-                                            class="seat-button"
-                                            th:each="seat : ${rowEntry.value}"
-                                            th:classappend="|${seat.occupied ? ' occupied' : ''}${seat.colCode == 'D' ? ' aisle-start' : ''}|"
-                                            th:disabled="${seat.occupied}"
-                                            th:attr="data-seat-id=${seat.seatId},
-                                                     data-seat-no=${seat.seatNo}"
-                                            th:text="${seat.colCode}">
-                                        A
-                                    </button>
-
-                                </div>
+								     data-seat-row
+								     th:each="rowEntry : ${outboundSeatMap.seatRowMap}">
+								
+								    <span class="row-number"
+								          th:text="${rowEntry.key}">
+								        1
+								    </span>
+								
+								    <div class="seat-row-groups">
+								
+								        <button type="button"
+								                class="seat-button"
+								                th:each="seat : ${rowEntry.value}"
+								                th:classappend="${seat.occupied ? ' occupied' : ''}"
+								                th:disabled="${seat.occupied}"
+								                th:attr="data-seat-id=${seat.seatId},
+								                         data-seat-no=${seat.seatNo}"
+								                th:text="${seat.colCode}">
+								            A
+								        </button>
+								
+								    </div>
+								
+								</div>
 
                             </div>
 
@@ -501,9 +517,10 @@
                 </section>
 
                 <section class="leg-section"
-                         data-leg-section="INBOUND"
-                         th:if="${shReserveForm.roundTrip}"
-                         th:attr="data-passenger-count=${#lists.size(seatPassengers)}">
+			         data-leg-section="INBOUND"
+			         th:if="${shReserveForm.roundTrip}"
+			         th:attr="data-passenger-count=${#lists.size(seatPassengers)},
+			                  data-wide-body=${inboundSeatMap.wideBody}">
 
                     <div class="leg-header">
 
@@ -589,27 +606,30 @@
                                 <div class="plane-head"></div>
 
                                 <div class="seat-row"
-                                     th:each="rowEntry : ${inboundSeatMap.seatRowMap}">
-
-                                    <span class="row-number"
-                                          th:text="${rowEntry.key}">
-                                        1
-                                    </span>
-
-                                    <button type="button"
-                                            class="seat-button"
-                                            th:each="seat : ${rowEntry.value}"
-                                            th:classappend="|${seat.occupied ? ' occupied' : ''}${seat.colCode == 'D' ? ' aisle-start' : ''}|"
-                                            th:disabled="${seat.occupied}"
-                                            th:attr="data-seat-id=${seat.seatId},
-                                                     data-seat-no=${seat.seatNo}"
-                                            th:text="${seat.colCode}">
-                                        A
-                                    </button>
-
-                                </div>
-
-                            </div>
+								     data-seat-row
+								     th:each="rowEntry : ${inboundSeatMap.seatRowMap}">
+								
+								    <span class="row-number"
+								          th:text="${rowEntry.key}">
+								        1
+								    </span>
+								
+								    <div class="seat-row-groups">
+								
+								        <button type="button"
+								                class="seat-button"
+								                th:each="seat : ${rowEntry.value}"
+								                th:classappend="${seat.occupied ? ' occupied' : ''}"
+								                th:disabled="${seat.occupied}"
+								                th:attr="data-seat-id=${seat.seatId},
+								                         data-seat-no=${seat.seatNo}"
+								                th:text="${seat.colCode}">
+								            A
+								        </button>
+								
+								    </div>
+								
+								</div>
 
                         </div>
 
