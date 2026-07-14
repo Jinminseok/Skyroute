@@ -129,6 +129,38 @@
 			A.airport_name ASC
 	</select>
 	
+	<!-- 회원 여권 정보 단건 조회  -->
+	<select id="selectSavedPassenger" parameterType="long" resultType="map">
+		SELECT 
+			MEMBER_ID,
+			NAME,
+			TO_CHAR(BIRTH_DATE, 'YYYY-MM-DD') AS BIRTH_DATE,
+			PHONE,
+			GENDER,
+			PASSPORT_NO,
+			TO_CHAR(PASSPORT_EXPIRY, 'YYYY-MM-DD') AS PASSPORT_EXPIRY
+		FROM SAVED_PASSENGER 
+		WHERE MEMBER_ID = #{memberId}
+	</select>
+
+	<!-- 여권 정보 업서트  -->
+	<insert id="upsertPassportInfo" parameterType="map">
+		MERGE INTO SAVED_PASSENGER S
+		USING DUAL
+		ON (S.MEMBER_ID = #{memberId})
+		WHEN MATCHED THEN
+			UPDATE SET 
+				S.NAME = #{name},
+				S.BIRTH_DATE = TO_DATE(#{birthDate}, 'YYYY-MM-DD'),
+				S.GENDER = #{gender},
+				S.PHONE = #{phone},
+				S.PASSPORT_NO = #{passportNo},
+				S.PASSPORT_EXPIRY = TO_DATE(#{passportExpiry}, 'YYYY-MM-DD')
+		WHEN NOT MATCHED THEN
+			INSERT (MEMBER_ID, NAME, BIRTH_DATE, GENDER, PHONE, PASSPORT_NO, PASSPORT_EXPIRY)
+			VALUES (#{memberId}, #{name}, TO_DATE(#{birthDate}, 'YYYY-MM-DD'), #{gender}, #{phone}, #{passportNo}, TO_DATE(#{passportExpiry}, 'YYYY-MM-DD'))
+	</insert>
+	
 </mapper>
 
 

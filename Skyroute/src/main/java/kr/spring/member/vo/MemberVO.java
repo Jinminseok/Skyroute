@@ -79,6 +79,10 @@ public class MemberVO{
 	@Pattern(regexp="^[A-Za-z0-9]{4,12}$")
 	private String now_passwd;
 	
+	//마이페이지 여권 관리
+	private String passport_no;
+	private Date passport_expiry;
+	
 	public int getRoleOrdinal() {
 		if(role == null) return -1;
 		

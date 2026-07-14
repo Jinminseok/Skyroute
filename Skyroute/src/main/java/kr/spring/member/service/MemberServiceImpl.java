@@ -62,6 +62,16 @@ public class MemberServiceImpl implements MemberService{
 		return memberMapper.selectActiveRouteList();
 	}
 
+	@Override
+	public Map<String, Object> selectSavedPassenger(Long memberId) {
+		return memberMapper.selectSavedPassenger(memberId);
+	}
+
+	@Override
+	public void upsertPassportInfo(Map<String, Object> paramMap) {
+		memberMapper.upsertPassportInfo(paramMap);
+	}
+
 
 
 }

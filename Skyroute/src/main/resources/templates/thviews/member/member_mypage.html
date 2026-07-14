@@ -53,6 +53,26 @@
 	align-items: center;
 }
 
+/* 예약현황과 여권정보를 좌우로 나란히 밀착 배치하는 그리드 */
+.mypage-dashboard-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px;
+	margin-top: 30px;
+	margin-bottom: 46px;
+	align-items: stretch; /* 두 카드의 높이를 일정하게 동기화 */
+}
+.mypage-card-box {
+	background: #fff;
+	border: 1px solid #cbd5e1;
+	border-radius: 12px;
+	padding: 24px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
 /* 원본 이벤트 내역 스타일 보존 구역 */
 .mypage-event-list {
 	display: flex;
@@ -126,6 +146,11 @@
 	text-align: center;
 	background: #fbfdff;
 }
+@media (max-width: 990px) {
+	.mypage-dashboard-grid {
+		grid-template-columns: 1fr;
+	}
+}
 @media (max-width: 760px) {
 	.mypage-event-card {
 		grid-template-columns: 1fr;
@@ -189,42 +214,97 @@
 			</div>
 		</div>
 
-		<div class="htitle" style="margin-top:40px;">
-			<h2 style="font-size:18px">나의 예약 (다가오는 여정)</h2>
-		</div>
+		<div class="mypage-dashboard-grid">
+			
+			<div class="mypage-card-box" style="padding: 28px;">
+				<div style="flex-grow: 1; display: flex; flex-direction: column;">
+					<h3 style="margin-top: 0; margin-bottom: 20px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; color: #0052cc;">
+						<span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">confirmation_number</span>
+						나의 항공권 예약 현황
+					</h3>
+					
+					<div style="margin-bottom: 12px;">
+						<span class="stat soon" style="background:#eff6ff; color:#3b82f6; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600;">LIVE TRIP</span>
+					</div>
+					
+					<h4 style="font-size: 17px; font-weight: 600; margin: 0 0 6px; color: #1e293b;">예약 확인 · 변경 · 체크인 및 환불</h4>
+					<p style="font-size: 13px; color: var(--mut); line-height: 1.5; margin: 0 0 24px;">
+						고객님이 예매하신 다가오는 여정을 실시간으로 안전하게 확인하고 일정을 조정해 보십시오.
+					</p>
 
-		<div class="trip" style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #fff;">
-			<div>
-				<div style="margin-bottom:6px">
-					<span class="stat soon" style="background:#eff6ff; color:#3b82f6; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:600; margin-right:6px;">출발 임박</span>
-					<span class="pnr" style="color:var(--mut); font-family:var(--sans-eng); font-size:13px;">NUX4K9</span>
+					<div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-around; margin-bottom: 24px; margin-top: auto;">
+						<div style="text-align: center;">
+							<span style="font-size: 11px; color: #94a3b8; display: block; font-weight: 500;">DEPARTURE</span>
+							<strong style="font-size: 18px; color: #1e293b; font-family: var(--sans-eng); font-weight: 700;">SEL</strong>
+						</div>
+						<div style="display: flex; flex-direction: column; align-items: center; flex-grow: 0.5; position: relative;">
+							<span class="material-symbols-outlined" style="color: #3b82f6; font-size: 18px;">flight_takeoff</span>
+							<div style="width: 100%; border-bottom: 1px dashed #cbd5e1; height: 1px; margin-top: 4px;"></div>
+						</div>
+						<div style="text-align: center;">
+							<span style="font-size: 11px; color: #94a3b8; display: block; font-weight: 500;">DESTINATION</span>
+							<strong style="font-size: 18px; color: #1e293b; font-family: var(--sans-eng); font-weight: 700;">WRLD</strong>
+						</div>
+					</div>
 				</div>
-				<div class="rt" style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">ICN ➔ JFK</div>
-				<div class="dt" style="font-size: 13px; color: var(--mut);">NU101 · 12.20 (토) · 23A</div>
-			</div>
-			<div class="actions" style="display: flex; gap: 8px;">
-				<button class="btn ghost sm" style="padding: 6px 12px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer;">체크인</button>
-				<button class="btn sm" style="padding: 6px 12px; background: #0052cc; color: #fff; border: none; border-radius: 6px; cursor: pointer;">상세</button>
-			</div>
-		</div>
-
-		<div class="htitle" style="margin-top:40px;">
-			<h2 style="font-size:18px">지난 탑승 내역 (History)</h2>
-		</div>
-
-		<div class="trip" style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #fff;">
-			<div>
-				<div style="margin-bottom:6px">
-					<span class="stat" style="background:#f1f5f9; color:#64748b; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:600; margin-right:6px;">탑승 완료</span>
-					<span class="pnr" style="color:var(--mut); font-family:var(--sans-eng); font-size:13px; margin-right:12px;">예약번호: ABC123</span>
-					<span class="pnr" style="color:var(--mut); font-family:var(--sans-eng); font-size:13px;">탑승일: 2026.05.10</span>
+				
+				<div>
+					<a th:href="@{/bookinglist/lookup}" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 12px 18px; background: #0052cc; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; box-sizing: border-box; height: 42px;">
+						나의 예약 조회하러 가기
+						<span class="material-symbols-outlined" style="font-size:16px; margin-left:6px;">arrow_forward</span>
+					</a>
 				</div>
-				<div class="rt" style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">ICN ➔ NRT</div>
-				<div class="dt" style="font-size: 13px; color: var(--mut);">편명: NU202</div>
 			</div>
+
+			<div class="mypage-card-box" style="padding: 28px;">
+				<div style="flex-grow: 1; display: flex; flex-direction: column;">
+					<h3 style="margin-top: 0; margin-bottom: 20px; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; color: #2563eb;">
+						<span style="display: flex; align-items: center; gap: 8px;">
+							<span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">passport</span>
+							나의 여권 정보
+						</span>
+						<button type="button" id="btnOpenPassportModal" class="btn ghost sm" style="padding: 4px 10px; font-size: 12px; height: auto; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+							<span class="material-symbols-outlined" style="font-size: 14px;">edit</span>수정하기
+						</button>
+					</h3>
+					
+					<div th:if="${savedPassenger == null}" style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex-grow:1; color:var(--mut); font-size:13px; padding: 40px 0; text-align:center;">
+						<span class="material-symbols-outlined" style="font-size: 44px; color:#cbd5e1; margin-bottom: 10px;">assignment_ind</span>
+						등록된 여권 정보가 존재하지 않습니다.<br>수정하기 버튼을 눌러 여권 정보를 등록해 주십시오.
+					</div>
+
+					<div th:if="${savedPassenger != null}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; font-size: 14px; margin-top: 10px; flex-grow: 1;">
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">영문 성명</span>
+							<strong th:text="${savedPassenger['NAME']}">-</strong>
+						</div>
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">생년월일</span>
+							<strong th:text="${savedPassenger['BIRTH_DATE']}">-</strong>
+						</div>
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">성별</span>
+							<strong th:text="${savedPassenger['GENDER'] == 'M' ? '남성 (Male)' : '여성 (Female)'}">-</strong>
+						</div>
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">등록 연락처</span>
+							<strong th:text="${savedPassenger['PHONE']}">-</strong>
+						</div>
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">여권 번호</span>
+							<strong th:text="${savedPassenger['PASSPORT_NO']}" style="font-family: var(--sans-eng); font-weight:600; color:#1e293b;">-</strong>
+						</div>
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">여권 만료일</span>
+							<strong th:text="${savedPassenger['PASSPORT_EXPIRY']}">-</strong>
+						</div>
+					</div>
+				</div>
+			</div>
+
 		</div>
 
-		<div class="htitle" style="margin-top:46px;">
+		<div class="htitle">
 			<div>
 				<div class="eyebrow">EVENT HISTORY</div>
 				<h2 style="font-size:18px; margin-top:4px;">이벤트 참여 내역</h2>
@@ -298,7 +378,6 @@
 					   class="mypage-event-result-text not-selected">
 						아쉽지만 이번 이벤트에는 선정되지 않았습니다.
 					</p>
-
 
 					<div class="mypage-event-date">
 						응모
@@ -390,12 +469,91 @@
 	    </div>
 	  </div>
 	</div>
+
+	<div class="modal-overlay" id="editPassportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+	  <div class="modal-content" style="width: 500px; max-height: 85vh; overflow-y: auto; background-color: #ffffff !important; padding: 30px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); position: relative; box-sizing: border-box;">
+	    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+	      <h2 style="font-size: 18px; font-weight: 600; margin: 0; color: #000000; display: flex; align-items: center; gap: 6px;">
+	        <span class="material-symbols-outlined" style="color:#2563eb;">passport</span>
+	        여권 정보 수정
+	      </h2>
+	      <span class="material-symbols-outlined modal-close" id="btnClosePassportModal" style="cursor: pointer; color: #000000; font-size: 24px;">close</span>
+	    </div>
+	    <div class="modal-body">
+	      <form id="passportForm">
+	        
+	        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px;">
+	          <div class="form-group-edit">
+	            <label>영문 성명 (여권 동일)</label>
+	            <input type="text" id="passName" name="name" 
+	                   th:value="${savedPassenger != null ? savedPassenger['NAME'] : ''}" 
+	                   class="form-control-edit" placeholder="EX) HONG GILDONG" 
+	                   oninput="this.value = this.value.toUpperCase().replace(/[^A-Z\s]/g, '');"
+	                   style="font-family: var(--sans-eng); text-transform: uppercase;" required>
+	          </div>
+	          <div class="form-group-edit">
+	            <label>생년월일</label>
+	            <input type="date" id="passBirthDate" name="birthDate" 
+	                   th:value="${savedPassenger != null ? savedPassenger['BIRTH_DATE'] : ''}" 
+	                   class="form-control-edit" style="font-family: var(--sans-eng);" required>
+	          </div>
+	        </div>
+
+	        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px;">
+	          <div class="form-group-edit">
+	            <label style="margin-bottom: 4px;">성별</label>
+	            <div style="display: flex; gap: 16px; align-items: center; height: 40px;">
+	              <label style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; font-size: 13px;">
+	                <input type="radio" name="gender" value="M" 
+	                       th:checked="${savedPassenger != null ? savedPassenger['GENDER'] == 'M' : false}" style="accent-color: #2563eb; width: 15px; height: 15px;"> 남성 (M)
+	              </label>
+	              <label style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; font-size: 13px;">
+	                <input type="radio" name="gender" value="F" 
+	                       th:checked="${savedPassenger != null ? savedPassenger['GENDER'] == 'F' : false}" style="accent-color: #2563eb; width: 15px; height: 15px;"> 여성 (F)
+	              </label>
+	            </div>
+	          </div>
+	          <div class="form-group-edit">
+	            <label>여권 등록 연락처</label>
+	            <input type="text" id="passPhone" name="phone" 
+	                   th:value="${savedPassenger != null ? savedPassenger['PHONE'] : ''}" 
+	                   class="form-control-edit" placeholder="010-1234-5678" 
+	                   oninput="this.value = this.value.replace(/[^0-9-]/g, '');"
+	                   style="font-family: var(--sans-eng);">
+	          </div>
+	        </div>
+
+	        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px;">
+	          <div class="form-group-edit">
+	            <label>여권 번호</label>
+	            <input type="text" id="passportNo" name="passportNo" 
+	                   th:value="${savedPassenger != null ? savedPassenger['PASSPORT_NO'] : ''}" 
+	                   class="form-control-edit" placeholder="M12345678" 
+	                   oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');"
+	                   style="font-family: var(--sans-eng); text-transform: uppercase;">
+	          </div>
+	          <div class="form-group-edit">
+	            <label>여권 만료일</label>
+	            <input type="date" id="passportExpiry" name="passportExpiry" 
+	                   th:value="${savedPassenger != null ? savedPassenger['PASSPORT_EXPIRY'] : ''}" 
+	                   class="form-control-edit" style="font-family: var(--sans-eng);">
+	          </div>
+	        </div>
+
+	        <button type="button" onclick="updatePassportInfo()" class="btn sm" style="width: 100%; height: 44px; background: #2563eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; box-sizing: border-box;">
+	          여권 정보 저장 완료
+	        </button>
+	      </form>
+	    </div>
+	  </div>
+	</div>
 	
 	<div id="layer" style="display:none;position:fixed;overflow:hidden;z-index:10000;align-items:center;justify-content:center;border-radius:12px;box-shadow:var(--sh);background:#fff;">
 	    <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnCloseLayer" style="cursor:pointer;position:absolute;right:10px;top:10px;z-index:1;width:18px;" onclick="closeDaumPostcode()" alt="닫기 버튼">
 	</div>
 
 	<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	
 	<script th:inline="javascript">
 	  var element_layer = document.getElementById('layer');
 
@@ -426,6 +584,24 @@
 	          document.getElementById('editProfileResult').style.display = 'none';
 	        }
 	      };
+	    }
+
+	    // 🎯 [신규] 여권 수정 모달 바인딩 엔진
+	    var mPassport = document.getElementById('editPassportModal');
+	    var btnOpenPassport = document.getElementById('btnOpenPassportModal');
+	    var btnClosePassport = document.getElementById('btnClosePassportModal');
+
+	    if(btnOpenPassport) {
+	    	btnOpenPassport.onclick = function(e) {
+	    		e.preventDefault();
+	    		if(mPassport) mPassport.style.display = 'flex';
+	    	};
+	    }
+
+	    if(btnClosePassport) {
+	    	btnClosePassport.onclick = function() {
+	    		if(mPassport) mPassport.style.display = 'none';
+	    	};
 	    }
 
 	    var btnSubmitEdit = document.getElementById('btnSubmitEditProfile');
@@ -465,7 +641,6 @@
 	        formData.append('address2', address2);
 	        formData.append(paramName, tokenValue);
 
-	        // 🌟 [핵심 패치] 상대경로 이슈 해결을 위해 주소 앞에 확실한 절대경로 슬래시('/') 바인딩 마감
 	        fetch('/member/updateProfile', {
 	          method: 'POST',
 	          headers: {
@@ -502,9 +677,12 @@
 	        document.getElementById('editPassword').value = '';
 	        document.getElementById('editProfileResult').style.display = 'none';
 	      }
+	      // 🎯 모달 바깥 영역 클릭 시 여권 모달창 닫기 안전 처리
+	      if (e.target === mPassport) {
+	    	  mPassport.style.display = 'none';
+	      }
 	    };
 
-	 // [회원 탈퇴 비동기 격발 스크립트]
 	    var btnDeleteAccount = document.getElementById('btnSubmitDeleteAccount');
 	    if(btnDeleteAccount) {
 	      btnDeleteAccount.onclick = function(e) {
@@ -513,14 +691,12 @@
 	        var nowPasswd = document.getElementById('editNowPasswd').value;
 	        var resultBox = document.getElementById('editProfileResult');
 
-	        // 현재 비밀번호 검증 가드
 	        if(!nowPasswd) {
 	          alert("회원 탈퇴를 진행하려면 '현재 비밀번호 확인' 칸에 비밀번호를 먼저 입력해 주세요.");
 	          document.getElementById('editNowPasswd').focus();
 	          return;
 	        }
 
-	        // 오작동 방지 최종 의사 확인 더블 체크
 	        if(!confirm("정말로 에어누리 회원 탈퇴를 진행하시겠습니까?\n탈퇴 시 모든 예약 현황 및 회원 정보가 즉시 파기되며 복구가 불가능합니다.")) {
 	          return;
 	        }
@@ -532,7 +708,6 @@
 	        formData.append('now_passwd', nowPasswd);
 	        formData.append(paramName, tokenValue);
 
-	        // 절대경로 매핑으로 회원 탈퇴 비동기 요청 전송
 	        fetch('/member/deleteAccount', {
 	          method: 'POST',
 	          headers: {
@@ -549,11 +724,11 @@
 	              resultBox.style.background = "#fef2f2";
 	              resultBox.style.color = "#ef4444";
 	              alert("회원 탈퇴가 정상 처리되었습니다. 그동안 에어누리를 이용해 주셔서 감사합니다.");
-	              location.href = "/main/home"; // 탈퇴 성공 시 메인 페이지로 강제 축출
+	              location.href = "/main/home";
 	            } else {
 	              resultBox.style.background = "#fef2f2";
 	              resultBox.style.color = "#dc2626";
-	              alert(response); // 비밀번호 불일치 등의 경고 메시지 팝업
+	              alert(response);
 	            }
 	        })
 	        .catch(function() {
@@ -563,6 +738,86 @@
 	    }
 	    
 	  });
+
+	  // 여권 정보 비동기 업데이트 핸들러 (실시간 대/소문자 및 숫자, 특수문자 제한 로직 탑재)
+	  function updatePassportInfo() {
+		  var name = document.getElementById('passName').value.trim();
+		  var birthDate = document.getElementById('passBirthDate').value;
+		  var genderElement = document.querySelector('input[name="gender"]:checked');
+		  var gender = genderElement ? genderElement.value : '';
+		  var phone = document.getElementById('passPhone').value.trim();
+		  var passportNo = document.getElementById('passportNo').value.trim();
+		  var passportExpiry = document.getElementById('passportExpiry').value;
+		  
+		  // A. 이름 형식 검증 (오직 대문자 영문과 공백만 허용)
+		  var nameRegex = /^[A-Z\s]+$/;
+		  if(!name || !nameRegex.test(name)) {
+			  alert("영문 성명은 필수이며, 오직 대문자 영문만 입력할 수 있습니다.");
+			  document.getElementById('passName').focus();
+			  return;
+		  }
+		  
+		  if(!birthDate) {
+			  alert("생년월일을 입력해 주세요.");
+			  document.getElementById('passBirthDate').focus();
+			  return;
+		  }
+		  
+		  if(!gender) {
+			  alert("성별을 선택해 주세요.");
+			  return;
+		  }
+		  
+		  // B. 연락처 형식 검증 (특수문자 배제, 숫자와 하이픈만 허용)
+		  var phoneRegex = /^[0-9-]+$/;
+		  if(phone && !phoneRegex.test(phone)) {
+			  alert("연락처에는 특수문자를 사용할 수 없으며 숫자와 하이픈(-)만 가능합니다.");
+			  document.getElementById('passPhone').focus();
+			  return;
+		  }
+		  
+		  // C. 여권번호 형식 검증 (대문자와 숫자만 허용, 특수문자 배제)
+		  var passportRegex = /^[A-Z0-9]+$/;
+		  if(!passportNo || !passportRegex.test(passportNo)) {
+			  alert("여권 번호는 필수 입력 사항이며, 특수문자 없이 대문자와 숫자만 입력해야 합니다.");
+			  document.getElementById('passportNo').focus();
+			  return;
+		  }
+		  
+		  if(!passportExpiry) {
+			  alert("여권 만료일을 선택해 주세요.");
+			  document.getElementById('passportExpiry').focus();
+			  return;
+		  }
+		  
+		  var paramName = document.getElementById('csrfParameterName').value;
+		  var tokenValue = document.getElementById('csrfToken').value;
+		  
+		  var formData = new URLSearchParams();
+		  formData.append('name', name);
+		  formData.append('birthDate', birthDate);
+		  formData.append('gender', gender);
+		  formData.append('phone', phone);
+		  formData.append('passportNo', passportNo);
+		  formData.append('passportExpiry', passportExpiry);
+		  formData.append(paramName, tokenValue);
+		  
+		  fetch('/member/updatePassport', {
+			  method: 'POST',
+			  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			  body: formData.toString()
+		  })
+		  .then(function(res) { return res.text(); })
+		  .then(function(response) {
+			  if(response.includes("성공") || response.includes("완료")) {
+				  alert("여권 정보가 성공적으로 업데이트되었습니다.");
+				  location.reload();
+			  } else {
+				  alert(response);
+			  }
+		  })
+		  .catch(function() { alert("정보 변경 중 시스템 에러가 발생했습니다."); });
+	  }
 
 	  function execDaumPostcode() {
 	      new daum.Postcode({

@@ -23,4 +23,8 @@ public interface MemberService {
 	//운항 조회
 	public List<Map<String, Object>> selectActiveRegionList();
 	public List<Map<String, Object>> selectActiveRouteList();
+	
+	// 마이페이지 여권 정보 
+	public Map<String, Object> selectSavedPassenger(Long memberId);
+	public void upsertPassportInfo(Map<String, Object> paramMap);
 }
