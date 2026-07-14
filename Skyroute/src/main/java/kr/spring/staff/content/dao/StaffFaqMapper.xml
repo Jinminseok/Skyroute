@@ -7,8 +7,12 @@
 
     <sql id="faqSearch">
         <where>
+            <!-- 사용자 페이지용 : 공개된 글만 가져오기 -->
+            <if test="is_visible != null and is_visible != ''">
+                is_visible = #{is_visible}
+            </if>
             <if test="category != null and category != ''">
-                category = #{category}
+                AND category = #{category}
             </if>
             <if test="keyword != null and keyword != ''">
                 AND (question LIKE '%' || #{keyword} || '%' OR answer LIKE '%' || #{keyword} || '%')

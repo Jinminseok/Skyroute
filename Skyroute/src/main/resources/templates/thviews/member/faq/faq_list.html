@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}">
+<head>
+<meta charset="UTF-8">
+<title>SkyRoute - 자주 묻는 질문</title>
+<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">
+<style>
+    /* FAQ 아코디언 전용 스타일 */
+    .faq-container { max-width: 900px; margin: 0 auto; }
+    .faq-header { text-align: center; margin-bottom: 40px; }
+    .faq-header h2 { font-size: 28px; font-weight: 700; color: var(--ink-900); margin-bottom: 12px; }
+    .faq-header p { color: var(--mut); font-size: 15px; }
+
+    /* 카테고리 탭 (사용자용) */
+    .faq-tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 30px; }
+    .faq-tab-btn { padding: 10px 20px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--mut); font-weight: 500; font-size: 14px; text-decoration: none; transition: 0.2s; }
+    .faq-tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .faq-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* 아코디언 아이템 */
+    .faq-list { display: flex; flex-direction: column; gap: 12px; }
+    .faq-item { border: 1px solid var(--line); border-radius: 12px; background: #fff; overflow: hidden; transition: 0.3s ease; }
+    
+    /* 질문 (Q) 버튼 */
+    .faq-question { width: 100%; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: transparent; border: none; cursor: pointer; text-align: left; font-size: 16px; font-weight: 600; color: var(--ink-800); }
+    .faq-question:hover { background: #f8fafc; }
+    .faq-q-badge { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 15px; font-weight: 700; }
+    .faq-q-text { flex-grow: 1; line-height: 1.5; }
+    .faq-icon { color: var(--mut); transition: transform 0.3s ease; }
+    
+    /* 답변 (A) 영역 */
+    .faq-answer { 
+        max-height: 0;           /* 높이를 0으로 만들어서 숨김 */
+        opacity: 0;              /* 글자를 투명하게 */
+        overflow: hidden;        /* 박스 밖의 내용을 숨김 */
+        padding: 0 24px;         /* 애니메이션을 위해 위아래 여백을 0으로 */
+        background: #f8fafc; 
+        border-top: 1px dashed transparent; /* 구분선 투명하게 */
+        
+        /* 높이, 투명도, 패딩, 선 색상이 부드럽게 변화 */
+        transition: max-height 0.4s ease, opacity 0.4s ease, padding 0.4s ease, border-top-color 0.4s ease; 
+    }
+    
+    .faq-a-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #e2e8f0; color: #475569; font-size: 15px; font-weight: 700; margin-top: 24px; margin-right: 12px; float: left; }
+    .faq-a-text { padding-top: 28px; line-height: 1.6; color: var(--ink-700); font-size: 15px; white-space: pre-wrap; }
+
+    /* 활성화(열림) 상태일 때의 변화 */
+    .faq-item.is-open { border-color: var(--accent); box-shadow: 0 4px 12px rgba(15,134,240,0.08); }
+    .faq-item.is-open .faq-question { color: var(--accent); }
+    .faq-item.is-open .faq-icon { transform: rotate(180deg); color: var(--accent); }
+    
+    .faq-item.is-open .faq-answer { 
+        max-height: 2000px;
+        opacity: 1;              /* 투명했던 글자를 선명하게 */
+        padding: 0 24px 24px 24px; /* 아래쪽 여백 주기 */
+        border-top-color: var(--line); /* 구분선이 활성화 */
+    }
+</style>
+</head>
+<body>
+
+<div layout:fragment="panel">
+    <div class="wrap" style="padding-top: 60px; padding-bottom: 100px;">
+        
+        <div class="faq-container">
+            <div class="faq-header">
+                <h2>자주 묻는 질문 (FAQ)</h2>
+                <p>고객님들이 가장 궁금해하시는 질문과 답변을 모아두었습니다.</p>
+            </div>
+
+            <!-- 카테고리 필터 -->
+            <div class="faq-tabs">
+                <a th:href="@{/member/faq/list}" class="faq-tab-btn" th:classappend="${category == '' ? 'active' : ''}">전체보기</a>
+                <a th:href="@{/member/faq/list(category='예약/항공권')}" class="faq-tab-btn" th:classappend="${category == '예약/항공권' ? 'active' : ''}">예약/항공권</a>
+                <a th:href="@{/member/faq/list(category='결제/환불')}" class="faq-tab-btn" th:classappend="${category == '결제/환불' ? 'active' : ''}">결제/환불</a>
+                <a th:href="@{/member/faq/list(category='수하물')}" class="faq-tab-btn" th:classappend="${category == '수하물' ? 'active' : ''}">수하물</a>
+                <a th:href="@{/member/faq/list(category='탑승/수속')}" class="faq-tab-btn" th:classappend="${category == '탑승/수속' ? 'active' : ''}">탑승/수속</a>
+                <a th:href="@{/member/faq/list(category='기타')}" class="faq-tab-btn" th:classappend="${category == '기타' ? 'active' : ''}">기타</a>
+            </div>
+
+            <!-- 검색창 -->
+            <form action="/member/faq/list" method="get" style="margin-bottom: 30px; text-align: center;">
+                <input type="hidden" name="category" th:value="${category}">
+                <div style="display: inline-flex; width: 100%; max-width: 500px; position: relative;">
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="검색어를 입력해 주세요." 
+                           style="width: 100%; padding: 14px 20px 14px 48px; border: 1px solid var(--line); border-radius: 999px; font-size: 15px; outline: none;">
+                    <span class="material-symbols-outlined" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--mut);">search</span>
+                    <button type="submit" style="position: absolute; right: 6px; top: 6px; bottom: 6px; padding: 0 20px; border: none; background: var(--accent); color: #fff; border-radius: 999px; cursor: pointer; font-weight: 600;">검색</button>
+                </div>
+            </form>
+
+            <!-- 아코디언 리스트 -->
+            <div class="faq-list">
+                
+                <div class="empty-result" th:if="${count == 0}" style="text-align: center; padding: 60px 0; color: var(--mut); border: 1px dashed var(--line); border-radius: 12px; background: #fff;">
+                    <span class="material-symbols-outlined" style="font-size: 40px; margin-bottom: 12px; opacity: 0.5;">search_off</span>
+                    <div>검색된 질문이 없습니다.</div>
+                </div>
+
+                <div class="faq-item" th:each="faq : ${list}">
+                    <!-- 질문 부분 -->
+                    <button class="faq-question" type="button">
+                        <span class="faq-q-badge">Q</span>
+                        <span class="faq-q-text">
+                            <span style="color: var(--mut); font-size: 13px; font-weight: 500; display: block; margin-bottom: 4px;" th:text="|[${faq.category}]|">[카테고리]</span>
+                            <span th:text="${faq.question}">질문 내용</span>
+                        </span>
+                        <span class="material-symbols-outlined faq-icon">expand_more</span>
+                    </button>
+                    <!-- 답변 부분 -->
+                    <div class="faq-answer">
+                        <span class="faq-a-badge">A</span>
+                        <div class="faq-a-text" th:text="${faq.answer}">답변 내용이 여기에 들어갑니다.</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 페이징 (기존 스타일 차용) -->
+            <div th:if="${count > 0}" style="display: flex; justify-content: center; gap: 8px; margin-top: 40px;">
+                <a th:if="${currentPage > 1}" th:href="@{/member/faq/list(pageNum=${currentPage - 1}, category=${category}, keyword=${keyword})}" class="btn ghost btn-sm">이전</a>
+                <span style="display: inline-flex; align-items: center; padding: 0 16px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 8px;" th:text="|${currentPage} / ${totalPage}|">1 / 1</span>
+                <a th:if="${currentPage < totalPage}" th:href="@{/member/faq/list(pageNum=${currentPage + 1}, category=${category}, keyword=${keyword})}" class="btn ghost btn-sm">다음</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 모든 질문 버튼을 찾습니다.
+            const questions = document.querySelectorAll(".faq-question");
+
+            // 각각의 버튼에 클릭 이벤트를 달아줍니다.
+            questions.forEach(btn => {
+                btn.addEventListener("click", function() {
+                    // 클릭한 버튼을 감싸고 있는 전체 FAQ 항목(박스)을 찾습니다.
+                    const item = this.closest(".faq-item");
+                    // 현재 이 항목이 열려있는지(is-open 클래스가 있는지) 확인합니다.
+                    const isOpen = item.classList.contains("is-open");
+
+                    // 1. 일단 다른 열려있는 모든 FAQ 항목을 닫아줍니다. (깔끔한 UI를 위해)
+                    document.querySelectorAll(".faq-item").forEach(el => el.classList.remove("is-open"));
+
+                    // 2. 만약 방금 클릭한 항목이 닫혀있던 상태였다면, 열어줍니다.
+                    if (!isOpen) {
+                        item.classList.add("is-open");
+                    }
+                });
+            });
+        });
+    </script>
+
+</div> <!-- // layout:fragment="panel" 닫는 태그 -->
+
+</body>
+</html>
