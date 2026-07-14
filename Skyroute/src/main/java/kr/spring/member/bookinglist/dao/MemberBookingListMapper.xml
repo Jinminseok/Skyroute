@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="kr.spring.member.bookinglist.dao.MemberBookingListMapper">
+
+	<select id="selectMyBookingList" parameterType="map" resultType="map">
+		SELECT 
+			B.BOOKING_ID, 
+			B.BOOKING_NO, 
+			B.STATUS AS BOOKING_STATUS, 
+			BP.NAME AS PASSENGER_NAME, 
+			BP.PASSENGER_TYPE, 
+			F.FLIGHT_NO, 
+			TO_CHAR(F.DEPARTURE_TIME, 'YYYY.MM.DD (DY) HH24:MI', 'NLS_DATE_LANGUAGE=KOREAN') AS DEPARTURE_TIME, 
+			DA.IATA_CODE AS DEP_IATA, 
+			DA.AIRPORT_NAME AS DEP_NAME, 
+			AA.IATA_CODE AS ARR_IATA, 
+			AA.AIRPORT_NAME AS ARR_NAME, 
+			SC.CLASS_NAME, 
+			S.SEAT_NO, 
+			T.FARE_AMOUNT, 
+			T.CHECKIN_STATUS, 
+			TO_CHAR(T.CHECKED_IN_AT, 'YYYY.MM.DD HH24:MI') AS CHECKED_IN_AT, 
+			TO_CHAR(T.BOARDED_AT, 'YYYY.MM.DD HH24:MI') AS BOARDED_AT 
+		FROM BOOKING B 
+		INNER JOIN BOOKING_PASSENGER BP ON B.BOOKING_ID = BP.BOOKING_ID 
+		INNER JOIN TICKET T ON B.BOOKING_ID = T.BOOKING_ID AND BP.BOOKING_PASSENGER_ID = T.BOOKING_PASSENGER_ID 
+		INNER JOIN FLIGHT F ON T.FLIGHT_ID = F.FLIGHT_ID 
+		INNER JOIN ROUTE R ON F.ROUTE_ID = R.ROUTE_ID 
+		INNER JOIN AIRPORT DA ON R.DEPARTURE_AIRPORT_ID = DA.AIRPORT_ID 
+		INNER JOIN AIRPORT AA ON R.ARRIVAL_AIRPORT_ID = AA.AIRPORT_ID 
+		INNER JOIN SEAT S ON T.SEAT_ID = S.SEAT_ID 
+		INNER JOIN SEAT_CLASS SC ON S.SEAT_CLASS_ID = SC.SEAT_CLASS_ID 
+		WHERE B.MEMBER_ID = #{memberId} 
+		  AND F.IS_DELETED = 'N' 
+		  
+		  <if test="passengerName != null and passengerName != ''"> 
+		    AND BP.NAME LIKE '%' || #{passengerName} || '%' 
+		  </if> 
+		  <if test="bookingNo != null and bookingNo != ''"> 
+		    AND UPPER(B.BOOKING_NO) = UPPER(#{bookingNo}) 
+		  </if> 
+		  <if test="arrivalKeyword != null and arrivalKeyword != ''"> 
+		    AND (UPPER(AA.IATA_CODE) LIKE '%' || UPPER(#{arrivalKeyword}) || '%' OR AA.AIRPORT_NAME LIKE '%' || #{arrivalKeyword} || '%') 
+		  </if> 
+		  <if test="departureDate != null and departureDate != ''"> 
+		    AND TO_CHAR(F.DEPARTURE_TIME, 'YYYY-MM-DD') = #{departureDate} 
+		  </if> 
+		ORDER BY B.CREATED_AT DESC, T.LEG_TYPE ASC
+	</select>
+
+<!-- 취소처리 
+	<update id="updateTicketStatusToCancel" parameterType="long">
+		UPDATE TICKET SET 
+		    HOLD_STATUS = 'CANCELLED', 
+		    CHECKIN_STATUS = 'NOT_CHECKED_IN' 
+		WHERE BOOKING_ID = #{bookingId}
+	</update>
+
+	<update id="updateBookingStatusToCancel" parameterType="long">
+		UPDATE BOOKING SET 
+		    STATUS = 'CANCELLED', 
+		    CANCELLED_AT = SYSTIMESTAMP 
+		WHERE BOOKING_ID = #{bookingId}
+	</update>
+-->
+</mapper>
