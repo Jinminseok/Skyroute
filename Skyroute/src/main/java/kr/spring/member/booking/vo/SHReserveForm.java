@@ -3,10 +3,12 @@ package kr.spring.member.booking.vo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.validation.Valid;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
 
 /*
  * 예약 진행 상태 (세션 보관)
@@ -46,7 +48,7 @@ public class SHReserveForm implements Serializable {
 
 
 	/* ===== 2단계 : 탑승객 정보 ===== */
-
+	@Valid
 	private List<SHPassengerForm> passengers = new ArrayList<>();
 
 

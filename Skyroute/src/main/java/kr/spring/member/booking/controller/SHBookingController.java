@@ -150,7 +150,7 @@ public class SHBookingController {
 		model.addAttribute("today", LocalDate.now());
 		model.addAttribute("activeMenu", "book");
 
-		return "thviews/member/sh_booking_passenger";
+		return "thviews/member/member_booking_passenger";
 	}
 
 
@@ -203,7 +203,7 @@ public class SHBookingController {
 
 		model.addAttribute("activeMenu", "book");
 
-		return "thviews/member/sh_select_seat";
+		return "thviews/member/member_select_seat";
 	}
 
 

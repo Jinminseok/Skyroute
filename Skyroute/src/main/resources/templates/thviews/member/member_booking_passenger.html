@@ -1,115 +1,484 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layouts/layout_basic}">
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}">
+
 <head>
-<meta charset="UTF-8">
-<title>에어누리 - 탑승객 정보 입력</title>
-<link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
-<script type="text/javascript" th:src="@{/assets/js/yh.member.js}"></script>
+    <meta charset="UTF-8">
+    <title>SkyRoute - 탑승객 정보 입력</title>
+    <link rel="stylesheet"
+          th:href="@{/assets/css/member.css}"
+          type="text/css">
+
+    <style>
+        .passenger-page {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .passenger-guide {
+            margin-bottom: 24px;
+            padding: 16px 18px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        .passenger-error {
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            background: #fef2f2;
+            color: #b91c1c;
+            font-size: 13px;
+        }
+
+        .passenger-error p {
+            margin: 4px 0;
+        }
+
+        .passenger-card {
+            margin-bottom: 24px;
+            padding: 24px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .passenger-card-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .passenger-card-title h3 {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .passenger-type {
+            display: inline-flex;
+            align-items: center;
+            min-height: 26px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .passenger-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .passenger-field {
+            display: block;
+            min-width: 0;
+        }
+
+        .passenger-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .passenger-field > span {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--ink-500);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .passenger-field input,
+        .passenger-field select {
+            width: 100%;
+            height: 44px;
+            padding: 0 13px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .passenger-field input:focus,
+        .passenger-field select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        .field-error {
+            display: block;
+            margin-top: 6px;
+            color: var(--bad);
+            font-size: 11px;
+        }
+
+        .save-passenger {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 18px;
+            color: var(--mut);
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .save-passenger input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+        }
+
+        .passenger-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .passenger-submit {
+            min-width: 280px;
+            height: 50px;
+            border: 0;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        @media(max-width: 720px) {
+            .passenger-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .passenger-field.full {
+                grid-column: auto;
+            }
+
+            .passenger-card {
+                padding: 18px;
+            }
+
+            .passenger-submit {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-	<div layout:fragment="panel">
-		<div class="wrap" style="padding-top: 40px; padding-bottom: 60px;">
+<div layout:fragment="panel">
 
-			<div class="booking-container" style="display: block; width: 100%;">
+    <div class="wrap"
+         style="padding-top: 40px; padding-bottom: 70px;">
 
-				<div class="cabin" style="padding: 0; border: none; background: none; width: 100%;">
-                    
-                    <div class="htitle" style="margin-bottom: 16px;">
-                        <div>
-                            <div class="eyebrow">PASSENGER INFO</div>
-                            <h2 style="font-size: 22px; font-weight: 600; margin-top: 5px;">탑승객 정보 입력 (탑승객당 입력폼 출력되어야 함.)</h2>
-                        </div>
+        <div class="passenger-page">
+
+            <div class="htitle"
+                 style="margin-bottom: 22px;">
+
+                <div>
+
+                    <div class="eyebrow">
+                        PASSENGER INFO
                     </div>
 
-                    <form id="passengerForm" style="width: 100%;">
-                        
-                        <div class="summary" style="margin-bottom: 24px; width: 100%;">
-                            <h3 style="display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 10px;">
-                                <span class="material-symbols-outlined" style="color: var(--accent);">person</span>
-                                탑승객 1 <span style="font-size: 12px; color: var(--mut); font-weight: 400;">(성인 / 대인)</span>
-                            </h3>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
-                                <div>
-                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">영문 성 (Last Name)</label>
-                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px;" placeholder="EX) HONG" value="HONG">
-                                </div>
-                                <div>
-                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">영문 이름 (First Name)</label>
-                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px;" placeholder="EX) GILDONG" value="GILDONG">
-                                </div>
-                            </div>
+                    <h2 style="
+                        margin-top: 5px;
+                        font-size: 22px;
+                        font-weight: 600;
+                    ">
+                        탑승객 정보 입력
+                    </h2>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
-                                <div>
-                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">생년월일 (8자리)</label>
-                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px; font-family: var(--mono);" placeholder="EX) 19900515" value="19900515">
-                                </div>
-                                <div>
-                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">성별</label>
-                                    <select class="mini-search select f-input" style="height: 40px; margin-bottom: 0;">
-                                        <option value="M" selected>남자 (Male)</option>
-                                        <option value="F">여자 (Female)</option>
-                                    </select>
-                                </div>
-                            </div>
+                    <p style="
+                        margin-top: 7px;
+                        color: var(--mut);
+                        font-size: 13px;
+                    ">
+                        검색 시 선택한 승객 구성에 맞춰 정보를 입력해 주세요.
+                    </p>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
-                                <div>
-                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">여권번호</label>
-                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px; font-family: var(--mono);" placeholder="여권번호 9자리 입력" value="M12345678">
-                                </div>
-                                <div>
-                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">여권 만료일</label>
-                                    <input type="date" class="chat-side-input" style="width:100%; height: 40px; font-family: var(--sans-eng);" value="2032-10-10">
-                                </div>
-                            </div>
+                </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
-                                <div style="grid-column: span 2;">
-                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">휴대폰 번호</label>
-                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px; font-family: var(--mono);" placeholder="EX) 01012345678" value="01011111111">
-                                </div>
-                            </div>
-                        </div>
+            </div>
 
-                        <div class="summary" style="margin-bottom: 24px; width: 100%;" th:each="stat : ${#numbers.sequence(1, session.passengerCount ?: 1)}" th:if="${false}">
-                            <h3 style="display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 10px;">
-                                <span class="material-symbols-outlined" style="color: var(--accent);">person</span>
-                                탑승객 <span th:text="${stat}">1</span>
-                            </h3>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
-                                <div>
-                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">영문 성 (Last Name)</label>
-                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px;" placeholder="EX) HONG">
-                                </div>
-                                <div>
-                                    <label style="font-size: 11px; color: var(--mut); display: block; margin-bottom: 4px;">영문 이름 (First Name)</label>
-                                    <input type="text" class="chat-side-input" style="width:100%; height: 40px;" placeholder="EX) GILDONG">
-                                </div>
-                            </div>
-                        </div>
+            <div class="passenger-guide">
 
-                        <div style="margin-top: 32px; display: flex; justify-content: center;">
-                            <a th:href="@{/member/member_select_seat}" class="btn" style="min-width: 280px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; font-weight: 500;">
-                                좌석 선택하기
-                            </a>
-                        </div>
+                승객 유형은 첫 번째 항공편 출발일을 기준으로 합니다.<br>
 
-                    </form>
-				</div>
+                유아는 성인과 함께 탑승해야 하며,
+                성인 1명당 유아 1명까지 예약할 수 있습니다.<br>
 
-			</div>
+                유아 좌석이 필요한 경우 소아로 예약해야 합니다.
 
-		</div>
-	</div>
+            </div>
+
+            <form th:action="@{/booking/reserve/passenger}"
+                  th:object="${shReserveForm}"
+                  method="post"
+                  id="passengerForm">
+
+                <div class="passenger-error"
+                     th:if="${#fields.hasAnyErrors()}">
+
+                    <strong>
+                        입력 내용을 확인해 주세요.
+                    </strong>
+
+                    <p th:each="error : ${#fields.allErrors()}"
+                       th:text="${error}">
+                        입력 오류입니다.
+                    </p>
+
+                </div>
+
+                <div class="passenger-card"
+                     th:each="passenger, stat : *{passengers}">
+
+                    <input type="hidden"
+                           th:field="*{passengers[__${stat.index}__].passengerType}">
+
+                    <input type="hidden"
+                           th:field="*{passengers[__${stat.index}__].savedPassengerId}">
+
+                    <div class="passenger-card-title">
+
+                        <h3>
+
+                            <span class="material-symbols-outlined"
+                                  style="color: var(--accent);">
+                                person
+                            </span>
+							여권에 표시된 영문 성과 영문 이름을 동일하게 입력해 주세요.<br>
+                            탑승객
+                            <span th:text="${stat.index + 1}">
+                                1
+                            </span>
+
+                        </h3>
+
+                        <span class="passenger-type"
+                              th:text="${passenger.passengerType == 'ADULT'
+                                  ? '성인'
+                                  : (passenger.passengerType == 'CHILD'
+                                      ? '소아'
+                                      : '유아')}">
+                            성인
+                        </span>
+
+                    </div>
+
+                    <div class="passenger-grid">
+
+                        <label class="passenger-field">
+
+						    <span>
+						        영문 성 (Last Name)
+						    </span>
+						
+						    <input type="text"
+						           th:field="*{passengers[__${stat.index}__].lastName}"
+						           maxlength="50"
+						           autocomplete="family-name"
+						           placeholder="여권과 동일하게 입력"
+						           style="text-transform: uppercase;">
+						
+						    <small class="field-error"
+						           th:errors="*{passengers[__${stat.index}__].lastName}">
+						        영문 성 오류
+						    </small>
+						
+						</label>
+						
+						<label class="passenger-field">
+						
+						    <span>
+						        영문 이름 (First Name)
+						    </span>
+						
+						    <input type="text"
+						           th:field="*{passengers[__${stat.index}__].firstName}"
+						           maxlength="50"
+						           autocomplete="given-name"
+						           placeholder="여권과 동일하게 입력"
+						           style="text-transform: uppercase;">
+						
+						    <small class="field-error"
+						           th:errors="*{passengers[__${stat.index}__].firstName}">
+						        영문 이름 오류
+						    </small>
+						
+						</label>
+                        <label class="passenger-field">
+
+                            <span>
+                                생년월일
+                            </span>
+
+                            <input type="date"
+                                   th:field="*{passengers[__${stat.index}__].birthDate}"
+                                   th:attr="max=${today}">
+
+                            <small class="field-error"
+                                   th:errors="*{passengers[__${stat.index}__].birthDate}">
+                                생년월일 오류
+                            </small>
+
+                        </label>
+
+                        <label class="passenger-field">
+
+                            <span>
+                                성별
+                            </span>
+
+                            <select th:field="*{passengers[__${stat.index}__].gender}">
+
+                                <option value="">
+                                    성별 선택
+                                </option>
+
+                                <option value="M">
+                                    남성
+                                </option>
+
+                                <option value="F">
+                                    여성
+                                </option>
+
+                            </select>
+
+                            <small class="field-error"
+                                   th:errors="*{passengers[__${stat.index}__].gender}">
+                                성별 오류
+                            </small>
+
+                        </label>
+
+                        <label class="passenger-field full">
+
+                            <span>
+                                휴대폰 번호
+                            </span>
+
+                            <input type="text"
+                                   th:field="*{passengers[__${stat.index}__].phone}"
+                                   maxlength="20"
+                                   inputmode="tel"
+                                   placeholder="01012345678">
+
+                        </label>
+
+                        <label class="passenger-field">
+
+                            <span>
+                                여권번호
+                            </span>
+
+                            <input type="text"
+                                   th:field="*{passengers[__${stat.index}__].passportNo}"
+                                   maxlength="20"
+                                   placeholder="국제선 이용 시 입력">
+
+                        </label>
+
+                        <label class="passenger-field">
+
+                            <span>
+                                여권 만료일
+                            </span>
+
+                            <input type="date"
+                                   th:field="*{passengers[__${stat.index}__].passportExpiry}"
+                                   th:attr="min=${today}">
+
+                        </label>
+
+                    </div>
+
+                    <label class="save-passenger">
+
+                        <input type="checkbox"
+                               th:field="*{passengers[__${stat.index}__].saveForNextTime}">
+
+                        다음 예약에서도 사용할 수 있도록 탑승객 정보를 저장합니다.
+
+                    </label>
+
+                </div>
+
+                <div class="passenger-actions">
+
+                    <button type="submit"
+                            id="passengerSubmitButton"
+                            class="btn passenger-submit">
+
+                        좌석 선택하기
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script layout:fragment="script">
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const form =
+            document.getElementById("passengerForm");
+
+        const submitButton =
+            document.getElementById("passengerSubmitButton");
+
+        if (!form || !submitButton) {
+            return;
+        }
+
+        form.addEventListener("submit", () => {
+
+            submitButton.disabled = true;
+            submitButton.textContent =
+                "탑승객 정보 저장 중...";
+
+        });
+
+        window.addEventListener("pageshow", () => {
+
+            submitButton.disabled = false;
+            submitButton.textContent =
+                "좌석 선택하기";
+
+        });
+
+    });
+
+</script>
 
 </body>
 </html>

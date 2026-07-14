@@ -406,6 +406,10 @@
 		        text-align: left;
 		    }
 		}
+		#reserveStartButton:disabled {
+		    opacity: 0.55;
+		    cursor: not-allowed;
+		}
 	</style>
 </head>
 
@@ -898,8 +902,12 @@
 				</div>
 
 
-				<form id="itinerarySelectionForm"
-					  onsubmit="return false;">
+				<form id="itinerarySelectionForm" th:action="@{/booking/reserve/start}" method="post">
+				
+				    <input th:if="${_csrf != null}"
+				           type="hidden"
+				           th:name="${_csrf.parameterName}"
+				           th:value="${_csrf.token}">
 
 
 					<input type="hidden"
@@ -1399,17 +1407,11 @@
 
 						<!-- USER 로그인 상태 -->
 						<button sec:authorize="hasAuthority('USER')"
-								type="button"
-								class="btn"
-								disabled
-								title="다음 예약 생성 단계에서 연결합니다."
-								style="
-									opacity: .55;
-									cursor: not-allowed;
-								">
-
-							예약 생성 단계에서 연결
-
+						        type="submit"
+						        id="reserveStartButton"
+						        class="btn"
+						        disabled>
+						    탑승객 정보 입력
 						</button>
 
 
