@@ -19,7 +19,7 @@ public class MemberBookingListServiceImpl implements MemberBookingListService{
         return bookingListMapper.selectMyBookingList(paramMap);
     }
 
-    //취소처리
+    //취소처리 (되는지 안되는지 모름)
     @Override
     public void cancelMyBooking(Long bookingId) {
         // A. 티켓 테이블의 선점 상태를 'CANCELLED'로 일괄 변경

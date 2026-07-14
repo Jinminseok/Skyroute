@@ -86,7 +86,7 @@ public class MemberBookingListController {
         return "thviews/member/member_booking"; 
     }
     
-//		취소처리
+//		취소처리 (되는지안되는지 모름)
 //    @GetMapping("/refundProcess")
 //    public String refundProcess(
 //            @RequestParam("bookingId") Long bookingId,
