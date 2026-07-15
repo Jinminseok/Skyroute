@@ -1,6 +1,7 @@
 package kr.spring.main.controller;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import kr.spring.member.booking.service.FlightSearchService;
 import kr.spring.member.booking.vo.FlightSearchForm;
 import kr.spring.member.booking.vo.SeatClassOptionVO;
+import kr.spring.member.schedule.service.ScheduleService;
 import kr.spring.member.service.MemberService;
 import kr.spring.member.vo.PrincipalDetails;
 import kr.spring.staff.content.service.StaffEventService;
@@ -30,6 +32,9 @@ public class MainController {
 
 	@Autowired
 	private StaffEventService staffEventService;
+	
+	@Autowired
+	private ScheduleService scheduleService;
 
 	//사이트 최초 진입
 	@GetMapping("/")
@@ -76,6 +81,13 @@ public class MainController {
 			flightSearchForm.setSeatClassId(defaultSeatClass.getSeatClassId());
 		}
 
+		// 오늘의 출/도착 현황
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("searchDate", LocalDate.now().toString()); // 오늘 날짜를 조건 검색어로 바인딩
+		
+		// 스케줄 조회 서비스를 통해 오늘 날짜 리스트 수거 (최근 5개만)
+		List<Map<String, Object>> todayFlightList = scheduleService.selectMainFlightStatusTop5();
+		model.addAttribute("todayFlightList", todayFlightList);
 
 		model.addAttribute("eventList", staffEventService.selectUserEventList());
 		model.addAttribute("airportList", flightSearchService.selectActiveAirportList());

@@ -116,14 +116,14 @@
                         <div>
                             <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px">
                                 <span th:text="${f.FLIGHT_STATUS}" th:class="|stat ${f.FLIGHT_STATUS == 'SCHEDULED' ? 'soon' : 'active'}|" style="padding: 2px 6px; border-radius:4px; font-size:12px;">SCHEDULED</span>
-                                <span class="pnr" th:text="${f.FLIGHT_NO}" style="font-weight: 500; font-family: var(--mono);">NU101</span>
+                                <span class="pnr" th:text="${f.FLIGHT_NO}" style="font-weight: 500; font-family: var(--mono);"></span>
                                 <span style="font-size: 12px; color: var(--accent); font-weight: 500;">
-								    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: -2px;">door_open</span> 
+								    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: -2px;"></span> 
 								    출발 게이트: <th:block th:text="${f.get('DEP_GATE') != null ? f.get('DEP_GATE') + '번' : '미정'}"></th:block> / 
 								    도착 게이트: <th:block th:text="${f.get('ARR_GATE') != null ? f.get('ARR_GATE') + '번' : '미정'}"></th:block>
 								</span>
                             </div>
-                            <div class="rt" style="font-weight: 500; font-size: 17px;" th:text="|${f.DEP_IATA} ${f.DEP_NAME} ➔ ${f.ARR_IATA} ${f.ARR_NAME}|">ICN 인천 ➔ JFK 뉴욕</div>
+                            <div class="rt" style="font-weight: 500; font-size: 17px;" th:text="|${f.DEP_IATA} ${f.DEP_NAME} ➔ ${f.ARR_IATA} ${f.ARR_NAME}|"></div>
                             
                             <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut);" 
 							     th:text="'출발 일시: ' + ${f.DEPARTURE_TIME} + ' - 도착 일시: ' + ${f.ARRIVAL_TIME} + ' (지연: ' + (${f.get('DELAY_MINUTES') != null} ? ${f.get('DELAY_MINUTES')} : 0) + '분)'">

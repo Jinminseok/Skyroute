@@ -558,14 +558,14 @@
         </div>
     </section>
 
-    <!-- 오늘의 운항 현황 -->
+    <!-- 실시간 출/도착 현황 -->
     <section class="home-information-section">
         <div class="home-content-wrap">
             <div class="home-section-heading home-section-heading-row">
                 <div>
                     <div class="home-eyebrow">TODAY'S FLIGHT STATUS</div>
-                    <h2>오늘의 실시간 출/도착 현황</h2>
-                    <p>오늘 운항하는 SkyRoute 항공편의 터미널 및 게이트 상태를 확인하세요.</p>
+                    <h2>출/도착 현황 (딜레이 시간 적용 필요 함.)</h2>
+                    <p>현재 시간 기준 가장 가까운 스케줄 5개의 터미널 및 게이트 상태를 실시간 확인하세요.</p>
                 </div>
                 <a th:href="@{/member/member_schedule(tabType='STATUS')}" class="home-section-more">
                     전체 운항편 보기 <span aria-hidden="true">→</span>
@@ -573,90 +573,65 @@
             </div>
 
             <div class="home-flight-list">
-                <a th:href="@{/member/member_schedule(tabType='STATUS')}" class="home-flight-card">
-                    <div class="home-flight-carrier">
-                        <span class="home-flight-logo">SR</span>
-                        <div>
-                            <strong>SR 101</strong>
-                            <span class="home-flight-status is-complete">출발 완료</span>
-                        </div>
-                    </div>
-                    <div class="home-flight-route">
-                        <div class="home-flight-node"><strong>10:30</strong><span>ICN 인천</span></div>
-                        <div class="home-flight-leg"><span>T1 · 26번 게이트</span><i></i><small>직항</small></div>
-                        <div class="home-flight-node is-right"><strong>11:50</strong><span>JFK 뉴욕</span></div>
-                    </div>
-                    <span class="material-symbols-outlined home-flight-arrow" aria-hidden="true">chevron_right</span>
-                </a>
-
-                <a th:href="@{/member/member_schedule(tabType='STATUS')}" class="home-flight-card">
-                    <div class="home-flight-carrier">
-                        <span class="home-flight-logo is-muted">SR</span>
-                        <div>
-                            <strong>SR 204</strong>
-                            <span class="home-flight-status">출발 전</span>
-                        </div>
-                    </div>
-                    <div class="home-flight-route">
-                        <div class="home-flight-node"><strong>18:15</strong><span>ICN 인천</span></div>
-                        <div class="home-flight-leg is-muted"><span>T1 · 42번 게이트</span><i></i><small>직항</small></div>
-                        <div class="home-flight-node is-right"><strong>20:30</strong><span>NRT 도쿄</span></div>
-                    </div>
-                    <span class="material-symbols-outlined home-flight-arrow" aria-hidden="true">chevron_right</span>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- 예약 마감 임박 -->
-    <section class="home-information-section home-closing-section">
-        <div class="home-content-wrap">
-            <div class="home-section-heading home-section-heading-row">
-                <div>
-                    <div class="home-eyebrow">CLOSING SOON</div>
-                    <h2>예약 마감 임박 항공권</h2>
-                    <p>발권 마감 시간이 가까운 항공편을 확인해 보세요.</p>
+                
+                <div th:if="${#lists.isEmpty(todayFlightList)}" style="text-align: center; color: var(--mut); padding: 40px 0; width: 100%; border: 1px dashed #cbd5e1; border-radius: 8px; background:#fff; font-size:14px;">
+                    현재 기준 예정된 실시간 출/도착 항공편이 존재하지 않습니다.
                 </div>
-                <a th:href="@{/main/home}" class="home-section-more">
-                    항공권 다시 검색 <span aria-hidden="true">→</span>
-                </a>
-            </div>
 
-            <div class="home-flight-list">
-                <a th:href="@{/main/home}" class="home-flight-card home-closing-card">
-                    <div class="home-flight-carrier">
-                        <span class="home-closing-badge">임박</span>
-                        <div>
-                            <strong>SR 101</strong>
-                            <span class="home-flight-status is-urgent">15분 뒤 마감</span>
+                <a th:unless="${#lists.isEmpty(todayFlightList)}" 
+                   th:each="f : ${todayFlightList}" 
+                   th:href="@{/member/member_schedule(tabType='STATUS')}" class="home-flight-card" style="display: block; margin-bottom: 12px; padding: 20px;">
+                    
+                    <div class="home-carrier" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div>
+                                <strong th:text="${f['FLIGHT_NO']}" style="font-size: 16px;"></strong>
+                                
+                                <span th:text="${f['STATUS_TEXT'] != null ? f['STATUS_TEXT'] : f['STATUS']}" 
+                                      th:class="|home-flight-status ${f['STATUS'] == 'DEPARTED' or f['STATUS'] == 'ARRIVED' or f['STATUS'] == 'COMPLETED' ? 'is-complete' : ''}|"
+                                      th:style="${f['STATUS'] == 'SCHEDULED' ? 'background: #eff6ff !important; color: #1d4ed8 !important;' : 
+                                                 (f['STATUS'] == 'DELAYED' ? 'background: #fef9c3 !important; color: #a16207 !important;' : 
+                                                 (f['STATUS'] == 'CANCELLED' ? 'background: #fef2f2 !important; color: #ef4444 !important;' : ''))}"></span>
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 13px; color: #0052cc; font-weight: 500;">
+                            출발 게이트: <th:block th:text="${f['DEP_GATE'] != null ? f['DEP_GATE'] : '확정전'}"></th:block> / 
+                            도착 게이트: <th:block th:text="${f['ARR_GATE'] != null ? f['ARR_GATE'] : '확정전'}"></th:block>
                         </div>
                     </div>
-                    <div class="home-flight-route">
-                        <div class="home-flight-node"><strong class="home-flight-date">오늘 21:05</strong><span>인천 (ICN)</span></div>
-                        <div class="home-flight-leg"><span>이코노미 잔여 2석</span><i></i><small>정상 운항</small></div>
-                        <div class="home-flight-node is-right"><strong class="home-flight-date">내일 22:40</strong><span>뉴욕 (JFK)</span></div>
-                    </div>
-                    <div class="home-flight-price"><strong>1,156,000<small>원</small></strong><span>1인 기준</span></div>
-                </a>
-
-                <a th:href="@{/main/home}" class="home-flight-card home-closing-card">
-                    <div class="home-flight-carrier">
-                        <span class="home-closing-badge">임박</span>
-                        <div>
-                            <strong>SR 204</strong>
-                            <span class="home-flight-status">1시간 뒤 마감</span>
+                    
+                    <div class="home-flight-route" style="margin-bottom: 12px;">
+                        <div class="home-flight-node">
+                            <strong th:text="${f['DEP_TIME']}" style="font-size: 20px;"></strong>
+                            <span th:text="|${f['DEP_IATA']} ${f['DEP_NAME']}|" style="font-size: 14px;"></span>
+                        </div>
+                        
+                        <div class="home-flight-leg">                            
+                            <i></i>
+                            <small th:text="${f['STATUS'] == 'CANCELLED' ? '결항' : '직항'}"></small>
+                        </div>
+                        
+                        <div class="home-flight-node is-right">
+                            <strong th:text="${f['ARR_TIME']}" style="font-size: 20px;"></strong>
+                            <span th:text="|${f['ARR_IATA']} ${f['ARR_NAME']}|" style="font-size: 14px;"></span>
                         </div>
                     </div>
-                    <div class="home-flight-route">
-                        <div class="home-flight-node"><strong class="home-flight-date">오늘 23:30</strong><span>인천 (ICN)</span></div>
-                        <div class="home-flight-leg"><span>이코노미 잔여 5석</span><i></i><small>정상 운항</small></div>
-                        <div class="home-flight-node is-right"><strong class="home-flight-date">내일 01:45</strong><span>도쿄 (NRT)</span></div>
+
+                    <div style="font-size: 12px; color: var(--mut); border-top: 1px solid #f1f5f9; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            출발 일시: <span th:text="${f['DEP_DATETIME']}"></span> 
+                            - 도착 일시: <span th:text="${f['ARR_DATETIME']}"></span> 
+                            (지연: <th:block th:text="${f['DELAY_MINUTES'] != null ? f['DELAY_MINUTES'] : '0'}"></th:block>분)
+                        </div>
+                        <span class="material-symbols-outlined" style="font-size: 16px; color:#cbd5e1;">chevron_right</span>
                     </div>
-                    <div class="home-flight-price"><strong>324,000<small>원</small></strong><span>1인 기준</span></div>
                 </a>
+                
             </div>
         </div>
     </section>
+
 </div>
 
 </body>

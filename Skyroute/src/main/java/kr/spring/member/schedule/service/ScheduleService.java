@@ -15,4 +15,7 @@ public interface ScheduleService {
 		
 		// 출발지, 도착지, 날짜 조건으로 스케줄 리스트 조회
 	    List<Map<String, Object>> getScheduleList(String departure, String arrival, String flightDate);
+	    
+	    // 메인 화면 전용 - 현재 시간 기준 최접근 5개 스케줄 조회
+		public List<Map<String, Object>> selectMainFlightStatusTop5();
 }

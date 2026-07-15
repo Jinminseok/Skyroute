@@ -36,4 +36,9 @@ public class ScheduleServiceImpl implements ScheduleService{
 		return scheduleMapper.getScheduleList(departure, arrival, flightDate);
 	}
 
+	@Override
+	public List<Map<String, Object>> selectMainFlightStatusTop5() {
+		return scheduleMapper.selectMainFlightStatusTop5();
+	}
+
 }
