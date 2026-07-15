@@ -22,10 +22,15 @@ public class SHSeatVO {
 
 	private String occupiedYn;      // Y / N (매퍼에서 계산)
 
+	private String isActive;
 
 	public boolean isOccupied() {
 		return "Y".equals(occupiedYn);
 	}
+	
+	public boolean isBroken() {
+        return "N".equals(isActive);
+    }
 
 
 	/* 12A → 12 */

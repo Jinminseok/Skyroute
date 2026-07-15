@@ -87,6 +87,12 @@ public class SHBookingServiceImpl implements SHBookingService {
 		}
 
 		seatMap.setSeatList(seatList);
+		
+		seatMap.setMaxSeatColumns(
+		        shBookingMapper.selectMaxSeatColumnsByFlight(
+		                flightId
+		        )
+		);
 
 		return seatMap;
 	}

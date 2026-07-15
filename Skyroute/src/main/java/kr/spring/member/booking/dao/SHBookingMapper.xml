@@ -16,6 +16,7 @@
 		<result property="seatClassId"       column="seat_class_id"/>
 		<result property="seatClassName"     column="seat_class_name"/>
 		<result property="price"             column="price"/>
+		<result property="maxSeatColumns"    column="max_seat_columns"/>
 	</resultMap>
 
 	<resultMap id="seatResultMap" type="kr.spring.member.booking.vo.SHSeatVO">
@@ -23,6 +24,7 @@
 		<result property="seatNo"      column="seat_no"/>
 		<result property="seatClassId" column="seat_class_id"/>
 		<result property="occupiedYn"  column="occupied_yn"/>
+		<result property="isActive"    column="is_active"/>
 	</resultMap>
 
 	<resultMap id="bookingResultMap" type="kr.spring.member.booking.vo.SHBookingVO">
@@ -148,7 +150,10 @@
 			s.seat_id,
 			s.seat_no,
 			s.seat_class_id,
+			s.is_active,
 			CASE
+				WHEN s.is_active = 'N'
+   				THEN 'Y'
 				WHEN EXISTS (
 					SELECT 1
 					FROM TICKET t
@@ -163,11 +168,26 @@
 		JOIN FLIGHT f ON f.aircraft_id = s.aircraft_id
 		WHERE f.flight_id = #{flightId}
 		  AND s.seat_class_id = #{seatClassId}
-		  AND s.is_active = 'Y'
 		ORDER BY
 			TO_NUMBER(REGEXP_SUBSTR(s.seat_no, '[0-9]+')),
 			REGEXP_SUBSTR(s.seat_no, '[A-Z]+')
 
+	</select>
+	
+	<select id="selectMaxSeatColumnsByFlight" resultType="java.lang.Integer">
+
+	    SELECT NVL(MAX(row_seat_count), 0)
+	    FROM (
+	        SELECT COUNT(*) AS row_seat_count
+	        FROM SEAT s
+	        JOIN FLIGHT f
+	          ON f.aircraft_id = s.aircraft_id
+	        WHERE f.flight_id = #{flightId}
+	        GROUP BY TO_NUMBER(
+	            REGEXP_SUBSTR(s.seat_no, '[0-9]+')
+	        )
+	    )
+	
 	</select>
 
 

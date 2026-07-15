@@ -25,6 +25,9 @@ public interface SHBookingMapper {
 	public List<SHSeatVO> selectSeatList(@Param("flightId") Long flightId,
 										 @Param("seatClassId") Long seatClassId);
 
+	public Integer selectMaxSeatColumnsByFlight(
+	        @Param("flightId") Long flightId);
+	
 	/* 선택한 좌석이 아직 비어 있는지 재확인 (HOLD 직전 방어) */
 	public int countOccupiedSeat(@Param("flightId") Long flightId,
 								 @Param("seatIds") List<Long> seatIds);

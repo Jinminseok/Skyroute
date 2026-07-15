@@ -47,23 +47,87 @@ public class SHSeatMapVO {
 	            && maxSeatColumns >= 7;
 	}
 
+	public boolean isAisleStart(int columnCount, int seatIndex) {
+
+	    if (seatIndex <= 0) {
+	        return false;
+	    }
+
+	    if (isWideBody()) {
+
+	        switch (columnCount) {
+	            case 4:
+	                return seatIndex == 1
+	                        || seatIndex == 3;
+
+	            case 6:
+	                return seatIndex == 2
+	                        || seatIndex == 4;
+
+	            case 7:
+	                return seatIndex == 2
+	                        || seatIndex == 5;
+
+	            case 8:
+	                return seatIndex == 2
+	                        || seatIndex == 6;
+
+	            case 9:
+	                return seatIndex == 3
+	                        || seatIndex == 6;
+
+	            case 10:
+	                return seatIndex == 3
+	                        || seatIndex == 7;
+
+	            default:
+	                int leftCount =
+	                        columnCount / 3;
+
+	                int rightCount =
+	                        columnCount / 3;
+
+	                int centerCount =
+	                        columnCount
+	                        - leftCount
+	                        - rightCount;
+
+	                return seatIndex == leftCount
+	                        || seatIndex
+	                        == leftCount + centerCount;
+	        }
+	    }
+
+	    int leftCount;
+
+	    if (columnCount == 4) {
+	        leftCount = 2;
+	    } else if (columnCount == 6) {
+	        leftCount = 3;
+	    } else {
+	        leftCount = columnCount / 2;
+	    }
+
+	    return seatIndex == leftCount;
+	}
+	
 	private List<SHSeatVO> seatList = new ArrayList<>();
 
 
 	/* 열 번호 → 그 열의 좌석들 (화면 렌더링용) */
 	public Map<Integer, List<SHSeatVO>> getSeatRowMap() {
 
-		Map<Integer, List<SHSeatVO>> rowMap = new TreeMap<>();
+	    Map<Integer, List<SHSeatVO>> rowMap = new TreeMap<>();
 
-		for (SHSeatVO seat : seatList) {
+	    for (SHSeatVO seat : seatList) {
 
-			rowMap.computeIfAbsent(
-					seat.getRowNo(),
-					key -> new ArrayList<>()
-			).add(seat);
-		}
+	        rowMap.computeIfAbsent(
+	                seat.getRowNo(),
+	                key -> new ArrayList<>()
+	        ).add(seat);
+	    }
 
-		return rowMap;
+	    return rowMap;
 	}
 
 
