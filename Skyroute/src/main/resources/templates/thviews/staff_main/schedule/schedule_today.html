@@ -93,32 +93,47 @@
 				<div class="clk" id="clock">--:--:--</div>
 			</div>
 
-			<div class="board-row head">
+			<div class="board-row head" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;">
 				<span>항공편명</span>
 				<span>노선구간</span>
-				<span>출발시각</span>
-				<span>출발게이트</span>
+				<span>출발 ➔ 도착 시각</span> <!-- 통합 -->
+				<span>출발 ➔ 도착 게이트</span> <!-- 통합 -->
 				<span>항공기모델</span>
 				<span>현재 상태</span>
+				<span>지연</span> <!-- 신설 -->
 				<span>수동 상태 변경 제어</span>
 			</div>
 
 			<div id="todayBoardRows">
-				<div class="board-row" th:each="f : ${scheduleList}">
+				<!-- 데이터 행도 (8칸) -->
+				<div class="board-row" th:each="f : ${scheduleList}" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;">
 					
+					<!-- 1. 항공편명 -->
 					<span style="font-weight: 700; color: var(--primary); font-size: 15px;" th:text="${f.flight_no}"></span>
 					
+					<!-- 2. 노선구간 -->
 					<span style="color: #475569; font-weight: 500;" th:text="${f.route_name}"></span>
 					
-					<span style="font-size: 18px; font-weight: 700; color: var(--text-dark);" th:text="${#strings.arraySplit(f.departure_time, 'T')[1]}"></span>
-					
-					<span>
-						<span style="background-color: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 8px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 13px;" 
-						      th:text="${f.dep_gate_code != null ? f.dep_gate_code : '미정'}"></span>
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span th:text="${#strings.arraySplit(f.departure_time, 'T')[1]}"></span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;" th:text="${#strings.arraySplit(f.arrival_time, 'T')[1]}"></span>
 					</span>
 					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;" 
+						      th:text="${f.dep_gate_code != null ? f.dep_gate_code : '미정'}"></span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;" 
+						      th:text="${f.arr_gate_code != null ? f.arr_gate_code : '미정'}"></span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
 					<span style="color: #64748b; font-size: 13px;" th:text="${f.aircraft_name}"></span>
 					
+					<!-- 6. 현재 상태 -->
 					<span>
 						<span th:if="${f.flight_status == 'SCHEDULED' or f.flight_status == 'BOARDING' or f.flight_status == 'DEPARTED' or f.flight_status == 'ARRIVED' or f.flight_status == 'COMPLETED'}" 
 						      style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
@@ -134,7 +149,14 @@
 							<span class="material-symbols-outlined" style="font-size: 16px;">cancel</span> 결항
 						</span>
 					</span>
+
+					<!-- 7. 지연 -->
+					<span th:style="${f.delay_minutes > 0 ? 'color: var(--danger); font-weight: 700; font-size: 14px;' : 'color: #94a3b8; font-size: 14px;'}" 
+					      class="mono" 
+					      th:text="${f.delay_minutes > 0 ? f.delay_minutes + '분' : '-'}">
+					</span>
 					
+					<!-- 8. 수동 상태 변경 제어 -->
 					<span>
 						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
 						        th:onchange="changeFlightStatus([[${f.flight_id}]], this.value)">
@@ -150,6 +172,7 @@
 					
 				</div>
 				
+				<!-- 데이터가 없을 때 -->
 				<div th:if="${#lists.isEmpty(scheduleList)}" style="display: flex; justify-content: center; padding: 40px; color: #94a3b8;">
 					오늘 운항 예정인 항공편이 없습니다.
 				</div>

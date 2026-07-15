@@ -11,69 +11,6 @@
 
 /* ==================== 하드코딩 데이터 스토어 ==================== */
 const state = {
-  /*flights: [
-    {
-      id: 1,
-      flight_no: 'HJ-1207',
-      route_id: 1,
-      route_name: '서울김포(GMP) → 제주공항(CJU)',
-      aircraft_id: 1,
-      aircraft_model: 'A320',
-      departure_gate_id: 11,
-      arrival_gate_id: 3,
-      departure_time: '2026-06-25 08:20',
-      arrival_time: '2026-06-25 09:35',
-      flight_status: 'BOARDING',
-      delay_minutes: 0,
-      is_deleted: 'N'
-    },
-    {
-      id: 2,
-      flight_no: 'HJ-8821',
-      route_id: 2,
-      route_name: '인천공항(ICN) → 도쿄나리타(NRT)',
-      aircraft_id: 2,
-      aircraft_model: 'B737',
-      departure_gate_id: 23,
-      arrival_gate_id: 1,
-      departure_time: '2026-06-25 10:15',
-      arrival_time: '2026-06-25 12:40',
-      flight_status: 'SCHEDULED',
-      delay_minutes: 0,
-      is_deleted: 'N'
-    },
-    {
-      id: 3,
-      flight_no: 'HJ-3340',
-      route_id: 3,
-      route_name: '김해공항(PUS) → 제주공항(CJU)',
-      aircraft_id: 1,
-      aircraft_model: 'A320',
-      departure_gate_id: 7,
-      arrival_gate_id: 5,
-      departure_time: '2026-06-25 14:40',
-      arrival_time: '2026-06-25 15:55',
-      flight_status: 'SCHEDULED',
-      delay_minutes: 0,
-      is_deleted: 'N'
-    },
-    {
-      id: 4,
-      flight_no: 'HJ-5012',
-      route_id: 4,
-      route_name: '서울김포(GMP) → 김해공항(PUS)',
-      aircraft_id: 2,
-      aircraft_model: 'B737',
-      departure_gate_id: 5,
-      arrival_gate_id: 2,
-      departure_time: '2026-06-25 16:50',
-      arrival_time: '2026-06-25 17:55',
-      flight_status: 'CANCELLED',
-      delay_minutes: 0,
-      is_deleted: 'N'
-    }
-  ],*/
-
   tickets: [
     {
       id: 101,
@@ -2232,13 +2169,33 @@ function deleteFlight(flightId) {
     });
 }
 
-// 6. 오늘 항공편 상태(정상/지연/결항) 변경
+// 6. 항공편 상태(정상/지연/결항) 변경 및 지연 시간 입력
 function changeFlightStatus(flightId, newStatus) {
-    if(!newStatus) return;
-    
-    if(!confirm('해당 항공편의 상태를 변경하시겠습니까?')) {
-        location.reload();
-        return;
+    if (!newStatus) return;
+
+    let delayMins = 0;
+
+    if (newStatus === 'DELAYED') {
+        const input = prompt("지연 시간(분)을 숫자로 입력해 주세요.\n(예: 30분 지연 시 30 입력)", "0");
+
+        if (input === null || input.trim() === '') {
+            location.reload();
+            return;
+        }
+
+        delayMins = parseInt(input, 10);
+
+        if (isNaN(delayMins) || delayMins < 0) {
+            alert("올바른 지연 시간(숫자)을 입력해 주세요.");
+            location.reload();
+            return;
+        }
+    } else {
+        // 지연이 아닐 때
+        if (!confirm('해당 항공편의 상태를 정말 변경하시겠습니까?')) {
+            location.reload();
+            return;
+        }
     }
 
     const csrfMeta = document.querySelector('meta[name="_csrf"]');
@@ -2251,7 +2208,7 @@ function changeFlightStatus(flightId, newStatus) {
 
     const headers = { 
         'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest' // 서버가 AJAX임을 인식하도록 추가!
+        'X-Requested-With': 'XMLHttpRequest' 
     };
     headers[csrfHeaderMeta.getAttribute('content')] = csrfMeta.getAttribute('content');
 
@@ -2260,20 +2217,23 @@ function changeFlightStatus(flightId, newStatus) {
         headers: headers,
         body: JSON.stringify({
             flight_id: parseInt(flightId),
-            flight_status: newStatus
+            flight_status: newStatus,
+            delay_minutes: delayMins
         })
     })
     .then(res => res.text())
     .then(result => {
-        if(result === 'success') {
+        if (result === 'success') {
             alert('상태가 정상적으로 변경되었습니다.');
             location.reload();
         } else {
             alert('상태 변경에 실패했습니다.');
+            location.reload();
         }
     })
     .catch(err => {
-        console.error(err);
+        console.error("상태 변경 오류:", err);
         alert('서버 통신 중 오류가 발생했습니다.');
+        location.reload();
     });
 }

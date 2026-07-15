@@ -94,9 +94,11 @@
         WHERE flight_id = #{flight_id}
     </update>
     
+    <!-- 상태 변경 -->
     <update id="updateFlightStatus" parameterType="kr.spring.staff.schedule.vo.ScheduleVO">
         UPDATE FLIGHT 
-        SET flight_status = #{flight_status} 
+        SET flight_status = #{flight_status},
+            delay_minutes = #{delay_minutes}
         WHERE flight_id = #{flight_id}
     </update>
 

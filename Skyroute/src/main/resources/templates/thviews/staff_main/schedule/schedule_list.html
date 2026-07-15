@@ -74,14 +74,18 @@
 					            <span style="color:#94a3b8;" th:text="'➔ ' + ${#strings.replace(f.arrival_time, 'T', ' ')}"></span>
 					        </td>
 					        
+					        <!-- 운항상태 -->
 					        <td>
-					            <span th:if="${f.flight_status == 'SCHEDULED'}" class="badge badge-scheduled">운항예정</span>
-					            <span th:if="${f.flight_status == 'BOARDING'}" class="badge badge-boarding">탑승중</span>
-					            <span th:if="${f.flight_status == 'DEPARTED'}" class="badge badge-departed">출발완료</span>
-					            <span th:if="${f.flight_status == 'ARRIVED'}" class="badge badge-arrived">도착완료</span>
-					            <span th:if="${f.flight_status == 'DELAYED'}" class="badge badge-delayed">지연</span>
-					            <span th:if="${f.flight_status == 'CANCELLED' or f.flight_status == 'CANCELED'}" class="badge badge-cancelled">결항</span>
-					            <span th:if="${f.flight_status == 'COMPLETED'}" class="badge badge-completed">운항종료</span>
+					            <select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 110px; border-radius: 6px; cursor: pointer; font-weight:bold; color:var(--primary);" 
+					                    th:onchange="changeFlightStatus([[${f.flight_id}]], this.value)">
+					                <option value="SCHEDULED" th:selected="${f.flight_status == 'SCHEDULED'}">운항예정</option>
+					                <option value="BOARDING" th:selected="${f.flight_status == 'BOARDING'}">탑승중</option>
+					                <option value="DEPARTED" th:selected="${f.flight_status == 'DEPARTED'}">출발완료</option>
+					                <option value="ARRIVED" th:selected="${f.flight_status == 'ARRIVED'}">도착완료</option>
+					                <option value="DELAYED" th:selected="${f.flight_status == 'DELAYED'}">지연(DELAY)</option>
+					                <option value="CANCELLED" th:selected="${f.flight_status == 'CANCELLED' or f.flight_status == 'CANCELED'}">결항(CANCEL)</option>
+					                <option value="COMPLETED" th:selected="${f.flight_status == 'COMPLETED'}">운항종료</option>
+					            </select>
 					        </td>
 					        
 					        <td th:style="${f.delay_minutes > 0 ? 'color:var(--danger); font-weight:bold;' : ''}" class="mono" th:text="${f.delay_minutes > 0 ? f.delay_minutes + '분' : '-'}"></td>
