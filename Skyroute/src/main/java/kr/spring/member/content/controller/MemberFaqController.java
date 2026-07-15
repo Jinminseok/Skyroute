@@ -21,47 +21,36 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/member/faq")
 public class MemberFaqController {
 
-    // 💡 지상직에서 만들어둔 서비스를 그대로 재활용합니다!
     private final StaffFaqService staffFaqService;
 
     @GetMapping("/list")
-    public String faqList(@RequestParam(defaultValue = "1") int pageNum,
-                          @RequestParam(defaultValue = "") String category,
-                          @RequestParam(defaultValue = "") String keyword,
-                          Model model) {
+    public String faqList(@RequestParam(defaultValue = "") String category,
+            			  @RequestParam(defaultValue = "") String keyword,
+            			  Model model) {
                           
-        Map<String, Object> map = new HashMap<>();
+    	Map<String, Object> map = new HashMap<>();
         map.put("category", category);
         map.put("keyword", keyword);
-        
-        // 🚨 핵심 포인트: 사용자 화면이므로 '공개(Y)' 상태인 것만 조회하도록 강제 설정
+        // 사용자 화면 - 공개 상태인 것만 조회
         map.put("is_visible", "Y");
+        
+        // 전체보기 상태인지 확인
+        boolean isViewAll = category.isEmpty() && keyword.isEmpty();
 
-        int count = staffFaqService.selectRowCount(map);
+        List<StaffFaqVO> list = staffFaqService.selectMemberFaqList(map);
 
-        // 페이징 처리 (1페이지당 10개 노출)
-        int pageSize = 10;
-        int start = (pageNum - 1) * pageSize + 1;
-        int end = pageNum * pageSize;
-        map.put("start", start);
-        map.put("end", end);
-
-        List<StaffFaqVO> list = null;
-        if (count > 0) {
-            list = staffFaqService.selectFaqList(map);
+        // 전체보기 상태라면 리스트를 10개로
+        if (isViewAll && list != null && list.size() > 10) {
+            list = list.subList(0, 10);
         }
 
-        int totalPage = (int) Math.ceil((double) count / pageSize);
+        // 전체 건수
+        int count = list != null ? list.size() : 0;
 
         model.addAttribute("count", count);
         model.addAttribute("list", list);
-        model.addAttribute("currentPage", pageNum);
-        model.addAttribute("totalPage", totalPage);
         model.addAttribute("category", category);
         model.addAttribute("keyword", keyword);
-
-        // 레이아웃의 메뉴 활성화를 위한 변수 (필요 시 사용)
-        model.addAttribute("activeMenu", "customer"); 
 
         return "thviews/member/faq/faq_list";
     }

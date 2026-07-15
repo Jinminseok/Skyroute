@@ -52,4 +52,19 @@ public class StaffFaqServiceImpl implements StaffFaqService{
 		staffFaqMapper.updateFaqVisible(map);
 	}
 
+	@Override
+	public List<StaffFaqVO> selectMemberFaqList(Map<String, Object> map) {
+		return staffFaqMapper.selectMemberFaqList(map);
+	}
+
+	@Override
+	public List<StaffFaqVO> selectFaqPriorityList() {
+		return staffFaqMapper.selectFaqPriorityList();
+	}
+
+	@Override
+	public void updateFaqPriority(StaffFaqVO faqVO) {
+		staffFaqMapper.updateFaqPriority(faqVO);
+	}
+
 }

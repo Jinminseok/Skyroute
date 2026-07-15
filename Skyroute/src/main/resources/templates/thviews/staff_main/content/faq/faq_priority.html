@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<title>에어 - FAQ 우선순위 설정</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
+<link rel="stylesheet" th:href="@{/assets/css/staff.css}">
+
+<!-- 드래그 앤 드롭 - SortableJS 라이브러리 -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+<style>
+    .split-layout { display: flex; gap: 24px; align-items: flex-start; }
+    .list-panel { flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; height: 600px; }
+    
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--line); background: #f8fafc; border-radius: 12px 12px 0 0; }
+    .panel-header h3 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    
+    /* 검색창 디자인 */
+    .search-box { margin-top: 12px; position: relative; }
+    .search-box input { width: 100%; padding: 8px 12px 8px 36px; border: 1px solid var(--line); border-radius: 6px; outline: none; transition: 0.2s; }
+    .search-box input:focus { border-color: var(--accent); }
+    .search-box .material-symbols-outlined { position: absolute; left: 10px; top: 9px; color: var(--mut); font-size: 20px; }
+
+    /* 드래그 영역과 아이템 디자인 */
+    .sortable-list { flex: 1; padding: 12px; overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column; gap: 8px; border-radius: 0 0 12px 12px; }
+    .sortable-item { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; cursor: grab; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: box-shadow 0.2s; }
+    .sortable-item:active { cursor: grabbing; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    
+    .drag-handle { color: #cbd5e1; cursor: grab; }
+    .drag-handle:active { cursor: grabbing; color: var(--accent); }
+
+    /* 우선순위 목록 강조 색상 */
+    #priorityList { background: #e0f2fe; }
+    #priorityList .sortable-item { border-color: #bae6fd; }
+
+    /* 드래그 중일 때 빈자리 표시 모양 */
+    .sortable-ghost { opacity: 0.4; background: #f8fafc; border: 2px dashed #cbd5e1; }
+</style>
+</head>
+<body>
+    <div th:replace="~{fragments/staff_header :: staffHeader('content')}"></div>
+
+    <main class="main">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div class="toolbar" style="margin-bottom: 16px;">
+                <a th:href="@{/staff/content/faq/list}" class="btn btn-ghost">
+                    <span class="material-symbols-outlined" style="font-size:18px">arrow_back</span> 목록으로
+                </a>
+                <div class="grow"></div>
+                <!-- 상단에 저장 버튼 -->
+                <button type="button" class="btn btn-primary" onclick="savePriority()">
+                    <span class="material-symbols-outlined" style="font-size:18px">save</span> 변경사항 저장
+                </button>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <h2 style="margin:0 0 8px; font-size: 22px;">최상단 우선순위 설정</h2>
+                <p style="margin:0; color:var(--mut); font-size: 14px;">
+                    왼쪽 목록에서 상단에 노출하고 싶은 질문을 <b>오른쪽으로 드래그</b>하세요. 위아래로 움직여 순서를 변경할 수 있습니다.
+                </p>
+            </div>
+
+            <!-- 듀얼 리스트 레이아웃 -->
+            <div class="split-layout">
+                
+                <!-- 1. 왼쪽 패널: 전체 FAQ 대기열 -->
+                <div class="list-panel">
+                    <div class="panel-header">
+                        <h3><span class="material-symbols-outlined">format_list_bulleted</span> 노출 대기 FAQ</h3>
+                        <div class="search-box">
+                            <span class="material-symbols-outlined">search</span>
+                            <!-- 검색창 -->
+                            <input type="text" id="faqSearch" placeholder="질문 내용으로 빠른 검색" onkeyup="filterFaqs()">
+                        </div>
+                    </div>
+                    <div class="sortable-list" id="faqPool">
+                        <!-- 우선순위가 0(일반 노출)인 항목만 렌더링 -->
+                        <div class="sortable-item" th:each="faq : ${list}" th:if="${faq.priority_num == 0}" th:attr="data-id=${faq.faq_id}">
+                            <span class="material-symbols-outlined drag-handle">drag_indicator</span>
+                            <span class="badge badge-category" th:text="${faq.category}">카테고리</span>
+                            <span class="faq-question-text" th:text="${faq.question}">질문</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 오른쪽 패널: 랭킹 적용열 -->
+                <div class="list-panel">
+                    <div class="panel-header">
+                        <h3 style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="material-symbols-outlined" style="color:var(--accent)">stars</span> 최상단 노출 순서
+                            </div>
+                            <!-- 개수 표시 카운터 -->
+                            <span id="priorityCounter" style="font-size: 13px; color: var(--mut); background: #fff; padding: 2px 10px; border-radius: 12px; border: 1px solid var(--line); font-weight: 700;">
+                                0 / 10
+                            </span>
+                        </h3>
+                        <p style="margin: 4px 0 0; font-size: 12px; color: var(--mut);">가장 위에 있는 항목이 사용자 화면 첫 번째로 나옵니다. (최대 10개)</p>
+                    </div>
+                    <div class="sortable-list" id="priorityList">
+                        <!-- 우선순위가 1 이상인 항목 렌더링 -->
+                        <div class="sortable-item" th:each="faq : ${list}" th:if="${faq.priority_num > 0}" th:attr="data-id=${faq.faq_id}">
+                            <span class="material-symbols-outlined drag-handle">drag_indicator</span>
+                            <span class="badge badge-category" th:text="${faq.category}">카테고리</span>
+                            <span class="faq-question-text" th:text="${faq.question}">질문</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </main>
+
+    <script>
+ 	// 우선순위 개수
+    function updateCounter() {
+        const priorityList = document.getElementById('priorityList');
+        const counterSpan = document.getElementById('priorityCounter');
+        const count = priorityList.children.length; // 들어있는 아이템 개수 세기
+        
+        counterSpan.textContent = count + ' / 10'; // 화면에 숫자 써주기
+        
+        // 10개가 꽉 차면 빨간색으로 경고 표시
+        if(count >= 10) {
+            counterSpan.style.color = '#35B62C'; 
+            counterSpan.style.borderColor = '#35B62C';
+        } else {
+            counterSpan.style.color = 'var(--mut)';
+            counterSpan.style.borderColor = 'var(--line)';
+        }
+    }
+
+    // 페이지가 로드될 때 실행되는 설정
+    document.addEventListener("DOMContentLoaded", function() {
+        const pool = document.getElementById('faqPool');
+        const priority = document.getElementById('priorityList');
+
+        // 왼쪽 리스트 설정
+        Sortable.create(pool, {
+            group: 'faq',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            // 아이템이 빠져나가거나 들어올 때 카운터 함수 실행
+            onSort: function (evt) {
+                updateCounter();
+            }
+        });
+
+        // 오른쪽 리스트 설정
+        Sortable.create(priority, {
+            // 10개 미만일 때만 가능
+            group: {
+                name: 'faq',
+                put: function (to) {
+                    return to.el.children.length < 10; 
+                }
+            },
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            // 아이템이 들어오거나 순서가 바뀔 때 카운터 함수 실행
+            onSort: function (evt) {
+                updateCounter();
+            }
+        });
+
+        updateCounter();
+    });
+
+    // 왼쪽 패널 검색
+    function filterFaqs() {
+        const keyword = document.getElementById('faqSearch').value.toLowerCase();
+        const items = document.querySelectorAll('#faqPool .sortable-item');
+        
+        items.forEach(item => {
+            const text = item.querySelector('.faq-question-text').textContent.toLowerCase();
+            // 입력한 글자가 포함되어 있으면 보여주고, 아니면 숨김
+            if(text.includes(keyword)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    // 변경사항 저장 로직
+    function savePriority() {
+        const priorityItems = document.querySelectorAll('#priorityList .sortable-item');
+        const poolItems = document.querySelectorAll('#faqPool .sortable-item');
+        const dataList = [];
+
+        // 1. 우선순위 적용
+        const totalPriority = priorityItems.length; 
+        priorityItems.forEach((item, index) => {
+            dataList.push({
+                faq_id: item.getAttribute('data-id'),
+                priority_num: totalPriority - index 
+            });
+        });
+
+        // 2. 일반 노출 처리
+        poolItems.forEach(item => {
+            dataList.push({
+                faq_id: item.getAttribute('data-id'),
+                priority_num: 0
+            });
+        });
+
+        // 보안 토큰
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        // 서버로 계산된 점수표 일괄 전송
+        fetch('/staff/content/faq/priority/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify(dataList)
+        })
+        .then(res => res.text())
+        .then(result => {
+            if(result === 'success') {
+                alert('우선순위가 성공적으로 저장되었습니다.');
+                location.href = '/staff/content/faq/list'; // 목록 페이지로
+            } else {
+                alert('우선순위 저장에 실패했습니다.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('서버 통신 오류가 발생했습니다.');
+        });
+    }
+    </script>
+</body>
+</html>

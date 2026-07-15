@@ -14,4 +14,5 @@ public class StaffFaqVO {
 	private String answer;		// 답변
 	private String is_visible;	// 노출 여부
 	private String created_at;	// 등록일시
+	private int priority_num;	// 우선순위
 }

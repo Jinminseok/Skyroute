@@ -285,7 +285,8 @@ CREATE TABLE FAQ (
     question VARCHAR2(300) NOT NULL,
     answer CLOB NOT NULL,
     is_visible CHAR(1) DEFAULT 'Y' NOT NULL CHECK (is_visible IN ('Y', 'N')),
-    created_at TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
+    priority_num NUMBER DEFAULT 0 NOT NULL
 );
 
 

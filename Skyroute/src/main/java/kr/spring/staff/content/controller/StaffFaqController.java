@@ -38,6 +38,20 @@ public class StaffFaqController {
         map.put("keyword", keyword);
 
         int count = staffFaqService.selectRowCount(map);
+        
+        // 상단 통계 박스용 데이터 추출 및 모델 추가 시작
+        Map<String, Object> emptyMap = new HashMap<>(); 
+        int totalCnt = staffFaqService.selectRowCount(emptyMap); // 전체 개수
+
+        Map<String, Object> publicMap = new HashMap<>();
+        publicMap.put("is_visible", "Y");
+        int publicCnt = staffFaqService.selectRowCount(publicMap); // 공개 개수
+
+        int privateCnt = totalCnt - publicCnt; // 비공개 개수
+
+        model.addAttribute("totalCnt", totalCnt);
+        model.addAttribute("publicCnt", publicCnt);
+        model.addAttribute("privateCnt", privateCnt);
 
         // 페이징 처리 (1페이지당 10개)
         int pageSize = 10;
@@ -122,6 +136,30 @@ public class StaffFaqController {
             return "success";
         } catch (Exception e) {
             log.error("FAQ 상태 토글 중 오류 발생: ", e);
+            return "error";
+        }
+    }
+    
+    // 9. 우선순위 설정 폼 열기
+    @GetMapping("/priority")
+    public String priorityForm(Model model) {
+        List<StaffFaqVO> list = staffFaqService.selectFaqPriorityList();
+        model.addAttribute("list", list);
+        model.addAttribute("activeMenu", "content");
+        return "thviews/staff_main/content/faq/faq_priority";
+    }
+
+    // 10. 우선순위 DB 일괄 저장
+    @PostMapping("/priority/save")
+    @ResponseBody
+    public String prioritySave(@RequestBody List<StaffFaqVO> priorityList) {
+        try {
+            for (StaffFaqVO faq : priorityList) {
+                staffFaqService.updateFaqPriority(faq);
+            }
+            return "success";
+        } catch (Exception e) {
+            log.error("우선순위 저장 오류: ", e);
             return "error";
         }
     }

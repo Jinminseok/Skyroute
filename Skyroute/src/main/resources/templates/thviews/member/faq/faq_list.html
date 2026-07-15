@@ -8,7 +8,7 @@
 <title>SkyRoute - 자주 묻는 질문</title>
 <link rel="stylesheet" th:href="@{/assets/css/member.css}" type="text/css">
 <style>
-    /* FAQ 아코디언 전용 스타일 */
+    /* FAQ 전용 스타일 */
     .faq-container { max-width: 900px; margin: 0 auto; }
     .faq-header { text-align: center; margin-bottom: 40px; }
     .faq-header h2 { font-size: 28px; font-weight: 700; color: var(--ink-900); margin-bottom: 12px; }
@@ -24,14 +24,14 @@
     .faq-list { display: flex; flex-direction: column; gap: 12px; }
     .faq-item { border: 1px solid var(--line); border-radius: 12px; background: #fff; overflow: hidden; transition: 0.3s ease; }
     
-    /* 질문 (Q) 버튼 */
+    /* 질문 버튼 */
     .faq-question { width: 100%; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: transparent; border: none; cursor: pointer; text-align: left; font-size: 16px; font-weight: 600; color: var(--ink-800); }
     .faq-question:hover { background: #f8fafc; }
     .faq-q-badge { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 15px; font-weight: 700; }
     .faq-q-text { flex-grow: 1; line-height: 1.5; }
     .faq-icon { color: var(--mut); transition: transform 0.3s ease; }
     
-    /* 답변 (A) 영역 */
+    /* 답변 영역 */
     .faq-answer { 
         max-height: 0;           /* 높이를 0으로 만들어서 숨김 */
         opacity: 0;              /* 글자를 투명하게 */
@@ -73,12 +73,23 @@
 
             <!-- 카테고리 필터 -->
             <div class="faq-tabs">
-                <a th:href="@{/member/faq/list}" class="faq-tab-btn" th:classappend="${category == '' ? 'active' : ''}">전체보기</a>
-                <a th:href="@{/member/faq/list(category='예약/항공권')}" class="faq-tab-btn" th:classappend="${category == '예약/항공권' ? 'active' : ''}">예약/항공권</a>
-                <a th:href="@{/member/faq/list(category='결제/환불')}" class="faq-tab-btn" th:classappend="${category == '결제/환불' ? 'active' : ''}">결제/환불</a>
-                <a th:href="@{/member/faq/list(category='수하물')}" class="faq-tab-btn" th:classappend="${category == '수하물' ? 'active' : ''}">수하물</a>
-                <a th:href="@{/member/faq/list(category='탑승/수속')}" class="faq-tab-btn" th:classappend="${category == '탑승/수속' ? 'active' : ''}">탑승/수속</a>
-                <a th:href="@{/member/faq/list(category='기타')}" class="faq-tab-btn" th:classappend="${category == '기타' ? 'active' : ''}">기타</a>
+                <a th:href="@{/member/faq/list}" class="faq-tab-btn" 
+                   th:classappend="${category == '' ? 'active' : ''}">전체보기</a>
+                   
+                <a th:href="@{/member/faq/list(category='예약/항공권')}" class="faq-tab-btn" 
+                   th:classappend="${category == '예약/항공권' ? 'active' : ''}">예약/항공권</a>
+                   
+                <a th:href="@{/member/faq/list(category='결제/환불/취소')}" class="faq-tab-btn" 
+                   th:classappend="${category == '결제/환불/취소' ? 'active' : ''}">결제/환불/취소</a>
+                   
+                <a th:href="@{/member/faq/list(category='수하물')}" class="faq-tab-btn" 
+                   th:classappend="${category == '수하물' ? 'active' : ''}">수하물</a>
+                   
+                <a th:href="@{/member/faq/list(category='탑승/수속')}" class="faq-tab-btn" 
+                   th:classappend="${category == '탑승/수속' ? 'active' : ''}">탑승/수속</a>
+                   
+                <a th:href="@{/member/faq/list(category='기타')}" class="faq-tab-btn" 
+                   th:classappend="${category == '기타' ? 'active' : ''}">기타</a>
             </div>
 
             <!-- 검색창 -->
@@ -105,9 +116,12 @@
                     <button class="faq-question" type="button">
                         <span class="faq-q-badge">Q</span>
                         <span class="faq-q-text">
-                            <span style="color: var(--mut); font-size: 13px; font-weight: 500; display: block; margin-bottom: 4px;" th:text="|[${faq.category}]|">[카테고리]</span>
-                            <span th:text="${faq.question}">질문 내용</span>
-                        </span>
+						    <!-- 동그란 뱃지 스타일 적용 -->
+						    <span style="display: inline-block; padding: 3px 10px; margin-bottom: 6px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #E0F2FE; color: #0284C7;" 
+						          th:text="${faq.category}">카테고리</span>
+						    
+						    <span style="display: block;" th:text="${faq.question}">질문 내용</span>
+						</span>
                         <span class="material-symbols-outlined faq-icon">expand_more</span>
                     </button>
                     <!-- 답변 부분 -->
@@ -119,33 +133,25 @@
 
             </div>
 
-            <!-- 페이징 (기존 스타일 차용) -->
-            <div th:if="${count > 0}" style="display: flex; justify-content: center; gap: 8px; margin-top: 40px;">
-                <a th:if="${currentPage > 1}" th:href="@{/member/faq/list(pageNum=${currentPage - 1}, category=${category}, keyword=${keyword})}" class="btn ghost btn-sm">이전</a>
-                <span style="display: inline-flex; align-items: center; padding: 0 16px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 8px;" th:text="|${currentPage} / ${totalPage}|">1 / 1</span>
-                <a th:if="${currentPage < totalPage}" th:href="@{/member/faq/list(pageNum=${currentPage + 1}, category=${category}, keyword=${keyword})}" class="btn ghost btn-sm">다음</a>
-            </div>
-
         </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 모든 질문 버튼을 찾습니다.
             const questions = document.querySelectorAll(".faq-question");
 
-            // 각각의 버튼에 클릭 이벤트를 달아줍니다.
+            // 각각의 버튼에 클릭 이벤트
             questions.forEach(btn => {
                 btn.addEventListener("click", function() {
-                    // 클릭한 버튼을 감싸고 있는 전체 FAQ 항목(박스)을 찾습니다.
+                    // 클릭한 버튼을 감싸고 있는 전체 FAQ 항목 찾기
                     const item = this.closest(".faq-item");
-                    // 현재 이 항목이 열려있는지(is-open 클래스가 있는지) 확인합니다.
+                    // 현재 이 항목이 열려있는지확인합니다.
                     const isOpen = item.classList.contains("is-open");
 
-                    // 1. 일단 다른 열려있는 모든 FAQ 항목을 닫아줍니다. (깔끔한 UI를 위해)
+                    // 1. 다른 열려있는 FAQ 항목을 닫기
                     document.querySelectorAll(".faq-item").forEach(el => el.classList.remove("is-open"));
 
-                    // 2. 만약 방금 클릭한 항목이 닫혀있던 상태였다면, 열어줍니다.
+                    // 2. 방금 클릭한 항목이 닫혀있다면 열기
                     if (!isOpen) {
                         item.classList.add("is-open");
                     }
@@ -154,7 +160,7 @@
         });
     </script>
 
-</div> <!-- // layout:fragment="panel" 닫는 태그 -->
+</div>
 
 </body>
 </html>

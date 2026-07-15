@@ -29,4 +29,13 @@ public interface StaffFaqMapper {
     
     // 7. FAQ 노출/비노출 상태 즉시 변경 (토글용)
     public void updateFaqVisible(Map<String, Object> map);
+
+    // 8. 사용자용 (페이징 X, 우선순위 정렬)
+    public List<StaffFaqVO> selectMemberFaqList(Map<String, Object> map);
+    
+    // 9. 관리자 우선순위 지정 화면용
+    public List<StaffFaqVO> selectFaqPriorityList();
+    
+    // 10. 우선순위 번호 수정
+    public void updateFaqPriority(StaffFaqVO faqVO);
 }
