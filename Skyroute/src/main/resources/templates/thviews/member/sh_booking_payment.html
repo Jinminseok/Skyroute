@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>결제 | SkyRoute</title>
+
+	<!-- CSRF (Spring Security 사용 시). 사용 안 하면 무시됨 -->
+	<meta name="_csrf" th:content="${_csrf != null} ? ${_csrf.token} : ''"/>
+	<meta name="_csrf_header" th:content="${_csrf != null} ? ${_csrf.headerName} : ''"/>
+
+	<!-- PortOne(아임포트) V1 SDK -->
+	<script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+
+	<style>
+		:root{
+			--charcoal:#1A1A1A; --bg:#F5F4F0; --coral:#D85A30;
+			--line:#e3e1da; --muted:#6b6b6b;
+		}
+		*{box-sizing:border-box;}
+		body{margin:0;background:var(--bg);color:var(--charcoal);
+			font-family:"Noto Sans KR",system-ui,sans-serif;}
+		.wrap{max-width:560px;margin:40px auto;padding:0 20px;}
+		h1{font-size:22px;letter-spacing:.02em;margin:0 0 24px;}
+		.card{background:#fff;border:1px solid var(--line);border-radius:14px;
+			padding:24px;margin-bottom:18px;}
+		.row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;}
+		.row .label{color:var(--muted);}
+		.total{border-top:1px solid var(--line);margin-top:10px;padding-top:14px;
+			font-size:18px;font-weight:700;}
+		.total .amt{color:var(--coral);}
+		.methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 4px;}
+		.m-btn{border:1.5px solid var(--line);background:#fff;border-radius:10px;
+			padding:14px;font-size:14px;cursor:pointer;transition:.15s;}
+		.m-btn.on{border-color:var(--coral);background:#fff6f2;font-weight:600;}
+		.m-btn:disabled{opacity:.45;cursor:not-allowed;}
+		.timer{font-size:13px;color:var(--muted);margin:2px 0 18px;text-align:center;}
+		.timer b{color:var(--coral);}
+		.pay{width:100%;background:var(--charcoal);color:#fff;border:none;
+			border-radius:12px;padding:16px;font-size:16px;font-weight:600;cursor:pointer;}
+		.pay:disabled{opacity:.5;cursor:not-allowed;}
+		.hint{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6;}
+	</style>
+</head>
+<body>
+<div class="wrap"
+	 th:attr="data-booking-id=${booking.bookingId},
+	          data-hold-minutes=${holdMinutes},
+	          data-imp-code=${impCode}">
+
+	<h1>결제하기</h1>
+
+	<div class="card">
+		<div class="row">
+			<span class="label">예약번호</span>
+			<span th:text="${booking.bookingNo}">SH-XXXX</span>
+		</div>
+		<div class="row">
+			<span class="label">여정</span>
+			<span th:text="${booking.outboundDepartureIata} + ' → ' + ${booking.outboundArrivalIata}">ICN → CJU</span>
+		</div>
+		<div class="row">
+			<span class="label">탑승객</span>
+			<span th:text="${booking.passengerCount} + '명'">1명</span>
+		</div>
+		<div class="row total">
+			<span>총 결제금액</span>
+			<span class="amt" th:text="${#numbers.formatInteger(booking.totalAmount,0,'COMMA')} + '원'">0원</span>
+		</div>
+	</div>
+
+	<div class="card">
+		<div class="methods">
+			<button type="button" class="m-btn on" data-method="KAKAOPAY">카카오페이</button>
+			<button type="button" class="m-btn" data-method="CARD">신용/체크카드</button>
+		</div>
+		<p class="hint">※ 가상계좌(무통장)는 EC2 배포 후 웹훅 연동과 함께 오픈 예정입니다.</p>
+	</div>
+
+	<p class="timer">좌석 선점 만료까지 <b id="timer">10:00</b> · 시간 초과 시 좌석이 자동 반납됩니다.</p>
+
+	<button type="button" id="payBtn" class="pay">결제하기</button>
+
+	<p class="hint">
+		결제 버튼을 누르면 선택한 수단의 결제창이 열립니다.<br/>
+		결제 완료 후 서버에서 실제 결제 금액을 검증한 뒤 예약이 확정됩니다.
+	</p>
+</div>
+
+<script>
+(function () {
+	const root       = document.querySelector('.wrap');
+	const bookingId  = Number(root.dataset.bookingId);
+	const impCode    = root.dataset.impCode;
+	const holdMin    = Number(root.dataset.holdMinutes || 10);
+
+	const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content || '';
+	const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || '';
+
+	let method = 'KAKAOPAY';
+
+	/* --- PortOne 초기화 (식별코드) --- */
+	IMP.init(impCode);
+
+	/* --- 결제수단 선택 --- */
+	document.querySelectorAll('.m-btn').forEach(btn => {
+		btn.addEventListener('click', () => {
+			document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('on'));
+			btn.classList.add('on');
+			method = btn.dataset.method;
+		});
+	});
+
+	/* --- 공통 fetch (CSRF 포함) --- */
+	async function postJson(url, body) {
+		const headers = { 'Content-Type': 'application/json' };
+		if (csrfHeader) headers[csrfHeader] = csrfToken;
+		const res = await fetch(url, {
+			method: 'POST', headers, body: JSON.stringify(body)
+		});
+		return res.json();
+	}
+
+	/* --- 결제 버튼 --- */
+	const payBtn = document.getElementById('payBtn');
+
+	payBtn.addEventListener('click', async () => {
+		payBtn.disabled = true;
+		try {
+			/* 1) 서버에 결제 준비 요청 → merchant_uid / 금액 / PG 정보 수신 */
+			const prep = await postJson('/booking/reserve/pay/prepare',
+				{ bookingId, method });
+
+			if (!prep || !prep.merchantUid) {
+				alert('결제 준비에 실패했습니다. 다시 시도해 주세요.');
+				payBtn.disabled = false;
+				return;
+			}
+
+			/* 2) 결제창 호출 */
+			IMP.request_pay({
+				channelKey:   prep.channelKey,
+				pay_method:   prep.payMethod,
+				merchant_uid: prep.merchantUid,
+				name:         prep.name,
+				amount:       prep.amount,
+				buyer_name:   prep.buyerName,
+				buyer_email:  prep.buyerEmail,
+				buyer_tel:    prep.buyerTel
+			}, async function (rsp) {
+
+				/* 3-A) 사용자가 취소하거나 결제 실패 → 좌석 반납 */
+				if (!rsp.success) {
+					await postJson('/booking/reserve/pay/cancel', { bookingId });
+					alert('결제가 취소되었습니다.' + (rsp.error_msg ? '\n' + rsp.error_msg : ''));
+					payBtn.disabled = false;
+					return;
+				}
+
+				/* 3-B) 결제 성공 → 서버 검증 요청 */
+				const result = await postJson('/booking/reserve/pay/complete', {
+					bookingId,
+					impUid:      rsp.imp_uid,
+					merchantUid: rsp.merchant_uid,
+					method
+				});
+
+				if (result.result === 'PAID') {
+					location.href = result.redirectUrl;
+
+				} else if (result.result === 'SEAT_EXPIRED') {
+					alert(result.message || '좌석 선점이 만료되어 결제가 자동 환불되었습니다.');
+					location.href = '/booking/reserve/start';
+
+				} else {
+					alert(result.message || '결제 검증에 실패했습니다. 결제가 취소됩니다.');
+					location.href = '/main/home';
+				}
+			});
+
+		} catch (e) {
+			console.error(e);
+			alert('결제 처리 중 오류가 발생했습니다.');
+			payBtn.disabled = false;
+		}
+	});
+
+	/* --- 선점 만료 카운트다운 (표시용) --- */
+	let remain = holdMin * 60;
+	const tEl = document.getElementById('timer');
+	const tick = setInterval(() => {
+		remain--;
+		if (remain <= 0) {
+			clearInterval(tick);
+			tEl.textContent = '00:00';
+			payBtn.disabled = true;
+			alert('좌석 선점 시간이 만료되었습니다. 좌석을 다시 선택해 주세요.');
+			location.href = '/booking/reserve/start';
+			return;
+		}
+		const m = String(Math.floor(remain / 60)).padStart(2, '0');
+		const s = String(remain % 60).padStart(2, '0');
+		tEl.textContent = m + ':' + s;
+	}, 1000);
+})();
+</script>
+</body>
+</html>

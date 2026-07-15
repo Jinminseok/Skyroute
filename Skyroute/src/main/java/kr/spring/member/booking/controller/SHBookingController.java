@@ -2,9 +2,12 @@ package kr.spring.member.booking.controller;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,14 +15,19 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import kr.spring.member.booking.exception.SHSeatTakenException;
+import kr.spring.member.booking.payment.SHIamportClient;
+import kr.spring.member.booking.payment.SHIamportPayment;
+import kr.spring.member.booking.payment.SHPayDto;
 import kr.spring.member.booking.service.SHBookingService;
 import kr.spring.member.booking.vo.SHBookingVO;
 import kr.spring.member.booking.vo.SHPassengerForm;
@@ -66,6 +74,15 @@ import lombok.extern.slf4j.Slf4j;
 public class SHBookingController {
 
 	private final SHBookingService shBookingService;
+	
+	private final SHIamportClient iamportClient;
+	
+	@Value("${imp.code}")
+	private String impCode;
+	@Value("${imp.channel-kakao}")
+	private String channelKakao;
+	@Value("${imp.channel-card}")
+	private String channelCard;
 
 
 	/* ===================================================================
@@ -511,8 +528,114 @@ public class SHBookingController {
 				"activeMenu",
 				"book"
 		);
-
+		model.addAttribute("impCode", impCode);
+		
 		return "thviews/member/sh_booking_payment";
+	}
+	
+	/* ========================= 결제 (PortOne V1) ========================= */
+
+	/** 결제 준비: PAYMENT(READY) 생성 + 결제창에 넘길 정보 반환 */
+	@PostMapping("/pay/prepare")
+	@ResponseBody
+	public Map<String, Object> payPrepare(
+			@RequestBody SHPayDto.Prepare req,
+			@AuthenticationPrincipal PrincipalDetails principal) {
+
+		Long memberId = getMemberId(principal);
+
+		String merchantUid =
+				shBookingService.preparePayment(req.bookingId(), memberId, req.method());
+
+		SHBookingVO booking = shBookingService.getBookingDetail(req.bookingId(), memberId);
+
+		Map<String, Object> res = new HashMap<>();
+		res.put("merchantUid", merchantUid);
+		res.put("amount",      booking.getTotalAmount());
+		res.put("name",        buildOrderName(booking));
+		res.put("channelKey", resolveChannelKey(req.method()));
+		res.put("payMethod",   resolvePayMethod(req.method()));
+		res.put("buyerName",   principal.getMemberVO().getName());
+		res.put("buyerEmail",  principal.getMemberVO().getEmail());
+		res.put("buyerTel",    principal.getMemberVO().getPhone());
+		return res;
+	}
+
+	/** 결제 완료: PortOne 서버 검증 → 좌석 확정 / 실패 시 환불 */
+	@PostMapping("/pay/complete")
+	@ResponseBody
+	public Map<String, Object> payComplete(
+			@RequestBody SHPayDto.Complete req,
+			@AuthenticationPrincipal PrincipalDetails principal) {
+
+		Long memberId = getMemberId(principal);
+		Map<String, Object> res = new HashMap<>();
+
+		/* 1) PortOne 서버에서 실제 결제 건 조회 (위변조 방지의 핵심) */
+		SHIamportPayment paid = iamportClient.getPayment(req.impUid());
+
+		/* 2) 결제 완료 상태가 아니면 실패 처리 */
+		if (!paid.isPaid()) {
+			shBookingService.failPayment(req.bookingId(), memberId);
+			res.put("result", "FAIL");
+			res.put("message", "결제가 완료되지 않았습니다.");
+			return res;
+		}
+
+		try {
+			/* 3) 좌석 확정 + 금액 검증(서버 조회 금액 기준) */
+			shBookingService.confirmPayment(
+					req.bookingId(), memberId,
+					req.impUid(), req.method(), paid.getAmount());
+
+			res.put("result", "PAID");
+			res.put("redirectUrl", "/booking/reserve/complete?bookingId=" + req.bookingId());
+
+		} catch (SHSeatTakenException e) {
+			/* 결제는 됐는데 좌석 만료 → 자동 환불 */
+			iamportClient.cancelPayment(req.impUid(), "좌석 선점 만료 - 자동 환불");
+			shBookingService.failPayment(req.bookingId(), memberId);
+			res.put("result", "SEAT_EXPIRED");
+			res.put("message", e.getMessage());
+
+		} catch (IllegalStateException e) {
+			/* 금액 불일치 등 검증 실패 → 자동 환불 */
+			iamportClient.cancelPayment(req.impUid(), "결제 검증 실패 - 자동 환불");
+			shBookingService.failPayment(req.bookingId(), memberId);
+			res.put("result", "FAIL");
+			res.put("message", e.getMessage());
+		}
+		return res;
+	}
+
+	/** 결제창 취소/이탈: 좌석 반납 */
+	@PostMapping("/pay/cancel")
+	@ResponseBody
+	public Map<String, Object> payCancel(
+			@RequestBody SHPayDto.Cancel req,
+			@AuthenticationPrincipal PrincipalDetails principal) {
+
+		shBookingService.failPayment(req.bookingId(), getMemberId(principal));
+		return Map.of("result", "CANCELLED");
+	}
+
+	/* ---- 결제 헬퍼 ---- */
+
+	private String resolveChannelKey(String method) {
+		return switch (method) {
+			case "KAKAOPAY" -> channelKakao;
+			case "CARD"     -> channelCard;
+			default -> throw new IllegalStateException("지원하지 않는 결제수단: " + method);
+		};
+	}
+
+	private String resolvePayMethod(String method) {
+		return "KAKAOPAY".equals(method) ? "card" : "card"; // VBANK 오픈 시 분기 추가
+	}
+
+	private String buildOrderName(SHBookingVO b) {
+		return b.getOutboundDepartureIata() + "→" + b.getOutboundArrivalIata()
+				+ " 항공권 " + b.getPassengerCount() + "명";
 	}
 
 
@@ -529,7 +652,7 @@ public class SHBookingController {
 		SHBookingVO booking =
 				shBookingService.getBookingDetail(bookingId, getMemberId(principal));
 
-		if (booking == null) {
+		if (booking == null || !"CONFIRMED".equals(booking.getStatus())) {
 			return "redirect:/main/home";
 		}
 
