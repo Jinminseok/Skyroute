@@ -564,7 +564,7 @@
             <div class="home-section-heading home-section-heading-row">
                 <div>
                     <div class="home-eyebrow">TODAY'S FLIGHT STATUS</div>
-                    <h2>출/도착 현황 (딜레이 시간 적용 필요 함.)</h2>
+                    <h2>오늘의 실시간 출/도착 현황</h2>
                     <p>현재 시간 기준 가장 가까운 스케줄 5개의 터미널 및 게이트 상태를 실시간 확인하세요.</p>
                 </div>
                 <a th:href="@{/member/member_schedule(tabType='STATUS')}" class="home-section-more">
@@ -602,8 +602,18 @@
                     </div>
                     
                     <div class="home-flight-route" style="margin-bottom: 12px;">
+                        
                         <div class="home-flight-node">
-                            <strong th:text="${f['DEP_TIME']}" style="font-size: 20px;"></strong>
+                            <th:block th:if="${f['DELAY_MINUTES'] == 0}">
+                                <strong th:text="${f['DEP_TIME']}" style="font-size: 20px;"></strong>
+                            </th:block>
+                            <th:block th:if="${f['DELAY_MINUTES'] > 0}">
+                                <strong style="font-size: 20px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <span th:text="${f['DEP_TIME']}" style="text-decoration: line-through; opacity: 0.5; font-size: 20px; font-weight: normal;"></span>
+                                    <span style="font-weight: normal; font-size: 16px;">→</span>
+                                    <span th:text="${f['REAL_DEP_TIME']}" style="color: #ef4444; font-weight: 700; font-size: 20px;"></span>
+                                </strong>
+                            </th:block>
                             <span th:text="|${f['DEP_IATA']} ${f['DEP_NAME']}|" style="font-size: 14px;"></span>
                         </div>
                         
@@ -613,16 +623,27 @@
                         </div>
                         
                         <div class="home-flight-node is-right">
-                            <strong th:text="${f['ARR_TIME']}" style="font-size: 20px;"></strong>
+                            <th:block th:if="${f['DELAY_MINUTES'] == 0}">
+                                <strong th:text="${f['ARR_TIME']}" style="font-size: 20px;"></strong>
+                            </th:block>
+                            <th:block th:if="${f['DELAY_MINUTES'] > 0}">
+                                <strong style="font-size: 20px; display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end;">
+                                    <span th:text="${f['ARR_TIME']}" style="text-decoration: line-through; opacity: 0.5; font-size: 20px; font-weight: normal;"></span>
+                                    <span style="font-weight: normal; font-size: 16px;">→</span>
+                                    <span th:text="${f['REAL_ARR_TIME']}" style="color: #ef4444; font-weight: 700; font-size: 20px;"></span>
+                                </strong>
+                            </th:block>
                             <span th:text="|${f['ARR_IATA']} ${f['ARR_NAME']}|" style="font-size: 14px;"></span>
                         </div>
                     </div>
 
                     <div style="font-size: 12px; color: var(--mut); border-top: 1px solid #f1f5f9; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            출발 일시: <span th:text="${f['DEP_DATETIME']}"></span> 
-                            - 도착 일시: <span th:text="${f['ARR_DATETIME']}"></span> 
-                            (지연: <th:block th:text="${f['DELAY_MINUTES'] != null ? f['DELAY_MINUTES'] : '0'}"></th:block>분)
+                            출발 일시: <span th:text="${f['REAL_DEP_DATETIME']}"></span> 
+                            - 도착 일시: <span th:text="${f['REAL_ARR_DATETIME']}"></span> 
+                            <strong style="font-weight: 700; color: #334155;">
+                                (지연: <th:block th:text="${f['DELAY_MINUTES']}"></th:block>분)
+                            </strong>
                         </div>
                         <span class="material-symbols-outlined" style="font-size: 16px; color:#cbd5e1;">chevron_right</span>
                     </div>
