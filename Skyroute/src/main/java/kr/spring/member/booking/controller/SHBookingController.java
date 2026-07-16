@@ -83,6 +83,8 @@ public class SHBookingController {
 	private String channelKakao;
 	@Value("${imp.channel-card}")
 	private String channelCard;
+	@Value("${imp.store_id}")
+	private String storeId;
 
 
 	/* ===================================================================
@@ -566,11 +568,13 @@ public class SHBookingController {
 		SHBookingVO booking = shBookingService.getBookingDetail(req.bookingId(), memberId);
 
 		Map<String, Object> res = new HashMap<>();
-		res.put("merchantUid", merchantUid);
-		res.put("amount",      booking.getTotalAmount());
-		res.put("name",        buildOrderName(booking));
+		res.put("storeId",    storeId);
 		res.put("channelKey", resolveChannelKey(req.method()));
-		res.put("payMethod",   resolvePayMethod(req.method()));
+		res.put("paymentId",  merchantUid);           // == merchant_uid
+		res.put("orderName",  buildOrderName(booking));
+		res.put("totalAmount", booking.getTotalAmount());
+		res.put("payMethod",  resolvePayMethod(req.method()));        // "CARD" 또는 "EASY_PAY"
+		res.put("easyPayProvider", resolveEasyPay(req.method()));     // 카카오면 provider, 카드면 null
 		res.put("buyerName",   principal.getMemberVO().getName());
 		res.put("buyerEmail",  principal.getMemberVO().getEmail());
 		res.put("buyerTel",    principal.getMemberVO().getPhone());
@@ -588,10 +592,11 @@ public class SHBookingController {
 		Map<String, Object> res = new HashMap<>();
 
 		/* 1) PortOne 서버에서 실제 결제 건 조회 (위변조 방지의 핵심) */
-		SHIamportPayment paid = iamportClient.getPayment(req.impUid());
-
+		//SHIamportPayment paid = iamportClient.getPayment(req.impUid());
+		SHIamportPayment p = iamportClient.getPayment(req.merchantUid());
+		
 		/* 2) 결제 완료 상태가 아니면 실패 처리 */
-		if (!paid.isPaid()) {
+		if (!p.isPaid()) {
 			shBookingService.failPayment(req.bookingId(), memberId);
 			res.put("result", "FAIL");
 			res.put("message", "결제가 완료되지 않았습니다.");
@@ -600,23 +605,21 @@ public class SHBookingController {
 
 		try {
 			/* 3) 좌석 확정 + 금액 검증(서버 조회 금액 기준) */
-			shBookingService.confirmPayment(
-					req.bookingId(), memberId,
-					req.impUid(), req.method(), paid.getAmount());
+			shBookingService.confirmPayment(req.bookingId(), memberId, req.merchantUid(), req.method(), p.getAmount());
 
 			res.put("result", "PAID");
 			res.put("redirectUrl", "/booking/reserve/complete?bookingId=" + req.bookingId());
 
 		} catch (SHSeatTakenException e) {
 			/* 결제는 됐는데 좌석 만료 → 자동 환불 */
-			iamportClient.cancelPayment(req.impUid(), "좌석 선점 만료 - 자동 환불");
+			iamportClient.cancelPayment(req.merchantUid(), "좌석 선점 만료 - 자동 환불");
 			shBookingService.failPayment(req.bookingId(), memberId);
 			res.put("result", "SEAT_EXPIRED");
 			res.put("message", e.getMessage());
 
 		} catch (IllegalStateException e) {
 			/* 금액 불일치 등 검증 실패 → 자동 환불 */
-			iamportClient.cancelPayment(req.impUid(), "결제 검증 실패 - 자동 환불");
+			iamportClient.cancelPayment(req.merchantUid(), "결제 검증 실패 - 자동 환불");
 			shBookingService.failPayment(req.bookingId(), memberId);
 			res.put("result", "FAIL");
 			res.put("message", e.getMessage());
@@ -646,7 +649,11 @@ public class SHBookingController {
 	}
 
 	private String resolvePayMethod(String method) {
-		return "KAKAOPAY".equals(method) ? "card" : "card"; // VBANK 오픈 시 분기 추가
+		return "KAKAOPAY".equals(method) ? "EASY_PAY" : "CARD";
+	}
+	
+	private String resolveEasyPay(String method) {
+		return "KAKAOPAY".equals(method) ? "EASY_PAY_PROVIDER_KAKAOPAY" : null;
 	}
 
 	private String buildOrderName(SHBookingVO b) {

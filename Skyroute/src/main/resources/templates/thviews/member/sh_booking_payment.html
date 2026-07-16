@@ -10,7 +10,7 @@
 	<meta name="_csrf_header" th:content="${_csrf != null} ? ${_csrf.headerName} : ''"/>
 
 	<!-- PortOne(아임포트) V1 SDK -->
-	<script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+	<script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
 
 	<style>
 		:root{
@@ -99,8 +99,6 @@
 
 	let method = 'KAKAOPAY';
 
-	/* --- PortOne 초기화 (식별코드) --- */
-	IMP.init(impCode);
 
 	/* --- 결제수단 선택 --- */
 	document.querySelectorAll('.m-btn').forEach(btn => {
@@ -127,56 +125,61 @@
 	payBtn.addEventListener('click', async () => {
 		payBtn.disabled = true;
 		try {
-			/* 1) 서버에 결제 준비 요청 → merchant_uid / 금액 / PG 정보 수신 */
+			/* 1) 결제 준비 요청 → paymentId / 금액 / 채널 정보 */
 			const prep = await postJson('/booking/reserve/pay/prepare',
 				{ bookingId, method });
 
-			if (!prep || !prep.merchantUid) {
+			if (!prep || !prep.paymentId) {
 				alert('결제 준비에 실패했습니다. 다시 시도해 주세요.');
 				payBtn.disabled = false;
 				return;
 			}
 
-			/* 2) 결제창 호출 */
-			IMP.request_pay({
-				channelKey:   prep.channelKey,
-				pay_method:   prep.payMethod,
-				merchant_uid: prep.merchantUid,
-				name:         prep.name,
-				amount:       prep.amount,
-				buyer_name:   prep.buyerName,
-				buyer_email:  prep.buyerEmail,
-				buyer_tel:    prep.buyerTel
-			}, async function (rsp) {
-
-				/* 3-A) 사용자가 취소하거나 결제 실패 → 좌석 반납 */
-				if (!rsp.success) {
-					await postJson('/booking/reserve/pay/cancel', { bookingId });
-					alert('결제가 취소되었습니다.' + (rsp.error_msg ? '\n' + rsp.error_msg : ''));
-					payBtn.disabled = false;
-					return;
+			/* 2) V2 결제창 호출 */
+			const request = {
+				storeId:     prep.storeId,
+				channelKey:  prep.channelKey,
+				paymentId:   prep.paymentId,
+				orderName:   prep.orderName,
+				totalAmount: prep.totalAmount,
+				currency:    'CURRENCY_KRW',
+				payMethod:   prep.payMethod,
+				customer: {
+					fullName:    prep.buyerName,
+					email:       prep.buyerEmail,
+					phoneNumber: prep.buyerTel
 				}
+			};
+			if (prep.easyPayProvider) {
+				request.easyPay = { easyPayProvider: prep.easyPayProvider };
+			}
 
-				/* 3-B) 결제 성공 → 서버 검증 요청 */
-				const result = await postJson('/booking/reserve/pay/complete', {
-					bookingId,
-					impUid:      rsp.imp_uid,
-					merchantUid: rsp.merchant_uid,
-					method
-				});
+			const rsp = await PortOne.requestPayment(request);
 
-				if (result.result === 'PAID') {
-					location.href = result.redirectUrl;
+			/* 3-A) 취소/실패 → 좌석 반납 */
+			if (rsp.code != null) {
+				await postJson('/booking/reserve/pay/cancel', { bookingId });
+				alert('결제가 취소되었습니다.' + (rsp.message ? '\n' + rsp.message : ''));
+				payBtn.disabled = false;
+				return;
+			}
 
-				} else if (result.result === 'SEAT_EXPIRED') {
-					alert(result.message || '좌석 선점이 만료되어 결제가 자동 환불되었습니다.');
-					location.href = '/booking/reserve/start';
-
-				} else {
-					alert(result.message || '결제 검증에 실패했습니다. 결제가 취소됩니다.');
-					location.href = '/main/home';
-				}
+			/* 3-B) 성공 → 서버 검증 (paymentId = merchant_uid) */
+			const result = await postJson('/booking/reserve/pay/complete', {
+				bookingId,
+				merchantUid: rsp.paymentId,
+				method
 			});
+
+			if (result.result === 'PAID') {
+				location.href = result.redirectUrl;
+			} else if (result.result === 'SEAT_EXPIRED') {
+				alert(result.message || '좌석 선점이 만료되어 결제가 자동 환불되었습니다.');
+				location.href = '/booking/reserve/start';
+			} else {
+				alert(result.message || '결제 검증에 실패했습니다.');
+				location.href = '/main/home';
+			}
 
 		} catch (e) {
 			console.error(e);

@@ -599,6 +599,6 @@ public class SHBookingServiceImpl implements SHBookingService {
 
 	private String generateMerchantUid(Long bookingId) {
 
-		return "SR_" + bookingId + "_" + System.currentTimeMillis();
+		return "SR" + bookingId + System.currentTimeMillis();
 	}
 }
