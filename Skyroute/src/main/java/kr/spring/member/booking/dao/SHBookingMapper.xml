@@ -412,10 +412,10 @@
 			b.created_at,
 			b.cancelled_at,
 
-			of.flight_no           AS outbound_flight_no,
+			outf.flight_no           AS outbound_flight_no,
 			TRIM(odep.iata_code)   AS outbound_departure_iata,
 			TRIM(oarr.iata_code)   AS outbound_arrival_iata,
-			of.departure_time      AS outbound_departure_time,
+			outf.departure_time      AS outbound_departure_time,
 
 			inf.flight_no          AS inbound_flight_no,
 			TRIM(idep.iata_code)   AS inbound_departure_iata,
@@ -430,8 +430,8 @@
 				    AND t.hold_status IN ('HOLDING', 'CONFIRMED')), 0) AS valid_amount
 
 		FROM BOOKING b
-		JOIN FLIGHT of      ON of.flight_id = b.outbound_flight_id
-		JOIN ROUTE oroute   ON oroute.route_id = of.route_id
+		JOIN FLIGHT outf      ON outf.flight_id = b.outbound_flight_id
+		JOIN ROUTE oroute   ON oroute.route_id = outf.route_id
 		JOIN AIRPORT odep   ON odep.airport_id = oroute.departure_airport_id
 		JOIN AIRPORT oarr   ON oarr.airport_id = oroute.arrival_airport_id
 
@@ -445,7 +445,6 @@
 		ORDER BY b.created_at DESC
 
 	</select>
-
 
 	<select id="selectBooking" resultMap="bookingResultMap">
 
@@ -461,10 +460,10 @@
 			b.created_at,
 			b.cancelled_at,
 
-			of.flight_no           AS outbound_flight_no,
+			outf.flight_no           AS outbound_flight_no,
 			TRIM(odep.iata_code)   AS outbound_departure_iata,
 			TRIM(oarr.iata_code)   AS outbound_arrival_iata,
-			of.departure_time      AS outbound_departure_time,
+			outf.departure_time      AS outbound_departure_time,
 
 			inf.flight_no          AS inbound_flight_no,
 			TRIM(idep.iata_code)   AS inbound_departure_iata,
@@ -479,8 +478,8 @@
 				    AND t.hold_status IN ('HOLDING', 'CONFIRMED')), 0) AS valid_amount
 
 		FROM BOOKING b
-		JOIN FLIGHT of      ON of.flight_id = b.outbound_flight_id
-		JOIN ROUTE oroute   ON oroute.route_id = of.route_id
+		JOIN FLIGHT outf      ON outf.flight_id = b.outbound_flight_id
+		JOIN ROUTE oroute   ON oroute.route_id = outf.route_id
 		JOIN AIRPORT odep   ON odep.airport_id = oroute.departure_airport_id
 		JOIN AIRPORT oarr   ON oarr.airport_id = oroute.arrival_airport_id
 
