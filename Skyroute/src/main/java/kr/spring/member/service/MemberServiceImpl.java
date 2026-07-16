@@ -63,8 +63,8 @@ public class MemberServiceImpl implements MemberService{
 	}
 
 	@Override
-	public Map<String, Object> selectSavedPassenger(Long memberId) {
-		return memberMapper.selectSavedPassenger(memberId);
+	public List<Map<String, Object>> selectSavedPassenger(Long memberId) {
+	    return memberMapper.selectSavedPassenger(memberId);
 	}
 
 	@Override
