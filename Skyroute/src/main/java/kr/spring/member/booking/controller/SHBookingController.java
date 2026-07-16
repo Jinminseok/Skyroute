@@ -99,6 +99,14 @@ public class SHBookingController {
 						@RequestParam(name = "infantCount", defaultValue = "0") int infantCount,
 						Model model) {
 
+		log.warn(
+			    "[예약 시작] tripType={}, outboundFlightId={}, inboundFlightId={}, seatClassId={}",
+			    tripType,
+			    outboundFlightId,
+			    inboundFlightId,
+			    seatClassId
+			);
+		
 		SHReserveForm reserveForm = new SHReserveForm();
 
 		reserveForm.setTripType(tripType);
@@ -202,6 +210,14 @@ public class SHBookingController {
 		if (!reserveForm.isPassengerReady()) {
 			return "redirect:/booking/reserve/passenger";
 		}
+		
+		log.warn(
+			    "[좌석 화면] tripType={}, outboundFlightId={}, inboundFlightId={}, seatClassId={}",
+			    reserveForm.getTripType(),
+			    reserveForm.getOutboundFlightId(),
+			    reserveForm.getInboundFlightId(),
+			    reserveForm.getSeatClassId()
+			);
 
 		SHSeatMapVO outboundSeatMap = shBookingService.getSeatMap(
 				reserveForm.getOutboundFlightId(),
