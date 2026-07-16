@@ -108,26 +108,96 @@
                 </form>
 
                 <div style="margin-top: 24px;" class="results">
-                    <div th:if="${#lists.isEmpty(statusResults)}" class="trip" style="text-align:center; color:var(--mut); padding:20px 0;">
+                    <div th:if="${#lists.isEmpty(statusResults)}" class="trip" style="text-align:center; color:var(--mut); padding:40px 0; border: 1px dashed #cbd5e1; border-radius: 8px; background: #fff;">
                         조회 범위 내 운항 현황 데이터가 존재하지 않습니다.
                     </div>
                     
-                    <div class="trip" th:each="f : ${statusResults}" style="margin-bottom: 12px;">
-                        <div>
-                            <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px">
-                                <span th:text="${f.FLIGHT_STATUS}" th:class="|stat ${f.FLIGHT_STATUS == 'SCHEDULED' ? 'soon' : 'active'}|" style="padding: 2px 6px; border-radius:4px; font-size:12px;">SCHEDULED</span>
-                                <span class="pnr" th:text="${f.FLIGHT_NO}" style="font-weight: 500; font-family: var(--mono);"></span>
-                                <span style="font-size: 12px; color: var(--accent); font-weight: 500;">
-								    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: -2px;"></span> 
-								    출발 게이트: <th:block th:text="${f.get('DEP_GATE') != null ? f.get('DEP_GATE') + '번' : '미정'}"></th:block> / 
-								    도착 게이트: <th:block th:text="${f.get('ARR_GATE') != null ? f.get('ARR_GATE') + '번' : '미정'}"></th:block>
-								</span>
+                    <div class="trip" th:unless="${#lists.isEmpty(statusResults)}" th:each="f : ${statusResults}" style="display: block; margin-bottom: 12px; padding: 20px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; box-sizing: border-box;">
+                        
+                        <div class="home-carrier" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div>
+                                    <strong th:text="${f.FLIGHT_NO}" style="font-size: 16px; color: #1e293b;"></strong>
+                                    
+                                    <span th:text="${f.get('STATUS_TEXT') != null ? f.get('STATUS_TEXT') : f.FLIGHT_STATUS}" 
+                                          th:class="|home-flight-status ${f.FLIGHT_STATUS == 'DEPARTED' or f.FLIGHT_STATUS == 'ARRIVED' or f.FLIGHT_STATUS == 'COMPLETED' ? 'is-complete' : ''}|"
+                                          th:style="${f.FLIGHT_STATUS == 'SCHEDULED' ? 'background: #eff6ff !important; color: #1d4ed8 !important; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid #bfdbfe;' : 
+                                                     (f.FLIGHT_STATUS == 'DELAYED' ? 'background: #fef9c3 !important; color: #a16207 !important; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid #fef08a;' : 
+                                                     (f.FLIGHT_STATUS == 'CANCELLED' ? 'background: #fef2f2 !important; color: #ef4444 !important; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; border: 1px solid #fecaca;' : ''))}"></span>
+                                </div>
                             </div>
-                            <div class="rt" style="font-weight: 500; font-size: 17px;" th:text="|${f.DEP_IATA} ${f.DEP_NAME} ➔ ${f.ARR_IATA} ${f.ARR_NAME}|"></div>
                             
-                            <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut);" 
-							     th:text="'출발 일시: ' + ${f.DEPARTURE_TIME} + ' - 도착 일시: ' + ${f.ARRIVAL_TIME} + ' (지연: ' + (${f.get('DELAY_MINUTES') != null} ? ${f.get('DELAY_MINUTES')} : 0) + '분)'">
-							</div>
+                            <div style="font-size: 13px; color: #0052cc; font-weight: 500;">
+                                출발 게이트: <th:block th:text="${f.get('DEP_GATE') != null ? f.get('DEP_GATE') : '미정'}"></th:block> / 
+                                도착 게이트: <th:block th:text="${f.get('ARR_GATE') != null ? f.get('ARR_GATE') : '미정'}"></th:block>
+                            </div>
+                        </div>
+                        
+                        <div class="home-flight-route" style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                            
+                            <div class="home-flight-node" style="flex: 1;">
+                                <th:block th:if="${f.get('DELAY_MINUTES') == null or f.get('DELAY_MINUTES') == 0}">
+                                    <strong th:text="${#strings.substring(f.DEPARTURE_TIME.toString(), 11, 16)}" style="font-size: 20px; color: #1e293b;"></strong>
+                                </th:block>
+                                <th:block th:if="${f.get('DELAY_MINUTES') != null and f.get('DELAY_MINUTES') > 0}">
+                                    <strong style="font-size: 20px; display: inline-flex; align-items: center; gap: 6px;">
+                                        <span th:text="${#strings.substring(f.DEPARTURE_TIME.toString(), 11, 16)}" style="text-decoration: line-through; opacity: 0.5; font-size: 20px; font-weight: normal; color: #64748b;"></span>
+                                        <span style="font-weight: normal; font-size: 16px; color: #64748b;">→</span>
+                                        <span th:with="rawStr=${f.DEPARTURE_TIME.toString()}, 
+                                                     parsedDate=${T(java.time.LocalDateTime).parse(#strings.substring(rawStr, 0, 10) + 'T' + #strings.substring(rawStr, 11, 16))},
+                                                     delayedDate=${parsedDate.plusMinutes(f.get('DELAY_MINUTES'))}"
+                                              th:text="${delayedDate.format(T(java.time.format.DateTimeFormatter).ofPattern('HH:mm'))}" 
+                                              style="color: #ef4444; font-weight: 700; font-size: 20px;"></span>
+                                    </strong>
+                                </th:block>
+                                <span th:text="|${f.DEP_IATA} ${f.DEP_NAME}|" style="font-size: 14px; display: block; margin-top: 4px; color: #475569;"></span>
+                            </div>
+                            
+                            <div class="home-flight-leg" style="flex: 1.5; text-align: center; position: relative; display: flex; flex-direction: column; align-items: center;">                                
+                                <div style="width: 100%; border-bottom: 2px solid #cbd5e1; position: relative; margin: 4px 0;">
+                                    <i style="position: absolute; width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; top: -2px; left: 0;"></i>
+                                    <i style="position: absolute; width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; top: -2px; right: 0;"></i>
+                                </div>
+                                <small th:text="${f.FLIGHT_STATUS == 'CANCELLED' ? '결항' : '직항'}" th:style="${f.FLIGHT_STATUS == 'CANCELLED' ? 'color:#ef4444; font-weight:bold;' : 'color:#64748b;'}"></small>
+                            </div>
+                            
+                            <div class="home-flight-node is-right" style="flex: 1; text-align: right;">
+                                <th:block th:if="${f.get('DELAY_MINUTES') == null or f.get('DELAY_MINUTES') == 0}">
+                                    <strong th:text="${#strings.substring(f.ARRIVAL_TIME.toString(), 11, 16)}" style="font-size: 20px; color: #1e293b;"></strong>
+                                </th:block>
+                                <th:block th:if="${f.get('DELAY_MINUTES') != null and f.get('DELAY_MINUTES') > 0}">
+                                    <strong style="font-size: 20px; display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end;">
+                                        <span th:text="${#strings.substring(f.ARRIVAL_TIME.toString(), 11, 16)}" style="text-decoration: line-through; opacity: 0.5; font-size: 20px; font-weight: normal; color: #64748b;"></span>
+                                        <span style="font-weight: normal; font-size: 16px; color: #64748b;">→</span>
+                                        <span th:with="rawStr=${f.ARRIVAL_TIME.toString()}, 
+                                                     parsedDate=${T(java.time.LocalDateTime).parse(#strings.substring(rawStr, 0, 10) + 'T' + #strings.substring(rawStr, 11, 16))},
+                                                     delayedDate=${parsedDate.plusMinutes(f.get('DELAY_MINUTES'))}"
+                                              th:text="${delayedDate.format(T(java.time.format.DateTimeFormatter).ofPattern('HH:mm'))}" 
+                                              style="color: #ef4444; font-weight: 700; font-size: 20px;"></span>
+                                    </strong>
+                                </th:block>
+                                <span th:text="|${f.ARR_IATA} ${f.ARR_NAME}|" style="font-size: 14px; display: block; margin-top: 4px; color: #475569;"></span>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 12px; color: var(--mut); border-top: 1px solid #f1f5f9; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                출발 일시: 
+                                <span th:with="rawStr=${f.DEPARTURE_TIME.toString()}, 
+                                             parsedDate=${T(java.time.LocalDateTime).parse(#strings.substring(rawStr, 0, 10) + 'T' + #strings.substring(rawStr, 11, 16))},
+                                             delayedDate=${parsedDate.plusMinutes(f.get('DELAY_MINUTES') != null ? f.get('DELAY_MINUTES') : 0)}"
+                                      th:text="${delayedDate.format(T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd HH:mm'))}"></span> 
+                                - 도착 일시: 
+                                <span th:with="rawStr=${f.ARRIVAL_TIME.toString()}, 
+                                             parsedDate=${T(java.time.LocalDateTime).parse(#strings.substring(rawStr, 0, 10) + 'T' + #strings.substring(rawStr, 11, 16))},
+                                             delayedDate=${parsedDate.plusMinutes(f.get('DELAY_MINUTES') != null ? f.get('DELAY_MINUTES') : 0)}"
+                                      th:text="${delayedDate.format(T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd HH:mm'))}"></span> 
+                                
+                                <strong style="font-weight: 700; color: #334155;">
+                                    (지연: <th:block th:text="${f.get('DELAY_MINUTES') != null ? f.get('DELAY_MINUTES') : '0'}"></th:block>분)
+                                </strong>
+                            </div>
+                            <span class="material-symbols-outlined" style="font-size: 16px; color:#cbd5e1;">chevron_right</span>
                         </div>
                     </div>
                 </div>
