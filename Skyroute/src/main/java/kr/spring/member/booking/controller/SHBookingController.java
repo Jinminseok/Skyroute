@@ -29,6 +29,7 @@ import kr.spring.member.booking.payment.SHIamportClient;
 import kr.spring.member.booking.payment.SHIamportPayment;
 import kr.spring.member.booking.payment.SHPayDto;
 import kr.spring.member.booking.service.SHBookingService;
+import kr.spring.member.booking.vo.SHBookingPassengerVO;
 import kr.spring.member.booking.vo.SHBookingVO;
 import kr.spring.member.booking.vo.SHPassengerForm;
 import kr.spring.member.booking.vo.SHReserveForm;
@@ -159,6 +160,136 @@ public class SHBookingController {
 
 		return passenger;
 	}
+	
+	/**
+	 * 저장된 회원 본인 탑승객 정보를 첫 번째 성인 폼에 자동 입력한다.
+	 *
+	 * 이미 입력된 값이 있거나 저장 정보가 없으면 아무것도 변경하지 않는다.
+	 */
+	private void applySavedPassengerToFirstAdult(
+	        SHReserveForm reserveForm,
+	        List<SHBookingPassengerVO> savedPassengerList) {
+
+	    if (reserveForm == null
+	            || reserveForm.getPassengers() == null
+	            || savedPassengerList == null
+	            || savedPassengerList.isEmpty()) {
+
+	        return;
+	    }
+
+	    /*
+	     * SAVED_PASSENGER는 회원 본인의 정보이므로
+	     * 첫 번째 ADULT 탑승객에만 적용한다.
+	     */
+	    SHPassengerForm targetPassenger =
+	            reserveForm.getPassengers()
+	                    .stream()
+	                    .filter(passenger ->
+	                            "ADULT".equals(
+	                                    passenger.getPassengerType()
+	                            )
+	                    )
+	                    .findFirst()
+	                    .orElse(null);
+
+	    if (targetPassenger == null) {
+	        return;
+	    }
+
+	    /*
+	     * 뒤로 가기, 검증 실패 재출력 등에서
+	     * 사용자가 이미 작성한 값을 덮어쓰지 않는다.
+	     */
+	    if (hasPassengerInput(targetPassenger)) {
+	        return;
+	    }
+
+	    SHBookingPassengerVO savedPassenger =
+	            savedPassengerList.get(0);
+
+	    String fullName =
+	            savedPassenger.getName() == null
+	                    ? ""
+	                    : savedPassenger.getName()
+	                            .trim()
+	                            .replaceAll("\\s+", " ");
+
+	    /*
+	     * 현재 프로젝트의 이름 저장 규칙:
+	     * "영문 성 + 공백 + 영문 이름"
+	     *
+	     * 예: HONG GILDONG
+	     *     lastName  = HONG
+	     *     firstName = GILDONG
+	     */
+	    String[] nameParts = fullName.split(" ", 2);
+
+	    if (nameParts.length != 2
+	            || nameParts[0].isBlank()
+	            || nameParts[1].isBlank()) {
+
+	        log.warn(
+	                "<<저장 탑승객 자동 입력 실패>> "
+	                + "이름 형식이 '성 이름' 구조가 아닙니다. "
+	                + "memberId={}, savedPassengerId={}, name={}",
+	                savedPassenger.getMemberId(),
+	                savedPassenger.getSavedPassengerId(),
+	                savedPassenger.getName()
+	        );
+
+	        return;
+	    }
+
+	    targetPassenger.setLastName(nameParts[0]);
+	    targetPassenger.setFirstName(nameParts[1]);
+	    targetPassenger.setBirthDate(
+	            savedPassenger.getBirthDate()
+	    );
+	    targetPassenger.setPhone(
+	            savedPassenger.getPhone()
+	    );
+	    targetPassenger.setGender(
+	            savedPassenger.getGender()
+	    );
+	    targetPassenger.setPassportNo(
+	            savedPassenger.getPassportNo()
+	    );
+	    targetPassenger.setPassportExpiry(
+	            savedPassenger.getPassportExpiry()
+	    );
+	    targetPassenger.setSavedPassengerId(
+	            savedPassenger.getSavedPassengerId()
+	    );
+
+	    log.debug(
+	            "<<저장 탑승객 자동 입력>> "
+	            + "memberId={}, savedPassengerId={}",
+	            savedPassenger.getMemberId(),
+	            savedPassenger.getSavedPassengerId()
+	    );
+	}
+	
+	/**
+	 * 탑승객 폼에 이미 사용자가 입력한 값이 있는지 확인한다.
+	 */
+	private boolean hasPassengerInput(
+	        SHPassengerForm passenger) {
+
+	    return passenger.getSavedPassengerId() != null
+	            || hasText(passenger.getLastName())
+	            || hasText(passenger.getFirstName())
+	            || passenger.getBirthDate() != null
+	            || hasText(passenger.getGender())
+	            || hasText(passenger.getPhone())
+	            || hasText(passenger.getPassportNo())
+	            || passenger.getPassportExpiry() != null;
+	}
+
+
+	private boolean hasText(String value) {
+	    return value != null && !value.isBlank();
+	}
 
 
 	/* ===================================================================
@@ -166,21 +297,38 @@ public class SHBookingController {
 	   =================================================================== */
 
 	@GetMapping("/passenger")
-	public String passengerForm(@ModelAttribute("shReserveForm") SHReserveForm reserveForm,
-								@AuthenticationPrincipal PrincipalDetails principal,
-								Model model) {
+	public String passengerForm(
+	        @ModelAttribute("shReserveForm") SHReserveForm reserveForm,
+	        @AuthenticationPrincipal PrincipalDetails principal,
+	        Model model) {
 
-		if (reserveForm.getOutboundFlightId() == null) {
-			return "redirect:/main/home";
-		}
+	    if (reserveForm.getOutboundFlightId() == null) {
+	        return "redirect:/main/home";
+	    }
 
-		model.addAttribute("savedPassengerList",
-				shBookingService.getSavedPassengerList(getMemberId(principal)));
+	    Long memberId = getMemberId(principal);
 
-		model.addAttribute("today", LocalDate.now());
-		model.addAttribute("activeMenu", "book");
+	    List<SHBookingPassengerVO> savedPassengerList =
+	            shBookingService.getSavedPassengerList(memberId);
 
-		return "thviews/member/member_booking_passenger";
+	    /*
+	     * 마이페이지에 저장된 회원 본인 정보를
+	     * 첫 번째 성인 탑승객 폼에만 자동 입력한다.
+	     */
+	    applySavedPassengerToFirstAdult(
+	            reserveForm,
+	            savedPassengerList
+	    );
+
+	    model.addAttribute(
+	            "savedPassengerList",
+	            savedPassengerList
+	    );
+
+	    model.addAttribute("today", LocalDate.now());
+	    model.addAttribute("activeMenu", "book");
+
+	    return "thviews/member/member_booking_passenger";
 	}
 
 

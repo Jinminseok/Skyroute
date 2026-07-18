@@ -24,7 +24,7 @@ public class SHBookingPassengerVO {
 
 	private Long savedPassengerId;
 
-	private Long memberId;          // SAVED_PASSENGER 저장 시 사용
+	private Long memberId;          // SAVED_PASSENGER 조회 결과 매핑용
 
 	private String name;
 

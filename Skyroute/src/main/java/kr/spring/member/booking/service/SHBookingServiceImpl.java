@@ -163,14 +163,6 @@ public class SHBookingServiceImpl implements SHBookingService {
 
 			shBookingMapper.insertBookingPassenger(passenger);
 
-			/* 다음에도 사용 체크 시 SAVED_PASSENGER 에 저장 */
-			if (passengerForm.isSaveForNextTime()) {
-
-				passenger.setMemberId(memberId);
-
-				shBookingMapper.insertSavedPassenger(passenger);
-			}
-
 			/* 유아는 좌석을 점유하지 않으므로 티켓을 만들지 않는다 */
 			if (!passengerForm.needsSeat()) {
 				continue;

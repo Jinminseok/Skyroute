@@ -198,7 +198,8 @@ public class MemberUserController {
 		model.addAttribute("member", memberVO);
 
 		// SAVED_PASSENGER 여권 정보 보여주기
-		List<Map<String, Object>> savedPassenger = memberService.selectSavedPassenger(memberId);
+		Map<String, Object> savedPassenger = memberService.selectSavedPassenger(memberId);
+
 		model.addAttribute("savedPassenger", savedPassenger);
 
 		model.addAttribute("eventParticipationList",

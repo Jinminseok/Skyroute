@@ -49,8 +49,6 @@ public class SHPassengerForm {
 
 	private Long savedPassengerId;
 
-	private boolean saveForNextTime;
-
 	public String getName() {
 
 		String normalizedLastName = normalizeName(lastName);

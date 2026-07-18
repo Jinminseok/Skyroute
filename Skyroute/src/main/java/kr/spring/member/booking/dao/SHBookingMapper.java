@@ -106,6 +106,4 @@ public interface SHBookingMapper {
 	/* ===================== 저장된 탑승객 ===================== */
 
 	public List<SHBookingPassengerVO> selectSavedPassengerList(@Param("memberId") Long memberId);
-
-	public void insertSavedPassenger(SHBookingPassengerVO passengerVO);
 }

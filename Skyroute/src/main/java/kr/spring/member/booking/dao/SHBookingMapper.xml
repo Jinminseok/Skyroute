@@ -608,35 +608,22 @@
 
 	<!-- ===================== 저장된 탑승객 ===================== -->
 
-	<select id="selectSavedPassengerList" resultMap="savedPassengerResultMap">
-
-		SELECT
-			saved_passenger_id, member_id, name, birth_date,
-			phone, gender, passport_no, passport_expiry
-		FROM SAVED_PASSENGER
-		WHERE member_id = #{memberId}
-		ORDER BY created_at DESC
-
+	<select id="selectSavedPassengerList"
+	        resultMap="savedPassengerResultMap">
+	
+	    SELECT
+	        saved_passenger_id,
+	        member_id,
+	        name,
+	        birth_date,
+	        phone,
+	        gender,
+	        passport_no,
+	        passport_expiry
+	    FROM SAVED_PASSENGER
+	    WHERE member_id = #{memberId}
+	    ORDER BY created_at DESC
+	
 	</select>
-
-
-	<insert id="insertSavedPassenger" parameterType="kr.spring.member.booking.vo.SHBookingPassengerVO">
-
-		INSERT INTO SAVED_PASSENGER (
-			member_id, name, birth_date, phone, gender, passport_no, passport_expiry
-		)
-		SELECT
-			#{memberId}, #{name}, #{birthDate,jdbcType=DATE},
-			#{phone,jdbcType=VARCHAR}, #{gender,jdbcType=CHAR},
-			#{passportNo,jdbcType=VARCHAR}, #{passportExpiry,jdbcType=DATE}
-		FROM DUAL
-		WHERE NOT EXISTS (
-			SELECT 1 FROM SAVED_PASSENGER sp
-			WHERE sp.member_id = #{memberId}
-			  AND sp.name = #{name}
-			  AND sp.birth_date = #{birthDate,jdbcType=DATE}
-		)
-
-	</insert>
 
 </mapper>

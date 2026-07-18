@@ -130,17 +130,24 @@
 	</select>
 	
 	<!-- 회원 여권 정보 단건 조회  -->
-	<select id="selectSavedPassenger" parameterType="long" resultType="map">
-		SELECT 
-			MEMBER_ID,
-			NAME,
-			TO_CHAR(BIRTH_DATE, 'YYYY-MM-DD') AS BIRTH_DATE,
-			PHONE,
-			GENDER,
-			PASSPORT_NO,
-			TO_CHAR(PASSPORT_EXPIRY, 'YYYY-MM-DD') AS PASSPORT_EXPIRY
-		FROM SAVED_PASSENGER 
-		WHERE MEMBER_ID = #{memberId}
+	<select id="selectSavedPassenger"
+	        parameterType="long"
+	        resultType="map">
+	
+	    SELECT
+	        SAVED_PASSENGER_ID,
+	        MEMBER_ID,
+	        NAME,
+	        TO_CHAR(BIRTH_DATE, 'YYYY-MM-DD') AS BIRTH_DATE,
+	        PHONE,
+	        GENDER,
+	        PASSPORT_NO,
+	        TO_CHAR(PASSPORT_EXPIRY, 'YYYY-MM-DD') AS PASSPORT_EXPIRY
+	    FROM SAVED_PASSENGER
+	    WHERE MEMBER_ID = #{memberId}
+	    ORDER BY CREATED_AT DESC, SAVED_PASSENGER_ID DESC
+	    FETCH FIRST 1 ROWS ONLY
+	
 	</select>
 
 	<!-- 여권 정보 업서트  -->
