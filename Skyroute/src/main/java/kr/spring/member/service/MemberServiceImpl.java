@@ -1,5 +1,6 @@
 package kr.spring.member.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +71,16 @@ public class MemberServiceImpl implements MemberService{
 	@Override
 	public void upsertPassportInfo(Map<String, Object> paramMap) {
 		memberMapper.upsertPassportInfo(paramMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> selectFavoriteRouteList(long memberId) {
+		return memberMapper.selectFavoriteRouteList(memberId);
+	}
+
+	@Override
+	public int deleteFavoriteRoute(Map<String, Object> paramMap) {
+		return memberMapper.deleteFavoriteRoute(paramMap);
 	}
 
 

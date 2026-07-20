@@ -204,6 +204,13 @@ public class MemberUserController {
 
 		model.addAttribute("eventParticipationList",
 				staffEventService.selectMyParticipationList(memberId));
+		
+		//관심노선 리스트 전달
+		List<Map<String, Object>> favoriteRouteList = memberService.selectFavoriteRouteList(memberId);
+		model.addAttribute("favoriteRouteList", favoriteRouteList);
+
+		model.addAttribute("eventParticipationList",
+				staffEventService.selectMyParticipationList(memberId));
 
 		return "thviews/member/member_mypage";
 	}
@@ -319,6 +326,21 @@ public class MemberUserController {
 		}
 	}
 	
+	// 마이페이지 관심 노선 삭제 처리
+	@GetMapping("/removeFavoriteRoute")
+	public String removeFavoriteRoute(@RequestParam("favoriteId") long favoriteId,
+			@AuthenticationPrincipal PrincipalDetails principalDetails) {
+		if (principalDetails != null && principalDetails.getMemberVO() != null) {
+			long memberId = principalDetails.getMemberVO().getMember_id();
+						
+			Map<String, Object> paramMap = new HashMap<>();
+			paramMap.put("favoriteId", favoriteId);
+			paramMap.put("memberId", memberId);
+			
+			memberService.deleteFavoriteRoute(paramMap);
+		}
+		return "redirect:/member/member_mypage";
+	}
 	
 	
 	//MY페이지

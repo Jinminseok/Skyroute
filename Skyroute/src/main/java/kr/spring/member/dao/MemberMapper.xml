@@ -168,6 +168,35 @@
 			VALUES (#{memberId}, #{name}, TO_DATE(#{birthDate}, 'YYYY-MM-DD'), #{gender}, #{phone}, #{passportNo}, TO_DATE(#{passportExpiry}, 'YYYY-MM-DD'))
 	</insert>
 	
+	<!-- 마이페이지 관심 노선 목록 조회 -->
+	<select id="selectFavoriteRouteList" parameterType="long" resultType="map">
+		SELECT 
+			FR.FAVORITE_ID,
+			FR.MEMBER_ID,
+			FR.FAVORITE_TYPE,
+			FR.DEPARTURE_AIRPORT_ID AS DEP_ID,
+			FR.ARRIVAL_AIRPORT_ID AS ARR_ID,
+			DA.IATA_CODE AS DEP_IATA,
+			DA.AIRPORT_NAME AS DEP_NAME,
+			AA.IATA_CODE AS ARR_IATA,
+			AA.AIRPORT_NAME AS ARR_NAME,
+			(DA.IATA_CODE || '-' || AA.IATA_CODE) AS ROUTE_CODE,
+			R.ROUTE_ID
+		FROM FAVORITE_ROUTE FR
+		INNER JOIN AIRPORT DA ON FR.DEPARTURE_AIRPORT_ID = DA.AIRPORT_ID
+		INNER JOIN AIRPORT AA ON FR.ARRIVAL_AIRPORT_ID = AA.AIRPORT_ID
+		LEFT OUTER JOIN ROUTE R ON (R.DEPARTURE_AIRPORT_ID = FR.DEPARTURE_AIRPORT_ID AND R.ARRIVAL_AIRPORT_ID = FR.ARRIVAL_AIRPORT_ID AND R.IS_ACTIVE = 'Y')
+		WHERE FR.MEMBER_ID = #{memberId}
+		  AND FR.FAVORITE_TYPE = 'ROUTE'
+		ORDER BY FR.CREATED_AT DESC
+	</select>
+
+	<!-- 관심 노선 삭제 (본인 소유 검증 포함) -->
+	<delete id="deleteFavoriteRoute" parameterType="map">
+		DELETE FROM FAVORITE_ROUTE
+		WHERE FAVORITE_ID = #{favoriteId}
+		  AND MEMBER_ID = #{memberId}
+	</delete>
 </mapper>
 
 
