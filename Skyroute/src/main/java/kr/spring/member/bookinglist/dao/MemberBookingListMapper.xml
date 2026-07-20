@@ -33,7 +33,6 @@
 		INNER JOIN SEAT S ON T.SEAT_ID = S.SEAT_ID 
 		INNER JOIN SEAT_CLASS SC ON S.SEAT_CLASS_ID = SC.SEAT_CLASS_ID 
 		WHERE B.MEMBER_ID = #{memberId} 
-		  AND F.IS_DELETED = 'N' 
 		  
 		  <if test="passengerName != null and passengerName != ''"> 
 		    AND BP.NAME LIKE '%' || #{passengerName} || '%' 
@@ -49,4 +48,5 @@
 		  </if> 
 		ORDER BY B.CREATED_AT DESC, T.LEG_TYPE ASC
 	</select>
+
 </mapper>

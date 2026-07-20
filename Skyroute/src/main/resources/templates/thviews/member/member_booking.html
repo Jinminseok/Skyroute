@@ -23,9 +23,15 @@
                     <div class="searchcard" style="margin-top:0; padding-bottom:24px">
                         <div class="fields" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
                             <div class="field">
-                                <label>탑승객 성명 (한글)</label>
-                                <input type="text" name="passengerName" th:value="${passengerName}" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px;" placeholder="EX) 홍길동">
-                            </div>
+							    <label>탑승객 성명 (영문 대문자)</label>
+							    <input type="text" 
+							           name="passengerName" 
+							           th:value="${passengerName}" 
+							           class="chat-side-input" 
+							           style="width:100%; height: 32px; margin-top:4px; text-transform: uppercase;" 
+							           placeholder="EX) HONG GILDONG"
+							           oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '').toUpperCase();">
+							</div> 
                             <div class="field">
                                 <label>예약번호 (PNR)</label>
                                 <input type="text" name="bookingNo" th:value="${bookingNo}" class="chat-side-input" style="width:100%; height: 32px; margin-top:4px; font-family: var(--mono);">
@@ -59,7 +65,7 @@
                                       th:class="|stat ${b.get('BOOKING_STATUS') == 'CONFIRMED' ? 'soon' : 'active'}|" 
                                       style="padding: 2px 6px; border-radius:4px; font-size:12px;">CONFIRMED</span>
                                 
-                                <span class="pnr" th:text="'PNR ' + ${b.get('BOOKING_NO')}" style="font-weight: 500; font-family: var(--mono);">PNR NUX4K9</span>
+                                <span class="pnr" th:text="'PNR ' + ${b.get('BOOKING_NO')}" style="font-weight: 500; font-family: var(--mono);"></span>
                                 
                                 <span th:if="${b.get('CHECKIN_STATUS') == 'CHECKED_IN' or b.get('CHECKIN_STATUS') == 'BOARDED'}" class="stat soon" style="background:#e3f2fd; color:#0d47a1;">
                                     ✓ 체크인 완료 (<th:block th:text="${b.get('CHECKED_IN_AT')}"></th:block>)
@@ -73,9 +79,9 @@
                                 </span>
                             </div>
                             
-                            <div class="rt" style="font-weight: 500; font-size: 17px;" th:text="|${b.get('DEP_IATA')} ${b.get('DEP_NAME')} ➔ ${b.get('ARR_IATA')} ${b.get('ARR_NAME')}|">ICN 인천 → JFK 뉴욕</div>
+                            <div class="rt" style="font-weight: 500; font-size: 17px;" th:text="|${b.get('DEP_IATA')} ${b.get('DEP_NAME')} ➔ ${b.get('ARR_IATA')} ${b.get('ARR_NAME')}|"></div>
                             <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut);" 
-                                 th:text="|편명: ${b.get('FLIGHT_NO')} · 탑승객: ${b.get('PASSENGER_NAME')} (${b.get('PASSENGER_TYPE')}) · 일시: ${b.get('DEPARTURE_TIME')}|">NU101 · 2026.12.20 (토) 10:30</div>
+                                 th:text="|편명: ${b.get('FLIGHT_NO')} · 탑승객: ${b.get('PASSENGER_NAME')} (${b.get('PASSENGER_TYPE')}) · 일시: ${b.get('DEPARTURE_TIME')}|"></div>
                         </div>
                         
                         <div class="actions" style="display: flex; gap: 8px;">
