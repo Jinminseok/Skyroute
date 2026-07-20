@@ -1,14 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
-<!DOCTYPE mapper   
-    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">    
+
 <mapper namespace="kr.spring.staff.delay.dao.StaffFlightNoticeMapper"> 
-	
+
+    <!-- 1. 지연/결항 공지 등록 -->
+    <insert id="insertFlightNotice" parameterType="kr.spring.staff.delay.vo.FlightNoticeVO">
+        INSERT INTO FLIGHT_NOTICE (
+            flight_id, notice_type, reason, delay_minutes, created_by
+        ) VALUES (
+            #{flight_id}, #{notice_type}, #{reason}, #{delay_minutes, jdbcType=INTEGER}, #{created_by}
+        )
+    </insert>
+
+    <!-- 2. 지연/결항 이력 목록 조회 -->
+    <select id="selectFlightNoticeList" resultType="kr.spring.staff.delay.vo.FlightNoticeVO">
+        SELECT 
+            N.flight_notice_id, 
+            N.flight_id, 
+            N.notice_type, 
+            N.reason, 
+            N.delay_minutes, 
+            N.created_by,
+            TO_CHAR(N.created_at, 'YYYY-MM-DD HH24:MI') AS created_at,
+            F.flight_no
+        FROM FLIGHT_NOTICE N
+        JOIN FLIGHT F ON N.flight_id = F.flight_id
+        ORDER BY N.created_at DESC
+    </select>
+
 </mapper>
-
-
-
-
-
-
-

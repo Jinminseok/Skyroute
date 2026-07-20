@@ -12,6 +12,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
 
 <link rel="stylesheet" th:href="@{/assets/css/staff.css}">
+
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
 </head>
 
 <body>
@@ -38,15 +42,16 @@
 
 				<div class="field" style="margin-bottom:14px;">
 					<label style="font-weight:600; font-size:12px; display:block; margin-bottom:4px;">
-						대상 항공편 선택
+						대상 항공편 검색 및 선택
 					</label>
-
-					<select class="select" id="noticeFlightId">
-						<option value="1">HJ-1207 (서울김포 → 제주공항)</option>
-						<option value="2">HJ-8821 (인천공항 → 도쿄나리타)</option>
-						<option value="3">HJ-3340 (김해공항 → 제주공항)</option>
-						<option value="4">HJ-5012 (서울김포 → 김해공항)</option>
-					</select>
+					<!-- 항공편 리스트 -->
+					<div style="display: flex; gap: 8px;">
+						<input type="hidden" id="noticeFlightId">
+						<input type="text" id="noticeFlightText" class="input" readonly placeholder="우측 돋보기 버튼을 눌러 항공편을 검색하세요" style="flex: 1; background-color: #f8fafc; cursor: default;">
+						<button type="button" class="btn btn-ghost" style="border: 1px solid var(--line); white-space: nowrap;" onclick="openFlightSearchModal()">
+							<span class="material-symbols-outlined" style="font-size:18px;">search</span> 항공편 검색
+						</button>
+					</div>
 				</div>
 
 				<div class="field" style="margin-bottom:14px;">
@@ -57,8 +62,8 @@
 					<select class="select"
 					        id="noticeType"
 					        onchange="toggleNoticeField()">
-						<option value="DELAY">지연 (DELAY)</option>
-						<option value="CANCEL">결항 (CANCEL)</option>
+						<option value="DELAY">지연</option>
+						<option value="CANCEL">결항</option>
 					</select>
 				</div>
 
@@ -91,12 +96,9 @@
 					          placeholder="예: 인천공항 기상 악화 및 연결편 지연으로 인한 스케줄 변동"></textarea>
 				</div>
 
-				<button type="button"
-				        class="btn btn-primary"
-				        style="width:100%;"
-				        onclick="submitFlightNotice()">
-					<span class="material-symbols-outlined" style="font-size:18px">campaign</span>
-					등록 및 실시간 알림 발송
+				<button type="button" class="btn btn-primary" style="width:100%;" onclick="stageFlightNotice()">
+					<span class="material-symbols-outlined" style="font-size:18px">playlist_add</span>
+					발송 대기 명단에 추가
 				</button>
 
 			</div>
@@ -127,11 +129,33 @@
 								<th>상세 발생 사유</th>
 								<th>등록자 ID</th>
 								<th>등록 일시</th>
+								<th>관리</th>
 							</tr>
 						</thead>
+						
+						<!-- 2차 확인 데이터 (확인/취소) -->
+                        <tbody id="stagedNoticeTable">
+                        </tbody>
 
+						<!-- 안내 이력 테이블 본문 -->
 						<tbody id="noticeHistoryTable">
-							<!-- staff.js에서 하드코딩 데이터 바인딩 -->
+							<tr th:each="n : ${noticeList}">
+								<td class="mono" th:text="${n.flight_notice_id}"></td>
+								<td style="font-weight: bold; color: var(--primary);" class="mono" th:text="${n.flight_no}"></td>
+								<td>
+									<span th:if="${n.notice_type == 'DELAY'}" class="badge badge-delayed">지연</span>
+									<span th:if="${n.notice_type == 'CANCEL'}" class="badge badge-cancelled">결항</span>
+								</td>
+								<td class="mono" th:text="${n.delay_minutes > 0 ? n.delay_minutes + '분' : '-'}"></td>
+								<td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" th:text="${n.reason}"></td>
+								<td class="mono" th:text="'STAFF_' + ${n.created_by}"></td>
+								<td class="mono" th:text="${n.created_at}"></td>
+                                <!-- 관리 칸: 발송완료 뱃지 -->
+								<td><span class="badge badge-ok">발송완료</span></td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(noticeList)}">
+								<td colspan="8" style="text-align:center; padding:30px; color:#94a3b8;">등록된 지연/결항 안내 이력이 없습니다.</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
@@ -143,6 +167,69 @@
 	</main>
 
 	<div class="toast-wrap" id="toasts"></div>
+	
+	<!-- 항공편 상세 검색 모달 -->
+	<div class="modal-overlay" id="flightSearchModal" style="display: none;">
+		<div class="modal" style="width: 750px; max-width: 95vw;">
+			<div class="modal-head">
+				<h3>대상 항공편 상세 검색</h3>
+				<button type="button" class="modal-close" onclick="closeFlightSearchModal()">
+					<span class="material-symbols-outlined">close</span>
+				</button>
+			</div>
+			
+			<div class="modal-body">
+				<!-- 검색 필터 영역 -->
+				<div style="display: flex; gap: 12px; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--line);">
+					<div style="flex: 0 0 160px;">
+						<label style="font-size: 11px; font-weight: 600; color: var(--mut); display: block; margin-bottom: 4px;">출발 날짜</label>
+						<input type="date" id="modalSearchDate" class="input" onchange="filterModalFlights()">
+					</div>
+					<div style="flex: 1;">
+						<label style="font-size: 11px; font-weight: 600; color: var(--mut); display: block; margin-bottom: 4px;">항공편명 또는 노선명</label>
+						<input type="text" id="modalSearchKeyword" class="input" placeholder="예: KE201, CJU 등 입력" onkeyup="filterModalFlights()">
+					</div>
+				</div>
+
+				<!-- 검색 결과 표 -->
+				<div style="max-height: 350px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px;">
+					<table class="data">
+						<thead style="position: sticky; top: 0; z-index: 1;">
+							<tr>
+								<th>항공편명</th>
+								<th>노선구간</th>
+								<th>출발 예정 일시</th>
+								<th>현재 상태</th>
+								<th>선택</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="f : ${flightList}" class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);" th:text="${f.flight_no}"></td>
+								<td class="flight-route" th:text="${f.route_name}"></td>
+								<td class="mono flight-time" th:text="${#strings.replace(f.departure_time, 'T', ' ')}"></td>
+								<td>
+									<span class="badge badge-scheduled" th:text="${f.flight_status}"></span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        th:data-id="${f.flight_id}" 
+									        th:data-text="|${f.flight_no} (${f.route_name}) / ${#strings.replace(f.departure_time, 'T', ' ')}|"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(flightList)}">
+								<td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">선택 가능한 항공편이 없습니다.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<script th:src="@{/assets/js/staff.js}"></script>
 
