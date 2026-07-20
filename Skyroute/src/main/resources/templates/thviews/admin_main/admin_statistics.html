@@ -29,17 +29,20 @@
         <div class="card">
           <div class="toolbar">
             <label style="font-size:12.5px; font-weight:600; color:var(--text-gray);">조회기간</label>
-            <input type="date" style="padding:6px; border:1px solid var(--border); border-radius:6px;">
+            <!-- [수정] 불필요한 input 삭제 및 id="startDate" 추가 -->
+            <input type="date" id="startDate" style="padding:6px; border:1px solid var(--border); border-radius:6px;">
             <span style="color:var(--text-light);">~</span>
-            <input type="date" style="padding:6px; border:1px solid var(--border); border-radius:6px;">
-            <button class="btn btn-primary btn-sm" style="margin-left:8px;">조회</button>
+            <input type="date" id="endDate" style="padding:6px; border:1px solid var(--border); border-radius:6px;">
+            <!-- [수정] onclick 이벤트 연결 -->
+            <button class="btn btn-primary btn-sm" onclick="fetchStatistics()" style="margin-left:8px;">조회</button>
           </div>
         </div>
 
         <div class="grid grid-2">
           <div class="card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; padding:40px;">
             <span class="material-symbols-outlined" style="font-size:36px; color:var(--text-light); margin-bottom:12px;">payments</span>
-            <h3 style="font-size:24px; font-weight:700;">148,500,000 원</h3>
+            <!-- [수정] 하드코딩된 금액 삭제 및 id 부여 -->
+            <h3 id="totalRevenueTxt" style="font-size:24px; font-weight:700;">0 원</h3>
             <p style="color:var(--text-gray); font-size:13px;">조회기간 누적 매출</p>
           </div>
           
@@ -48,9 +51,9 @@
             <div class="table-wrap">
               <table class="data">
                 <thead><tr><th>노선</th><th>매출액</th></tr></thead>
-                <tbody>
-                  <tr><td>ICN → JFK</td><td style="font-weight:600;">88,000,000 원</td></tr>
-                  <tr><td>GMP → CJU</td><td style="font-weight:600;">32,000,000 원</td></tr>
+                <!-- [수정] 하드코딩된 노선 목록 삭제 및 id 부여 -->
+                <tbody id="routeRevenueBody">
+                  <tr><td colspan="2" style="text-align: center; color: var(--text-gray);">데이터를 불러오는 중입니다...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -62,7 +65,8 @@
         <div class="grid grid-2">
            <div class="card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; padding:40px;">
             <span class="material-symbols-outlined" style="font-size:36px; color:var(--text-light); margin-bottom:12px;">receipt_long</span>
-            <h3 style="font-size:24px; font-weight:700;">1,982 건</h3>
+            <!-- [수정] 하드코딩된 건수 삭제 및 id 부여 -->
+            <h3 id="totalBookingsTxt" style="font-size:24px; font-weight:700;">0 건</h3>
             <p style="color:var(--text-gray); font-size:13px;">조회기간 전체 예약 건수</p>
           </div>
         </div>
@@ -72,6 +76,47 @@
   </main>
 
   <script>
+    // [추가] 화면이 로드되면 자동으로 통계 데이터 1회 조회
+    document.addEventListener('DOMContentLoaded', function() {
+      fetchStatistics();
+    });
+
+    // 데이터 조회 함수
+    function fetchStatistics() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      fetch(`/admin/statistics/data?startDate=${startDate}&endDate=${endDate}`)
+        .then(response => response.json())
+        .then(data => {
+          // 1. 매출 데이터 업데이트 (정확한 id 선택)
+          document.getElementById('totalRevenueTxt').innerText = 
+            (data.totalRevenue || 0).toLocaleString() + ' 원';
+
+          // 2. 예약 데이터 업데이트 (정확한 id 선택)
+          document.getElementById('totalBookingsTxt').innerText = 
+            (data.totalBookings || 0).toLocaleString() + ' 건';
+
+          // 3. 노선별 매출 테이블 업데이트
+          const tbody = document.getElementById('routeRevenueBody');
+          tbody.innerHTML = ''; // 기존 데이터 초기화
+
+          if (data.routeRevenues && data.routeRevenues.length > 0) {
+            data.routeRevenues.forEach(item => {
+              const row = `<tr>
+                <td>${item.routeName}</td>
+                <td style="font-weight:600;">${(item.routeRevenue || 0).toLocaleString()} 원</td>
+              </tr>`;
+              tbody.innerHTML += row;
+            });
+          } else {
+            // 조회된 데이터가 없을 경우
+            tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--text-gray);">조회된 데이터가 없습니다.</td></tr>';
+          }
+        })
+        .catch(error => console.error('통계 데이터 로딩 오류:', error));
+    }
+
     // 내부 탭 전환 스크립트
     function switchTab(tabId, el) {
       document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -88,5 +133,4 @@
     }
   </script>
 </body>
-  
 </html>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.spring.admin.dao.StatMapper">
+	
+<!-- 1. 누적 총 매출액 -->
+    <select id="selectTotalRevenue" parameterType="kr.spring.admin.vo.StatVO" resultType="long">
+        SELECT NVL(SUM(AMOUNT), 0)
+        FROM PAYMENT
+        WHERE STATUS IN ('PAID', 'PARTIAL_REFUNDED')
+        <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+            AND PAID_AT BETWEEN TO_DATE(#{startDate} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS') 
+                            AND TO_DATE(#{endDate} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+        </if>
+    </select>
+
+    <!-- 2. 전체 예약 건수 (id를 selectTotalBooking으로 수정) -->
+    <select id="selectTotalBooking" parameterType="kr.spring.admin.vo.StatVO" resultType="long">
+        SELECT COUNT(*)
+        FROM BOOKING
+        WHERE STATUS = 'CONFIRMED'
+        <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+            AND CREATED_AT BETWEEN TO_DATE(#{startDate} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS') 
+                               AND TO_DATE(#{endDate} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+        </if>
+    </select>
+
+    <select id="selectRevenueByRoute" parameterType="kr.spring.admin.vo.StatVO" resultType="kr.spring.admin.vo.StatVO">
+        SELECT 
+            R.TYPE_NAME AS routeName,  <!-- ROUTE_NAME을 TYPE_NAME으로 수정 -->
+            NVL(SUM(P.AMOUNT), 0) AS routeRevenue
+        FROM PAYMENT P
+        JOIN BOOKING B ON P.BOOKING_ID = B.BOOKING_ID
+        JOIN FLIGHT F ON B.OUTBOUND_FLIGHT_ID = F.FLIGHT_ID  
+        JOIN ROUTE_TYPE R ON F.ROUTE_ID = R.ROUTE_TYPE_ID    
+        WHERE P.STATUS IN ('PAID', 'PARTIAL_REFUNDED')
+        <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+            AND P.PAID_AT BETWEEN TO_DATE(#{startDate} || ' 00:00:00', 'YYYY-MM-DD HH24:MI:SS') 
+                              AND TO_DATE(#{endDate} || ' 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+        </if>
+        GROUP BY R.TYPE_NAME <!-- GROUP BY 절도 TYPE_NAME으로 수정 -->
+        ORDER BY routeRevenue DESC
+    </select>
+</mapper>
+
+
+
+
+
+
+

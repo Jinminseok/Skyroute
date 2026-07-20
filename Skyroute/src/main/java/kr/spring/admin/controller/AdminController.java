@@ -1,6 +1,7 @@
 package kr.spring.admin.controller;
 
 import java.util.List;
+import java.util.Map; // 추가: Map import
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,12 +17,14 @@ import kr.spring.admin.dao.RegionMapper;
 import kr.spring.admin.dao.RouteTypeMapper;
 import kr.spring.admin.dao.SeasonMapper;
 import kr.spring.admin.service.AirCraftService;
+import kr.spring.admin.service.StatService;
+import kr.spring.admin.vo.AirCraftVO;
 import kr.spring.admin.vo.GateAreaVO;
 import kr.spring.admin.vo.RegionVO;
 import kr.spring.admin.vo.RouteTypeVO;
 import kr.spring.admin.vo.SeasonVO;
+import kr.spring.admin.vo.StatVO; // 추가: StatVO import
 import kr.spring.member.vo.MemberVO;
-import kr.spring.admin.vo.AirCraftVO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,6 +49,9 @@ public class AdminController {
 	
 	@Autowired
 	private AirCraftService airCraftService;	// 항공기 관리
+	
+	@Autowired
+	private StatService statService; // 통계 서비스
 
 	@GetMapping("/admin/base1")
 	public String adminMain(Model model) {
@@ -76,11 +82,29 @@ public class AdminController {
 		return "thviews/admin_main/admin_base2"; 
 	}
 
-	// 4. 전사 운영 통계 페이지
+	// 4. 전사 운영 통계 페이지 (기본 뷰 반환)
 	@GetMapping("/admin/statistics")
 	public String statistics() {
 		return "thviews/admin_main/admin_statistics";
 	}
+
+	// ==========================================
+	// 5. 통계 데이터 비동기(AJAX) 요청 처리 API (추가된 부분)
+	// ==========================================
+	@GetMapping("/admin/statistics/data")
+	@ResponseBody
+	public Map<String, Object> getStatisticsData(
+			@RequestParam(required = false) String startDate, 
+			@RequestParam(required = false) String endDate) {
+		
+		StatVO statVO = new StatVO();
+		statVO.setStartDate(startDate);
+		statVO.setEndDate(endDate);
+		
+		// 날짜에 따른 매출, 예약, 노선별 데이터를 Map으로 반환 (Spring이 자동으로 JSON 변환)
+		return statService.getDashboardStatistics(statVO);
+	}
+
 	//========================
 	//권역부분
 	//========================
