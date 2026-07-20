@@ -97,44 +97,148 @@ public class SHIamportClient {
 		}
 	}
 
-	/* ------------------------------------------------------------------ */
-	/* 2. 결제 취소(환불)                                                   */
-	/* ------------------------------------------------------------------ */
-
 	/**
-	 * 전액 취소. "결제는 됐는데 좌석이 만료된" 경우처럼
-	 * 서버 검증이 실패했을 때 자동 환불에 쓴다.
+	 * PortOne 결제 전액 취소.
 	 *
-	 * @param paymentId 결제창에 넘긴 주문번호(= merchant_uid)
+	 * amount를 보내지 않으므로 결제 가능 잔액 전체를 취소한다.
+	 *
+	 * @param paymentId PortOne V2 결제 ID
+	 *                  현재 프로젝트에서는 merchant_uid와 같은 값
+	 * @param reason    취소 사유
+	 * @return PortOne 취소 결과
 	 */
-	public void cancelPayment(String paymentId, String reason) {
-
-		Map<String, String> body = new LinkedHashMap<>();
-		body.put("reason", reason == null ? "" : reason);
-
-		try {
-			Request req = new Request.Builder()
-					.url(API_HOST + "/payments/" + paymentId + "/cancel")
-					.addHeader("Authorization", authHeader())
-					.post(RequestBody.create(om.writeValueAsString(body), JSON))
-					.build();
-
-			try (Response res = http.newCall(req).execute()) {
-
-				JsonNode root = readJson(res);
-
-				if (!res.isSuccessful()) {
-					String msg = root.path("message").asText();
-					log.warn("<<PortOne 취소 응답>> http={}, msg={}", res.code(), msg);
-					throw new IllegalStateException("PortOne 결제 취소 실패: " + msg);
-				}
-
-				log.debug("<<PortOne 결제취소 완료>> paymentId={}", paymentId);
-			}
-
-		} catch (IOException e) {
-			throw new IllegalStateException("PortOne 결제 취소 통신 오류", e);
+	public SHIamportCancellation cancelPayment(String paymentId, String reason) {
+		return cancelPayment(paymentId, reason, null, null);
+	}
+	
+	/**
+	 * PortOne 결제 취소.
+	 *
+	 * amount가 null이면 전액 취소,
+	 * 값이 있으면 부분 취소 요청이다.
+	 */
+	public SHIamportCancellation cancelPayment(String paymentId, String reason, Long amount, Long currentCancellableAmount) {
+		
+		if(paymentId == null || paymentId.isBlank()) {
+			throw new IllegalArgumentException("PortOne paymentId가 필요합니다.");
 		}
+		
+		Map<String,Object> body = new LinkedHashMap<>();
+		
+		body.put("reason", reason == null || reason.isBlank() ? "고객 요청" : reason.trim());
+		
+		/*
+		 * 전액 취소에서는 두값을 보내지 않는다.
+		 * 추후 부분 환불 구현 시 사용한다.
+		 */
+		if(amount != null) {
+			body.put("amount", amount);
+		}
+		
+		if (currentCancellableAmount != null) {
+	        body.put(
+	                "currentCancellableAmount",
+	                currentCancellableAmount
+	        );
+	    }
+
+	    try {
+
+	        Request req = new Request.Builder()
+	                .url(
+	                        API_HOST
+	                        + "/payments/"
+	                        + paymentId
+	                        + "/cancel"
+	                )
+	                .addHeader(
+	                        "Authorization",
+	                        authHeader()
+	                )
+	                .post(
+	                        RequestBody.create(
+	                                om.writeValueAsString(body),
+	                                JSON
+	                        )
+	                )
+	                .build();
+
+	        try (Response res =
+	                     http.newCall(req).execute()) {
+
+	            JsonNode root = readJson(res);
+
+	            if (!res.isSuccessful()) {
+
+	                String msg =
+	                        root.path("message").asText();
+
+	                if (msg == null || msg.isBlank()) {
+	                    msg = root.path("type").asText();
+	                }
+
+	                log.warn(
+	                        "<<PortOne 취소 실패>> "
+	                        + "paymentId={}, http={}, message={}",
+	                        paymentId,
+	                        res.code(),
+	                        msg
+	                );
+
+	                throw new IllegalStateException(
+	                        "PortOne 결제 취소 실패: " + msg
+	                );
+	            }
+
+	            JsonNode cancellation =
+	                    root.path("cancellation");
+
+	            String status =
+	                    cancellation.path("status").asText();
+
+	            if (status == null || status.isBlank()) {
+	                throw new IllegalStateException(
+	                        "PortOne 취소 응답에 상태값이 없습니다."
+	                );
+	            }
+
+	            SHIamportCancellation result =
+	                    new SHIamportCancellation();
+
+	            result.setCancellationId(
+	                    cancellation.path("id").asText()
+	            );
+
+	            result.setPgCancellationId(
+	                    cancellation
+	                            .path("pgCancellationId")
+	                            .asText()
+	            );
+
+	            result.setStatus(status);
+
+	            result.setReason(
+	                    cancellation.path("reason").asText()
+	            );
+
+	            log.info(
+	                    "<<PortOne 결제 취소 응답>> "
+	                    + "paymentId={}, cancellationId={}, status={}",
+	                    paymentId,
+	                    result.getCancellationId(),
+	                    result.getStatus()
+	            );
+
+	            return result;
+	        }
+
+	    } catch (IOException e) {
+
+	        throw new IllegalStateException(
+	                "PortOne 결제 취소 통신 오류",
+	                e
+	        );
+	    }
 	}
 
 	/* ------------------------------------------------------------------ */

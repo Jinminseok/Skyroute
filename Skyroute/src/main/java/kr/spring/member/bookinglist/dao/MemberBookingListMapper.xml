@@ -49,20 +49,4 @@
 		  </if> 
 		ORDER BY B.CREATED_AT DESC, T.LEG_TYPE ASC
 	</select>
-
-<!-- 취소처리 
-	<update id="updateTicketStatusToCancel" parameterType="long">
-		UPDATE TICKET SET 
-		    HOLD_STATUS = 'CANCELLED', 
-		    CHECKIN_STATUS = 'NOT_CHECKED_IN' 
-		WHERE BOOKING_ID = #{bookingId}
-	</update>
-
-	<update id="updateBookingStatusToCancel" parameterType="long">
-		UPDATE BOOKING SET 
-		    STATUS = 'CANCELLED', 
-		    CANCELLED_AT = SYSTIMESTAMP 
-		WHERE BOOKING_ID = #{bookingId}
-	</update>
--->
 </mapper>

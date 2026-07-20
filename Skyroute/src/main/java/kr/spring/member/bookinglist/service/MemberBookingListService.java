@@ -5,5 +5,4 @@ import java.util.Map;
 
 public interface MemberBookingListService {
     List<Map<String, Object>> selectMyBookingList(Map<String, Object> paramMap);
-    void cancelMyBooking(Long bookingId);
 }

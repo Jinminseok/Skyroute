@@ -85,22 +85,37 @@ public interface SHBookingMapper {
 
 	/* ===================== 취소 / 환불 ===================== */
 
-	public List<SHTicketVO> selectCancelableTicketList(@Param("bookingId") Long bookingId,
-													   @Param("bookingPassengerId") Long bookingPassengerId);
+	/*
+	 * 예약 전체 티켓 취소.
+	 *
+	 * CONFIRMED이면서 미체크인 상태인 티켓만 변경한다.
+	 */
+	public int cancelAllConfirmedTickets(
+	        @Param("bookingId") Long bookingId
+	);
 
-	public int cancelTickets(@Param("bookingId") Long bookingId,
-							 @Param("bookingPassengerId") Long bookingPassengerId);
+	public void insertRefund(
+	        @Param("paymentId") Long paymentId,
+	        @Param("ticketId") Long ticketId,
+	        @Param("amount") Long amount,
+	        @Param("reason") String reason
+	);
 
-	public void insertRefund(@Param("paymentId") Long paymentId,
-							 @Param("ticketId") Long ticketId,
-							 @Param("amount") Long amount,
-							 @Param("reason") String reason);
+	public int updatePaymentFullRefund(
+	        @Param("paymentId") Long paymentId,
+	        @Param("refundAmount") Long refundAmount
+	);
 
-	public void updatePaymentRefund(@Param("paymentId") Long paymentId,
-									@Param("refundAmount") Long refundAmount,
-									@Param("status") String status);
+	public int updateBookingCancelled(
+	        @Param("bookingId") Long bookingId
+	);
 
-	public int countActiveTicket(@Param("bookingId") Long bookingId);
+	/*
+	 * 결제 준비 단계에서도 사용하므로 유지.
+	 */
+	public int countActiveTicket(
+	        @Param("bookingId") Long bookingId
+	);
 
 
 	/* ===================== 저장된 탑승객 ===================== */

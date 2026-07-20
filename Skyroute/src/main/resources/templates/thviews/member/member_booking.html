@@ -89,10 +89,27 @@
                                         data-price=${#numbers.formatInteger(b.get('FARE_AMOUNT'), 1, 'COMMA')}"
                                onclick="openDetailModal(this)" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">상세보기</a>
                             
-                            <a th:if="${b.get('BOOKING_STATUS') == 'CONFIRMED' or b.get('BOOKING_STATUS') == 'PENDING'}" 
-                               href="javascript:void(0);" 
-                               th:attr="data-booking-id=${b.get('BOOKING_ID')}, data-pnr=${b.get('BOOKING_NO')}"
-                               onclick="triggerDirectCancel(this)" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: var(--bad);">예약취소</a>
+								<button type="button"
+								        th:if="${b.get('BOOKING_STATUS') == 'CONFIRMED'}"
+								        th:attr="
+								            data-booking-id=${b.get('BOOKING_ID')},
+								            data-pnr=${b.get('BOOKING_NO')}
+								        "
+								        onclick="triggerDirectCancel(this)"
+								        class="btn sm"
+								        style="
+								            display:inline-flex;
+								            align-items:center;
+								            justify-content:center;
+								            border:none;
+								            cursor:pointer;
+								            color:#fff;
+								            background:var(--bad);
+								        ">
+								
+								    예약취소
+								
+								</button>
                         </div>
                     </div>
 
@@ -138,43 +155,278 @@
         </div>
 
         <script th:inline="javascript">
-            // 1. 상세보기 동적 데이터 매핑 및 출력
-            function openDetailModal(element) {
-                document.getElementById('dtBookingNo').innerText = element.getAttribute('data-pnr');
-                document.getElementById('dtPassengerName').innerText = element.getAttribute('data-name');
-                document.getElementById('dtFlightNo').innerText = element.getAttribute('data-flight');
-                document.getElementById('dtRoute').innerText = element.getAttribute('data-route');
-                document.getElementById('dtTime').innerText = element.getAttribute('data-time');
-                document.getElementById('dtSeat').innerText = element.getAttribute('data-seat');
-                document.getElementById('dtPrice').innerText = element.getAttribute('data-price') + ' 원';
-                
-                document.getElementById('detailModal').style.display = 'flex';
-            }
 
-            // 2. 예약 취소 버튼 클릭 시 즉각적인 confirm창 가동 엔진
-            function triggerDirectCancel(element) {
-                const pnrNo = element.getAttribute('data-pnr');
-                const bookingId = element.getAttribute('data-booking-id');
-                
-                const confirmAnswer = confirm(
-                    "정말로 해당 항공권 예약을 취소하시겠습니까?\n" +
-                    "(예약번호: " + pnrNo + ")\n\n" +
-                    "※ 취소 완료 시 즉시 환불 절차가 진행되며, 취소된 좌석은 복구할 수 없습니다."
-                );
-                
-                if (confirmAnswer) {
-                    const contextPath = /*[[@{/}]]*/ '';
-                    alert('예약 취소 및 환불 접수가 완료되었습니다.\n내역 갱신을 위해 리스트로 이동합니다.');
-                    window.location.href = contextPath + "bookinglist/refundProcess?bookingId=" + bookingId;
-                }
-            }
-
-            // 3. 모달창 닫기 함수
-            function closeModal(modalId) {
-                const modal = document.getElementById(modalId);
-                if(modal) modal.style.display = 'none';
-            }
-        </script>
+		    /*
+		     * 예약 취소 및 전액 환불.
+		     */
+		    async function triggerDirectCancel(button) {
+		
+		        /*
+		         * 중복 클릭 방지
+		         */
+		        if (button.dataset.processing === "true") {
+		            return;
+		        }
+		
+		        const bookingId =
+		                Number(
+		                    button.dataset.bookingId
+		                );
+		
+		        const pnrNo =
+		                button.dataset.pnr || "";
+		
+		        if (!Number.isInteger(bookingId)
+		                || bookingId <= 0) {
+		
+		            alert(
+		                "예약 정보를 확인할 수 없습니다."
+		            );
+		
+		            return;
+		        }
+		
+		        const confirmAnswer =
+		                confirm(
+		                    "정말로 해당 항공권 예약을 "
+		                    + "취소하시겠습니까?\n"
+		                    + "(예약번호: "
+		                    + pnrNo
+		                    + ")\n\n"
+		                    + "취소 승인 후 결제금액 전액이 "
+		                    + "환불되며 선택 좌석이 반환됩니다."
+		                );
+		
+		        if (!confirmAnswer) {
+		            return;
+		        }
+		
+		        const cancelUrl =
+		                /*[[@{/bookinglist/cancel}]]*/
+		                "/bookinglist/cancel";
+		
+		        const csrfHeader =
+		                document
+		                    .querySelector(
+		                        'meta[name="csrf-header"]'
+		                    )
+		                    ?.content;
+		
+		        const csrfToken =
+		                document
+		                    .querySelector(
+		                        'meta[name="csrf-token"]'
+		                    )
+		                    ?.content;
+		
+		        const headers = {
+		            "Content-Type": "application/json",
+		            "Accept": "application/json"
+		        };
+		
+		        if (csrfHeader && csrfToken) {
+		            headers[csrfHeader] = csrfToken;
+		        }
+		
+		        const originalText =
+		                button.textContent;
+		
+		        let completed = false;
+		
+		        button.dataset.processing = "true";
+		        button.disabled = true;
+		        button.textContent = "환불 처리 중...";
+		
+		        try {
+		
+		            const response =
+		                    await fetch(
+		                        cancelUrl,
+		                        {
+		                            method: "POST",
+		                            headers,
+		                            body: JSON.stringify({
+		                                bookingId: bookingId,
+		                                reason:
+		                                    "고객 요청 - 예약 전체 취소"
+		                            })
+		                        }
+		                    );
+		
+		            const contentType =
+		                    response
+		                        .headers
+		                        .get("content-type")
+		                    || "";
+		
+		            /*
+		             * 로그인 만료나 보안 오류로
+		             * HTML 응답이 내려온 경우 방어
+		             */
+		            if (!contentType.includes(
+		                    "application/json"
+		            )) {
+		
+		                await response.text();
+		
+		                throw new Error(
+		                    response.status === 403
+		                        ? "요청 권한이 없거나 "
+		                          + "보안 토큰이 만료되었습니다."
+		                        : "로그인 세션이 만료되었거나 "
+		                          + "서버 응답 형식이 올바르지 않습니다."
+		                );
+		            }
+		
+		            const data =
+		                    await response.json();
+		
+		            if (!response.ok) {
+		
+		                throw new Error(
+		                    data.message
+		                    || "예약 취소 처리에 실패했습니다."
+		                );
+		            }
+		
+		            completed = true;
+		
+		            const refundAmount =
+		                    Number(
+		                        data.refundAmount || 0
+		                    )
+		                    .toLocaleString("ko-KR");
+		
+		            alert(
+		                data.message
+		                + "\n환불 금액: "
+		                + refundAmount
+		                + "원"
+		            );
+		
+		            /*
+		             * 현재 검색 조건을 유지하면서
+		             * 예약 목록을 다시 조회한다.
+		             */
+		            window.location.reload();
+		
+		        } catch (error) {
+		
+		            console.error(
+		                "예약 취소 처리 오류:",
+		                error
+		            );
+		
+		            alert(
+		                error.message
+		                || "예약 취소 처리 중 "
+		                   + "오류가 발생했습니다."
+		            );
+		
+		        } finally {
+		
+		            /*
+		             * 성공한 경우에는 곧 새로고침되므로
+		             * 실패한 경우에만 버튼을 복구한다.
+		             */
+		            if (!completed) {
+		
+		                button.dataset.processing = "false";
+		                button.disabled = false;
+		                button.textContent = originalText;
+		            }
+		        }
+		    }
+		
+		
+		    function openDetailModal(element) {
+		
+		        document
+		            .getElementById(
+		                "dtBookingNo"
+		            )
+		            .innerText =
+		                element.getAttribute(
+		                    "data-pnr"
+		                );
+		
+		        document
+		            .getElementById(
+		                "dtPassengerName"
+		            )
+		            .innerText =
+		                element.getAttribute(
+		                    "data-name"
+		                );
+		
+		        document
+		            .getElementById(
+		                "dtFlightNo"
+		            )
+		            .innerText =
+		                element.getAttribute(
+		                    "data-flight"
+		                );
+		
+		        document
+		            .getElementById(
+		                "dtRoute"
+		            )
+		            .innerText =
+		                element.getAttribute(
+		                    "data-route"
+		                );
+		
+		        document
+		            .getElementById(
+		                "dtTime"
+		            )
+		            .innerText =
+		                element.getAttribute(
+		                    "data-time"
+		                );
+		
+		        document
+		            .getElementById(
+		                "dtSeat"
+		            )
+		            .innerText =
+		                element.getAttribute(
+		                    "data-seat"
+		                );
+		
+		        document
+		            .getElementById(
+		                "dtPrice"
+		            )
+		            .innerText =
+		                element.getAttribute(
+		                    "data-price"
+		                )
+		                + " 원";
+		
+		        document
+		            .getElementById(
+		                "detailModal"
+		            )
+		            .style
+		            .display = "flex";
+		    }
+		
+		
+		    function closeModal(modalId) {
+		
+		        const modal =
+		                document.getElementById(
+		                    modalId
+		                );
+		
+		        if (modal) {
+		            modal.style.display = "none";
+		        }
+		    }
+		
+		</script>
 
     </div> </body>
 </html>

@@ -130,22 +130,6 @@
             font-size: 11px;
         }
 
-        .save-passenger {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 18px;
-            color: var(--mut);
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .save-passenger input {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--accent);
-        }
-
         .passenger-actions {
             display: flex;
             justify-content: center;
@@ -179,6 +163,52 @@
                 width: 100%;
                 min-width: 0;
             }
+            
+            .passenger-card-tools {
+			    display: flex;
+			    align-items: center;
+			    gap: 8px;
+			}
+			
+			.load-saved-passenger {
+			    min-height: 32px;
+			    padding: 6px 12px;
+			    border: 1px solid var(--accent);
+			    border-radius: 8px;
+			    background: #fff;
+			    color: var(--accent);
+			    font-family: inherit;
+			    font-size: 12px;
+			    font-weight: 600;
+			    cursor: pointer;
+			}
+			
+			.load-saved-passenger:hover {
+			    background: var(--accent-soft);
+			}
+			
+			.passenger-card-tools {
+			    display: flex;
+			    align-items: center;
+			    gap: 8px;
+			}
+			
+			.load-saved-passenger {
+			    min-height: 32px;
+			    padding: 6px 12px;
+			    border: 1px solid var(--accent);
+			    border-radius: 8px;
+			    background: #fff;
+			    color: var(--accent);
+			    font-family: inherit;
+			    font-size: 12px;
+			    font-weight: 600;
+			    cursor: pointer;
+			}
+			
+			.load-saved-passenger:hover {
+			    background: var(--accent-soft);
+			}
         }
     </style>
 </head>
@@ -235,7 +265,24 @@
                 여권과 동일하게 입력해 주세요.<br>
             </p> -->
             
-
+			<div id="savedPassengerData"
+			     hidden
+			     th:if="${savedPassenger != null}"
+			     th:attr="
+			        data-saved-id=${savedPassenger.savedPassengerId},
+			        data-name=${savedPassenger.name},
+			        data-birth-date=${savedPassenger.birthDate != null
+			            ? #temporals.format(savedPassenger.birthDate, 'yyyy-MM-dd')
+			            : ''},
+			        data-phone=${savedPassenger.phone},
+			        data-gender=${savedPassenger.gender},
+			        data-passport-no=${savedPassenger.passportNo},
+			        data-passport-expiry=${savedPassenger.passportExpiry != null
+			            ? #temporals.format(savedPassenger.passportExpiry, 'yyyy-MM-dd')
+			            : ''}
+			     ">
+			</div>
+			
             <form th:action="@{/booking/reserve/passenger}"
                   th:object="${shReserveForm}"
                   method="post"
@@ -264,31 +311,48 @@
                     <input type="hidden"
                            th:field="*{passengers[__${stat.index}__].savedPassengerId}">
 
-                    <div class="passenger-card-title">
-
-                        <h3>
-
-                            <span class="material-symbols-outlined"
-                                  style="color: var(--accent);">
-                                person
-                            </span>
-                            탑승객
-                            <span th:text="${stat.index + 1}">
-                                1
-                            </span>
-
-                        </h3>
-
-                        <span class="passenger-type"
-                              th:text="${passenger.passengerType == 'ADULT'
-                                  ? '성인'
-                                  : (passenger.passengerType == 'CHILD'
-                                      ? '소아'
-                                      : '유아')}">
-                            성인
-                        </span>
-
-                    </div>
+					<div class="passenger-card-title">
+					
+					    <h3>
+					
+					        <span class="material-symbols-outlined"
+					              style="color: var(--accent);">
+					            person
+					        </span>
+					
+					        탑승객
+					
+					        <span th:text="${stat.index + 1}">
+					            1
+					        </span>
+					
+					    </h3>
+					
+					    <div class="passenger-card-tools">
+					
+					        <button type="button"
+					                id="loadMyPassengerButton"
+					                class="load-saved-passenger"
+					                th:if="${stat.index == 0
+					                    and passenger.passengerType == 'ADULT'
+					                    and savedPassenger != null}">
+					
+					            내 탑승 정보 불러오기
+					
+					        </button>
+					
+					        <span class="passenger-type"
+					              th:text="${passenger.passengerType == 'ADULT'
+					                  ? '성인'
+					                  : (passenger.passengerType == 'CHILD'
+					                      ? '소아'
+					                      : '유아')}">
+					            성인
+					        </span>
+					
+					    </div>
+					
+					</div>
 
                     <div class="passenger-grid">
 
@@ -448,23 +512,224 @@
             document.getElementById("passengerForm");
 
         const submitButton =
-            document.getElementById("passengerSubmitButton");
+            document.getElementById(
+                "passengerSubmitButton"
+            );
+
+        const loadMyPassengerButton =
+            document.getElementById(
+                "loadMyPassengerButton"
+            );
+
+        const savedPassengerData =
+            document.getElementById(
+                "savedPassengerData"
+            );
 
         if (!form || !submitButton) {
             return;
         }
 
+
+        const getFirstPassengerField =
+            (fieldName) => {
+
+                return form.elements.namedItem(
+                    `passengers[0].${fieldName}`
+                );
+
+            };
+
+
+        const setFirstPassengerField =
+            (fieldName, value) => {
+
+                const field =
+                    getFirstPassengerField(fieldName);
+
+                if (field) {
+                    field.value = value || "";
+                }
+
+            };
+
+
+        /*
+         * 내 정보 불러오기
+         */
+        if (
+            loadMyPassengerButton
+            && savedPassengerData
+        ) {
+
+            loadMyPassengerButton.addEventListener(
+                "click",
+                () => {
+
+                    const fullName =
+                        (
+                            savedPassengerData
+                                .dataset
+                                .name
+                            || ""
+                        )
+                        .trim()
+                        .replace(/\s+/g, " ");
+
+                    const nameParts =
+                        fullName.split(" ");
+
+                    const lastName =
+                        nameParts.shift() || "";
+
+                    const firstName =
+                        nameParts.join(" ");
+
+                    if (!lastName || !firstName) {
+
+                        alert(
+                            "저장된 영문 이름 형식을 확인해 주세요."
+                        );
+
+                        return;
+                    }
+
+                    setFirstPassengerField(
+                        "lastName",
+                        lastName
+                    );
+
+                    setFirstPassengerField(
+                        "firstName",
+                        firstName
+                    );
+
+                    setFirstPassengerField(
+                        "birthDate",
+                        savedPassengerData
+                            .dataset
+                            .birthDate
+                    );
+
+                    setFirstPassengerField(
+                        "phone",
+                        savedPassengerData
+                            .dataset
+                            .phone
+                    );
+
+                    setFirstPassengerField(
+                        "gender",
+                        savedPassengerData
+                            .dataset
+                            .gender
+                    );
+
+                    setFirstPassengerField(
+                        "passportNo",
+                        savedPassengerData
+                            .dataset
+                            .passportNo
+                    );
+
+                    setFirstPassengerField(
+                        "passportExpiry",
+                        savedPassengerData
+                            .dataset
+                            .passportExpiry
+                    );
+
+                    setFirstPassengerField(
+                        "savedPassengerId",
+                        savedPassengerData
+                            .dataset
+                            .savedId
+                    );
+
+                    loadMyPassengerButton.textContent =
+                        "내 정보 불러옴";
+
+                }
+            );
+
+        }
+
+
+        /*
+         * 불러온 뒤 사용자가 내용을 수정하면
+         * SAVED_PASSENGER 출처 ID는 제거한다.
+         */
+        const editableFieldNames = [
+            "lastName",
+            "firstName",
+            "birthDate",
+            "phone",
+            "gender",
+            "passportNo",
+            "passportExpiry"
+        ];
+
+        editableFieldNames.forEach(
+            (fieldName) => {
+
+                const field =
+                    getFirstPassengerField(fieldName);
+
+                if (!field) {
+                    return;
+                }
+
+                const clearSavedPassengerId = () => {
+
+                    const savedPassengerIdField =
+                        getFirstPassengerField(
+                            "savedPassengerId"
+                        );
+
+                    if (
+                        savedPassengerIdField
+                        && document.activeElement === field
+                    ) {
+
+                        savedPassengerIdField.value = "";
+
+                        if (loadMyPassengerButton) {
+                            loadMyPassengerButton.textContent =
+                                "내 탑승 정보 불러오기";
+                        }
+
+                    }
+
+                };
+
+                field.addEventListener(
+                    "input",
+                    clearSavedPassengerId
+                );
+
+                field.addEventListener(
+                    "change",
+                    clearSavedPassengerId
+                );
+
+            }
+        );
+
+
         form.addEventListener("submit", () => {
 
             submitButton.disabled = true;
+
             submitButton.textContent =
                 "탑승객 정보 저장 중...";
 
         });
 
+
         window.addEventListener("pageshow", () => {
 
             submitButton.disabled = false;
+
             submitButton.textContent =
                 "좌석 선택하기";
 

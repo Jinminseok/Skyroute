@@ -53,8 +53,15 @@ public interface SHBookingService {
 
 	/* ===== 취소 ===== */
 
-	/* bookingPassengerId 가 null 이면 예약 전체 취소, 값이 있으면 해당 승객만 부분 취소 */
-	public Long cancelBooking(Long bookingId, Long memberId, Long bookingPassengerId, String reason);
+	/*
+	 * PortOne 전액 취소 성공 후
+	 * 내부 DB 상태를 일괄 반영한다.
+	 */
+	public Long applyFullCancellation(
+	        Long bookingId,
+	        Long memberId,
+	        String reason
+	);
 
 
 	/* ===== 저장된 탑승객 ===== */

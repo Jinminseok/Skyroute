@@ -540,69 +540,70 @@
 
 
 	<!-- ===================== 취소 / 환불 ===================== -->
-
-	<!-- 취소 대상 티켓 (bookingPassengerId 가 null 이면 전체) -->
-	<select id="selectCancelableTicketList" resultMap="ticketResultMap">
-
-		SELECT
-			t.ticket_id,
-			t.booking_id,
-			t.booking_passenger_id,
-			t.fare_amount,
-			t.hold_status,
-			t.leg_type
-		FROM TICKET t
-		WHERE t.booking_id = #{bookingId}
-		  AND t.hold_status = 'CONFIRMED'
-		<if test="bookingPassengerId != null">
-		  AND t.booking_passenger_id = #{bookingPassengerId}
-		</if>
-
-	</select>
-
-
-	<update id="cancelTickets">
-
-		UPDATE TICKET
-		SET hold_status = 'CANCELLED'
-		WHERE booking_id = #{bookingId}
-		  AND hold_status = 'CONFIRMED'
-		<if test="bookingPassengerId != null">
-		  AND booking_passenger_id = #{bookingPassengerId}
-		</if>
-
+	
+	<update id="cancelAllConfirmedTickets">
+	
+	    UPDATE TICKET
+	    SET hold_status = 'CANCELLED'
+	    WHERE booking_id = #{bookingId}
+	      AND hold_status = 'CONFIRMED'
+	      AND checkin_status = 'NOT_CHECKED_IN'
+	
 	</update>
-
-
+	
+	
 	<insert id="insertRefund">
-
-		INSERT INTO REFUND (
-			payment_id, ticket_id, amount, reason
-		) VALUES (
-			#{paymentId}, #{ticketId}, #{amount}, #{reason,jdbcType=VARCHAR}
-		)
-
+	
+	    INSERT INTO REFUND (
+	        payment_id,
+	        ticket_id,
+	        amount,
+	        reason
+	    ) VALUES (
+	        #{paymentId},
+	        #{ticketId},
+	        #{amount},
+	        #{reason,jdbcType=VARCHAR}
+	    )
+	
 	</insert>
-
-
-	<update id="updatePaymentRefund">
-
-		UPDATE PAYMENT
-		SET refund_amount = NVL(refund_amount, 0) + #{refundAmount},
-			status        = #{status},
-			refunded_at   = SYSTIMESTAMP
-		WHERE payment_id = #{paymentId}
-
+	
+	
+	<update id="updatePaymentFullRefund">
+	
+	    UPDATE PAYMENT
+	    SET refund_amount = #{refundAmount},
+	        status        = 'REFUNDED',
+	        refunded_at   = SYSTIMESTAMP
+	    WHERE payment_id = #{paymentId}
+	      AND status = 'PAID'
+	
 	</update>
-
-
-	<select id="countActiveTicket" resultType="int">
-
-		SELECT COUNT(*)
-		FROM TICKET
-		WHERE booking_id = #{bookingId}
-		  AND hold_status IN ('HOLDING', 'CONFIRMED')
-
+	
+	
+	<update id="updateBookingCancelled">
+	
+	    UPDATE BOOKING
+	    SET status       = 'CANCELLED',
+	        cancelled_at = SYSTIMESTAMP
+	    WHERE booking_id = #{bookingId}
+	      AND status = 'CONFIRMED'
+	
+	</update>
+	
+	
+	<!-- 결제 준비 단계에서도 사용하므로 유지 -->
+	<select id="countActiveTicket"
+	        resultType="int">
+	
+	    SELECT COUNT(*)
+	    FROM TICKET
+	    WHERE booking_id = #{bookingId}
+	      AND hold_status IN (
+	          'HOLDING',
+	          'CONFIRMED'
+	      )
+	
 	</select>
 
 
