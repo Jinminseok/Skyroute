@@ -145,7 +145,7 @@
 							<span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> 지연
 						</span>
 						
-						<span th:if="${f.flight_status == 'CANCELLED' or f.flight_status == 'CANCELED'}" style="color: var(--danger); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+						<span th:if="${f.flight_status == 'CANCELLED'}" style="color: var(--danger); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
 							<span class="material-symbols-outlined" style="font-size: 16px;">cancel</span> 결항
 						</span>
 					</span>
@@ -164,8 +164,8 @@
 							<option value="BOARDING" th:selected="${f.flight_status == 'BOARDING'}">탑승중</option>
 							<option value="DEPARTED" th:selected="${f.flight_status == 'DEPARTED'}">출발완료</option>
 							<option value="ARRIVED" th:selected="${f.flight_status == 'ARRIVED'}">도착완료</option>
-							<option value="DELAYED" th:selected="${f.flight_status == 'DELAYED'}">지연(DELAY)</option>
-							<option value="CANCELLED" th:selected="${f.flight_status == 'CANCELLED' or f.flight_status == 'CANCELED'}">결항(CANCEL)</option>
+							<option value="DELAYED" th:selected="${f.flight_status == 'DELAYED'}">지연</option>
+							<option value="CANCELLED" th:selected="${f.flight_status == 'CANCELLED'}">결항</option>
 							<option value="COMPLETED" th:selected="${f.flight_status == 'COMPLETED'}">운항종료</option>
 						</select>
 					</span>
