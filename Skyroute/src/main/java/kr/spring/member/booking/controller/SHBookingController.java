@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -699,34 +701,47 @@ public class SHBookingController {
 		return "thviews/member/sh_booking_payment";
 	}
 	
-	/* ========================= 결제 (PortOne V1) ========================= */
+	/* ========================= 결제 (PortOne V2) ========================= */
 
 	/** 결제 준비: PAYMENT(READY) 생성 + 결제창에 넘길 정보 반환 */
 	@PostMapping("/pay/prepare")
 	@ResponseBody
-	public Map<String, Object> payPrepare(
-			@RequestBody SHPayDto.Prepare req,
-			@AuthenticationPrincipal PrincipalDetails principal) {
+	public ResponseEntity<Map<String, Object>> payPrepare(
+	        @RequestBody SHPayDto.Prepare req,
+	        @AuthenticationPrincipal PrincipalDetails principal) {
 
-		Long memberId = getMemberId(principal);
+	    try {
 
-		String merchantUid =
-				shBookingService.preparePayment(req.bookingId(), memberId, req.method());
+	        Long memberId = getMemberId(principal);
 
-		SHBookingVO booking = shBookingService.getBookingDetail(req.bookingId(), memberId);
+	        if ("CARD".equals(req.method())) {
+	            validateCardCustomer(principal);
+	        }
 
-		Map<String, Object> res = new HashMap<>();
-		res.put("storeId",    storeId);
-		res.put("channelKey", resolveChannelKey(req.method()));
-		res.put("paymentId",  merchantUid);           // == merchant_uid
-		res.put("orderName",  buildOrderName(booking));
-		res.put("totalAmount", booking.getTotalAmount());
-		res.put("payMethod",  resolvePayMethod(req.method()));        // "CARD" 또는 "EASY_PAY"
-		res.put("easyPayProvider", resolveEasyPay(req.method()));     // 카카오면 provider, 카드면 null
-		res.put("buyerName",   principal.getMemberVO().getName());
-		res.put("buyerEmail",  principal.getMemberVO().getEmail());
-		res.put("buyerTel",    principal.getMemberVO().getPhone());
-		return res;
+	        String merchantUid = shBookingService.preparePayment(req.bookingId(), memberId, req.method());
+
+	        SHBookingVO booking = shBookingService.getBookingDetail(req.bookingId(), memberId);
+
+	        Map<String, Object> res = new HashMap<>();
+
+	        res.put("storeId", storeId);
+	        res.put("channelKey", resolveChannelKey(req.method()));
+	        res.put("paymentId", merchantUid);
+	        res.put("orderName", buildOrderName(booking));
+	        res.put("totalAmount", booking.getTotalAmount());
+	        res.put("payMethod", resolvePayMethod(req.method()));
+	        res.put("easyPayProvider", resolveEasyPay(req.method()));
+	        res.put("buyerName", principal.getMemberVO().getName());
+	        res.put("buyerEmail", principal.getMemberVO().getEmail());
+	        res.put("buyerTel", principal.getMemberVO().getPhone());
+
+	        return ResponseEntity.ok(res);
+
+	    } catch (
+	            SHSeatTakenException | IllegalStateException e
+	    ) {
+	    	return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("result", "FAIL","message", e.getMessage()));
+	    }
 	}
 
 	/** 결제 완료: PortOne 서버 검증 → 좌석 확정 / 실패 시 환불 */
@@ -787,6 +802,26 @@ public class SHBookingController {
 	}
 
 	/* ---- 결제 헬퍼 ---- */
+	
+	private void validateCardCustomer(PrincipalDetails principal) {
+		if(principal ==null || principal.getMemberVO() == null) {
+			throw new IllegalStateException("로그인이 필요합니다.");
+		}
+		
+		var member = principal.getMemberVO();
+		
+		if(!hasText(member.getName())) {
+			throw new IllegalStateException("카드 결제를 위해 회원 이름이 필요합니다.");
+		}
+		
+		if(!hasText(member.getEmail())) {
+			throw new IllegalStateException("카드 결제를 위해 회원 이메일이 필요합니다.");
+		}
+		
+		if(!hasText(member.getPhone())) {
+			throw new IllegalStateException("카드 결제를 위해 회원 연락처가 필요합니다.");
+		}
+	}
 
 	private String resolveChannelKey(String method) {
 		return switch (method) {
