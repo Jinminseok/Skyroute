@@ -45,5 +45,10 @@ public interface MemberMapper {
 	// 마이페이지 여권 정보
 	public Map<String, Object> selectSavedPassenger(@Param("memberId") Long memberId);
 	public void upsertPassportInfo(Map<String, Object> paramMap);
+	
+	//마이페이지 관심노선
+	public List<Map<String, Object>> selectFavoriteRouteList(long memberId);
+	//마이페이지 관심노선 삭제
+	public int deleteFavoriteRoute(Map<String, Object> paramMap);
 
 }
