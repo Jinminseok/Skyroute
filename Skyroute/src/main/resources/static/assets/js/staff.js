@@ -644,187 +644,9 @@ function openBaseModal(table, action, id = null) {
 
   let html = '';
 
-  if (table === 'airport') {
-    html = `
-      <div class="form-grid">
-        <div class="field">
-          <label>IATA 코드 *</label>
-          <input class="input" id="m_b_air_code" value="${item ? item.iata_code : ''}" ${action === '수정' ? 'disabled' : ''}>
-        </div>
 
-        <div class="field">
-          <label>공항명 *</label>
-          <input class="input" id="m_b_air_name" value="${item ? item.name : ''}">
-        </div>
 
-        <div class="field">
-          <label>국가 *</label>
-          <input class="input" id="m_b_air_country" value="${item ? item.country : '대한민국'}">
-        </div>
 
-        <div class="field">
-          <label>타임존 *</label>
-          <input class="input" id="m_b_air_tz" value="${item ? item.timezone : 'Asia/Seoul'}">
-        </div>
-
-        <div class="field">
-          <label>권역 ID *</label>
-          <input class="input" type="number" id="m_b_air_reg" value="${item ? item.region_id : 1}">
-        </div>
-
-        <div class="field">
-          <label>국내/국제선 구분 *</label>
-          <input class="input" id="m_b_air_type" value="${item ? item.flight_type : 'DOM'}">
-        </div>
-      </div>
-    `;
-  }
-
-  if (table === 'gate') {
-    html = `
-      <div class="form-grid">
-        <div class="field">
-          <label>소속 공항 ID *</label>
-          <input class="input" type="number" id="m_b_g_pid" value="${item ? item.airport_id : 1}" ${action === '수정' ? 'disabled' : ''}>
-        </div>
-
-        <div class="field">
-          <label>게이트 코드 *</label>
-          <input class="input" id="m_b_g_code" value="${item ? item.gate_code : ''}" ${action === '수정' ? 'disabled' : ''}>
-        </div>
-
-        <div class="field">
-          <label>게이트 구역 ID *</label>
-          <input class="input" type="number" id="m_b_g_area" value="${item ? item.gate_area_id : 101}">
-        </div>
-
-        <div class="field">
-          <label>국내/국제선 구분 *</label>
-          <input class="input" id="m_b_g_type" value="${item ? item.flight_type : 'DOM'}">
-        </div>
-      </div>
-    `;
-  }
-
-  if (table === 'route') {
-    html = `
-      <div class="form-grid">
-        <div class="field">
-          <label>출발 공항 ID *</label>
-          <input class="input" type="number" id="m_b_r_dep" value="${item ? item.departure_airport_id : 1}" ${action === '수정' ? 'disabled' : ''}>
-        </div>
-
-        <div class="field">
-          <label>도착 공항 ID *</label>
-          <input class="input" type="number" id="m_b_r_arr" value="${item ? item.arrival_airport_id : 3}" ${action === '수정' ? 'disabled' : ''}>
-        </div>
-
-        <div class="field">
-          <label>국내/국제선 구분 *</label>
-          <input class="input" id="m_b_r_type" value="${item ? item.flight_type : 'DOM'}">
-        </div>
-
-        <div class="field">
-          <label>노선 유형 ID *</label>
-          <input class="input" type="number" id="m_b_r_tid" value="${item ? item.route_type_id : 11}">
-        </div>
-      </div>
-    `;
-  }
-
-  if (table === 'aircraft') {
-    html = `
-      <div class="form-grid">
-        <div class="field">
-          <label>항공기 등록번호 *</label>
-          <input class="input" id="m_b_ac_no" value="${item ? item.no : ''}" ${action === '수정' ? 'disabled' : ''}>
-        </div>
-
-        <div class="field">
-          <label>모델명 *</label>
-          <input class="input" id="m_b_ac_model" value="${item ? item.model_name : ''}">
-        </div>
-
-        <div class="field">
-          <label>총 좌석 수 *</label>
-          <input class="input" type="number" id="m_b_ac_seats" value="${item ? item.total_seats : 180}">
-        </div>
-
-        <div class="field">
-          <label>운영 상태 ID *</label>
-          <input class="input" type="number" id="m_b_ac_status" value="${item ? item.aircraft_status_id : 1}">
-        </div>
-      </div>
-    `;
-  }
-
-  if (table === 'seat') {
-    if (action === '일괄등록') {
-      html = `
-        <div class="form-grid">
-          <div class="field full">
-            <label>대상 항공기 ID *</label>
-            <input class="input" type="number" id="m_b_s_bulk_id" value="1">
-          </div>
-
-          <div class="field">
-            <label>이코노미 생성 좌석 수 *</label>
-            <input class="input" type="number" id="m_b_s_bulk_eco" value="150">
-          </div>
-
-          <div class="field">
-            <label>비즈니스 생성 좌석 수 *</label>
-            <input class="input" type="number" id="m_b_s_bulk_biz" value="12">
-          </div>
-        </div>
-      `;
-    } else {
-      html = `
-        <div class="form-grid">
-          <div class="field">
-            <label>항공기 ID</label>
-            <input class="input" type="number" id="m_b_s_pid" value="${item ? item.aircraft_id : 1}" disabled>
-          </div>
-
-          <div class="field">
-            <label>좌석 번호</label>
-            <input class="input" id="m_b_s_no" value="${item ? item.seat_no : ''}" disabled>
-          </div>
-
-          <div class="field full">
-            <label>좌석 등급 ID *</label>
-            <input class="input" type="number" id="m_b_s_class" value="${item ? item.seat_class_id : 1}">
-          </div>
-        </div>
-      `;
-    }
-  }
-
-  if (table === 'fare') {
-    html = `
-      <div class="form-grid">
-        <div class="field">
-          <label>노선 ID *</label>
-          <input class="input" type="number" id="m_b_f_rid" value="${item ? item.route_id : 1}" ${action === '수정' ? 'disabled' : ''}>
-        </div>
-
-        <div class="field">
-          <label>좌석 등급 ID *</label>
-          <input class="input" type="number" id="m_b_f_sid" value="${item ? item.seat_class_id : 1}" ${action === '수정' ? 'disabled' : ''}>
-        </div>
-
-        <div class="field">
-          <label>시즌 ID *</label>
-          <input class="input" type="number" id="m_b_f_season" value="${item ? item.season_id : 1}" ${action === '수정' ? 'disabled' : ''}>
-        </div>
-
-        <div class="field full">
-          <label>운임 금액 *</label>
-          <input class="input" type="number" id="m_b_f_price" value="${item ? item.price : 100000}">
-        </div>
-      </div>
-    `;
-  }
 
   setHtml('globalModalBody', html);
   openModal();
@@ -833,12 +655,6 @@ function openBaseModal(table, action, id = null) {
 /* ==================== 통합 모달 저장 ==================== */
 function saveGlobalModalData() {
   const ctx = activeContext;
-
-  /*if (ctx.type === 'flight') {
-    saveFlightFromModal(ctx);
-    closeModal();
-    return;
-  }*/
 
   if (ctx.type && ctx.type.startsWith('base_')) {
     saveBaseFromModal(ctx);
@@ -849,65 +665,7 @@ function saveGlobalModalData() {
   toast('저장할 작업 정보를 찾을 수 없습니다.');
 }
 
-/*function saveFlightFromModal(ctx) {
-  const flightNo = $('m_f_no') ? $('m_f_no').value.trim() : '';
-  const routeId = Number($('m_f_route') ? $('m_f_route').value : 0);
-  const aircraftId = Number($('m_f_aircraft') ? $('m_f_aircraft').value : 0);
-  const departureGateId = Number($('m_f_dgate') ? $('m_f_dgate').value : 0);
-  const arrivalGateId = Number($('m_f_agate') ? $('m_f_agate').value : 0);
-  const departureTime = $('m_f_dtime') ? $('m_f_dtime').value.trim() : '';
-  const arrivalTime = $('m_f_atime') ? $('m_f_atime').value.trim() : '';
 
-  if (ctx.action === '등록' && !flightNo) {
-    alert('항공편 번호를 입력해야 합니다.');
-    return;
-  }
-
-  if (!routeId || !aircraftId || !departureTime || !arrivalTime) {
-    alert('노선, 항공기, 출발/도착 일시는 필수입니다.');
-    return;
-  }
-
-  if (ctx.action === '등록') {
-    state.flights.push({
-      id: nextId(state.flights),
-      flight_no: flightNo,
-      route_id: routeId,
-      route_name: getRouteName(routeId),
-      aircraft_id: aircraftId,
-      aircraft_model: getAircraftModel(aircraftId),
-      departure_gate_id: departureGateId,
-      arrival_gate_id: arrivalGateId,
-      departure_time: departureTime,
-      arrival_time: arrivalTime,
-      flight_status: 'SCHEDULED',
-      delay_minutes: 0,
-      is_deleted: 'N'
-    });
-
-    toast('신규 운항 스케줄이 등록되었습니다.');
-  } else {
-    const flight = state.flights.find(item => item.id === Number(ctx.id));
-    if (!flight) {
-      toast('수정할 스케줄을 찾을 수 없습니다.');
-      return;
-    }
-
-    flight.route_id = routeId;
-    flight.route_name = getRouteName(routeId);
-    flight.aircraft_id = aircraftId;
-    flight.aircraft_model = getAircraftModel(aircraftId);
-    flight.departure_gate_id = departureGateId;
-    flight.arrival_gate_id = arrivalGateId;
-    flight.departure_time = departureTime;
-    flight.arrival_time = arrivalTime;
-
-    toast('운항 스케줄이 수정되었습니다.');
-  }
-
-  renderFlightSchedule();
-  renderTodayBoard();
-}*/
 
 function saveBaseFromModal(ctx) {
   const table = ctx.type.replace('base_', '');
@@ -972,52 +730,6 @@ function insertBaseItem(table, list, action) {
       model_name: $('m_b_ac_model').value.trim(),
       total_seats: Number($('m_b_ac_seats').value),
       aircraft_status_id: Number($('m_b_ac_status').value),
-      is_active: 'Y'
-    });
-  }
-
-  if (table === 'seat' && action === '일괄등록') {
-    const aircraftId = Number($('m_b_s_bulk_id').value);
-    const ecoCount = Number($('m_b_s_bulk_eco').value);
-    const bizCount = Number($('m_b_s_bulk_biz').value);
-
-    const startId = nextId(state.base.seat);
-
-    state.base.seat.push({
-      id: startId,
-      aircraft_id: aircraftId,
-      seat_no: '1A',
-      seat_class_id: 2,
-      is_active: 'Y'
-    });
-
-    state.base.seat.push({
-      id: startId + 1,
-      aircraft_id: aircraftId,
-      seat_no: '1B',
-      seat_class_id: 2,
-      is_active: 'Y'
-    });
-
-    state.base.seat.push({
-      id: startId + 2,
-      aircraft_id: aircraftId,
-      seat_no: '12A',
-      seat_class_id: 1,
-      is_active: 'Y'
-    });
-
-    toast(`좌석 샘플이 일괄 생성되었습니다. 이코노미 ${ecoCount}석, 비즈니스 ${bizCount}석 기준입니다.`);
-    return;
-  }
-
-  if (table === 'fare') {
-    list.push({
-      id,
-      route_id: Number($('m_b_f_rid').value),
-      seat_class_id: Number($('m_b_f_sid').value),
-      season_id: Number($('m_b_f_season').value),
-      price: Number($('m_b_f_price').value),
       is_active: 'Y'
     });
   }
