@@ -32,4 +32,8 @@ public interface MemberService {
 	public List<Map<String, Object>> selectFavoriteRouteList(long memberId);
 	//마이페이지 관심노선 삭제
 	public int deleteFavoriteRoute(Map<String, Object> paramMap);
+	
+	// 관심 항공편 토글 (등록/삭제)
+	public String toggleFavoriteFlight(long flightId, long memberId);
+	
 }

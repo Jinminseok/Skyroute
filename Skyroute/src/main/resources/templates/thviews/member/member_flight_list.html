@@ -410,6 +410,29 @@
 		    opacity: 0.55;
 		    cursor: not-allowed;
 		}
+
+		/* 관심 항공편 하트 버튼 */
+		.btn-favorite-heart {
+			background: none;
+			border: none;
+			cursor: pointer;
+			padding: 4px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			color: #cbd5e1;
+			transition: color 0.2s, transform 0.15s ease-in-out;
+		}
+		.btn-favorite-heart:hover {
+			transform: scale(1.15);
+			color: #f43f5e;
+		}
+		.btn-favorite-heart.active {
+			color: #e11d48 !important;
+		}
+		.btn-favorite-heart .material-symbols-outlined {
+			font-size: 22px;
+		}
 	</style>
 </head>
 
@@ -452,7 +475,6 @@
 					<!-- 현재 검색 조건 요약 -->
 					<div id="searchConditionSummary" class="search-condition-summary" th:if="${searchReady}" th:hidden="${searchFormOpen}">
 					
-					    <!-- 기존 search-summary-list를 이 위치에 그대로 둔다 -->
 					    <div class="search-summary-list">
 					
 					        <div class="search-summary-item">
@@ -1069,6 +1091,19 @@
 
 								<div class="fare">
 
+									<!-- 하트 버튼 (가는 편) -->
+									<div style="display: flex; justify-content: flex-end; width: 100%; margin-bottom: 4px;">
+										<button type="button" 
+												class="btn-favorite-heart" 
+												th:data-flight-id="${flight.flightId}"
+												title="관심 항공편 등록"
+												onclick="toggleFavoriteFlight(this)">
+											<span class="material-symbols-outlined">
+												favorite
+											</span>
+										</button>
+									</div>
+
 									<div class="price">
 
 										<span th:text="${#numbers.formatInteger(
@@ -1294,6 +1329,19 @@
 
 								<div class="fare">
 
+									<!-- 하트 버튼 (오는 편) -->
+									<div style="display: flex; justify-content: flex-end; width: 100%; margin-bottom: 4px;">
+										<button type="button" 
+												class="btn-favorite-heart" 
+												th:data-flight-id="${flight.flightId}"
+												title="관심 항공편 등록"
+												onclick="toggleFavoriteFlight(this)">
+											<span class="material-symbols-outlined">
+												favorite
+											</span>
+										</button>
+									</div>
+
 									<div class="price">
 
 										<span th:text="${#numbers.formatInteger(
@@ -1449,6 +1497,53 @@
 		</div>
 
 	</div>
+
+	<!-- 🎯 관심 항공편 비동기 토글 스크립트 -->
+	<script th:inline="javascript">
+	function toggleFavoriteFlight(btnElement) {
+		var flightId = btnElement.getAttribute('data-flight-id');
+		if (!flightId) return;
+
+		var csrfToken = document.querySelector('input[name="_csrf"]')?.value || document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+
+		var formData = new URLSearchParams();
+		formData.append('flightId', flightId);
+
+		fetch('/member/toggleFavoriteFlight', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'X-CSRF-TOKEN': csrfToken || ''
+			},
+			body: formData.toString()
+		})
+		.then(function(res) { 
+			if (res.status === 401 || res.status === 403) {
+				alert("로그인 후 관심 항공편을 등록하실 수 있습니다.");
+				location.href = "/member/login";
+				return null;
+			}
+			return res.text(); 
+		})
+		.then(function(response) {
+			if (!response) return;
+
+			if (response.includes("ADD_SUCCESS") || response.includes("등록")) {
+				btnElement.classList.add('active');
+				alert("관심 항공편으로 등록되었습니다.");
+			} else if (response.includes("REMOVE_SUCCESS") || response.includes("삭제") || response.includes("해제")) {
+				btnElement.classList.remove('active');
+				alert("관심 항공편 등록이 해제되었습니다.");
+			} else {
+				alert(response);
+			}
+		})
+		.catch(function(err) {
+			console.error(err);
+			alert("처리 중 에러가 발생했습니다.");
+		});
+	}
+	</script>
 
 </div>
 

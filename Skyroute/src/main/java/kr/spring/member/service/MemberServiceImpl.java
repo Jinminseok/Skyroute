@@ -83,6 +83,27 @@ public class MemberServiceImpl implements MemberService{
 		return memberMapper.deleteFavoriteRoute(paramMap);
 	}
 
+	@Override
+	public String toggleFavoriteFlight(long flightId, long memberId) {
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("flightId", flightId);
+		paramMap.put("memberId", memberId);
+
+		// 1. 이미 하트가 눌려있는지 확인
+		int count = memberMapper.selectFavoriteFlightCount(paramMap);
+
+		if (count > 0) {
+			// 2. 이미 등록되어 있다면 삭제 처리
+			memberMapper.deleteFavoriteFlightByFlightId(paramMap);
+			return "REMOVE_SUCCESS";
+		} else {
+			// 3. 등록되어 있지 않다면 신규 등록 처리
+			memberMapper.insertFavoriteFlight(paramMap);
+			return "ADD_SUCCESS";
+		}
+	}
+	
+
 
 
 }

@@ -50,5 +50,15 @@ public interface MemberMapper {
 	public List<Map<String, Object>> selectFavoriteRouteList(long memberId);
 	//마이페이지 관심노선 삭제
 	public int deleteFavoriteRoute(Map<String, Object> paramMap);
+	
+	
+	//관심 항공편 이미 등록되어 있는지 확인
+	public int selectFavoriteFlightCount(Map<String, Object> paramMap);
+
+	//관심 항공편 등록
+	public int insertFavoriteFlight(Map<String, Object> paramMap);
+
+	//관심 항공편 취소 (FLIGHT_ID 기준 삭제)
+	public int deleteFavoriteFlightByFlightId(Map<String, Object> paramMap);
 
 }

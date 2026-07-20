@@ -174,28 +174,67 @@
 			FR.FAVORITE_ID,
 			FR.MEMBER_ID,
 			FR.FAVORITE_TYPE,
-			FR.DEPARTURE_AIRPORT_ID AS DEP_ID,
-			FR.ARRIVAL_AIRPORT_ID AS ARR_ID,
+			FR.FLIGHT_ID,
+			
+			<!-- 항공편(FLIGHT) 핵심 정보 -->
+			F.FLIGHT_NO,
+			TO_CHAR(F.DEPARTURE_TIME, 'HH24:MI') AS DEP_TIME,
+			TO_CHAR(F.ARRIVAL_TIME, 'HH24:MI') AS ARR_TIME,
+			TO_CHAR(F.DEPARTURE_TIME, 'YYYY-MM-DD') AS FLIGHT_DATE,
+			F.FLIGHT_STATUS,
+			
+			<!-- 출발/도착 공항 정보 -->
 			DA.IATA_CODE AS DEP_IATA,
 			DA.AIRPORT_NAME AS DEP_NAME,
 			AA.IATA_CODE AS ARR_IATA,
-			AA.AIRPORT_NAME AS ARR_NAME,
-			(DA.IATA_CODE || '-' || AA.IATA_CODE) AS ROUTE_CODE,
-			R.ROUTE_ID
+			AA.AIRPORT_NAME AS ARR_NAME
 		FROM FAVORITE_ROUTE FR
-		INNER JOIN AIRPORT DA ON FR.DEPARTURE_AIRPORT_ID = DA.AIRPORT_ID
-		INNER JOIN AIRPORT AA ON FR.ARRIVAL_AIRPORT_ID = AA.AIRPORT_ID
-		LEFT OUTER JOIN ROUTE R ON (R.DEPARTURE_AIRPORT_ID = FR.DEPARTURE_AIRPORT_ID AND R.ARRIVAL_AIRPORT_ID = FR.ARRIVAL_AIRPORT_ID AND R.IS_ACTIVE = 'Y')
+		INNER JOIN FLIGHT F ON FR.FLIGHT_ID = F.FLIGHT_ID
+		INNER JOIN ROUTE R ON F.ROUTE_ID = R.ROUTE_ID
+		INNER JOIN AIRPORT DA ON R.DEPARTURE_AIRPORT_ID = DA.AIRPORT_ID
+		INNER JOIN AIRPORT AA ON R.ARRIVAL_AIRPORT_ID = AA.AIRPORT_ID
 		WHERE FR.MEMBER_ID = #{memberId}
-		  AND FR.FAVORITE_TYPE = 'ROUTE'
+		  AND FR.FAVORITE_TYPE = 'FLIGHT'
 		ORDER BY FR.CREATED_AT DESC
 	</select>
 
-	<!-- 관심 노선 삭제 (본인 소유 검증 포함) -->
+	<!-- 관심 노선 삭제 -->
 	<delete id="deleteFavoriteRoute" parameterType="map">
 		DELETE FROM FAVORITE_ROUTE
 		WHERE FAVORITE_ID = #{favoriteId}
 		  AND MEMBER_ID = #{memberId}
+	</delete>
+	
+	<!-- 관심 항공편 이미 등록되어 있는지 확인 -->
+	<select id="selectFavoriteFlightCount" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM FAVORITE_ROUTE
+		WHERE MEMBER_ID = #{memberId}
+		  AND FLIGHT_ID = #{flightId}
+		  AND FAVORITE_TYPE = 'FLIGHT'
+	</select>
+
+	<!-- 관심 항공편 신규 등록 -->
+	<insert id="insertFavoriteFlight" parameterType="map">
+		INSERT INTO FAVORITE_ROUTE (
+			MEMBER_ID,
+			FAVORITE_TYPE,
+			FLIGHT_ID,
+			CREATED_AT
+		) VALUES (
+			#{memberId},
+			'FLIGHT',
+			#{flightId},
+			SYSTIMESTAMP
+		)
+	</insert>
+
+	<!-- 관심 항공편 등록 해제 (회원ID + 항공편ID 기준 삭제) -->
+	<delete id="deleteFavoriteFlightByFlightId" parameterType="map">
+		DELETE FROM FAVORITE_ROUTE
+		WHERE MEMBER_ID = #{memberId}
+		  AND FLIGHT_ID = #{flightId}
+		  AND FAVORITE_TYPE = 'FLIGHT'
 	</delete>
 </mapper>
 

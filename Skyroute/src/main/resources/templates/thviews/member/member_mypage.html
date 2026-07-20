@@ -350,67 +350,83 @@
 		<div class="mypage-route-section">
 			<div class="htitle" style="margin-bottom: 0;">
 				<div>
-					<div class="eyebrow">FAVORITE ROUTE</div>
+					<div class="eyebrow">FAVORITE FLIGHT</div>
 					<h2 style="font-size:18px; margin-top:4px; display: flex; align-items: center; gap: 6px;">
 						<span class="material-symbols-outlined" style="color: #e11d48; font-size: 22px;">favorite</span>
-						나의 관심 노선
+						나의 관심 항공편
 					</h2>
 				</div>
 
 				<div th:if="${favoriteRouteList != null and !#lists.isEmpty(favoriteRouteList)}" style="font-size:13px; color:var(--mut);">
-					총 <b style="color:var(--accent); font-family:var(--sans-eng);" th:text="${#lists.size(favoriteRouteList)}">0</b>개 노선
+					총 <b style="color:var(--accent); font-family:var(--sans-eng);" th:text="${#lists.size(favoriteRouteList)}">0</b>개 항공편
 				</div>
 			</div>
 
-			<!-- Case A: 관심 노선 데이터가 없을 때 -->
+			<!-- Case A: 등록된 관심 항공편이 없을 때 -->
 			<div th:if="${favoriteRouteList == null or #lists.isEmpty(favoriteRouteList)}" class="mypage-route-empty">
 				<span class="material-symbols-outlined" style="font-size: 38px; color: #cbd5e1; display: block; margin-bottom: 8px;">bookmark_add</span>
-				아직 등록된 관심 노선이 없습니다.<br>노선 검색 및 운항 스케줄에서 자주 찾는 노선을 하트에 담아보세요.
+				아직 등록된 관심 항공편이 없습니다.<br>운항 스케줄 및 실시간 출/도착에서 자주 찾는 항공편을 하트에 담아보세요.
 			</div>
 
-			<!-- Case B: 관심 노선 데이터가 존재할 때 (이벤트 카드처럼 가로로 길게 확대된 노선 리스트) -->
+			<!-- Case B: 관심 항공편 리스트 출력 -->
 			<div th:if="${favoriteRouteList != null and !#lists.isEmpty(favoriteRouteList)}" class="mypage-route-list">
 				<div class="mypage-route-card" th:each="route : ${favoriteRouteList}">
 					
-					<!-- 왼쪽: 뱃지 및 출/도착 노선 정보 -->
+					<!-- 왼쪽: 항공편 뱃지, 편명, 날짜 및 삭제 버튼 -->
 					<div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
 						<div style="display: flex; align-items: center; gap: 10px;">
-							<span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; font-family: var(--sans-eng);" 
-								  th:text="${route['ROUTE_CODE'] != null ? route['ROUTE_CODE'] : 'FAVORITE'}">FAVORITE</span>
 							
+							<!-- 관심 항공편 전용 배지 (편명 + 날짜) -->
+							<span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; font-family: var(--sans-eng);" 
+								  th:text="|FLIGHT ${route['FLIGHT_NO']} (${route['FLIGHT_DATE']})|">FLIGHT KE901 (2026-07-20)</span>
+							
+							<!-- 관심 취소 버튼 -->
 							<a th:href="@{/member/removeFavoriteRoute(favoriteId=${route['FAVORITE_ID']})}" 
 							   class="btn ghost sm" 
-							   style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; height: auto; font-size: 12px; color: #e11d48; border-color: #fecdd3; background: #fff1f2; text-decoration: none; border-radius: 6px;" 
-							   title="관심 노선 삭제">
-							    <span class="material-symbols-outlined" style="font-size: 14px;">heart_broken</span>
-							    관심 노선 취소
+							   style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; height: auto; font-size: 11px; color: #e11d48; border-color: #fecdd3; background: #fff1f2; text-decoration: none; border-radius: 6px;" 
+							   title="관심 항공편 삭제">
+								<span class="material-symbols-outlined" style="font-size: 13px;">heart_broken</span>
+								관심 취소
 							</a>
 						</div>
 						
-						<!-- 출/도착 간락 노드 그래픽 (가로 전체 채움) -->
-						<div style="display: flex; align-items: center; max-width: 480px; width: 100%; margin-top: 4px;">
-							<div style="text-align: left; min-width: 100px;">
-								<strong style="font-size: 20px; color: #1e293b; font-family: var(--sans-eng); font-weight: 700; display: block;" th:text="${route['DEP_IATA']}">GMP</strong>
+						<!-- 출/도착 공항 및 시간 노드 그래픽 -->
+						<div style="display: flex; align-items: center; max-width: 520px; width: 100%; margin-top: 4px;">
+							
+							<!-- 출발 공항 & 시간 -->
+							<div style="text-align: left; min-width: 110px;">
+								<strong th:if="${route['DEP_TIME'] != null}" 
+										style="font-size: 14px; color: #2563eb; font-weight: 700; display: block;" 
+										th:text="${route['DEP_TIME']}">16:40</strong>
+								<strong style="font-size: 20px; color: #1e293b; font-family: var(--sans-eng); font-weight: 700; display: block;" 
+										th:text="${route['DEP_IATA']}">GMP</strong>
 								<span style="font-size: 13px; color: #64748b;" th:text="${route['DEP_NAME']}">김포국제공항</span>
 							</div>
 							
+							<!-- 경로선 -->
 							<div style="display: flex; flex-direction: column; align-items: center; flex: 1; margin: 0 20px;">
 								<span class="material-symbols-outlined" style="font-size: 18px; color: #3b82f6;">flight_takeoff</span>
 								<div style="width: 100%; border-bottom: 1px dashed #cbd5e1; margin-top: 4px;"></div>
 							</div>
 							
-							<div style="text-align: right; min-width: 100px;">
-								<strong style="font-size: 20px; color: #1e293b; font-family: var(--sans-eng); font-weight: 700; display: block;" th:text="${route['ARR_IATA']}">CJU</strong>
+							<!-- 도착 공항 & 시간 -->
+							<div style="text-align: right; min-width: 110px;">
+								<strong th:if="${route['ARR_TIME'] != null}" 
+										style="font-size: 14px; color: #2563eb; font-weight: 700; display: block;" 
+										th:text="${route['ARR_TIME']}">18:40</strong>
+								<strong style="font-size: 20px; color: #1e293b; font-family: var(--sans-eng); font-weight: 700; display: block;" 
+										th:text="${route['ARR_IATA']}">CJU</strong>
 								<span style="font-size: 13px; color: #64748b;" th:text="${route['ARR_NAME']}">제주국제공항</span>
 							</div>
 						</div>
 					</div>
 
-					<!-- 오른쪽: 이동 버튼 (이벤트 보기 버튼처럼 우측에 정렬) -->
+					<!-- 오른쪽: 이동 버튼 -->
 					<div style="display: flex; align-items: center;">
-						<a th:href="@{/main/home}" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 16px; font-size: 13px; border-color: #cbd5e1; white-space: nowrap;">
+						<a th:href="@{/main/home}" 
+						   class="btn ghost sm" 
+						   style="display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 16px; font-size: 13px; border-color: #cbd5e1; white-space: nowrap;">
 							예매하러 가기
-							<span class="material-symbols-outlined" style="font-size: 16px; margin-left: 4px;">chevron_right</span>
 						</a>
 					</div>
 

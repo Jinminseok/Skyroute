@@ -342,6 +342,23 @@ public class MemberUserController {
 		return "redirect:/member/member_mypage";
 	}
 	
+	// 관심 항공편 비동기(AJAX) 토글
+	@PostMapping("/toggleFavoriteFlight")
+	@ResponseBody
+	public String toggleFavoriteFlight(@RequestParam("flightId") long flightId,
+			@AuthenticationPrincipal PrincipalDetails principalDetails) {
+
+		// 미로그인 사용자 가드
+		if (principalDetails == null || principalDetails.getMemberVO() == null) {
+			return "LOGIN_REQUIRED";
+		}
+
+		long memberId = principalDetails.getMemberVO().getMember_id();
+
+		// 토글 로직 실행 후 결과 문자열 반환 ("ADD_SUCCESS" 또는 "REMOVE_SUCCESS")
+		return memberService.toggleFavoriteFlight(flightId, memberId);
+	}
+	
 	
 	//MY페이지
 		/*
