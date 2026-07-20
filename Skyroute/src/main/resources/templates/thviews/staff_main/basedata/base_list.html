@@ -261,45 +261,44 @@
 			조회·등록·수정·비활성화합니다. 운영 기준 정보는 운항 스케줄 등록과 사용자 항공권 검색의 기반 데이터로 사용됩니다.</p>
 
 		<div class="grid grid-4" style="margin-bottom: 24px">
-			<div class="stat">
-				<div class="label">
-					<span class="material-symbols-outlined" style="font-size: 18px">local_airport</span>
-					공항 마스터
-				</div>
-				<div class="value">
-					3<span class="unit">건</span>
-				</div>
-			</div>
-			<div class="stat">
-				<div class="label">
-					<span class="material-symbols-outlined"
-						style="font-size: 18px; color: var(--primary)">meeting_room</span>
-					게이트 구성
-				</div>
-				<div class="value" style="color: var(--primary)">
-					2<span class="unit">건</span>
-				</div>
-			</div>
-			<div class="stat">
-				<div class="label">
-					<span class="material-symbols-outlined"
-						style="font-size: 18px; color: var(--ok)">route</span> 운항 노선
-				</div>
-				<div class="value" style="color: var(--ok)">
-					2<span class="unit">건</span>
-				</div>
-			</div>
-			<div class="stat">
-				<div class="label">
-					<span class="material-symbols-outlined"
-						style="font-size: 18px; color: var(--warn)">paid</span> 운임 기준
-				</div>
-				<div class="value" style="color: var(--warn)">
-					1<span class="unit">건</span>
-				</div>
-			</div>
-		</div>
-
+    <div class="stat">
+        <div class="label">
+            <span class="material-symbols-outlined" style="font-size: 18px">local_airport</span>
+            공항 마스터
+        </div>
+        <div class="value">
+            <span th:text="${#lists.size(airportList)}">0</span><span class="unit">건</span>
+        </div>
+    </div>
+    <div class="stat">
+        <div class="label">
+            <span class="material-symbols-outlined"
+                style="font-size: 18px; color: var(--primary)">meeting_room</span>
+            게이트 구성
+        </div>
+        <div class="value" style="color: var(--primary)">
+            <span th:text="${#lists.size(gateList)}">0</span><span class="unit">건</span>
+        </div>
+    </div>
+    <div class="stat">
+        <div class="label">
+            <span class="material-symbols-outlined"
+                style="font-size: 18px; color: var(--ok)">route</span> 운항 노선
+        </div>
+        <div class="value" style="color: var(--ok)">
+            <span th:text="${#lists.size(routeList)}">0</span><span class="unit">건</span>
+        </div>
+    </div>
+    <div class="stat">
+        <div class="label">
+            <span class="material-symbols-outlined"
+                style="font-size: 18px; color: var(--warn)">paid</span> 운임 기준
+        </div>
+        <div class="value" style="color: var(--warn)">
+            <span th:text="${#lists.size(fareList)}">0</span><span class="unit">건</span>
+        </div>
+    </div>
+</div>
 		<div class="tabs">
 			<button type="button" class="active"
 				onclick="subTab('base', 'airport', this)">공항 마스터 (AIRPORT)</button>

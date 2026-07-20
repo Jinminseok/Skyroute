@@ -26,22 +26,24 @@
 
       <div id="tab-revenue" class="sub-page" style="display: block;">
         
-        <div class="card">
-          <div class="toolbar">
-            <label style="font-size:12.5px; font-weight:600; color:var(--text-gray);">조회기간</label>
-            <!-- [수정] 불필요한 input 삭제 및 id="startDate" 추가 -->
-            <input type="date" id="startDate" style="padding:6px; border:1px solid var(--border); border-radius:6px;">
-            <span style="color:var(--text-light);">~</span>
-            <input type="date" id="endDate" style="padding:6px; border:1px solid var(--border); border-radius:6px;">
-            <!-- [수정] onclick 이벤트 연결 -->
-            <button class="btn btn-primary btn-sm" onclick="fetchStatistics()" style="margin-left:8px;">조회</button>
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="toolbar" style="display: flex; align-items: center; gap: 12px; padding: 8px 4px;">
+            <label style="font-size: 14px; font-weight: 600; color: var(--text-gray); margin: 0;">조회기간</label>
+            
+            <input type="date" id="startDate" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 14px; color: #333; outline: none; cursor: pointer;">
+            
+            <span style="color: var(--text-light); font-weight: 600;">~</span>
+            
+            <input type="date" id="endDate" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 14px; color: #333; outline: none; cursor: pointer;">
+            
+            <button class="btn btn-primary btn-sm" onclick="fetchStatistics()" style="padding: 8px 18px; margin-left: 4px; font-family: inherit; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer;">조회</button>
           </div>
         </div>
 
         <div class="grid grid-2">
           <div class="card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; padding:40px;">
             <span class="material-symbols-outlined" style="font-size:36px; color:var(--text-light); margin-bottom:12px;">payments</span>
-            <!-- [수정] 하드코딩된 금액 삭제 및 id 부여 -->
+            
             <h3 id="totalRevenueTxt" style="font-size:24px; font-weight:700;">0 원</h3>
             <p style="color:var(--text-gray); font-size:13px;">조회기간 누적 매출</p>
           </div>
@@ -51,7 +53,7 @@
             <div class="table-wrap">
               <table class="data">
                 <thead><tr><th>노선</th><th>매출액</th></tr></thead>
-                <!-- [수정] 하드코딩된 노선 목록 삭제 및 id 부여 -->
+               
                 <tbody id="routeRevenueBody">
                   <tr><td colspan="2" style="text-align: center; color: var(--text-gray);">데이터를 불러오는 중입니다...</td></tr>
                 </tbody>
