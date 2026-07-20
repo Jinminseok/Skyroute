@@ -222,15 +222,8 @@ h1 {
 }
 
 @keyframes fadeIn {
-	from {opacity: 0;
-	transform: translateY(8px)
-}
-
-to {
-	opacity: 1;
-	transform: translateY(0)
-}
-
+	from {opacity: 0; transform: translateY(8px)}
+	to {opacity: 1; transform: translateY(0)}
 }
 
 /* 뱃지 스타일 (요구사항 한글 상태값 적용) */
@@ -245,53 +238,24 @@ to {
 	text-transform: uppercase;
 }
 
-.badge-scheduled {
-	background: rgba(2, 132, 199, 0.1);
-	color: #0284C7;
-} /* 운항예정 */
-.badge-boarding {
-	background: rgba(47, 128, 237, 0.1);
-	color: var(--info);
-} /* 탑승중 */
-.badge-departed {
-	background: rgba(30, 58, 138, 0.1);
-	color: var(--navy);
-} /* 출발완료 */
-.badge-arrived {
-	background: rgba(142, 68, 173, 0.1);
-	color: #8E44AD;
-} /* 도착완료 */
-.badge-delayed {
-	background: rgba(242, 153, 74, 0.1);
-	color: var(--warn);
-} /* 지연 */
-.badge-cancelled {
-	background: rgba(235, 87, 87, 0.1);
-	color: var(--danger);
-} /* 결항 */
-.badge-completed {
-	background: rgba(71, 85, 105, 0.1);
-	color: var(--text-gray);
-} /* 운항종료 */
-.badge-ok {
-	background: rgba(0, 176, 107, 0.1);
-	color: var(--ok);
-}
+.badge-scheduled { background: rgba(2, 132, 199, 0.1); color: #0284C7; } /* 운항예정 */
+.badge-boarding { background: rgba(47, 128, 237, 0.1); color: var(--info); } /* 탑승중 */
+.badge-departed { background: rgba(30, 58, 138, 0.1); color: var(--navy); } /* 출발완료 */
+.badge-arrived { background: rgba(142, 68, 173, 0.1); color: #8E44AD; } /* 도착완료 */
+.badge-delayed { background: rgba(242, 153, 74, 0.1); color: var(--warn); } /* 지연 */
+.badge-cancelled { background: rgba(235, 87, 87, 0.1); color: var(--danger); } /* 결항 */
+.badge-completed { background: rgba(71, 85, 105, 0.1); color: var(--text-gray); } /* 운항종료 */
+.badge-ok { background: rgba(0, 176, 107, 0.1); color: var(--ok); }
+.badge-muted { background: rgba(0, 0, 0, 0.06); color: var(--text-gray); }
+.badge-info { background: rgba(47, 128, 237, 0.1); color: var(--info); }
+.badge-warn { background: rgba(242, 153, 74, 0.1); color: var(--warn); }
 
-.badge-muted {
-	background: rgba(0, 0, 0, 0.06);
-	color: var(--text-gray);
-}
-
-.badge-info {
-  background: rgba(47, 128, 237, 0.1);
-  color: var(--info);
-}
-
-.badge-warn {
-  background: rgba(242, 153, 74, 0.1);
-  color: var(--warn);
-}
+/* ▼▼ 추가된 체크인/탑승 전용 뱃지 스타일 ▼▼ */
+.badge-waiting { background: rgba(100, 116, 139, 0.1); color: #64748B; }   /* 체크인 대기 */
+.badge-checkedin { background: rgba(47, 128, 237, 0.1); color: #2F80ED; }  /* 체크인 완료 */
+.badge-boarded { background: rgba(0, 176, 107, 0.1); color: #00B06B; }     /* 탑승 완료 */
+.badge-noshow { background: rgba(235, 87, 87, 0.1); color: #EB5757; }      /* 노쇼 처리 */
+/* ▲▲ 추가 끝 ▲▲ */
 
 /* 버튼 */
 .btn {
@@ -316,9 +280,7 @@ to {
 	box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
 }
 
-.btn-primary:hover {
-	background: #0369A1;
-}
+.btn-primary:hover { background: #0369A1; }
 
 .btn-ghost {
 	background: rgba(255, 255, 255, 0.7);
@@ -564,9 +526,7 @@ to {
 	vertical-align: middle;
 }
 
-.toggle.on {
-	background: var(--ok);
-}
+.toggle.on { background: var(--ok); }
 
 .toggle::after {
 	content: "";
@@ -581,9 +541,7 @@ to {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-.toggle.on::after {
-	left: 23px;
-}
+.toggle.on::after { left: 23px; }
 
 /* 모달 */
 .modal-overlay {
@@ -600,9 +558,7 @@ to {
 	z-index: 1000;
 }
 
-.modal-overlay.open {
-	display: flex;
-}
+.modal-overlay.open { display: flex; }
 
 .modal {
 	background: #fff;
@@ -616,16 +572,10 @@ to {
 }
 
 @keyframes modalM {
-	from {opacity: 0;
-	transform: scale(0.96)
+	from {opacity: 0; transform: scale(0.96)}
+	to {opacity: 1; transform: scale(1)}
 }
 
-to {
-	opacity: 1;
-	transform: scale(1)
-}
-
-}
 .modal-head {
 	padding: 18px 24px;
 	border-bottom: 1px solid var(--border);
@@ -651,9 +601,7 @@ to {
 	align-items: center;
 }
 
-.modal-close:hover {
-	color: var(--text-dark);
-}
+.modal-close:hover { color: var(--text-dark); }
 
 .modal-body {
 	padding: 24px;
@@ -717,15 +665,10 @@ to {
 }
 
 @keyframes slideIn {
-	from {transform: translateY(20px);
-	opacity: 0
+	from {transform: translateY(20px); opacity: 0}
+	to {transform: translateY(0); opacity: 1}
 }
 
-to {
-	transform: translateY(0);
-	opacity: 1
-}
-}
 /* =========================================
    테이블 내 체크박스형 토글 스위치 디자인
    ========================================= */
@@ -737,14 +680,12 @@ to {
     vertical-align: middle;
 }
 
-/* 실제 체크박스는 숨김 처리 */
 .toggle-switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-/* 스위치 배경 (OFF 상태) */
 .toggle-switch .slider {
     position: absolute;
     cursor: pointer;
@@ -757,7 +698,6 @@ to {
     border-radius: 99px;
 }
 
-/* 스위치 동그라미 (손잡이) */
 .toggle-switch .slider:before {
     position: absolute;
     content: "";
@@ -771,43 +711,36 @@ to {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-/* 체크되었을 때(ON 상태)의 배경색 - 이미지와 같은 청록색 */
 .toggle-switch input:checked + .slider {
-    background-color: var(--ok); /* #00B06B */
+    background-color: var(--ok);
 }
 
-/* 체크되었을 때(ON 상태) 동그라미 이동 */
 .toggle-switch input:checked + .slider:before {
     transform: translateX(20px);
 }
 
 /* ===== staff notice ===== */
-
 .notice-row-title {
 	display: block;
 	max-width: 100%;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	
 	color: var(--text-dark);
 	font-weight: 700;
 	text-decoration: none;
 }
 
-.notice-row-title:hover {
+.notice-row-title:hover, .notice-row-title:visited {
 	color: var(--text-dark);
 	text-decoration: none;
 }
 
 .notice-row-summary {
-	max-width: 100%;       /* 기존 520px 제거 */
+	max-width: 100%;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-}
-.notice-row-title:visited {
-	color: var(--text-dark);
 }
 
 .notice-empty-cell {
@@ -842,9 +775,7 @@ to {
 	border-color: var(--primary);
 }
 
-.notice-detail-card h1 {
-	margin-bottom: 12px;
-}
+.notice-detail-card h1 { margin-bottom: 12px; }
 
 .notice-detail-meta {
 	display: flex;
@@ -857,9 +788,7 @@ to {
 	margin-bottom: 24px;
 }
 
-.notice-detail-meta b {
-	color: var(--text-dark);
-}
+.notice-detail-meta b { color: var(--text-dark); }
 
 .notice-detail-content {
 	min-height: 260px;
@@ -883,22 +812,10 @@ to {
 	font-size: 12px;
 }
 
-.event-status-draw {
-	background: #fff7ed;
-	color: #c2410c;
-}
-
 /* =========================================================
-   공지사항 관리 페이지 보정 — staff.css 하단에 추가
-   (기존 .toolbar / .data / .badge 규칙은 건드리지 않고 스코프로만 덮음)
+   공지사항 관리 페이지 보정
    ========================================================= */
-
-/* 1) 카드 헤더: '새 공지사항 등록' + NOTICE 배지를 카드 안쪽 상단으로
-      → 버튼 밑에 카드 테두리가 가로줄처럼 보이던 문제 해결 */
-.notice-card {
-	padding: 24px;
-}
-
+.notice-card { padding: 24px; }
 .notice-card-head {
 	display: flex;
 	align-items: center;
@@ -906,151 +823,12 @@ to {
 	margin-bottom: 16px;
 }
 
-/* 2) 컬럼 정렬 — 헤더(th)와 셀(td)을 같은 축으로 통일.
-      .notice-data 로 스코프를 걸어 다른 지상직 테이블에는 영향 없음.
-      기본 중앙 정렬, 3번째 열(제목/본문)만 좌측 정렬 */
-.notice-data th,
-.notice-data td {
+.notice-data th, .notice-data td {
 	text-align: center;
 	vertical-align: middle;
 }
 
-.notice-data th:nth-child(3),
-.notice-data td:nth-child(3) {
-	text-align: left;
-}
-
-.notice-title-cell {
-	min-width: 260px;
-}
-
-/* 날짜 셀: 줄바꿈 방지 + 숫자 폭 고정으로 세로 정렬감 확보 */
-.notice-date {
-	white-space: nowrap;
-	color: var(--text-gray);
-	font-variant-numeric: tabular-nums;
-}
-
-/* 관리 버튼 그룹 중앙 정렬 */
-.notice-data .btn-action-group {
-	display: inline-flex;
-	gap: 6px;
-	align-items: center;
-	justify-content: center;
-	flex-wrap: nowrap;
-}
-
-/* 3) 카테고리 배지 (연한 하늘색 pill) */
-.badge-category {
-	background: var(--primary-light);
-	color: var(--primary);
-	text-transform: none;
-}
-
-/* 4) 공개 여부 토글 스위치 — '관리' 칸의 비공개 버튼을 대체 */
-.toggle-form {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	margin: 0;
-}
-
-.toggle {
-	position: relative;
-	display: inline-block;
-	width: 42px;
-	height: 24px;
-	flex-shrink: 0;
-}
-
-.toggle input {
-	position: absolute;
-	opacity: 0;
-	width: 0;
-	height: 0;
-}
-
-.toggle-track {
-	position: absolute;
-	inset: 0;
-	cursor: pointer;
-	background: #CBD5E1;
-	border-radius: 99px;
-	transition: background 0.2s ease;
-}
-
-.toggle-track::before {
-	content: "";
-	position: absolute;
-	width: 18px;
-	height: 18px;
-	left: 3px;
-	top: 3px;
-	background: #FFFFFF;
-	border-radius: 50%;
-	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
-	transition: transform 0.2s ease;
-}
-
-.toggle input:checked + .toggle-track {
-	background: var(--ok);
-}
-
-.toggle input:checked + .toggle-track::before {
-	transform: translateX(18px);
-}
-
-.toggle input:focus-visible + .toggle-track {
-	box-shadow: 0 0 0 3px var(--primary-light);
-}
-
-.toggle-label {
-	font-size: 12px;
-	font-weight: 600;
-	min-width: 34px;
-	text-align: left;
-}
-
-.toggle-label.is-on {
-	color: var(--ok);
-}
-
-.toggle-label.is-off {
-	color: var(--text-light);
-}
-
-/* =========================================================
-   공지사항 관리 페이지 보정 — staff.css 하단에 추가
-   (기존 .toolbar / .data / .badge / .toggle 규칙은 건드리지 않음)
-   ⚠ 이전에 붙여넣은 '공지사항 관리 페이지 보정' 블록이 있으면
-     그 블록을 지우고 이걸로 교체하세요. (토글 클래스명이 .notice-toggle 로 변경됨)
-   ========================================================= */
-
-/* 1) 카드 헤더: '새 공지사항 등록' + NOTICE 배지를 카드 안쪽 상단으로
-      → 버튼 밑에 카드 테두리가 가로줄처럼 보이던 문제 해결 */
-.notice-card {
-	padding: 24px;
-}
-
-.notice-card-head {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	margin-bottom: 16px;
-}
-
-/* 2) 컬럼 정렬 — 헤더(th)와 셀(td)을 같은 축으로 통일.
-      .notice-data 로 스코프를 걸어 다른 지상직 테이블에는 영향 없음.
-      기본 중앙 정렬, 3번째 열(제목/본문)만 좌측 정렬 */
-.notice-data th,
-.notice-data td {
-	text-align: center;
-	vertical-align: middle;
-}
-
-.notice-data th:nth-child(3),
-.notice-data td:nth-child(3) {
+.notice-data th:nth-child(3), .notice-data td:nth-child(3) {
 	text-align: left;
 }
 
@@ -1060,14 +838,12 @@ to {
 	min-width: 200px;
 }
 
-/* 날짜 셀: 줄바꿈 방지 + 숫자 폭 고정으로 세로 정렬감 확보 */
 .notice-date {
 	white-space: nowrap;
 	color: var(--text-gray);
 	font-variant-numeric: tabular-nums;
 }
 
-/* 관리 버튼 그룹 중앙 정렬 */
 .notice-data .btn-action-group {
 	display: inline-flex;
 	gap: 6px;
@@ -1076,15 +852,13 @@ to {
 	flex-wrap: nowrap;
 }
 
-/* 3) 카테고리 배지 (연한 하늘색 pill) */
 .badge-category {
 	background: var(--primary-light);
 	color: var(--primary);
 	text-transform: none;
+	white-space: nowrap;
 }
 
-/* 4) 공개 여부 토글 스위치 — '관리' 칸의 비공개 버튼을 대체
-      ★ 기존 staff.html 의 .toggle 과 충돌하지 않도록 .notice-toggle 로 분리 */
 .notice-toggle-form {
 	display: inline-flex;
 	align-items: center;
@@ -1130,17 +904,9 @@ to {
 	transition: transform 0.2s ease;
 }
 
-.notice-toggle input:checked + .notice-toggle-track {
-	background: var(--ok);
-}
-
-.notice-toggle input:checked + .notice-toggle-track::before {
-	transform: translateX(18px);
-}
-
-.notice-toggle input:focus-visible + .notice-toggle-track {
-	box-shadow: 0 0 0 3px var(--primary-light);
-}
+.notice-toggle input:checked + .notice-toggle-track { background: var(--ok); }
+.notice-toggle input:checked + .notice-toggle-track::before { transform: translateX(18px); }
+.notice-toggle input:focus-visible + .notice-toggle-track { box-shadow: 0 0 0 3px var(--primary-light); }
 
 .notice-toggle-label {
 	font-size: 12px;
@@ -1148,42 +914,27 @@ to {
 	min-width: 34px;
 	text-align: left;
 }
+.notice-toggle-label.is-on { color: var(--ok); }
+.notice-toggle-label.is-off { color: var(--text-light); }
 
-.notice-toggle-label.is-on {
-	color: var(--ok);
-}
-
-.notice-toggle-label.is-off {
-	color: var(--text-light);
-}
-
-/* 5) 링크형 버튼(<a class="btn">) 기본 밑줄 제거
-      새 공지사항 등록 / 초기화 / 상세 / 수정 등 */
-a.btn,
-a.btn:hover {
-	text-decoration: none;
-}
+a.btn, a.btn:hover { text-decoration: none; }
 
 /* ===== staff notice category stats ===== */
-
 .notice-category-stats {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 	gap: 14px;
 }
  
-/* --- 카드 공통 --- */
 .notice-category-stat {
 	--accent: var(--primary);
 	--accent-soft: rgba(2, 132, 199, 0.1);
- 
 	position: relative;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
 	padding: 18px 18px 16px;
 	min-height: 128px;
- 
 	text-decoration: none;
 	color: inherit;
 	background: var(--bg-white);
@@ -1193,14 +944,11 @@ a.btn:hover {
 	overflow: hidden;
 	transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
- 
-/* 상단 액센트 라인 */
+
 .notice-category-stat::before {
 	content: "";
 	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
+	top: 0; left: 0; right: 0;
 	height: 3px;
 	background: var(--accent);
 	opacity: 0.9;
@@ -1212,32 +960,23 @@ a.btn:hover {
 	box-shadow: var(--shadow);
 }
  
-/* 현재 선택된 카테고리 강조 */
 .notice-category-stat.is-active {
 	border-color: var(--accent);
 	box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow-sm);
 }
- 
-/* --- 상단: 아이콘 칩 + 라벨 --- */
-.ncs-top {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-}
- 
+
+.ncs-top { display: flex; align-items: center; gap: 8px; }
 .ncs-icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 30px;
-	height: 30px;
+	width: 30px; height: 30px;
 	border-radius: 9px;
 	background: var(--accent-soft);
 	color: var(--accent);
 	font-size: 18px;
 	flex-shrink: 0;
 }
- 
 .ncs-label {
 	font-size: 13px;
 	font-weight: 600;
@@ -1246,8 +985,6 @@ a.btn:hover {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
- 
-/* --- 값 --- */
 .ncs-value {
 	display: flex;
 	align-items: baseline;
@@ -1259,40 +996,19 @@ a.btn:hover {
 	line-height: 1;
 	color: var(--text-dark);
 }
- 
-.ncs-unit {
-	font-size: 13px;
-	font-weight: 500;
-	color: var(--text-gray);
-}
- 
-/* --- 전체 대비 비율 바 --- */
-.ncs-bar {
-	height: 5px;
-	border-radius: 99px;
-	background: rgba(15, 23, 42, 0.06);
-	overflow: hidden;
-}
- 
+.ncs-unit { font-size: 13px; font-weight: 500; color: var(--text-gray); }
+.ncs-bar { height: 5px; border-radius: 99px; background: rgba(15, 23, 42, 0.06); overflow: hidden; }
 .ncs-bar-fill {
-	display: block;
-	height: 100%;
-	min-width: 3px;
-	border-radius: 99px;
-	background: var(--accent);
+	display: block; height: 100%; min-width: 3px;
+	border-radius: 99px; background: var(--accent);
 	transition: width 0.4s ease;
 }
- 
-/* --- 코드 태그 --- */
 .ncs-code {
 	font-family: var(--mono);
-	font-size: 10px;
-	font-weight: 600;
-	letter-spacing: 0.3px;
-	color: var(--text-light);
+	font-size: 10px; font-weight: 600;
+	letter-spacing: 0.3px; color: var(--text-light);
 }
  
-/* --- 전체 공지 (히어로 카드) --- */
 .notice-total-stat {
 	--accent: var(--navy);
 	--accent-soft: rgba(30, 58, 138, 0.1);
@@ -1300,360 +1016,105 @@ a.btn:hover {
 	border-color: rgba(30, 58, 138, 0.25);
 }
  
-/* --- 카테고리별 액센트 컬러 (전체=1번, 이후 카테고리 순서대로) --- */
-.notice-category-stats > a:nth-child(2) { --accent:#0284C7; --accent-soft:rgba(2,132,199,0.10); }   /* 스카이 소식 */
-.notice-category-stats > a:nth-child(3) { --accent:#F2994A; --accent-soft:rgba(242,153,74,0.12); }   /* 유류할증료 */
-.notice-category-stats > a:nth-child(4) { --accent:#00B06B; --accent-soft:rgba(0,176,107,0.12); }    /* 멤버십클럽 */
-.notice-category-stats > a:nth-child(5) { --accent:#8E44AD; --accent-soft:rgba(142,68,173,0.12); }   /* 제휴사 소식 */
-.notice-category-stats > a:nth-child(6) { --accent:#64748B; --accent-soft:rgba(100,116,139,0.12); }  /* 기타 */
+.notice-category-stats > a:nth-child(2) { --accent:#0284C7; --accent-soft:rgba(2,132,199,0.10); }
+.notice-category-stats > a:nth-child(3) { --accent:#F2994A; --accent-soft:rgba(242,153,74,0.12); }
+.notice-category-stats > a:nth-child(4) { --accent:#00B06B; --accent-soft:rgba(0,176,107,0.12); }
+.notice-category-stats > a:nth-child(5) { --accent:#8E44AD; --accent-soft:rgba(142,68,173,0.12); }
+.notice-category-stats > a:nth-child(6) { --accent:#64748B; --accent-soft:rgba(100,116,139,0.12); }
 
-/* 카테고리 배지 한 줄 고정 */
-.badge-category {
-	white-space: nowrap;
-}
+.badge-category[data-category="SKY_NEWS"] { background: rgba(2, 132, 199, 0.12); color: #0284C7; }
+.badge-category[data-category="FUEL_SURCHARGE"] { background: rgba(242, 153, 74, 0.16); color: #C2410C; }
+.badge-category[data-category="MEMBERSHIP_CLUB"] { background: rgba(0, 176, 107, 0.14); color: #047857; }
+.badge-category[data-category="PARTNER_NEWS"] { background: rgba(142, 68, 173, 0.14); color: #7E22CE; }
+.badge-category[data-category="ETC"] { background: rgba(100, 116, 139, 0.14); color: #475569; }
 
+.notice-data th { white-space: nowrap; }
+.notice-data td:nth-child(4) { white-space: nowrap; }
 
-/* 공통(한 줄 고정 등은 기존 규칙 유지) */
-.badge-category {
-	text-transform: none;
-	white-space: nowrap;
-}
- 
-/* 스카이 소식 — 블루 (패널 #0284C7) */
-.badge-category[data-category="SKY_NEWS"] {
-	background: rgba(2, 132, 199, 0.12);
-	color: #0284C7;
-}
- 
-/* 유류할증료 — 오렌지 (패널 #F2994A) */
-.badge-category[data-category="FUEL_SURCHARGE"] {
-	background: rgba(242, 153, 74, 0.16);
-	color: #C2410C;
-}
- 
-/* 멤버십클럽 — 그린 (패널 #00B06B) */
-.badge-category[data-category="MEMBERSHIP_CLUB"] {
-	background: rgba(0, 176, 107, 0.14);
-	color: #047857;
-}
- 
-/* 제휴사 소식 — 퍼플 (패널 #8E44AD) */
-.badge-category[data-category="PARTNER_NEWS"] {
-	background: rgba(142, 68, 173, 0.14);
-	color: #7E22CE;
-}
- 
-/* 기타 — 그레이 (패널 #64748B) */
-.badge-category[data-category="ETC"] {
-	background: rgba(100, 116, 139, 0.14);
-	color: #475569;
-}
-
-/* 헤더(등록자 등)·등록자 셀 줄바꿈 방지 */
-.notice-data th {
-	white-space: nowrap;
-}
-
-.notice-data td:nth-child(4) {
-	white-space: nowrap;
-}
-
- 
 .notice-filter {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: flex-end;
-	gap: 14px;
-	padding: 16px;
-	margin-bottom: 20px;
-	background: rgba(224, 242, 254, 0.35);
-	border: 1px solid var(--border);
-	border-radius: 12px;
+	display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px;
+	padding: 16px; margin-bottom: 20px;
+	background: rgba(224, 242, 254, 0.35); border: 1px solid var(--border); border-radius: 12px;
 }
  
-/* 필드 그룹(라벨 + 컨트롤) */
-.filter-field {
-	display: flex;
-	flex-direction: column;
-	min-width: 140px;
-}
+.filter-field { display: flex; flex-direction: column; min-width: 140px; }
+.filter-field-grow { flex: 1 1 240px; min-width: 200px; }
+.filter-label { margin-bottom: 6px; font-size: 12px; font-weight: 600; color: var(--text-gray); }
  
-/* 검색어 칸은 남는 폭 흡수 */
-.filter-field-grow {
-	flex: 1 1 240px;
-	min-width: 200px;
-}
- 
-.filter-label {
-	margin-bottom: 6px;
-	font-size: 12px;
-	font-weight: 600;
-	color: var(--text-gray);
-}
- 
-/* 공통 컨트롤 */
-.filter-select,
-.filter-input {
-	width: 100%;
-	height: 42px;
-	padding: 0 14px;
-	border: 1px solid var(--border);
-	border-radius: 9px;
-	background: #fff;
-	color: var(--text-dark);
-	font-family: inherit;
-	font-size: 14px;
-	outline: none;
+.filter-select, .filter-input {
+	width: 100%; height: 42px; padding: 0 14px;
+	border: 1px solid var(--border); border-radius: 9px; background: #fff;
+	color: var(--text-dark); font-family: inherit; font-size: 14px; outline: none;
 	transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
  
-/* 셀렉트: 기본 화살표 제거 + 커스텀 쉐브론 */
 .filter-select {
-	appearance: none;
-	-webkit-appearance: none;
-	padding-right: 38px;
-	cursor: pointer;
+	appearance: none; -webkit-appearance: none; padding-right: 38px; cursor: pointer;
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-	background-repeat: no-repeat;
-	background-position: right 12px center;
-	background-size: 16px;
+	background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
 }
  
-.filter-select:focus,
-.filter-input:focus {
-	border-color: var(--primary);
-	box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
-}
- 
-/* 검색 인풋(아이콘 내장) */
-.filter-search {
-	position: relative;
-}
- 
+.filter-select:focus, .filter-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+.filter-search { position: relative; }
 .filter-search-icon {
-	position: absolute;
-	left: 12px;
-	top: 50%;
-	transform: translateY(-50%);
-	font-size: 20px;
-	color: var(--text-light);
-	pointer-events: none;
+	position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+	font-size: 20px; color: var(--text-light); pointer-events: none;
 }
+.filter-search .filter-input { padding-left: 40px; }
+.filter-actions { display: flex; gap: 8px; margin-left: auto; }
+.filter-actions .btn { height: 42px; }
  
-.filter-search .filter-input {
-	padding-left: 40px;
-}
- 
-/* 액션 버튼: 오른쪽 정렬 + 컨트롤과 높이 맞춤 */
-.filter-actions {
-	display: flex;
-	gap: 8px;
-	margin-left: auto;
-}
- 
-.filter-actions .btn {
-	height: 42px;
-}
- 
-/* 좁은 화면: 액션도 전체폭으로 자연스럽게 */
 @media (max-width: 640px) {
-	.filter-actions {
-		margin-left: 0;
-		width: 100%;
-	}
- 
-	.filter-actions .btn {
-		flex: 1;
-	}
+	.filter-actions { margin-left: 0; width: 100%; }
+	.filter-actions .btn { flex: 1; }
 }
 
-
-.event-status-draw {
-	background: #fff7ed;
-	color: #c2410c;
-}
-
-.event-filter-bar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 16px;
-	margin: 0 0 16px;
-}
-
-.event-filter-left {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	flex-wrap: wrap;
-}
-
-.event-filter-group {
-	display: flex;
-	align-items: center;
-	gap: 7px;
-	flex-wrap: wrap;
-}
+.event-status-draw { background: #fff7ed; color: #c2410c; }
+.event-filter-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 16px; }
+.event-filter-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.event-filter-group { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
 
 .event-filter-btn {
-	min-height: 34px;
-	padding: 0 13px;
-	border: 1px solid var(--line);
-	border-radius: 999px;
-	background: #fff;
-	color: var(--text-light);
-	font-family: inherit;
-	font-size: 13px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: .15s;
+	min-height: 34px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px;
+	background: #fff; color: var(--text-light); font-family: inherit; font-size: 13px;
+	font-weight: 600; cursor: pointer; transition: .15s;
 }
-
-.event-filter-btn:hover {
-	border-color: var(--primary);
-	color: var(--primary);
-	background: #f5f9ff;
-}
-
-.event-filter-btn.active {
-	border-color: var(--primary);
-	background: var(--primary);
-	color: #fff;
-}
-
-.event-filter-btn.event-filter-draw.active {
-	border-color: #ea580c;
-	background: #ea580c;
-	color: #fff;
-}
+.event-filter-btn:hover { border-color: var(--primary); color: var(--primary); background: #f5f9ff; }
+.event-filter-btn.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+.event-filter-btn.event-filter-draw.active { border-color: #ea580c; background: #ea580c; color: #fff; }
 
 .event-search-box {
-	width: 240px;
-	height: 34px;
-	display: flex;
-	align-items: center;
-	gap: 7px;
-	padding: 0 10px;
-	border: 1px solid var(--line);
-	border-radius: 8px;
-	background: #fff;
+	width: 240px; height: 34px; display: flex; align-items: center; gap: 7px;
+	padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff;
 }
+.event-search-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .08); }
+.event-search-box .material-symbols-outlined { color: var(--text-light); font-size: 18px; }
+.event-search-box input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); font-family: inherit; font-size: 13px; }
+.event-search-box input::placeholder { color: var(--text-light); }
 
-.event-search-box:focus-within {
-	border-color: var(--primary);
-	box-shadow: 0 0 0 3px rgba(37, 99, 235, .08);
-}
+.event-result-count { color: var(--text-light); font-size: 13px; white-space: nowrap; }
+.event-result-count strong { margin: 0 2px; color: var(--primary); font-weight: 700; }
 
-.event-search-box .material-symbols-outlined {
-	color: var(--text-light);
-	font-size: 18px;
-}
-
-.event-search-box input {
-	width: 100%;
-	border: 0;
-	outline: 0;
-	background: transparent;
-	color: var(--text);
-	font-family: inherit;
-	font-size: 13px;
-}
-
-.event-search-box input::placeholder {
-	color: var(--text-light);
-}
-
-.event-result-count {
-	color: var(--text-light);
-	font-size: 13px;
-	white-space: nowrap;
-}
-
-.event-result-count strong {
-	margin: 0 2px;
-	color: var(--primary);
-	font-weight: 700;
-}
-
-.event-paging {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 24px 0 2px;
-}
-
+.event-paging { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 24px 0 2px; }
 .event-page-btn {
-	min-width: 34px;
-	height: 34px;
-	padding: 0 9px;
-	border: 1px solid var(--line);
-	border-radius: 8px;
-	background: #fff;
-	color: var(--text-light);
-	font-family: inherit;
-	font-size: 13px;
-	cursor: pointer;
+	min-width: 34px; height: 34px; padding: 0 9px; border: 1px solid var(--line);
+	border-radius: 8px; background: #fff; color: var(--text-light); font-family: inherit; font-size: 13px; cursor: pointer;
 }
-
-.event-page-btn:hover:not(:disabled) {
-	border-color: var(--primary);
-	color: var(--primary);
-	background: #f5f9ff;
-}
-
-.event-page-btn.active {
-	border-color: var(--primary);
-	background: var(--primary);
-	color: #fff;
-	font-weight: 700;
-}
-
-.event-page-btn:disabled {
-	opacity: .45;
-	cursor: default;
-}
-
-.event-page-btn .material-symbols-outlined {
-	font-size: 18px;
-	vertical-align: middle;
-}
+.event-page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: #f5f9ff; }
+.event-page-btn.active { border-color: var(--primary); background: var(--primary); color: #fff; font-weight: 700; }
+.event-page-btn:disabled { opacity: .45; cursor: default; }
+.event-page-btn .material-symbols-outlined { font-size: 18px; vertical-align: middle; }
 
 @media (max-width: 960px) {
-	.event-filter-bar {
-		align-items: flex-start;
-		flex-direction: column;
-	}
-
-	.event-result-count {
-		align-self: flex-end;
-	}
+	.event-filter-bar { align-items: flex-start; flex-direction: column; }
+	.event-result-count { align-self: flex-end; }
 }
 
 @media (max-width: 640px) {
-	.event-search-box {
-		width: 100%;
-	}
-
-	.event-filter-left {
-		width: 100%;
-	}
-
-	.event-filter-left .btn {
-		flex: 1;
-	}
+	.event-search-box { width: 100%; }
+	.event-filter-left { width: 100%; }
+	.event-filter-left .btn { flex: 1; }
 }
-.event-stat-card {
-	cursor: pointer;
-	transition: .15s;
-}
-
-.event-stat-card:hover {
-	border-color: var(--primary);
-	box-shadow: 0 10px 26px rgba(37, 99, 235, .08);
-	transform: translateY(-1px);
-}
-.inline-action-form {
-	display: inline-flex;
-	margin: 0;
-}
+.event-stat-card { cursor: pointer; transition: .15s; }
+.event-stat-card:hover { border-color: var(--primary); box-shadow: 0 10px 26px rgba(37, 99, 235, .08); transform: translateY(-1px); }
+.inline-action-form { display: inline-flex; margin: 0; }

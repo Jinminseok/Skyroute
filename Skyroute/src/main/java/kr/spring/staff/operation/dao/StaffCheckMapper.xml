@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.spring.staff.operation.dao.StaffCheckMapper">
+
+    <!-- 1. 운항 스케줄 조회 -->
+    <select id="selectFlightList" resultType="map">
+        SELECT 
+            f.flight_id AS "flightId",
+            f.flight_no AS "flightNo",
+            dep.airport_name AS "depAirport",
+            arr.airport_name AS "arrAirport",
+            TO_CHAR(f.departure_time, 'HH24:MI') AS "departureTime"
+        FROM FLIGHT f
+        JOIN ROUTE r ON f.route_id = r.route_id
+        JOIN AIRPORT dep ON r.departure_airport_id = dep.airport_id
+        JOIN AIRPORT arr ON r.arrival_airport_id = arr.airport_id
+        WHERE f.flight_status != 'CANCELLED'
+        ORDER BY f.departure_time ASC
+    </select>
+
+    <!-- 2. 승객 리스트 조회 (조건 및 매핑 수정) -->
+    <select id="selectPassengerList" parameterType="long" resultType="kr.spring.staff.operation.vo.CheckVO">
+        SELECT 
+            t.ticket_id AS ticketId,
+            b.booking_no AS pnrCode,
+            p.name AS passengerName,
+            s.seat_no AS seatName,
+            t.hold_status AS holdStatus,
+            pay.status AS paymentStatus,
+            t.checkin_status AS checkinStatus,
+            m.name AS checkedInByName
+        FROM TICKET t
+        JOIN BOOKING b ON t.booking_id = b.booking_id
+        JOIN BOOKING_PASSENGER p ON t.booking_passenger_id = p.booking_passenger_id
+        JOIN FLIGHT f ON t.flight_id = f.flight_id
+        LEFT JOIN SEAT s ON t.seat_id = s.seat_id
+        LEFT JOIN PAYMENT pay ON t.booking_id = pay.booking_id
+        LEFT JOIN MEMBER m ON t.checked_in_by = m.member_id
+        WHERE f.flight_id = #{flightId}
+          <!-- 명확한 결제 및 확정 조건 -->
+          AND pay.status = 'PAID'         <!-- 조건 1: 결제 완료 상태 -->
+          AND b.status = 'CONFIRMED'      <!-- 조건 2: 예약 확정 상태 -->
+          AND t.hold_status = 'CONFIRMED' <!-- 조건 3: 티켓 확정 상태 -->
+        ORDER BY s.seat_no ASC
+    </select>
+
+    <!-- 3. 티켓 상태 업데이트 (동적 쿼리 구문 수정) -->
+    <update id="updateTicketStatus" parameterType="kr.spring.staff.operation.vo.CheckVO">
+        UPDATE TICKET
+        SET checkin_status = #{checkinStatus}
+            <!-- 수정: 쌍따옴표 내부에 홑따옴표 사용 -->
+            <if test="checkinStatus == 'CHECKED_IN'">
+                , checked_in_at = SYSTIMESTAMP
+                , checked_in_by = #{checkedInBy}
+            </if>
+            <if test="checkinStatus == 'BOARDED'">
+                , boarded_at = SYSTIMESTAMP
+                , boarded_by = #{checkedInBy}
+            </if>
+        WHERE ticket_id = #{ticketId}
+    </update>
+
+</mapper>
