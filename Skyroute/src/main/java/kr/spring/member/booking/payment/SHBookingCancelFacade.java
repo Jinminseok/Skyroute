@@ -233,7 +233,7 @@ public class SHBookingCancelFacade {
 
     	} catch (RuntimeException e) {
 
-    		log.error(
+    		log.error(    
     				"<<환불 정합성 오류>> "
     				+ "PortOne 취소 성공 후 DB 반영 실패 "
     				+ "bookingId={}, "
