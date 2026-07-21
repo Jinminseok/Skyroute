@@ -1,8 +1,42 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
-<th:block th:fragment="header">
 
+<th:block th:fragment="header">
+<style>
+/* 프로필 링크 전체 레이아웃 */
+.sr-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px 5px 6px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    color: #0f172a;
+    font-size: 13.5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+.sr-profile:hover {
+    border-color: #2563eb;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+.sr-profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+</style>
 	<header class="sr-header">
 
 		<!-- ================= 상단 유틸리티 바 ================= -->
@@ -52,12 +86,8 @@
 					</div>
 				</div>
 
-				<span class="sr-topbar-divider" aria-hidden="true"></span>
-
-				<span class="sr-topbar-locale">
-					<span class="material-symbols-outlined" aria-hidden="true">language</span>
-					대한민국 <i>|</i> 한국어
-				</span>
+				
+				
 
 				<th:block sec:authorize="!isAuthenticated()">
 					<span class="sr-topbar-divider" aria-hidden="true"></span>
@@ -186,7 +216,7 @@
 								<a th:href="@{/member/member_booking}">
 									<span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
 									<span>
-										<b>예약 조회 · 변경</b>
+										<b>예약 조회 · 취소</b>
 										<small>예약 확인 및 취소</small>
 									</span>
 								</a>
@@ -212,14 +242,7 @@
 										<b>운항 노선</b>
 										<small>취항지 및 노선 안내</small>
 									</span>
-								</a>
-								<a th:href="@{/member/member_functions}">
-									<span class="material-symbols-outlined" aria-hidden="true">apps</span>
-									<span>
-										<b>기능 한눈에 보기</b>
-										<small>서비스 전체 기능</small>
-									</span>
-								</a>
+								</a>							
 							</div>
 						</div>
 						
@@ -327,10 +350,11 @@
 
 					<th:block sec:authorize="isAuthenticated()">
 						<a th:href="@{/member/member_mypage}" class="sr-profile">
-							<img th:src="@{/member/photoView}" alt="" class="sr-profile-photo">
-							<b th:text="${#authentication.principal.memberVO != null
-										 ? #authentication.principal.memberVO.name
-										 : #authentication.name}">회원</b>
+						    <span class="sr-profile-avatar" 
+						          th:text="${#strings.substring(#authentication.principal.memberVO != null ? #authentication.principal.memberVO.name : #authentication.name, 0, 1)}">회</span>
+						    <b th:text="${#authentication.principal.memberVO != null
+						                 ? #authentication.principal.memberVO.name
+						                 : #authentication.name}">회원</b>
 						</a>
 
 						<button type="button" class="sr-login-button" id="logout">로그아웃</button>
