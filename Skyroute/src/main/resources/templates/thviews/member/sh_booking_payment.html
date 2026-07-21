@@ -199,12 +199,26 @@
 			*/
 			if (rsp.code != null) {
 				console.warn('PortOne 결제 미완료 응답:', rsp);
-				
-				const failureMessage = rsp.pgMessage || rsp.message || '결제가 완료되지 않았습니다.';
-				
-				alert('결제가 완료되지 않았습니다.\n' + failureMessage + '\n\n좌석 선점 시간이 남아 있으면 다시 결제할 수 있습니다.');
-				
-				payBtn.disabled = false;
+
+				const failureMessage =
+					rsp.pgMessage || rsp.message || '결제가 완료되지 않았습니다.';
+
+				try {
+					await postJson(
+						'/booking/reserve/pay/cancel',
+						{ bookingId }
+					);
+				} catch (cancelError) {
+					console.error('좌석 반납 처리 오류:', cancelError);
+				}
+
+				alert(
+					'결제가 취소되었습니다.\n'
+					+ failureMessage
+					+ '\n선택한 좌석이 반납됩니다.'
+				);
+
+				location.href = '/main/home';
 				return;
 			}
 

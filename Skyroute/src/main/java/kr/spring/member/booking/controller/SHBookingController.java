@@ -453,6 +453,8 @@ public class SHBookingController {
 				defaultValue = "false"
 			)
 			boolean guardianConsent,
+			@RequestParam(name = "paymentMethod")
+			String paymentMethod,
 			@AuthenticationPrincipal
 			PrincipalDetails principal,
 			RedirectAttributes redirectAttributes) {
@@ -494,6 +496,22 @@ public class SHBookingController {
 			return "redirect:/booking/reserve/confirm";
 		}
 
+		
+		if (!List.of(
+				"KAKAOPAY",
+				"CARD",
+				"TOSSPAY",
+				"TRANSFER"
+		).contains(paymentMethod)) {
+
+			redirectAttributes.addFlashAttribute(
+					"error",
+					"지원하지 않는 결제수단입니다."
+			);
+
+			return "redirect:/booking/reserve/confirm";
+		}
+		
 		Long memberId = getMemberId(principal);
 
 		try {
@@ -504,8 +522,19 @@ public class SHBookingController {
 							memberId
 					);
 
-			return "redirect:/booking/reserve/payment?bookingId="
-					+ bookingId;
+			if ("KAKAOPAY".equals(paymentMethod)
+					|| "CARD".equals(paymentMethod)) {
+
+				return "redirect:/booking/reserve/payment?bookingId="
+						+ bookingId
+						+ "&method="
+						+ paymentMethod;
+			}
+
+			return "redirect:/booking/reserve/toss-payment?bookingId="
+					+ bookingId
+					+ "&method="
+					+ paymentMethod;
 
 		} catch (SHSeatTakenException e) {
 
@@ -577,6 +606,75 @@ public class SHBookingController {
 		return "thviews/member/sh_booking_payment";
 	}
 	
+	
+	@GetMapping("/toss-payment")
+	public String tossPayment(
+			@RequestParam(name = "bookingId")
+			Long bookingId,
+			@RequestParam(name = "method")
+			String method,
+			@AuthenticationPrincipal
+			PrincipalDetails principal,
+			Model model,
+			RedirectAttributes redirectAttributes) {
+
+		if (!List.of(
+				"TOSSPAY",
+				"TRANSFER"
+		).contains(method)) {
+
+			redirectAttributes.addFlashAttribute(
+					"error",
+					"지원하지 않는 토스 결제수단입니다."
+			);
+
+			return "redirect:/main/home";
+		}
+
+		Long memberId = getMemberId(principal);
+
+		SHBookingVO booking =
+				shBookingService.getBookingDetail(
+						bookingId,
+						memberId
+				);
+
+		if (booking == null
+				|| !"PENDING".equals(booking.getStatus())) {
+
+			redirectAttributes.addFlashAttribute(
+					"error",
+					"결제할 수 있는 예약 정보를 찾을 수 없습니다."
+			);
+
+			return "redirect:/main/home";
+		}
+
+		model.addAttribute(
+				"booking",
+				booking
+		);
+
+		model.addAttribute(
+				"paymentMethod",
+				method
+		);
+
+		model.addAttribute(
+				"holdMinutes",
+				10
+		);
+
+		model.addAttribute(
+				"activeMenu",
+				"book"
+		);
+
+		return "thviews/member/toss_booking_payment";
+	}
+	
+	
+	
 	/* ========================= 결제 (PortOne V2) ========================= */
 
 	/** 결제 준비: PAYMENT(READY) 생성 + 결제창에 넘길 정보 반환 */
@@ -618,6 +716,44 @@ public class SHBookingController {
 	    ) {
 	    	return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("result", "FAIL","message", e.getMessage()));
 	    }
+	}
+	
+	// 토스 결제 준비
+	@PostMapping("/toss/prepare")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> tossPrepare(
+			@RequestBody SHPayDto.Prepare req,
+			@AuthenticationPrincipal PrincipalDetails principal) {
+
+		try {
+			if (!"TOSSPAY".equals(req.method()) && !"TRANSFER".equals(req.method())) {
+				throw new IllegalStateException("지원하지 않는 토스 결제수단입니다.");
+			}
+
+			Long memberId = getMemberId(principal);
+			String orderId = shBookingService.preparePayment(req.bookingId(), memberId, req.method());
+			SHBookingVO booking = shBookingService.getBookingDetail(req.bookingId(), memberId);
+
+			if (booking == null) {
+				throw new IllegalStateException("예약 정보를 찾을 수 없습니다.");
+			}
+
+			Map<String, Object> result = new HashMap<>();
+			result.put("clientKey", tossClientKey);
+			result.put("customerKey", "SKYROUTE-" + memberId);
+			result.put("orderId", orderId);
+			result.put("orderName", buildOrderName(booking));
+			result.put("totalAmount", booking.getTotalAmount());
+
+			return ResponseEntity.ok(result);
+
+		} catch (SHSeatTakenException | IllegalStateException e) {
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body(Map.of(
+							"result", "FAIL",
+							"message", e.getMessage()
+					));
+		}
 	}
 
 	/** 결제 완료: PortOne 서버 검증 → 좌석 확정 / 실패 시 환불 */
@@ -665,6 +801,112 @@ public class SHBookingController {
 		}
 		return res;
 	}
+	
+	// 토스 결제 성공
+	@GetMapping("/toss/success")
+	public String tossSuccess(
+			@RequestParam Long bookingId,
+			@RequestParam String paymentKey,
+			@RequestParam String orderId,
+			@RequestParam Long amount,
+			@AuthenticationPrincipal PrincipalDetails principal,
+			RedirectAttributes redirectAttributes) {
+
+		Long memberId = getMemberId(principal);
+		SHBookingVO booking = shBookingService.getBookingDetail(bookingId, memberId);
+
+		if (booking == null) {
+			return "redirect:/main/home";
+		}
+
+		if ("CONFIRMED".equals(booking.getStatus())) {
+			return "redirect:/booking/reserve/complete?bookingId=" + bookingId;
+		}
+
+		if (!"PENDING".equals(booking.getStatus())) {
+			redirectAttributes.addFlashAttribute("paymentError", "결제할 수 있는 예약 상태가 아닙니다.");
+			return "redirect:/main/home";
+		}
+
+		SHPaymentVO payment = booking.getPayment();
+
+		if (payment == null
+				|| !"READY".equals(payment.getStatus())
+				|| !"TOSS_PAYMENTS".equals(payment.getPaymentProvider())) {
+
+			redirectAttributes.addFlashAttribute("paymentError", "토스 결제 준비 정보를 찾을 수 없습니다.");
+			return "redirect:/booking/reserve/payment?bookingId=" + bookingId;
+		}
+
+		if (!Objects.equals(payment.getMerchantUid(), orderId)) {
+			redirectAttributes.addFlashAttribute("paymentError", "토스 주문번호가 일치하지 않습니다.");
+			return "redirect:/booking/reserve/payment?bookingId=" + bookingId;
+		}
+
+		if (!Objects.equals(payment.getAmount(), amount)
+				|| !Objects.equals(booking.getTotalAmount(), amount)) {
+
+			redirectAttributes.addFlashAttribute("paymentError", "토스 결제금액이 예약 금액과 일치하지 않습니다.");
+			return "redirect:/booking/reserve/payment?bookingId=" + bookingId;
+		}
+
+		JsonNode tossPayment;
+
+		try {
+			tossPayment = tossPaymentsClient.confirmPayment(paymentKey, orderId, amount);
+		} catch (IllegalStateException e) {
+			redirectAttributes.addFlashAttribute("paymentError", e.getMessage());
+			return "redirect:/booking/reserve/payment?bookingId=" + bookingId;
+		}
+
+		if (!"DONE".equals(tossPayment.path("status").asText())) {
+			redirectAttributes.addFlashAttribute("paymentError", "토스 결제가 완료되지 않았습니다.");
+			return "redirect:/booking/reserve/payment?bookingId=" + bookingId;
+		}
+
+		String confirmedOrderId = tossPayment.path("orderId").asText();
+		long confirmedAmount = tossPayment.path("totalAmount").asLong();
+		String partialCancelableYn = tossPayment.path("isPartialCancelable").asBoolean(false) ? "Y" : "N";
+
+		if (!Objects.equals(orderId, confirmedOrderId)) {
+			try {
+				tossPaymentsClient.cancelPayment(paymentKey, "주문번호 검증 실패");
+			} catch (Exception cancelException) {
+				log.error("토스 자동취소 실패 paymentKey={}", paymentKey, cancelException);
+			}
+
+			shBookingService.failPayment(bookingId, memberId);
+			redirectAttributes.addFlashAttribute("paymentError", "토스 주문번호 검증에 실패했습니다.");
+			return "redirect:/main/home";
+		}
+
+		try {
+			shBookingService.confirmPayment(
+					bookingId,
+					memberId,
+					paymentKey,
+					payment.getMethod(),
+					confirmedAmount,
+					"TOSS_PAYMENTS",
+					partialCancelableYn
+			);
+
+			return "redirect:/booking/reserve/complete?bookingId=" + bookingId;
+
+		} catch (SHSeatTakenException | IllegalStateException e) {
+			try {
+				tossPaymentsClient.cancelPayment(paymentKey, "예약 확정 실패 자동 환불");
+			} catch (Exception cancelException) {
+				log.error("토스 자동환불 실패 paymentKey={}", paymentKey, cancelException);
+			}
+
+			shBookingService.failPayment(bookingId, memberId);
+			redirectAttributes.addFlashAttribute("paymentError", e.getMessage());
+
+			return "redirect:/main/home";
+		}
+	}
+	
 
 	/** 결제창 취소/이탈: 좌석 반납 */
 	@PostMapping("/pay/cancel")
@@ -676,6 +918,41 @@ public class SHBookingController {
 		shBookingService.failPayment(req.bookingId(), getMemberId(principal));
 		return Map.of("result", "CANCELLED");
 	}
+	
+	
+	// 토스 결제 실패
+	@GetMapping("/toss/fail")
+	public String tossFail(
+			@RequestParam Long bookingId,
+			@RequestParam(required = false) String code,
+			@RequestParam(required = false) String message,
+			@AuthenticationPrincipal PrincipalDetails principal,
+			RedirectAttributes redirectAttributes) {
+
+		Long memberId = getMemberId(principal);
+
+		shBookingService.failPayment(
+				bookingId,
+				memberId
+		);
+
+		String errorMessage =
+				hasText(message)
+				? message
+				: "토스 결제가 취소되었거나 완료되지 않았습니다.";
+
+		if (hasText(code)) {
+			errorMessage += " (" + code + ")";
+		}
+
+		redirectAttributes.addFlashAttribute(
+				"paymentError",
+				errorMessage
+		);
+
+		return "redirect:/main/home";
+	}
+	
 
 	/* ---- 결제 헬퍼 ---- */
 	
