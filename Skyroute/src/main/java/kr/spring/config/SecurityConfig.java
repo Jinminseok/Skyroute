@@ -73,11 +73,11 @@ public class SecurityConfig{
 				)
 				// 일반 로그인 설정
 				.formLogin(login -> login 
-						.loginPage("/member/login")
-						.defaultSuccessUrl("/", true)
-						.failureHandler(authenticationFailureHandler)
-						.usernameParameter("id")
-						.passwordParameter("password"))
+				        .loginPage("/member/login")
+				        .successHandler(authenticationSuccessHandler) 
+				        .failureHandler(authenticationFailureHandler) 
+				        .usernameParameter("id")
+				        .passwordParameter("password"))
 				
 				// 로그아웃 설정
 				.logout(logout -> logout 

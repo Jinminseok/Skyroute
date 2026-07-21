@@ -1,5 +1,7 @@
 package kr.spring.member.security;
 
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,13 +24,30 @@ public class UserSecurityService implements UserDetailsService {
 	private final MemberService memberService;
 
 	@Override
-	public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException{
+	public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
 		log.debug("[Login Check 1 - UserSecurityService] 로그인 아이디 :" + id);
+		
 		MemberVO member = memberService.selectCheckMember(id);
-		if (member==null || member.getRole().equals(UserRole.INACTIVE.getValue())) {
-			log.debug("[Login Check 1] 로그인 아이디가 없거나 탈퇴회원");
-			throw new UsernameNotFoundException("UserNotFound");
+		
+		// 1. 회원 정보가 없는 경우
+		if (member == null) {
+		    throw new UsernameNotFoundException("UserNotFound");
 		}
+
+		String status = member.getStatus();
+
+		// 2. 탈퇴회원 또는 휴면회원 체크 -> DisabledException 사용
+		if ("DELETED".equals(status) || "INACTIVE".equals(status) || UserRole.INACTIVE.getValue().equals(member.getRole())) {
+		    log.debug("[Login Check] 탈퇴/비활성화 회원 : " + id);
+		    throw new DisabledException("UserDeletedOrInactive");
+		}
+
+		// 3. 정지 회원 체크 -> LockedException 사용
+		if ("SUSPENDED".equals(status) || "SUSPENDED".equals(member.getRole())) {
+		    log.debug("[Login Check] 이용 정지 회원 : " + id);
+		    throw new LockedException("UserSuspended");
+		}
+
 		return new PrincipalDetails(member);
 	}
 }

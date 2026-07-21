@@ -97,21 +97,63 @@
 			display: none;
 			text-align: center;
 		}
+		/* 에러 박스 디자인 스타일 */
+		.error-box {
+		    display: flex;
+		    align-items: center;
+		    gap: 8px;
+		    background-color: #fef2f2; /* 은은하고 고급스러운 연분홍/빨간 배경 */
+		    border: 1px solid #fecaca;   /* 테두리 선 */
+		    color: #dc2626;             /* 경고 빨간색 폰트 */
+		    padding: 12px 16px;
+		    border-radius: 10px;
+		    font-size: 13px;
+		    font-weight: 500;
+		    margin-bottom: 20px;        /* 아래 input 폼과의 여백 */
+		    line-height: 1.4;
+		    word-break: keep-all;       /* 단어 단위 줄바꿈으로 깔끔함 유지 */
+		    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.05);
+		}
+		
+		.error-box .error-icon {
+		    font-size: 18px;
+		    color: #dc2626;
+		    flex-shrink: 0;             /* 아이콘 찌그러짐 방지 */
+		}
 	</style>
 </head>  
 <body>	
 
-	<div class="login-container">
+  <div class="login-container">
     <div class="logo-wrap">
       <div class="logo-box">SR</div>
       <h1>SkyRoute 로그인</h1>
       <p>SkyRoute 하늘을 누리다</p>
     </div>
 
-    <div class="error-box" th:if="${error == 'error'}">아이디 또는 비밀번호가 일치하지 않습니다.</div>
-    <div class="error-box" th:if="${error == 'error_suspended'}">이 계정은 이용이 정지된 회원입니다.</div>
+	<!-- 🎯 상태/권한별 에러 메시지 출력 구역 -->
+	<div class="error-box" th:if="${error == 'error'}">
+	    <span class="material-symbols-outlined error-icon">error</span>
+	    <span>아이디 또는 비밀번호가 일치하지 않습니다.</span>
+	</div>
+	
+	<div class="error-box" th:if="${error == 'error_suspended'}">
+	    <span class="material-symbols-outlined error-icon">block</span>
+	    <span>이 계정은 이용이 정지된 회원 계정입니다.</span>
+	</div>
+	
+	<div class="error-box" th:if="${error == 'error_deleted'}">
+	    <span class="material-symbols-outlined error-icon">person_off</span>
+	    <span>존재하지 않거나 탈퇴/비활성화된 회원입니다.</span>
+	</div>
+	
+	<div class="error-box" th:if="${error == 'error_admin_not_allowed'}">
+	    <span class="material-symbols-outlined error-icon">admin_panel_settings</span>
+	    <span>관리자/스태프 계정은 전용 로그인 페이지를 이용해 주세요.</span>
+	</div>
 
-    <form th:action="@{login}" id="member_login" method="post">
+    <!-- 🎯 th:action 절대 경로(/member/login) 지정으로 시큐리티 POST 캐치 확실히 보장 -->
+    <form th:action="@{/member/login}" id="member_login" method="post">
       
       <input type="hidden" id="csrfParameterName" th:value="${_csrf.parameterName}">
       <input type="hidden" id="csrfToken" th:value="${_csrf.token}">
@@ -150,6 +192,7 @@
   </div>
 
 
+  <!-- 아이디 찾기 모달 -->
   <div class="modal-overlay" id="findIdModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -179,6 +222,7 @@
     </div>
   </div>
 
+  <!-- 비밀번호 찾기 모달 -->
   <div class="modal-overlay" id="findPwModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -324,7 +368,7 @@
         });
       }
 
-      //  비밀번호 찾기 버튼 클릭 이벤트 처리 
+      // 비밀번호 찾기 버튼 클릭 이벤트 처리 
       var btnSubmitPw = document.getElementById('btnSubmitFindPw'); 
       if(btnSubmitPw) {
         btnSubmitPw.addEventListener('click', function(e) {
