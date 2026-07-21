@@ -41,6 +41,11 @@ import kr.spring.member.vo.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import kr.spring.member.booking.payment.TossPaymentsClient;
+import kr.spring.member.booking.vo.SHPaymentVO;
+
 
 /*
  * 예약 진행 컨트롤러 (회원 전용)
@@ -80,6 +85,10 @@ public class SHBookingController {
 	
 	private final SHIamportClient iamportClient;
 	
+	private final TossPaymentsClient tossPaymentsClient;
+
+	@Value("${toss.client-key}")
+	private String tossClientKey;
 	@Value("${imp.code}")
 	private String impCode;
 	@Value("${imp.channel-kakao}")
@@ -635,7 +644,7 @@ public class SHBookingController {
 
 		try {
 			/* 3) 좌석 확정 + 금액 검증(서버 조회 금액 기준) */
-			shBookingService.confirmPayment(req.bookingId(), memberId, req.merchantUid(), req.method(), p.getAmount());
+			shBookingService.confirmPayment(req.bookingId(), memberId, req.merchantUid(), req.method(), p.getAmount(), "PORTONE", null);
 
 			res.put("result", "PAID");
 			res.put("redirectUrl", "/booking/reserve/complete?bookingId=" + req.bookingId());

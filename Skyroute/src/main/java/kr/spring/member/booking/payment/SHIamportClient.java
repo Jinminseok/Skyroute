@@ -61,7 +61,7 @@ public class SHIamportClient {
 	 * @param paymentId 결제창에 넘긴 주문번호(= merchant_uid)
 	 */
 	public SHIamportPayment getPayment(String paymentId) {
-
+		
 		Request req = new Request.Builder()
 				.url(API_HOST + "/payments/" + paymentId)
 				.addHeader("Authorization", authHeader())
@@ -118,6 +118,7 @@ public class SHIamportClient {
 	 * 값이 있으면 부분 취소 요청이다.
 	 */
 	public SHIamportCancellation cancelPayment(String paymentId, String reason, Long amount, Long currentCancellableAmount) {
+		log.warn("### 수정된 SHIamportClient 실행됨 ### paymentId={}, amount={}, currentCancellableAmount={}", paymentId, amount, currentCancellableAmount);
 		
 		if(paymentId == null || paymentId.isBlank()) {
 			throw new IllegalArgumentException("PortOne paymentId가 필요합니다.");
@@ -143,7 +144,7 @@ public class SHIamportClient {
 	    }
 
 	    try {
-
+	    	log.info("<<PortOne 취소 요청>> paymentId={}, amount={}, currentCancellableAmount={}, body={}", paymentId, amount, currentCancellableAmount, om.writeValueAsString(body));
 	        Request req = new Request.Builder()
 	                .url(
 	                        API_HOST
@@ -169,25 +170,15 @@ public class SHIamportClient {
 	            JsonNode root = readJson(res);
 
 	            if (!res.isSuccessful()) {
+	                String type = root.path("type").asText();
+	                String message = root.path("message").asText();
+	                String pgCode = root.path("pgCode").asText();
+	                String pgMessage = root.path("pgMessage").asText();
 
-	                String msg =
-	                        root.path("message").asText();
+	                log.warn("<<PortOne 취소 실패>> paymentId={}, http={}, type={}, message={}, pgCode={}, pgMessage={}, body={}", paymentId, res.code(), type, message, pgCode, pgMessage, root.toString());
 
-	                if (msg == null || msg.isBlank()) {
-	                    msg = root.path("type").asText();
-	                }
-
-	                log.warn(
-	                        "<<PortOne 취소 실패>> "
-	                        + "paymentId={}, http={}, message={}",
-	                        paymentId,
-	                        res.code(),
-	                        msg
-	                );
-
-	                throw new IllegalStateException(
-	                        "PortOne 결제 취소 실패: " + msg
-	                );
+	                String detail = !pgMessage.isBlank() ? pgMessage : (!message.isBlank() ? message : type);
+	                throw new IllegalStateException("PortOne 결제 취소 실패: " + detail);
 	            }
 
 	            JsonNode cancellation =

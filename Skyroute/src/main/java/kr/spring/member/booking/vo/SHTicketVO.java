@@ -63,6 +63,10 @@ public class SHTicketVO {
 	private LocalDateTime departureTime;
 
 	private LocalDateTime arrivalTime;
+	
+	
+	// 결항 여부 확인
+	private String flightStatus;
 
 
 	public boolean isCancelled() {

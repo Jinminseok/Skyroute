@@ -22,8 +22,8 @@
 
   <main class="main">
     <div>
-      <h1>기재(항공기) 등록 및 운임 시즌 관리</h1>
-      <p class="desc">신규 항공기의 제원 등록 및 운임 시즌 기준 데이터를 통제합니다.</p>
+      <h1>기재·운임 및 환불 정책 관리</h1>
+	  <p class="desc">신규 항공기의 제원, 운임 시즌과 취소·환불 수수료 기준 데이터를 관리합니다.</p>
       
       <div style="display: flex; flex-direction: column; gap: 24px; margin-top: 24px;">
         
@@ -89,6 +89,66 @@
             </table>
           </div>
         </div>
+        
+        <div class="card">
+			<div class="toolbar">
+				<h3 style="font-size:16px; font-weight:700;">
+					취소·환불 수수료 정책 (REFUND_POLICY)
+				</h3>
+		
+				<div class="grow"></div>
+		
+				<button type="button"
+						class="btn btn-ghost btn-sm"
+						onclick="openRefundPolicyModal()">
+					전체 조회 및 관리
+				</button>
+			</div>
+		
+			<div class="table-wrap">
+				<table class="data">
+					<thead>
+						<tr>
+							<th>취소 시점</th>
+							<th>수수료율</th>
+							<th>수정 여부</th>
+						</tr>
+					</thead>
+		
+					<tbody>
+						<tr th:each="policy, stat : ${refundPolicyList}"
+							th:if="${stat.index < 3}">
+		
+							<td th:text="${policy.policyName}"></td>
+		
+							<td th:id="'main-refund-rate-' + ${policy.policyId}"
+								th:text="|${policy.feeRate}%|">
+							</td>
+		
+							<td>
+								<span th:if="${policy.editableYn == 'Y'}"
+									  style="color:#10b981; font-weight:600;">
+									수정 가능
+								</span>
+		
+								<span th:if="${policy.editableYn == 'N'}"
+									  style="color:#64748b; font-weight:600;">
+									고정
+								</span>
+							</td>
+						</tr>
+		
+						<tr th:if="${#lists.isEmpty(refundPolicyList)}">
+							<td colspan="3"
+								style="text-align:center; padding:20px;">
+								등록된 환불정책이 없습니다.
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+        
 
       </div>
     </div>
@@ -255,6 +315,108 @@
 			</form>
 		</div>
 	</div>
+	
+	<div id="refundPolicyModal" class="modal-overlay" style="display:none;">
+		<div class="modal-content-large">
+	
+			<div class="modal-header">
+				<h2 class="modal-title">취소·환불 수수료 정책 관리</h2>
+				<button type="button" class="btn btn-ghost btn-sm" onclick="closeRefundPolicyModal()">닫기 ✕</button>
+			</div>
+	
+			<div style="
+				background:#eff6ff;
+				color:#1d4ed8;
+				padding:12px;
+				border-radius:6px;
+				font-size:13px;
+				margin-bottom:16px;
+				font-weight:500;
+			">
+				<span class="material-symbols-outlined" style="font-size:16px; vertical-align:-3px;">
+					info
+				</span>
+	
+				취소 시점 구간은 고정되며 수수료율만 변경할 수 있습니다.
+				출발 91일 이상 전 취소는 수수료 0%로 고정됩니다.
+			</div>
+	
+			<div class="table-wrap scrollable-wrap">
+				<table class="data">
+	
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>취소 시점</th>
+							<th>적용 범위</th>
+							<th>수수료율</th>
+							<th>관리</th>
+						</tr>
+					</thead>
+	
+					<tbody>
+						<tr th:each="policy : ${refundPolicyList}">
+	
+							<td th:text="${policy.policyId}"></td>
+	
+							<td th:text="${policy.policyName}"></td>
+	
+							<td>
+								<span th:if="${policy.maxDaysBefore == null}" th:text="|${policy.minDaysBefore}일 이상|">
+								</span>
+	
+								<span th:if="${policy.maxDaysBefore != null}" th:text="|${policy.minDaysBefore}일 ~ ${policy.maxDaysBefore}일|">
+								</span>
+							</td>
+	
+							<td>
+								<div style="
+									display:flex;
+									align-items:center;
+									gap:6px;
+								">
+									<input type="number"
+										   class="form-input"
+										   min="0"
+										   max="99.99"
+										   step="0.01"
+										   th:id="'refund-rate-' + ${policy.policyId}"
+										   th:value="${policy.feeRate}"
+										   th:disabled="${policy.editableYn == 'N'}"
+										   style="
+										   	width:110px;
+										   	margin-bottom:0;
+										   ">
+	
+									<span>%</span>
+								</div>
+							</td>
+	
+							<td>
+								<button type="button" class="btn btn-primary btn-sm"
+										th:if="${policy.editableYn == 'Y'}"
+										th:attr="onclick=|updateRefundPolicy(${policy.policyId})|">
+									저장
+								</button>
+	
+								<button type="button" class="btn btn-ghost btn-sm"
+										disabled
+										th:if="${policy.editableYn == 'N'}">
+									0% 고정
+								</button>
+							</td>
+						</tr>
+	
+						<tr th:if="${#lists.isEmpty(refundPolicyList)}">
+							<td colspan="5" style="text-align:center; padding:30px;">
+								등록된 환불정책이 없습니다.
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
 
 <script>
 	    // ====== 기재(항공기) 모달 제어 함수 ======
@@ -371,6 +533,120 @@
 			.catch(error => {
 				console.error('Error:', error);
 				alert("통신 중 오류가 발생했습니다.");
+			});
+		}
+		
+		
+		
+		function openRefundPolicyModal() {
+			document.getElementById('refundPolicyModal').style.display = 'flex';
+		}
+
+		function closeRefundPolicyModal() {document.getElementById('refundPolicyModal').style.display = 'none';
+		}
+
+		function updateRefundPolicy(policyId) {
+
+			const input = document.getElementById('refund-rate-' + policyId);
+
+			const feeRate = input.value;
+
+			if (feeRate === '') {
+				alert('수수료율을 입력해주세요.');
+				return;
+			}
+
+			const numberRate = Number(feeRate);
+
+			if (Number.isNaN(numberRate)
+					|| numberRate < 0
+					|| numberRate >= 100) {
+
+				alert('수수료율은 0 이상 100 미만이어야 합니다.');
+
+				return;
+			}
+
+			const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+
+			const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+			const formData = new URLSearchParams();
+
+			formData.append(
+				'policyId',
+				policyId
+			);
+
+			formData.append(
+				'feeRate',
+				feeRate
+			);
+
+			fetch('/admin/refundPolicy/update', {
+				method: 'POST',
+				headers: {
+					'Content-Type':
+						'application/x-www-form-urlencoded',
+					[csrfHeader]: csrfToken
+				},
+				body: formData
+			})
+			.then(response => {
+
+				if (!response.ok) {
+					throw new Error(
+						'네트워크 응답 오류'
+					);
+				}
+
+				return response.text();
+			})
+			.then(result => {
+
+				if (result === 'success') {
+
+					const normalizedRate =
+						Number(feeRate)
+							.toFixed(2)
+							.replace(/\.?0+$/, '');
+
+					input.value = normalizedRate;
+
+					const mainRate =
+						document.getElementById(
+							'main-refund-rate-'
+							+ policyId
+						);
+
+					if (mainRate) {
+						mainRate.innerText =
+							normalizedRate + '%';
+					}
+
+					alert('환불 수수료율이 수정되었습니다.');
+
+				} else if (result === 'invalid') {
+
+					alert('수수료율 입력값을 확인해주세요.');
+
+				} else if (result === 'locked') {
+
+					alert('수정할 수 없는 환불정책입니다.');
+
+				} else {
+
+					alert('수수료율 수정 중 오류가 발생했습니다.');
+				}
+			})
+			.catch(error => {
+
+				console.error(
+					'Error:',
+					error
+				);
+
+				alert('통신 중 오류가 발생했습니다.');
 			});
 		}
 	</script>

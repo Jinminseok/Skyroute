@@ -1,6 +1,7 @@
 package kr.spring.member.booking.dao;
 
 import java.util.List;
+import java.math.BigDecimal;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -62,6 +63,9 @@ public interface SHBookingMapper {
 									@Param("status") String status);
 
 
+	public int updateReadyPaymentMethod(@Param("bookingId") Long bookingId, @Param("method") String method, @Param("paymentProvider") String paymentProvider);
+	
+	
 	/* ===================== 좌석 해제 ===================== */
 
 	public int releaseTicketsByBooking(@Param("bookingId") Long bookingId);
@@ -105,6 +109,25 @@ public interface SHBookingMapper {
 	        @Param("paymentId") Long paymentId,
 	        @Param("refundAmount") Long refundAmount
 	);
+	
+	
+	public int insertRefundWithPolicy(
+			@Param("paymentId") Long paymentId,
+			@Param("ticketId") Long ticketId,
+			@Param("policyId") Long policyId,
+			@Param("originalAmount") Long originalAmount,
+			@Param("appliedFeeRate") BigDecimal appliedFeeRate,
+			@Param("feeAmount") Long feeAmount,
+			@Param("amount") Long amount,
+			@Param("refundType") String refundType,
+			@Param("reason") String reason
+	);
+
+	public int updatePaymentRefund(
+			@Param("paymentId") Long paymentId,
+			@Param("refundAmount") Long refundAmount
+	);
+	
 
 	public int updateBookingCancelled(
 	        @Param("bookingId") Long bookingId

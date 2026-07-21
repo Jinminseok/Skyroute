@@ -6,6 +6,7 @@ import kr.spring.member.booking.vo.SHBookingPassengerVO;
 import kr.spring.member.booking.vo.SHBookingVO;
 import kr.spring.member.booking.vo.SHReserveForm;
 import kr.spring.member.booking.vo.SHSeatMapVO;
+import kr.spring.member.booking.payment.BookingCancelQuote;
 
 public interface SHBookingService {
 
@@ -38,7 +39,7 @@ public interface SHBookingService {
 	 * PortOne 검증 결과 금액이 일치하면
 	 * PAYMENT → PAID, TICKET → CONFIRMED, BOOKING → CONFIRMED
 	 */
-	public void confirmPayment(Long bookingId, Long memberId, String impUid, String method, Long paidAmount);
+	public void confirmPayment(Long bookingId, Long memberId, String externalPaymentKey, String method, Long paidAmount, String paymentProvider, String partialCancelableYn);
 
 	/* 결제 실패 / 사용자 취소 → 좌석 즉시 반납 */
 	public void failPayment(Long bookingId, Long memberId);
@@ -53,6 +54,20 @@ public interface SHBookingService {
 
 	/* ===== 취소 ===== */
 
+	// 고객 취소 시점의 환불정책을 조회해서 PortOne 요청이랑 DB 기록에 사용할 계산 결과 만들기
+	public BookingCancelQuote calculateCancellationQuote(
+			Long bookingId,
+			Long memberId
+	);
+	
+	// PortOne 취소 성공 후 미리 계산한 동일한 환불 결과를 내부 DB에 반영
+	public Long applyCancellation(
+			Long bookingId,
+			Long memberId,
+			String reason,
+			BookingCancelQuote quote
+	);
+	
 	/*
 	 * PortOne 전액 취소 성공 후
 	 * 내부 DB 상태를 일괄 반영한다.

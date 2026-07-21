@@ -2,6 +2,7 @@ package kr.spring.admin.controller;
 
 import java.util.List;
 import java.util.Map; // 추가: Map import
+import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,6 +26,8 @@ import kr.spring.admin.vo.RouteTypeVO;
 import kr.spring.admin.vo.SeasonVO;
 import kr.spring.admin.vo.StatVO; // 추가: StatVO import
 import kr.spring.member.vo.MemberVO;
+import kr.spring.admin.service.RefundPolicyService;
+import kr.spring.admin.vo.RefundPolicyVO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,6 +46,9 @@ public class AdminController {
 
 	@Autowired
 	private SeasonMapper seasonMapper; //시즌
+	
+	@Autowired
+	private RefundPolicyService refundPolicyService;
 
 	@Autowired
 	private AdminMemberMapper adminMemberMapper; //회원 관리
@@ -67,19 +73,23 @@ public class AdminController {
 
 		return "thviews/admin_main/admin_base1"; 
 	}
-
+	
 	@GetMapping("/admin/base2")
 	public String adminBase2(Model model) {
-		
+
 		// 항공기 목록 조회
 		List<AirCraftVO> aircraftList = airCraftService.selectListAircraft();
 		model.addAttribute("aircraftList", aircraftList);
-		
-		//시즌
+
+		// 시즌
 		List<SeasonVO> seasonList = seasonMapper.selectSeasonList();
 		model.addAttribute("seasonList", seasonList);
 
-		return "thviews/admin_main/admin_base2"; 
+		// 환불
+		List<RefundPolicyVO> refundPolicyList = refundPolicyService.selectRefundPolicyList();
+		model.addAttribute("refundPolicyList", refundPolicyList);
+
+		return "thviews/admin_main/admin_base2";
 	}
 
 	// 4. 전사 운영 통계 페이지 (기본 뷰 반환)
@@ -269,6 +279,41 @@ public class AdminController {
 			return "error";
 		}
 	}
+	
+	
+	@PostMapping("/admin/refundPolicy/update")
+	@ResponseBody
+	public String updateRefundPolicy(
+			@RequestParam long policyId,
+			@RequestParam BigDecimal feeRate) {
+
+		try {
+
+			refundPolicyService.updateFeeRate(policyId, feeRate);
+
+			return "success";
+
+		} catch (IllegalArgumentException e) {
+
+			log.warn("환불 수수료율 입력값 오류: {}", e.getMessage());
+
+			return "invalid";
+
+		} catch (IllegalStateException e) {
+
+			log.warn("환불 수수료율 수정 거부: {}", e.getMessage());
+
+			return "locked";
+
+		} catch (Exception e) {
+
+			log.error("환불 수수료율 수정 중 오류 발생", e);
+
+			return "error";
+		}
+	}
+	
+	
 
 	// 시스템 계정 및 가입 회원 관리 페이지 매핑
 	@GetMapping("/admin/accounts")

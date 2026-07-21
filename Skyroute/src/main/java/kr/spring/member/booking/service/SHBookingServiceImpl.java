@@ -1,17 +1,27 @@
 package kr.spring.member.booking.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.spring.admin.dao.RefundPolicyMapper;
+import kr.spring.admin.vo.RefundPolicyVO;
 import kr.spring.member.booking.dao.SHBookingMapper;
 import kr.spring.member.booking.exception.SHSeatTakenException;
+import kr.spring.member.booking.payment.BookingCancelQuote;
+import kr.spring.member.booking.payment.TicketRefundCalculation;
 import kr.spring.member.booking.vo.SHBookingPassengerVO;
 import kr.spring.member.booking.vo.SHBookingVO;
 import kr.spring.member.booking.vo.SHPassengerForm;
@@ -22,6 +32,7 @@ import kr.spring.member.booking.vo.SHSeatVO;
 import kr.spring.member.booking.vo.SHTicketVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 
 /*
  * 예약 서비스
@@ -56,6 +67,8 @@ import lombok.extern.slf4j.Slf4j;
 public class SHBookingServiceImpl implements SHBookingService {
 
 	private final SHBookingMapper shBookingMapper;
+	
+	private final RefundPolicyMapper refundPolicyMapper;
 
 
 	/* 좌석 HOLD 유지 시간 (분) */
@@ -267,23 +280,23 @@ public class SHBookingServiceImpl implements SHBookingService {
 		}
 
 		if (shBookingMapper.countActiveTicket(bookingId) == 0) {
-			throw new SHSeatTakenException(
-					"좌석 선점 시간이 만료되었습니다. 좌석을 다시 선택해 주세요.");
+			throw new SHSeatTakenException("좌석 선점 시간이 만료되었습니다. 좌석을 다시 선택해 주세요.");
 		}
 
+		String paymentProvider = resolvePaymentProvider(method);
 		SHPaymentVO payment = shBookingMapper.selectPaymentByBooking(bookingId);
 
-		/* 이미 READY 결제가 있으면 merchant_uid 를 재사용한다 (중복 생성 방지) */
 		if (payment != null && "READY".equals(payment.getStatus())) {
+			shBookingMapper.updateReadyPaymentMethod(bookingId, method, paymentProvider);
 			return payment.getMerchantUid();
 		}
 
 		SHPaymentVO newPayment = new SHPaymentVO();
-
 		newPayment.setBookingId(bookingId);
 		newPayment.setMethod(method);
 		newPayment.setAmount(booking.getTotalAmount());
 		newPayment.setMerchantUid(generateMerchantUid(bookingId));
+		newPayment.setPaymentProvider(paymentProvider);
 
 		shBookingMapper.insertPayment(newPayment);
 
@@ -292,8 +305,14 @@ public class SHBookingServiceImpl implements SHBookingService {
 
 
 	@Override
-	public void confirmPayment(Long bookingId, Long memberId,
-							   String impUid, String method, Long paidAmount) {
+	public void confirmPayment(
+			Long bookingId,
+			Long memberId,
+			String externalPaymentKey,
+			String method,
+			Long paidAmount,
+			String paymentProvider,
+			String partialCancelableYn) {
 
 		SHBookingVO booking = shBookingMapper.selectBooking(bookingId, memberId);
 
@@ -301,7 +320,6 @@ public class SHBookingServiceImpl implements SHBookingService {
 			throw new IllegalStateException("예약 정보를 찾을 수 없습니다.");
 		}
 
-		/* 이미 확정된 예약이면 아무것도 하지 않는다 (결제 콜백 중복 호출 방어) */
 		if ("CONFIRMED".equals(booking.getStatus())) {
 			return;
 		}
@@ -310,39 +328,35 @@ public class SHBookingServiceImpl implements SHBookingService {
 			throw new IllegalStateException("결제할 수 있는 상태가 아닙니다.");
 		}
 
-		/*
-		 * 위변조 검증
-		 *
-		 * 클라이언트가 보낸 금액이 아니라, PortOne 서버에서 조회한 실제 결제 금액을
-		 * 우리 원장 금액과 대조한다. 이 검증이 결제 파트의 존재 이유다.
-		 */
 		if (paidAmount == null || !paidAmount.equals(booking.getTotalAmount())) {
-
-			log.warn("<<결제 금액 불일치>> booking_id={}, 원장={}, 결제={}",
-					bookingId, booking.getTotalAmount(), paidAmount);
-
+			log.warn("<<결제 금액 불일치>> booking_id={}, 원장={}, 결제={}", bookingId, booking.getTotalAmount(), paidAmount);
 			throw new IllegalStateException("결제 금액이 예약 금액과 일치하지 않습니다.");
 		}
 
-		/* 좌석 확정 : 만료되지 않은 HOLDING 만 CONFIRMED 로 승격된다 */
 		int confirmed = shBookingMapper.confirmTickets(bookingId);
 
 		if (confirmed == 0) {
-			throw new SHSeatTakenException(
-					"좌석 선점 시간이 만료되었습니다. 결제를 취소하고 다시 예약해 주세요.");
+			throw new SHSeatTakenException("좌석 선점 시간이 만료되었습니다. 결제를 취소하고 다시 예약해 주세요.");
 		}
 
 		SHPaymentVO payment = new SHPaymentVO();
-
 		payment.setBookingId(bookingId);
-		payment.setImpUid(impUid);
 		payment.setMethod(method);
+		payment.setPaymentProvider(paymentProvider);
+		payment.setPartialCancelableYn(partialCancelableYn);
+
+		if ("PORTONE".equals(paymentProvider)) {
+			payment.setImpUid(externalPaymentKey);
+		} else if ("TOSS_PAYMENTS".equals(paymentProvider)) {
+			payment.setProviderPaymentKey(externalPaymentKey);
+		} else {
+			throw new IllegalStateException("지원하지 않는 결제 제공자입니다.");
+		}
 
 		shBookingMapper.updatePaymentPaid(payment);
-
 		shBookingMapper.updateBookingStatus(bookingId, "CONFIRMED");
 
-		log.debug("<<결제 확정>> booking_id={}, imp_uid={}, 좌석 {}석", bookingId, impUid, confirmed);
+		log.info("<<결제 확정>> bookingId={}, provider={}, method={}, 좌석={}석", bookingId, paymentProvider, method, confirmed);
 	}
 
 
@@ -404,6 +418,174 @@ public class SHBookingServiceImpl implements SHBookingService {
 	   취소 / 환불
 	   =================================================================== */
 
+	@Override
+	@Transactional(readOnly = true)
+	public BookingCancelQuote calculateCancellationQuote(Long bookingId, Long memberId) {
+
+		LocalDateTime calculatedAt = LocalDateTime.now();
+
+		SHBookingVO booking = shBookingMapper.selectBooking(bookingId, memberId);
+
+		if (booking == null) {
+			throw new IllegalStateException("예약 정보를 찾을 수 없습니다.");
+		}
+
+		SHPaymentVO payment = shBookingMapper.selectPaymentByBooking(bookingId);
+
+		List<SHTicketVO> tickets = shBookingMapper.selectTicketList(bookingId);
+
+		validateCustomerCancellationSource(booking,payment,tickets,calculatedAt);
+
+		List<TicketRefundCalculation> calculations = new ArrayList<>();
+
+		long totalOriginalAmount = 0L;
+		long totalFeeAmount = 0L;
+		long totalRefundAmount = 0L;
+
+		for (SHTicketVO ticket : tickets) {
+
+			long daysBefore = ChronoUnit.DAYS.between(calculatedAt.toLocalDate(), ticket.getDepartureTime().toLocalDate());
+
+			RefundPolicyVO policy = refundPolicyMapper.selectRefundPolicyByDays(daysBefore);
+
+			if (policy == null) {
+				throw new IllegalStateException(
+						"출발일까지 남은 기간에 해당하는 "
+						+ "환불정책을 찾을 수 없습니다."
+				);
+			}
+
+			BigDecimal feeRate = policy.getFeeRate();
+
+			validateFeeRate(feeRate);
+
+			long originalAmount = ticket.getFareAmount();
+
+			long feeAmount = calculateFeeAmount(originalAmount, feeRate);
+
+			long refundAmount = originalAmount - feeAmount;
+
+			if (refundAmount <= 0L) {
+				throw new IllegalStateException(
+						"계산된 환불금액이 0원 이하입니다."
+				);
+			}
+
+			TicketRefundCalculation calculation = new TicketRefundCalculation(ticket.getTicketId(),policy.getPolicyId(),originalAmount,feeRate,feeAmount,refundAmount,"CUSTOMER");
+
+			calculations.add(calculation);
+
+			totalOriginalAmount += originalAmount;
+			totalFeeAmount += feeAmount;
+			totalRefundAmount += refundAmount;
+		}
+
+		if (!Objects.equals(booking.getTotalAmount(),totalOriginalAmount) || !Objects.equals(payment.getAmount(), totalOriginalAmount)) {
+
+			throw new IllegalStateException(
+					"예약 원장 금액과 환불 대상 원금이 "
+					+ "일치하지 않습니다."
+			);
+		}
+
+		return new BookingCancelQuote(bookingId,totalOriginalAmount,totalFeeAmount, totalRefundAmount, calculations);
+	}
+	
+	// 새 DB 반영임
+	@Override
+	@Transactional
+	public Long applyCancellation(Long bookingId, Long memberId, String reason, BookingCancelQuote quote) {
+
+		SHBookingVO booking = shBookingMapper.selectBooking(bookingId, memberId);
+
+		if (booking == null) {
+			throw new IllegalStateException(
+					"예약 정보를 찾을 수 없습니다."
+			);
+		}
+
+		SHPaymentVO payment = shBookingMapper.selectPaymentByBooking(bookingId);
+
+		if (isCancellationCompleted(booking, payment)) {
+
+			return payment.getRefundAmount() == null
+					? payment.getAmount()
+					: payment.getRefundAmount();
+		}
+
+		List<SHTicketVO> tickets = shBookingMapper.selectTicketList(bookingId);
+
+		validateCustomerCancellationSource(booking, payment, tickets, LocalDateTime.now());
+
+		validateCancellationQuote(booking, payment, tickets, quote);
+
+		int cancelledTickets = shBookingMapper.cancelAllConfirmedTickets(bookingId);
+
+		if (cancelledTickets != tickets.size()) {
+			throw new IllegalStateException(
+					"티켓 상태가 변경되어 "
+					+ "예약 취소를 완료할 수 없습니다."
+			);
+		}
+
+		for (TicketRefundCalculation calculation : quote.ticketCalculations()) {
+
+			int inserted = shBookingMapper.insertRefundWithPolicy(
+									payment.getPaymentId(),
+									calculation.ticketId(),
+									calculation.policyId(),
+									calculation.originalAmount(),
+									calculation.appliedFeeRate(),
+									calculation.feeAmount(),
+									calculation.refundAmount(),
+									calculation.refundType(),
+									reason
+							);
+
+			if (inserted != 1) {
+				throw new IllegalStateException(
+						"환불 이력 저장에 실패했습니다."
+				);
+			}
+		}
+
+		int paymentUpdated = shBookingMapper.updatePaymentRefund(payment.getPaymentId(),quote.totalRefundAmount());
+
+		if (paymentUpdated != 1) {
+			throw new IllegalStateException(
+					"결제 상태가 변경되어 "
+					+ "환불 내역을 반영할 수 없습니다."
+			);
+		}
+
+		int bookingUpdated = shBookingMapper.updateBookingCancelled(bookingId);
+
+		if (bookingUpdated != 1) {
+			throw new IllegalStateException(
+					"예약 상태가 변경되어 "
+					+ "취소를 완료할 수 없습니다."
+			);
+		}
+
+		log.info(
+				"<<환불정책 적용 예약 취소>> "
+				+ "bookingId={}, "
+				+ "ticketCount={}, "
+				+ "originalAmount={}, "
+				+ "feeAmount={}, "
+				+ "refundAmount={}",
+				bookingId,
+				tickets.size(),
+				quote.originalAmount(),
+				quote.totalFeeAmount(),
+				quote.totalRefundAmount()
+		);
+
+		return quote.totalRefundAmount();
+	}
+	
+	
+	
 	@Override
 	@Transactional
 	public Long applyFullCancellation(
@@ -606,18 +788,257 @@ public class SHBookingServiceImpl implements SHBookingService {
 	}
 
 
-	private boolean refundAmountEquals(
-	        SHBookingVO booking,
-	        SHPaymentVO payment,
-	        long refundAmount) {
+	private boolean refundAmountEquals(SHBookingVO booking, SHPaymentVO payment, long refundAmount) {
 
 	    return booking.getTotalAmount() != null
 	            && payment.getAmount() != null
-	            && booking.getTotalAmount()
-	                    == refundAmount
-	            && payment.getAmount()
-	                    == refundAmount;
+	            && booking.getTotalAmount() == refundAmount
+	            && payment.getAmount() == refundAmount;
 	}
+	
+	
+	
+	
+	private void validateCustomerCancellationSource(SHBookingVO booking, SHPaymentVO payment, List<SHTicketVO> tickets, LocalDateTime currentTime) {
+
+		if (!"CONFIRMED".equals(booking.getStatus())) {
+
+			throw new IllegalStateException(
+					"취소할 수 없는 예약 상태입니다."
+			);
+		}
+
+		if (payment == null || !"PAID".equals(payment.getStatus())) {
+
+			throw new IllegalStateException(
+					"환불 가능한 결제 정보가 없습니다."
+			);
+		}
+
+		if (booking.getOutboundDepartureTime() == null || !booking.getOutboundDepartureTime().isAfter(currentTime)) {
+
+			throw new IllegalStateException(
+					"이미 출발했거나 출발 시각이 지난 "
+					+ "예약은 취소할 수 없습니다."
+			);
+		}
+
+		if (tickets == null || tickets.isEmpty()) {
+			throw new IllegalStateException(
+					"취소할 티켓이 없습니다."
+			);
+		}
+
+		for (SHTicketVO ticket : tickets) {
+
+			if ("CANCELLED".equals(ticket.getFlightStatus())) {
+
+				throw new IllegalStateException(
+						"결항된 항공편은 고객 취소가 아니라 "
+						+ "항공사 환불 절차로 처리해야 합니다."
+				);
+			}
+
+			if (!"CONFIRMED".equals(ticket.getHoldStatus())) {
+
+				throw new IllegalStateException(
+						"이미 취소됐거나 유효하지 않은 "
+						+ "티켓이 포함되어 있습니다."
+				);
+			}
+
+			if (!"NOT_CHECKED_IN".equals(ticket.getCheckinStatus())) {
+
+				throw new IllegalStateException(
+						"체크인 또는 탑승 처리된 "
+						+ "항공권은 취소할 수 없습니다."
+				);
+			}
+
+			if (ticket.getFareAmount() == null || ticket.getFareAmount() <= 0L) {
+
+				throw new IllegalStateException(
+						"티켓 환불 원금이 올바르지 않습니다."
+				);
+			}
+
+			if (ticket.getDepartureTime() == null || !ticket.getDepartureTime().isAfter(currentTime)) {
+
+				throw new IllegalStateException(
+						"이미 출발한 항공권이 포함되어 있습니다."
+				);
+			}
+		}
+	}
+	
+	
+	private void validateFeeRate(BigDecimal feeRate) {
+
+		if (feeRate == null
+				|| feeRate.compareTo(
+						BigDecimal.ZERO) < 0
+				|| feeRate.compareTo(
+						new BigDecimal("100")) >= 0) {
+
+			throw new IllegalStateException(
+					"환불 수수료율이 올바르지 않습니다."
+			);
+		}
+	}
+	
+	private long calculateFeeAmount(long originalAmount, BigDecimal feeRate) {
+
+		return BigDecimal.valueOf(originalAmount).multiply(feeRate).divide(new BigDecimal("100"), 0, RoundingMode.HALF_UP).longValueExact();
+	}
+	
+	
+	private boolean isCancellationCompleted(SHBookingVO booking, SHPaymentVO payment) {
+
+		return "CANCELLED".equals(
+					booking.getStatus())
+				&& payment != null
+				&& (
+					"REFUNDED".equals(
+							payment.getStatus())
+					|| "PARTIAL_REFUNDED".equals(
+							payment.getStatus())
+				);
+	}
+	
+	
+	private void validateCancellationQuote(SHBookingVO booking, SHPaymentVO payment, List<SHTicketVO> tickets, BookingCancelQuote quote) {
+
+		if (quote == null) {
+			throw new IllegalStateException(
+					"환불 계산 결과가 없습니다."
+			);
+		}
+
+		if (!Objects.equals(booking.getBookingId(), quote.bookingId())) {
+
+			throw new IllegalStateException(
+					"환불 계산 결과의 예약번호가 "
+					+ "일치하지 않습니다."
+			);
+		}
+
+		if (quote.ticketCalculations() == null || quote.ticketCalculations().size() != tickets.size()) {
+
+			throw new IllegalStateException(
+					"환불 대상 티켓 수가 일치하지 않습니다."
+			);
+		}
+
+		Map<Long, SHTicketVO> ticketMap = new HashMap<>();
+
+		for (SHTicketVO ticket : tickets) {
+
+			if (ticketMap.put(ticket.getTicketId(), ticket) != null) {
+
+				throw new IllegalStateException(
+						"중복된 티켓 정보가 있습니다."
+				);
+			}
+		}
+
+		long originalTotal = 0L;
+		long feeTotal = 0L;
+		long refundTotal = 0L;
+
+		Map<Long, Boolean> calculatedTicketIds = new HashMap<>();
+
+		for (TicketRefundCalculation calculation : quote.ticketCalculations()) {
+
+			if (calculation == null || calculation.ticketId() == null) {
+
+				throw new IllegalStateException(
+						"환불 계산 상세정보가 올바르지 않습니다."
+				);
+			}
+
+			if (calculatedTicketIds.put(calculation.ticketId(), Boolean.TRUE) != null) {
+
+				throw new IllegalStateException(
+						"중복된 환불 티켓이 있습니다."
+				);
+			}
+
+			SHTicketVO ticket = ticketMap.get(calculation.ticketId());
+
+			if (ticket == null) {
+				throw new IllegalStateException(
+						"환불 대상이 아닌 티켓이 "
+						+ "포함되어 있습니다."
+				);
+			}
+
+			if (!Objects.equals(ticket.getFareAmount(),calculation.originalAmount())) {
+
+				throw new IllegalStateException(
+						"티켓 원금이 환불 계산 시점과 "
+						+ "달라졌습니다."
+				);
+			}
+
+			if (!"CUSTOMER".equals(calculation.refundType())) {
+
+				throw new IllegalStateException(
+						"고객 취소가 아닌 환불 유형이 "
+						+ "포함되어 있습니다."
+				);
+			}
+
+			if (calculation.policyId() == null) {
+				throw new IllegalStateException(
+						"적용된 환불정책이 없습니다."
+				);
+			}
+
+			validateFeeRate(calculation.appliedFeeRate());
+
+			if (calculation.feeAmount() == null
+					|| calculation.feeAmount() < 0L
+					|| calculation.refundAmount() == null
+					|| calculation.refundAmount() <= 0L) {
+
+				throw new IllegalStateException(
+						"환불 계산 금액이 올바르지 않습니다."
+				);
+			}
+
+			if (calculation.originalAmount() != calculation.feeAmount() + calculation.refundAmount()) {
+
+				throw new IllegalStateException(
+						"티켓 원금과 수수료·환불액의 "
+						+ "합계가 일치하지 않습니다."
+				);
+			}
+
+			originalTotal += calculation.originalAmount();
+
+			feeTotal += calculation.feeAmount();
+
+			refundTotal += calculation.refundAmount();
+		}
+
+		if (!Objects.equals(quote.originalAmount(), originalTotal)
+				|| !Objects.equals(quote.totalFeeAmount(), feeTotal) || !Objects.equals(quote.totalRefundAmount(),refundTotal)) {
+
+			throw new IllegalStateException(
+					"예약 환불 합계가 일치하지 않습니다."
+			);
+		}
+
+		if (!Objects.equals(booking.getTotalAmount(),originalTotal)	|| !Objects.equals(payment.getAmount(), originalTotal)) {
+
+			throw new IllegalStateException(
+					"예약·결제 원장과 환불 원금이 "
+					+ "일치하지 않습니다."
+			);
+		}
+	}
+	
+	
 
 	/* ===================================================================
 	   저장된 탑승객
@@ -722,6 +1143,15 @@ public class SHBookingServiceImpl implements SHBookingService {
 	private String generateMerchantUid(Long bookingId) {
 
 		return "SR" + bookingId + System.currentTimeMillis();
+	}
+	
+	
+	private String resolvePaymentProvider(String method) {
+		return switch (method) {
+			case "KAKAOPAY", "CARD", "VBANK" -> "PORTONE";
+			case "TOSSPAY", "TRANSFER" -> "TOSS_PAYMENTS";
+			default -> throw new IllegalStateException("지원하지 않는 결제수단입니다: " + method);
+		};
 	}
 
 }

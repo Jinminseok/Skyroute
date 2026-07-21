@@ -68,6 +68,7 @@
 		<result property="seatNo"             column="seat_no"/>
 		<result property="seatClassName"      column="seat_class_name"/>
 		<result property="flightNo"           column="flight_no"/>
+		<result property="flightStatus" 	  column="flight_status"/>
 		<result property="departureIataCode"  column="departure_iata_code"/>
 		<result property="arrivalIataCode"    column="arrival_iata_code"/>
 		<result property="departureTime"      column="departure_time"/>
@@ -75,17 +76,20 @@
 	</resultMap>
 
 	<resultMap id="paymentResultMap" type="kr.spring.member.booking.vo.SHPaymentVO">
-		<id     property="paymentId"    column="payment_id"/>
-		<result property="bookingId"    column="booking_id"/>
-		<result property="method"       column="method"/>
-		<result property="amount"       column="amount"/>
-		<result property="status"       column="status"/>
-		<result property="impUid"       column="imp_uid"/>
-		<result property="merchantUid"  column="merchant_uid"/>
-		<result property="paidAt"       column="paid_at"/>
+		<id property="paymentId" column="payment_id"/>
+		<result property="bookingId" column="booking_id"/>
+		<result property="method" column="method"/>
+		<result property="amount" column="amount"/>
+		<result property="status" column="status"/>
+		<result property="impUid" column="imp_uid"/>
+		<result property="merchantUid" column="merchant_uid"/>
+		<result property="paymentProvider" column="payment_provider"/>
+		<result property="providerPaymentKey" column="provider_payment_key"/>
+		<result property="partialCancelableYn" column="partial_cancelable_yn"/>
+		<result property="paidAt" column="paid_at"/>
 		<result property="refundAmount" column="refund_amount"/>
-		<result property="refundedAt"   column="refunded_at"/>
-		<result property="createdAt"    column="created_at"/>
+		<result property="refundedAt" column="refunded_at"/>
+		<result property="createdAt" column="created_at"/>
 	</resultMap>
 
 	<resultMap id="savedPassengerResultMap" type="kr.spring.member.booking.vo.SHBookingPassengerVO">
@@ -278,42 +282,80 @@
 
 	<!-- ===================== 결제 ===================== -->
 
-	<insert id="insertPayment" parameterType="kr.spring.member.booking.vo.SHPaymentVO"
-			useGeneratedKeys="true" keyProperty="paymentId" keyColumn="payment_id">
-
+	<insert id="insertPayment"
+			parameterType="kr.spring.member.booking.vo.SHPaymentVO"
+			useGeneratedKeys="true"
+			keyProperty="paymentId"
+			keyColumn="payment_id">
+	
 		INSERT INTO PAYMENT (
-			booking_id, method, amount, status, merchant_uid
+			booking_id,
+			method,
+			amount,
+			status,
+			merchant_uid,
+			payment_provider
 		) VALUES (
-			#{bookingId}, #{method}, #{amount}, 'READY', #{merchantUid}
+			#{bookingId},
+			#{method},
+			#{amount},
+			'READY',
+			#{merchantUid},
+			#{paymentProvider}
 		)
-
+	
 	</insert>
 
 
 	<select id="selectPaymentByBooking" resultMap="paymentResultMap">
 
 		SELECT
-			payment_id, booking_id, method, amount, status,
-			imp_uid, merchant_uid, paid_at,
-			refund_amount, refunded_at, created_at
+			payment_id,
+			booking_id,
+			method,
+			amount,
+			status,
+			imp_uid,
+			merchant_uid,
+			payment_provider,
+			provider_payment_key,
+			partial_cancelable_yn,
+			paid_at,
+			refund_amount,
+			refunded_at,
+			created_at
 		FROM PAYMENT
 		WHERE booking_id = #{bookingId}
 		ORDER BY payment_id DESC
 		FETCH FIRST 1 ROWS ONLY
-
+	
 	</select>
 
 
 	<update id="updatePaymentPaid" parameterType="kr.spring.member.booking.vo.SHPaymentVO">
 
 		UPDATE PAYMENT
-		SET status  = 'PAID',
-			imp_uid = #{impUid},
-			method  = #{method},
+		SET status = 'PAID',
+			imp_uid = #{impUid,jdbcType=VARCHAR},
+			provider_payment_key = #{providerPaymentKey,jdbcType=VARCHAR},
+			payment_provider = #{paymentProvider},
+			partial_cancelable_yn = #{partialCancelableYn,jdbcType=CHAR},
+			method = #{method},
 			paid_at = SYSTIMESTAMP
 		WHERE booking_id = #{bookingId}
 		  AND status = 'READY'
+	
+	</update>
+	
+	
+	<update id="updateReadyPaymentMethod">
 
+		UPDATE PAYMENT
+		SET method = #{method},
+			payment_provider = #{paymentProvider}
+		WHERE booking_id = #{bookingId}
+		  AND status = 'READY'
+	
 	</update>
 
 
@@ -517,6 +559,7 @@
 			sc.class_name     AS seat_class_name,
 
 			f.flight_no,
+			f.flight_status,
 			TRIM(dep.iata_code) AS departure_iata_code,
 			TRIM(arr.iata_code) AS arrival_iata_code,
 			f.departure_time,
@@ -568,6 +611,32 @@
 	
 	</insert>
 	
+	<insert id="insertRefundWithPolicy">
+
+		INSERT INTO REFUND (
+			payment_id,
+			ticket_id,
+			policy_id,
+			original_amount,
+			applied_fee_rate,
+			fee_amount,
+			amount,
+			refund_type,
+			reason
+		) VALUES (
+			#{paymentId},
+			#{ticketId},
+			#{policyId,jdbcType=NUMERIC},
+			#{originalAmount},
+			#{appliedFeeRate},
+			#{feeAmount},
+			#{amount},
+			#{refundType},
+			#{reason,jdbcType=VARCHAR}
+		)
+	
+	</insert>
+	
 	
 	<update id="updatePaymentFullRefund">
 	
@@ -577,6 +646,22 @@
 	        refunded_at   = SYSTIMESTAMP
 	    WHERE payment_id = #{paymentId}
 	      AND status = 'PAID'
+	
+	</update>
+	
+	
+	<update id="updatePaymentRefund">
+
+		UPDATE PAYMENT
+		SET refund_amount = #{refundAmount},
+			status = CASE
+				WHEN #{refundAmount} = amount
+					THEN 'REFUNDED'
+				ELSE 'PARTIAL_REFUNDED'
+			END,
+			refunded_at = SYSTIMESTAMP
+		WHERE payment_id = #{paymentId}
+		  AND status = 'PAID'
 	
 	</update>
 	
