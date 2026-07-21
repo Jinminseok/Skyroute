@@ -29,5 +29,20 @@
         LEFT JOIN MEMBER M ON N.created_by = M.member_id
         ORDER BY N.created_at DESC
     </select>
+    
+    <!-- 3. 지연/결항 등록 시 FLIGHT 테이블 상태 및 지연시간 자동 업데이트 -->
+    <update id="updateFlightStatusFromNotice" parameterType="kr.spring.staff.delay.vo.FlightNoticeVO">
+        UPDATE FLIGHT
+        SET 
+            <!-- 안내 유형이 DELAY면 상태를 DELAYED로, CANCEL이면 CANCELLED로 -->
+            flight_status = CASE 
+                                WHEN #{notice_type} = 'DELAY' THEN 'DELAYED'
+                                WHEN #{notice_type} = 'CANCEL' THEN 'CANCELLED'
+                            END,
+            delay_minutes = #{delay_minutes, jdbcType=INTEGER},
+            updated_at = SYSTIMESTAMP
+        WHERE 
+            flight_id = #{flight_id}
+    </update>
 
 </mapper>

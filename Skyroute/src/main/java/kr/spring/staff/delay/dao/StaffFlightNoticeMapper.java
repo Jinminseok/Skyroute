@@ -13,4 +13,7 @@ public interface StaffFlightNoticeMapper {
     
     // 지연/결항 안내 이력 조회
     public List<FlightNoticeVO> selectFlightNoticeList();
+    
+    // 운항 스케줄 동기화(업데이트)
+    public void updateFlightStatusFromNotice(FlightNoticeVO noticeVO);
 }

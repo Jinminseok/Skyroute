@@ -33,6 +33,7 @@ public class StaffDelayServiceImpl implements StaffDelayService{
         
         // 결항(null)일 경우 0으로 변환하여 저장
         int delayMins = (noticeVO.getDelay_minutes() == null) ? 0 : noticeVO.getDelay_minutes();
+        schedule.setDelay_minutes(delayMins);
         staffScheduleMapper.updateFlightStatus(schedule);
     }
 
