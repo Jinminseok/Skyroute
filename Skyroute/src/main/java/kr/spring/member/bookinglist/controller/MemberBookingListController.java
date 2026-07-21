@@ -27,6 +27,9 @@ import kr.spring.member.vo.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import kr.spring.member.booking.payment.BookingCancelQuote;
+import kr.spring.member.booking.service.SHBookingService;
+
 @Slf4j
 @Controller
 @RequestMapping("/bookinglist")
@@ -37,6 +40,7 @@ public class MemberBookingListController {
 
     private final SHBookingCancelFacade bookingCancelFacade;
 
+    private final SHBookingService shBookingService;
 
     /**
      * 로그인 회원의 예약 목록 조회.
@@ -138,6 +142,76 @@ public class MemberBookingListController {
         return "thviews/member/member_booking";
     }
 
+    
+    // 로그인 회원 예약 전체 취소 및 환불정책에 따른 환불
+    @PostMapping("/cancel/quote")
+    @ResponseBody
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<Map<String, Object>> cancelQuote(
+    		@RequestBody MemberBookingCancelRequest request,
+    		@AuthenticationPrincipal PrincipalDetails principal) {
+
+    	if (principal == null || principal.getMemberVO() == null) {
+    		return errorResponse(
+    				HttpStatus.UNAUTHORIZED,
+    				"UNAUTHORIZED",
+    				"로그인이 필요합니다."
+    		);
+    	}
+
+    	if (request == null || request.bookingId() == null) {
+    		return errorResponse(
+    				HttpStatus.BAD_REQUEST,
+    				"INVALID_REQUEST",
+    				"예약 ID가 필요합니다."
+    		);
+    	}
+
+    	Long memberId = principal.getMemberVO().getMember_id();
+
+    	try {
+    		BookingCancelQuote quote = shBookingService.calculateCancellationQuote(request.bookingId(), memberId);
+
+    		Map<String, Object> body = new LinkedHashMap<>();
+
+    		body.put("result", "SUCCESS");
+    		body.put("bookingId", quote.bookingId());
+    		body.put("originalAmount", quote.originalAmount());
+    		body.put("feeAmount", quote.totalFeeAmount());
+    		body.put("refundAmount", quote.totalRefundAmount());
+    		body.put("fullRefund", quote.totalFeeAmount() == 0L);
+
+    		return ResponseEntity.ok(body);
+
+    	} catch (IllegalArgumentException | IllegalStateException e) {
+    		log.warn(
+    				"<<예약 취소 예상금액 조회 거절>> memberId={}, bookingId={}, message={}",
+    				memberId,
+    				request.bookingId(),
+    				e.getMessage()
+    		);
+
+    		return errorResponse(
+    				HttpStatus.CONFLICT,
+    				"CANCEL_NOT_ALLOWED",
+    				e.getMessage()
+    		);
+
+    	} catch (Exception e) {
+    		log.error(
+    				"<<예약 취소 예상금액 조회 오류>> memberId={}, bookingId={}",
+    				memberId,
+    				request.bookingId(),
+    				e
+    		);
+
+    		return errorResponse(
+    				HttpStatus.INTERNAL_SERVER_ERROR,
+    				"INTERNAL_ERROR",
+    				"예상 환불금액을 계산하는 중 오류가 발생했습니다."
+    		);
+    	}
+    }
 
     /**
      * 로그인 회원 예약 전체 취소 및 전액 환불.

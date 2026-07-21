@@ -38,6 +38,26 @@ public class TossPaymentsClient {
 				)
 		);
 	}
+	
+	public JsonNode getPayment(String paymentKey) {
+
+		if (paymentKey == null || paymentKey.isBlank()) {
+			throw new IllegalStateException(
+					"토스 결제 식별값이 없습니다."
+			);
+		}
+
+		String encodedPaymentKey =
+				UriUtils.encodePathSegment(
+						paymentKey,
+						StandardCharsets.UTF_8
+				);
+
+		return get(
+				"https://api.tosspayments.com/v1/payments/"
+						+ encodedPaymentKey
+		);
+	}
 
 	public JsonNode cancelPayment(String paymentKey, String reason) {
 		String encodedPaymentKey = UriUtils.encodePathSegment(paymentKey, StandardCharsets.UTF_8);
@@ -118,6 +138,90 @@ public class TossPaymentsClient {
 			throw e;
 		} catch (Exception e) {
 			throw new IllegalStateException("토스페이먼츠 통신 중 오류가 발생했습니다.", e);
+		}
+	}
+	
+	
+	private JsonNode get(String url) {
+
+		try {
+
+			String authorization =
+					Base64.getEncoder()
+							.encodeToString(
+									(secretKey + ":")
+											.getBytes(
+													StandardCharsets.UTF_8
+											)
+							);
+
+			HttpRequest request =
+					HttpRequest.newBuilder()
+							.uri(URI.create(url))
+							.timeout(
+									Duration.ofSeconds(30)
+							)
+							.header(
+									"Authorization",
+									"Basic " + authorization
+							)
+							.header(
+									"Accept",
+									"application/json"
+							)
+							.GET()
+							.build();
+
+			HttpResponse<String> response =
+					httpClient.send(
+							request,
+							HttpResponse.BodyHandlers.ofString()
+					);
+
+			JsonNode responseBody =
+					objectMapper.readTree(
+							response.body()
+					);
+
+			if (response.statusCode() < 200
+					|| response.statusCode() >= 300) {
+
+				String code =
+						responseBody.path("code")
+								.asText("TOSS_API_ERROR");
+
+				String message =
+						responseBody.path("message")
+								.asText(
+										"토스페이먼츠 요청에 실패했습니다."
+								);
+
+				throw new IllegalStateException(
+						code + ": " + message
+				);
+			}
+
+			return responseBody;
+
+		} catch (InterruptedException e) {
+
+			Thread.currentThread().interrupt();
+
+			throw new IllegalStateException(
+					"토스페이먼츠 요청이 중단되었습니다.",
+					e
+			);
+
+		} catch (IllegalStateException e) {
+
+			throw e;
+
+		} catch (Exception e) {
+
+			throw new IllegalStateException(
+					"토스페이먼츠 통신 중 오류가 발생했습니다.",
+					e
+			);
 		}
 	}
 }

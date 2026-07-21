@@ -101,7 +101,8 @@
 								            data-booking-id=${b.get('BOOKING_ID')},
 								            data-pnr=${b.get('BOOKING_NO')}
 								        "
-								        onclick="triggerDirectCancel(this)"
+								        
+								        onclick="openCancelQuoteModal(this)"
 								        class="btn sm"
 								        style="
 								            display:inline-flex;
@@ -145,204 +146,239 @@
             </div>
         </div>
 
-        <div id="cancelModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-            <div class="summary" style="background:#fff; width:450px; padding:30px; border-radius:16px; box-shadow: var(--sh); position:relative; border-top: 4px solid var(--bad);">
-                <h3 style="margin-top:0; color:var(--bad); font-size:18px;">항공권 예약 취소</h3>
-                <p style="font-size:14px; color:var(--ink-500); line-height:1.6; margin:20px 0;">
-                    정말로 해당 항공권 예약을 취소하시겠습니까?<br>
-                    취소 완료 시 즉시 <b>환불(반환) 절차</b>가 진행되며, 취소된 좌석은 다시 복구할 수 없습니다.
-                </p>
-                <input type="hidden" id="cancelTargetId" value="">
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-                    <a href="javascript:void(0);" onclick="closeModal('cancelModal')" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; width:90px;">돌아가기</a>
-                    <a href="javascript:void(0);" id="btnConfirmCancel" onclick="executeCancel(this, event);" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background:var(--bad); width:110px;">취소 승인</a>
-                </div>
-            </div>
-        </div>
+        <div id="cancelModal"
+		     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+		
+		    <div class="summary"
+		         style="background:#fff; width:450px; padding:30px; border-radius:16px; box-shadow:var(--sh); position:relative; border-top:4px solid var(--bad);">
+		
+		        <h3 style="margin-top:0; color:var(--bad); font-size:18px;">
+		            항공권 예약 취소
+		        </h3>
+		
+		        <p style="font-size:14px; color:var(--ink-500); line-height:1.6; margin:18px 0;">
+		            예약번호 <b id="cancelPnr"></b> 예약을 취소하시겠습니까?<br>
+		            출발일까지 남은 기간에 따라 취소 수수료가 적용됩니다.
+		        </p>
+		
+		        <div id="cancelQuoteLoading"
+		             style="padding:20px 0; text-align:center; color:var(--mut); font-size:13px;">
+		            예상 환불금액을 계산하고 있습니다.
+		        </div>
+		
+		        <div id="cancelQuoteSummary"
+		             style="display:none; margin:20px 0; padding:16px; border:1px solid var(--line); border-radius:12px; background:#f8fafc;">
+		
+		            <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:14px;">
+		                <span style="color:var(--mut);">결제금액</span>
+		                <b id="cancelOriginalAmount">0원</b>
+		            </div>
+		
+		            <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:14px;">
+		                <span style="color:var(--mut);">취소수수료</span>
+		                <b id="cancelFeeAmount" style="color:var(--bad);">0원</b>
+		            </div>
+		
+		            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:14px; border-top:1px solid var(--line); font-size:16px;">
+		                <span>예상 환불금액</span>
+		                <b id="cancelRefundAmount" style="color:var(--accent);">0원</b>
+		            </div>
+		
+		        </div>
+		
+		        <p style="font-size:12px; color:var(--mut); line-height:1.6;">
+		            실제 취소 시점에 환불정책을 다시 확인하며,
+		            취소 완료 후 선택 좌석은 즉시 반납됩니다.
+		        </p>
+		
+		        <input type="hidden" id="cancelTargetId">
+		
+		        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+		
+		            <button type="button"
+		                    onclick="closeModal('cancelModal')"
+		                    class="btn ghost sm"
+		                    style="width:90px; border:none; cursor:pointer;">
+		                돌아가기
+		            </button>
+		
+		            <button type="button"
+		                    id="btnConfirmCancel"
+		                    onclick="executeCancel(this)"
+		                    class="btn sm"
+		                    disabled
+		                    style="width:110px; border:none; cursor:pointer; background:var(--bad); color:#fff;">
+		                취소 승인
+		            </button>
+		
+		        </div>
+		
+		    </div>
+		
+		</div>
 
         <script th:inline="javascript">
 
-		    /*
-		     * 예약 취소 및 전액 환불.
-		     */
-		    async function triggerDirectCancel(button) {
-		
-		        /*
-		         * 중복 클릭 방지
-		         */
-		        if (button.dataset.processing === "true") {
-		            return;
-		        }
-		
-		        const bookingId =
-		                Number(
-		                    button.dataset.bookingId
-		                );
-		
-		        const pnrNo =
-		                button.dataset.pnr || "";
-		
-		        if (!Number.isInteger(bookingId)
-		                || bookingId <= 0) {
-		
-		            alert(
-		                "예약 정보를 확인할 수 없습니다."
-		            );
-		
-		            return;
-		        }
-		
-		        const confirmAnswer =
-		                confirm(
-		                    "정말로 해당 항공권 예약을 "
-		                    + "취소하시겠습니까?\n"
-		                    + "(예약번호: "
-		                    + pnrNo
-		                    + ")\n\n"
-		                    + "취소 승인 후 결제금액 전액이 "
-		                    + "환불되며 선택 좌석이 반환됩니다."
-		                );
-		
-		        if (!confirmAnswer) {
-		            return;
-		        }
-		
-		        const cancelUrl =
-		                /*[[@{/bookinglist/cancel}]]*/
-		                "/bookinglist/cancel";
-		
-		        const csrfHeader =
-		                document
-		                    .querySelector(
-		                        'meta[name="csrf-header"]'
-		                    )
-		                    ?.content;
-		
-		        const csrfToken =
-		                document
-		                    .querySelector(
-		                        'meta[name="csrf-token"]'
-		                    )
-		                    ?.content;
-		
-		        const headers = {
-		            "Content-Type": "application/json",
-		            "Accept": "application/json"
-		        };
-		
-		        if (csrfHeader && csrfToken) {
-		            headers[csrfHeader] = csrfToken;
-		        }
-		
-		        const originalText =
-		                button.textContent;
-		
-		        let completed = false;
-		
-		        button.dataset.processing = "true";
-		        button.disabled = true;
-		        button.textContent = "환불 처리 중...";
-		
-		        try {
-		
-		            const response =
-		                    await fetch(
-		                        cancelUrl,
-		                        {
-		                            method: "POST",
-		                            headers,
-		                            body: JSON.stringify({
-		                                bookingId: bookingId,
-		                                reason:
-		                                    "고객 요청 - 예약 전체 취소"
-		                            })
-		                        }
-		                    );
-		
-		            const contentType =
-		                    response
-		                        .headers
-		                        .get("content-type")
-		                    || "";
-		
-		            /*
-		             * 로그인 만료나 보안 오류로
-		             * HTML 응답이 내려온 경우 방어
-		             */
-		            if (!contentType.includes(
-		                    "application/json"
-		            )) {
-		
-		                await response.text();
-		
-		                throw new Error(
-		                    response.status === 403
-		                        ? "요청 권한이 없거나 "
-		                          + "보안 토큰이 만료되었습니다."
-		                        : "로그인 세션이 만료되었거나 "
-		                          + "서버 응답 형식이 올바르지 않습니다."
-		                );
-		            }
-		
-		            const data =
-		                    await response.json();
-		
-		            if (!response.ok) {
-		
-		                throw new Error(
-		                    data.message
-		                    || "예약 취소 처리에 실패했습니다."
-		                );
-		            }
-		
-		            completed = true;
-		
-		            const refundAmount =
-		                    Number(
-		                        data.refundAmount || 0
-		                    )
-		                    .toLocaleString("ko-KR");
-		
-		            alert(
-		                data.message
-		                + "\n환불 금액: "
-		                + refundAmount
-		                + "원"
-		            );
-		
-		            /*
-		             * 현재 검색 조건을 유지하면서
-		             * 예약 목록을 다시 조회한다.
-		             */
-		            window.location.reload();
-		
-		        } catch (error) {
-		
-		            console.error(
-		                "예약 취소 처리 오류:",
-		                error
-		            );
-		
-		            alert(
-		                error.message
-		                || "예약 취소 처리 중 "
-		                   + "오류가 발생했습니다."
-		            );
-		
-		        } finally {
-		
-		            /*
-		             * 성공한 경우에는 곧 새로고침되므로
-		             * 실패한 경우에만 버튼을 복구한다.
-		             */
-		            if (!completed) {
-		
-		                button.dataset.processing = "false";
-		                button.disabled = false;
-		                button.textContent = originalText;
-		            }
-		        }
-		    }
+        function createRequestHeaders() {
+            const headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            };
+
+            const csrfHeader =
+                document.querySelector('meta[name="csrf-header"]')?.content
+                || document.querySelector('meta[name="_csrf_header"]')?.content;
+
+            const csrfToken =
+                document.querySelector('meta[name="csrf-token"]')?.content
+                || document.querySelector('meta[name="_csrf"]')?.content;
+
+            if (csrfHeader && csrfToken) {
+                headers[csrfHeader] = csrfToken;
+            }
+
+            return headers;
+        }
+
+
+        async function postBookingJson(url, body) {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: createRequestHeaders(),
+                body: JSON.stringify(body)
+            });
+
+            const contentType = response.headers.get("content-type") || "";
+
+            if (!contentType.includes("application/json")) {
+                await response.text();
+
+                throw new Error(
+                    response.status === 403
+                        ? "요청 권한이 없거나 보안 토큰이 만료되었습니다."
+                        : "로그인 세션이 만료되었거나 서버 응답이 올바르지 않습니다."
+                );
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message
+                    || "요청 처리에 실패했습니다."
+                );
+            }
+
+            return data;
+        }
+
+
+        function formatWon(amount) {
+            return Number(amount || 0).toLocaleString("ko-KR") + "원";
+        }
+
+
+        async function openCancelQuoteModal(button) {
+            const bookingId = Number(button.dataset.bookingId);
+            const pnr = button.dataset.pnr || "";
+
+            if (!Number.isInteger(bookingId) || bookingId <= 0) {
+                alert("예약 정보를 확인할 수 없습니다.");
+                return;
+            }
+
+            document.getElementById("cancelTargetId").value = bookingId;
+            document.getElementById("cancelPnr").textContent = pnr;
+
+            const modal = document.getElementById("cancelModal");
+            const loading = document.getElementById("cancelQuoteLoading");
+            const summary = document.getElementById("cancelQuoteSummary");
+            const confirmButton = document.getElementById("btnConfirmCancel");
+
+            loading.style.display = "block";
+            loading.textContent = "예상 환불금액을 계산하고 있습니다.";
+            summary.style.display = "none";
+            confirmButton.disabled = true;
+            confirmButton.textContent = "취소 승인";
+
+            modal.style.display = "flex";
+
+            try {
+                const data = await postBookingJson(
+                    /*[[@{/bookinglist/cancel/quote}]]*/ "/bookinglist/cancel/quote",
+                    {
+                        bookingId: bookingId,
+                        reason: null
+                    }
+                );
+
+                document.getElementById("cancelOriginalAmount").textContent = formatWon(data.originalAmount);
+                document.getElementById("cancelFeeAmount").textContent = formatWon(data.feeAmount);
+                document.getElementById("cancelRefundAmount").textContent = formatWon(data.refundAmount);
+
+                loading.style.display = "none";
+                summary.style.display = "block";
+                confirmButton.disabled = false;
+
+            } catch (error) {
+                console.error("예상 환불금액 조회 오류:", error);
+
+                closeModal("cancelModal");
+
+                alert(
+                    error.message
+                    || "예상 환불금액을 확인하지 못했습니다."
+                );
+            }
+        }
+
+
+        async function executeCancel(button) {
+            const bookingId = Number(
+                document.getElementById("cancelTargetId").value
+            );
+
+            if (!Number.isInteger(bookingId) || bookingId <= 0) {
+                alert("취소할 예약 정보를 확인할 수 없습니다.");
+                return;
+            }
+
+            const originalText = button.textContent;
+
+            button.disabled = true;
+            button.textContent = "환불 처리 중...";
+
+            try {
+                const data = await postBookingJson(
+                    /*[[@{/bookinglist/cancel}]]*/ "/bookinglist/cancel",
+                    {
+                        bookingId: bookingId,
+                        reason: "고객 요청 - 예약 전체 취소"
+                    }
+                );
+
+                const refundAmount = formatWon(data.refundAmount);
+
+                alert(
+                    data.message
+                    + "\n실제 환불 금액: "
+                    + refundAmount
+                );
+
+                window.location.reload();
+
+            } catch (error) {
+                console.error("예약 취소 처리 오류:", error);
+
+                alert(
+                    error.message
+                    || "예약 취소 처리 중 오류가 발생했습니다."
+                );
+
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
 		
 		
 		    function openDetailModal(element) {
