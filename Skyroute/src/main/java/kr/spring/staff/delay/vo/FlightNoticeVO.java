@@ -17,4 +17,5 @@ public class FlightNoticeVO {
 	private String created_at;		// 등록 일시
 	
 	private String flight_no;		// 항공편 번호
+	private String creator_id;		// 로그인한 아이디
 }

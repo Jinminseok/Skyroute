@@ -148,7 +148,7 @@
 								</td>
 								<td class="mono" th:text="${n.delay_minutes > 0 ? n.delay_minutes + '분' : '-'}"></td>
 								<td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" th:text="${n.reason}"></td>
-								<td class="mono" th:text="'STAFF_' + ${n.created_by}"></td>
+								<td class="mono" th:text="${n.creator_id}"></td>
 								<td class="mono" th:text="${n.created_at}"></td>
                                 <!-- 관리 칸: 발송완료 뱃지 -->
 								<td><span class="badge badge-ok">발송완료</span></td>

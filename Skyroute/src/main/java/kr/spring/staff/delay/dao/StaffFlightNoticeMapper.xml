@@ -22,9 +22,11 @@
             N.delay_minutes, 
             N.created_by,
             TO_CHAR(N.created_at, 'YYYY-MM-DD HH24:MI') AS created_at,
-            F.flight_no
+            F.flight_no,
+            M.login_id AS creator_id
         FROM FLIGHT_NOTICE N
         JOIN FLIGHT F ON N.flight_id = F.flight_id
+        LEFT JOIN MEMBER M ON N.created_by = M.member_id
         ORDER BY N.created_at DESC
     </select>
 
