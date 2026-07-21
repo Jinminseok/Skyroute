@@ -11,6 +11,11 @@
 			B.STATUS AS BOOKING_STATUS, 
 			F.FLIGHT_STATUS,                         
 			NVL(F.DELAY_MINUTES, 0) AS DELAY_MINUTES, 
+			/* 🎯 [추가] 지연 분(DELAY_MINUTES)이 포함된 실제 출발 시각 기준으로 출발 여부 판단 ('Y': 출발함 / 'N': 미출발) */
+			CASE 
+				WHEN SYSDATE >= (F.DEPARTURE_TIME + NUMTODSINTERVAL(NVL(F.DELAY_MINUTES, 0), 'MINUTE')) THEN 'Y'
+				ELSE 'N'
+			END AS IS_DEPARTED,
 			BP.NAME AS PASSENGER_NAME, 
 			BP.PASSENGER_TYPE, 
 			F.FLIGHT_NO, 

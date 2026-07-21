@@ -54,9 +54,9 @@
             
                 <div style="margin-top:24px" class="results">
                     
-                    <div th:if="${#lists.isEmpty(bookingList)}" class="trip" style="text-align:center; color:var(--mut); padding:40px 0;">
-                        조회된 항공권 예약 내역이 존재하지 않습니다.
-                    </div>
+                    <div th:if="${#lists.isEmpty(bookingList)}" class="trip" style="text-align: left; color: var(--mut); padding: 24px 28px;">
+					    조회된 항공권 예약 내역이 존재하지 않습니다.
+					</div>
                     
                     <div class="trip" th:each="b : ${bookingList}" style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center;">
                         <div>
@@ -96,13 +96,15 @@
                                onclick="openDetailModal(this)" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">상세보기</a>
                             
 								<button type="button"
-								        th:if="${b.get('BOOKING_STATUS') == 'CONFIRMED'}"
+								        th:if="${b.get('BOOKING_STATUS') == 'CONFIRMED' 
+								                 and (b.get('CHECKIN_STATUS') == null or b.get('CHECKIN_STATUS') == 'NOT_CHECKED_IN')
+								                 and (b.get('FLIGHT_STATUS') == 'SCHEDULED' or b.get('FLIGHT_STATUS') == 'DELAYED')
+								                 and b.get('IS_DEPARTED') == 'N'}"
 								        th:attr="
 								            data-booking-id=${b.get('BOOKING_ID')},
 								            data-pnr=${b.get('BOOKING_NO')}
 								        "
-								        
-								        onclick="openCancelQuoteModal(this)"
+								        onclick="triggerDirectCancel(this)"
 								        class="btn sm"
 								        style="
 								            display:inline-flex;
@@ -117,6 +119,7 @@
 								    예약취소
 								
 								</button>
+
                         </div>
                     </div>
 
@@ -467,6 +470,25 @@
 		            modal.style.display = "none";
 		        }
 		    }
+		    
+		    /*
+		     * 로그인 여부 판단 가드 
+		     */
+		    document.addEventListener("DOMContentLoaded", function() {
+		        const bookingSearchForm = document.getElementById("bookingSearchForm");
+		        
+		        const isAuthenticated = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+		        
+		        if (bookingSearchForm) {
+		            bookingSearchForm.addEventListener("submit", function(event) {
+		                if (!isAuthenticated) {
+		                    event.preventDefault(); // 폼 제출 중단
+		                    alert("로그인 후 사용이 가능합니다.");
+		                    return false;
+		                }
+		            });
+		        }
+		    });
 		
 		</script>
 
