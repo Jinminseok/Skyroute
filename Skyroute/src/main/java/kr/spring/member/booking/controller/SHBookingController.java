@@ -568,6 +568,8 @@ public class SHBookingController {
 	public String payment(
 			@RequestParam(name = "bookingId")
 			Long bookingId,
+			@RequestParam(name = "method")
+			String method,
 			@AuthenticationPrincipal
 			PrincipalDetails principal,
 			Model model) {
@@ -586,6 +588,13 @@ public class SHBookingController {
 		) {
 			return "redirect:/main/home";
 		}
+		if (!List.of(
+				"KAKAOPAY",
+				"CARD"
+		).contains(method)) {
+
+			return "redirect:/main/home";
+		}
 
 		model.addAttribute(
 				"booking",
@@ -601,6 +610,12 @@ public class SHBookingController {
 				"activeMenu",
 				"book"
 		);
+		
+		model.addAttribute(
+				"selectedMethod",
+				method
+		);
+		
 		model.addAttribute("impCode", impCode);
 		
 		return "thviews/member/sh_booking_payment";

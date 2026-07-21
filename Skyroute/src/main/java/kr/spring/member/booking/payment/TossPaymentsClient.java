@@ -47,6 +47,44 @@ public class TossPaymentsClient {
 				Map.of("cancelReason", reason)
 		);
 	}
+	
+	
+	public JsonNode cancelPayment(
+			String paymentKey,
+			String reason,
+			Long cancelAmount) {
+
+		if (paymentKey == null || paymentKey.isBlank()) {
+			throw new IllegalStateException(
+					"토스 결제 식별값이 없습니다."
+			);
+		}
+
+		if (cancelAmount == null || cancelAmount <= 0L) {
+			throw new IllegalStateException(
+					"취소 금액이 올바르지 않습니다."
+			);
+		}
+
+		String encodedPaymentKey =
+				UriUtils.encodePathSegment(
+						paymentKey,
+						StandardCharsets.UTF_8
+				);
+
+		return post(
+				"https://api.tosspayments.com/v1/payments/"
+						+ encodedPaymentKey
+						+ "/cancel",
+				Map.of(
+						"cancelReason",
+						reason,
+						"cancelAmount",
+						cancelAmount
+				)
+		);
+	}
+	
 
 	private JsonNode post(String url, Map<String, Object> body) {
 		try {

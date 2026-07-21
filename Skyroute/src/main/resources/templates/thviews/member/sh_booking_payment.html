@@ -46,7 +46,8 @@
 <div class="wrap"
 	 th:attr="data-booking-id=${booking.bookingId},
 	          data-hold-minutes=${holdMinutes},
-	          data-imp-code=${impCode}">
+	          data-imp-code=${impCode},
+	          data-selected-method=${selectedMethod}">
 
 	<h1>결제하기</h1>
 
@@ -97,13 +98,23 @@
 	const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content || '';
 	const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || '';
 
-	let method = 'KAKAOPAY';
+	let method = root.dataset.selectedMethod || "KAKAOPAY";
 
 
 	/* --- 결제수단 선택 --- */
 	document.querySelectorAll('.m-btn').forEach(btn => {
+
+		btn.classList.toggle(
+			'on',
+			btn.dataset.method === method
+		);
+	
 		btn.addEventListener('click', () => {
-			document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('on'));
+	
+			document.querySelectorAll('.m-btn').forEach(button => {
+				button.classList.remove('on');
+			});
+	
 			btn.classList.add('on');
 			method = btn.dataset.method;
 		});
