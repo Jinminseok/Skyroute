@@ -498,10 +498,8 @@ public class SHBookingController {
 
 		
 		if (!List.of(
-				"KAKAOPAY",
-				"CARD",
-				"TOSSPAY",
-				"TRANSFER"
+		        "KAKAOPAY",
+		        "CARD"
 		).contains(paymentMethod)) {
 
 			redirectAttributes.addFlashAttribute(
@@ -522,19 +520,10 @@ public class SHBookingController {
 							memberId
 					);
 
-			if ("KAKAOPAY".equals(paymentMethod)
-					|| "CARD".equals(paymentMethod)) {
-
-				return "redirect:/booking/reserve/payment?bookingId="
-						+ bookingId
-						+ "&method="
-						+ paymentMethod;
-			}
-
-			return "redirect:/booking/reserve/toss-payment?bookingId="
-					+ bookingId
-					+ "&method="
-					+ paymentMethod;
+			return "redirect:/booking/reserve/payment?bookingId="
+	        + bookingId
+	        + "&method="
+	        + paymentMethod;
 
 		} catch (SHSeatTakenException e) {
 
@@ -563,6 +552,155 @@ public class SHBookingController {
 			return "redirect:/booking/reserve/confirm";
 		}
 	}
+	
+	@PostMapping("/hold/toss")
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> holdToss(
+	        @ModelAttribute("shReserveForm")
+	        SHReserveForm reserveForm,
+
+	        @RequestParam(
+	                name = "agreeTerms",
+	                defaultValue = "false"
+	        )
+	        boolean agreeTerms,
+
+	        @RequestParam(
+	                name = "agreeRefund",
+	                defaultValue = "false"
+	        )
+	        boolean agreeRefund,
+
+	        @RequestParam(
+	                name = "guardianConsent",
+	                defaultValue = "false"
+	        )
+	        boolean guardianConsent,
+
+	        @RequestParam(name = "paymentMethod")
+	        String paymentMethod,
+
+	        @AuthenticationPrincipal
+	        PrincipalDetails principal) {
+
+	    try {
+	        if (!reserveForm.isSeatReady()) {
+	            throw new IllegalStateException(
+	                    "선택한 좌석 정보를 확인할 수 없습니다."
+	            );
+	        }
+
+	        SHSeatMapVO outboundSeatMap =
+	                shBookingService.getSeatMap(
+	                        reserveForm.getOutboundFlightId(),
+	                        reserveForm.getSeatClassId(),
+	                        "OUTBOUND"
+	                );
+
+	        boolean guardianRequired =
+	                requiresGuardianConsent(
+	                        reserveForm,
+	                        outboundSeatMap
+	                );
+
+	        if (!agreeTerms || !agreeRefund) {
+	            throw new IllegalStateException(
+	                    "필수 약관과 취소·환불 규정에 동의해 주세요."
+	            );
+	        }
+
+	        if (guardianRequired && !guardianConsent) {
+	            throw new IllegalStateException(
+	                    "만 14세 미만 승객의 법정대리인 동의가 필요합니다."
+	            );
+	        }
+
+	        if (!List.of(
+	                "TOSSPAY",
+	                "TRANSFER"
+	        ).contains(paymentMethod)) {
+
+	            throw new IllegalStateException(
+	                    "지원하지 않는 토스 결제수단입니다."
+	            );
+	        }
+
+	        Long memberId =
+	                getMemberId(principal);
+
+	        Long bookingId =
+	                shBookingService.holdSeats(
+	                        reserveForm,
+	                        memberId
+	                );
+
+	        Map<String, Object> result =
+	                new HashMap<>();
+
+	        result.put(
+	                "result",
+	                "SUCCESS"
+	        );
+
+	        result.put(
+	                "bookingId",
+	                bookingId
+	        );
+
+	        result.put(
+	                "method",
+	                paymentMethod
+	        );
+
+	        return ResponseEntity.ok(result);
+
+	    } catch (SHSeatTakenException e) {
+	        reserveForm.setOutboundSeatIds(
+	                new ArrayList<>()
+	        );
+
+	        reserveForm.setInboundSeatIds(
+	                new ArrayList<>()
+	        );
+
+	        Map<String, Object> result =
+	                new HashMap<>();
+
+	        result.put(
+	                "result",
+	                "FAIL"
+	        );
+
+	        result.put(
+	                "message",
+	                e.getMessage()
+	        );
+
+	        result.put(
+	                "redirectUrl",
+	                "/booking/reserve/seat"
+	        );
+
+	        return ResponseEntity
+	                .status(HttpStatus.CONFLICT)
+	                .body(result);
+
+	    } catch (IllegalStateException e) {
+	        return ResponseEntity
+	                .status(HttpStatus.CONFLICT)
+	                .body(
+	                        Map.of(
+	                                "result",
+	                                "FAIL",
+	                                "message",
+	                                e.getMessage()
+	                        )
+	                );
+	    }
+	}
+	
+	
+	
 	
 	@GetMapping("/payment")
 	public String payment(
@@ -622,71 +760,6 @@ public class SHBookingController {
 	}
 	
 	
-	@GetMapping("/toss-payment")
-	public String tossPayment(
-			@RequestParam(name = "bookingId")
-			Long bookingId,
-			@RequestParam(name = "method")
-			String method,
-			@AuthenticationPrincipal
-			PrincipalDetails principal,
-			Model model,
-			RedirectAttributes redirectAttributes) {
-
-		if (!List.of(
-				"TOSSPAY",
-				"TRANSFER"
-		).contains(method)) {
-
-			redirectAttributes.addFlashAttribute(
-					"error",
-					"지원하지 않는 토스 결제수단입니다."
-			);
-
-			return "redirect:/main/home";
-		}
-
-		Long memberId = getMemberId(principal);
-
-		SHBookingVO booking =
-				shBookingService.getBookingDetail(
-						bookingId,
-						memberId
-				);
-
-		if (booking == null
-				|| !"PENDING".equals(booking.getStatus())) {
-
-			redirectAttributes.addFlashAttribute(
-					"error",
-					"결제할 수 있는 예약 정보를 찾을 수 없습니다."
-			);
-
-			return "redirect:/main/home";
-		}
-
-		model.addAttribute(
-				"booking",
-				booking
-		);
-
-		model.addAttribute(
-				"paymentMethod",
-				method
-		);
-
-		model.addAttribute(
-				"holdMinutes",
-				10
-		);
-
-		model.addAttribute(
-				"activeMenu",
-				"book"
-		);
-
-		return "thviews/member/toss_booking_payment";
-	}
 	
 	
 	
@@ -850,19 +923,19 @@ public class SHBookingController {
 				|| !"TOSS_PAYMENTS".equals(payment.getPaymentProvider())) {
 
 			redirectAttributes.addFlashAttribute("paymentError", "토스 결제 준비 정보를 찾을 수 없습니다.");
-			return "redirect:/booking/reserve/payment?bookingId=" + bookingId;
+			return "redirect:/main/home";
 		}
 
 		if (!Objects.equals(payment.getMerchantUid(), orderId)) {
 			redirectAttributes.addFlashAttribute("paymentError", "토스 주문번호가 일치하지 않습니다.");
-			return "redirect:/booking/reserve/payment?bookingId=" + bookingId;
+			return "redirect:/main/home";
 		}
 
 		if (!Objects.equals(payment.getAmount(), amount)
 				|| !Objects.equals(booking.getTotalAmount(), amount)) {
 
 			redirectAttributes.addFlashAttribute("paymentError", "토스 결제금액이 예약 금액과 일치하지 않습니다.");
-			return "redirect:/booking/reserve/payment?bookingId=" + bookingId;
+			return "redirect:/main/home";
 		}
 
 		JsonNode tossPayment;
@@ -871,12 +944,12 @@ public class SHBookingController {
 			tossPayment = tossPaymentsClient.confirmPayment(paymentKey, orderId, amount);
 		} catch (IllegalStateException e) {
 			redirectAttributes.addFlashAttribute("paymentError", e.getMessage());
-			return "redirect:/booking/reserve/payment?bookingId=" + bookingId;
+			return "redirect:/main/home";
 		}
 
 		if (!"DONE".equals(tossPayment.path("status").asText())) {
 			redirectAttributes.addFlashAttribute("paymentError", "토스 결제가 완료되지 않았습니다.");
-			return "redirect:/booking/reserve/payment?bookingId=" + bookingId;
+			return "redirect:/main/home";
 		}
 
 		String confirmedOrderId = tossPayment.path("orderId").asText();

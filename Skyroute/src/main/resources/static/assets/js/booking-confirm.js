@@ -2,14 +2,9 @@
     "use strict";
 
     function initializeBookingConfirmation() {
-        const form =
-            document.getElementById("confirmForm");
-
-        const submitButton =
-            document.getElementById("paymentSubmitButton");
-
-        const paymentGuide =
-            document.getElementById("paymentGuide");
+        const form = document.getElementById("confirmForm");
+        const submitButton = document.getElementById("paymentSubmitButton");
+        const paymentGuide = document.getElementById("paymentGuide");
 
         if (!form || !submitButton) {
             return;
@@ -23,22 +18,23 @@
             form.querySelectorAll(".payment-method-radio")
         );
 
+        let processing = false;
+
         function allAgreementsChecked() {
             return agreements.length > 0
-                && agreements.every(
-                    agreement => agreement.checked
-                );
+                && agreements.every(agreement => agreement.checked);
+        }
+
+        function getSelectedPaymentMethod() {
+            return paymentMethods.find(paymentMethod => paymentMethod.checked)?.value || "";
         }
 
         function paymentMethodSelected() {
-            return paymentMethods.some(
-                paymentMethod => paymentMethod.checked
-            );
+            return getSelectedPaymentMethod() !== "";
         }
 
         function updateState() {
-            const allAgreed =
-                allAgreementsChecked();
+            const allAgreed = allAgreementsChecked();
 
             paymentMethods.forEach(paymentMethod => {
                 paymentMethod.disabled = !allAgreed;
@@ -47,35 +43,25 @@
                     paymentMethod.checked = false;
                 }
 
-                const label =
-                    paymentMethod.closest(".payment-method");
+                const label = paymentMethod.closest(".payment-method");
 
                 if (label) {
-                    label.classList.toggle(
-                        "disabled",
-                        !allAgreed
-                    );
-
-                    label.classList.toggle(
-                        "selected",
-                        paymentMethod.checked
-                    );
-
-                    label.setAttribute(
-                        "aria-disabled",
-                        String(!allAgreed)
-                    );
+                    label.classList.toggle("disabled", !allAgreed);
+                    label.classList.toggle("selected", paymentMethod.checked);
+                    label.setAttribute("aria-disabled", String(!allAgreed));
                 }
             });
 
-            const methodSelected =
-                paymentMethodSelected();
+            const methodSelected = paymentMethodSelected();
 
             submitButton.disabled =
-                !allAgreed || !methodSelected;
+                processing || !allAgreed || !methodSelected;
 
             if (paymentGuide) {
-                if (!allAgreed) {
+                if (processing) {
+                    paymentGuide.textContent =
+                        "좌석을 확보하고 결제창을 준비하고 있습니다.";
+                } else if (!allAgreed) {
                     paymentGuide.textContent =
                         "필수 확인 및 동의 후 결제수단을 선택할 수 있습니다.";
                 } else if (!methodSelected) {
@@ -88,6 +74,177 @@
             }
         }
 
+        function createCsrfHeaders(headers = {}) {
+            const csrfToken =
+                document.querySelector('meta[name="_csrf"]')?.content || "";
+
+            const csrfHeader =
+                document.querySelector('meta[name="_csrf_header"]')?.content || "";
+
+            if (csrfHeader && csrfToken) {
+                headers[csrfHeader] = csrfToken;
+            }
+
+            return headers;
+        }
+
+        async function readResponse(response) {
+            const contentType =
+                response.headers.get("content-type") || "";
+
+            let data;
+
+            if (contentType.includes("application/json")) {
+                data = await response.json();
+            } else {
+                data = {
+                    message: await response.text()
+                };
+            }
+
+            if (!response.ok) {
+                const error = new Error(
+                    data.message || "요청 처리에 실패했습니다."
+                );
+
+                error.redirectUrl = data.redirectUrl || "";
+                throw error;
+            }
+
+            return data;
+        }
+
+        async function postForm(url, formData) {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: createCsrfHeaders({
+                    "Accept": "application/json"
+                }),
+                body: formData
+            });
+
+            return readResponse(response);
+        }
+
+        async function postJson(url, body) {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: createCsrfHeaders({
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                }),
+                body: JSON.stringify(body)
+            });
+
+            return readResponse(response);
+        }
+
+        async function releaseHold(bookingId) {
+            if (!Number.isInteger(bookingId) || bookingId <= 0) {
+                return;
+            }
+
+            try {
+                await postJson(
+                    "/booking/reserve/pay/cancel",
+                    {
+                        bookingId: bookingId
+                    }
+                );
+            } catch (error) {
+                console.error(
+                    "좌석 HOLD 해제 실패:",
+                    error
+                );
+            }
+        }
+
+        async function openTossPayment(
+            bookingId,
+            paymentMethod
+        ) {
+            if (typeof TossPayments !== "function") {
+                throw new Error(
+                    "토스 결제 모듈을 불러오지 못했습니다."
+                );
+            }
+
+            const prepare = await postJson(
+                "/booking/reserve/toss/prepare",
+                {
+                    bookingId: bookingId,
+                    method: paymentMethod
+                }
+            );
+
+            if (!prepare.clientKey
+                    || !prepare.customerKey
+                    || !prepare.orderId
+                    || !prepare.totalAmount) {
+
+                throw new Error(
+                    "토스 결제 준비 정보가 올바르지 않습니다."
+                );
+            }
+
+            const tossPayments =
+                TossPayments(prepare.clientKey);
+
+            const payment =
+                tossPayments.payment({
+                    customerKey: prepare.customerKey
+                });
+
+            const successUrl =
+                window.location.origin
+                + "/booking/reserve/toss/success"
+                + "?bookingId="
+                + bookingId;
+
+            const failUrl =
+                window.location.origin
+                + "/booking/reserve/toss/fail"
+                + "?bookingId="
+                + bookingId;
+
+            const commonRequest = {
+                amount: {
+                    currency: "KRW",
+                    value: Number(prepare.totalAmount)
+                },
+                orderId: prepare.orderId,
+                orderName: prepare.orderName,
+                successUrl: successUrl,
+                failUrl: failUrl
+            };
+
+            if (paymentMethod === "TOSSPAY") {
+                await payment.requestPayment({
+                    ...commonRequest,
+                    method: "CARD",
+                    card: {
+                        flowMode: "DIRECT",
+                        easyPay: "TOSSPAY"
+                    }
+                });
+
+                return;
+            }
+
+            if (paymentMethod === "TRANSFER") {
+                await payment.requestPayment({
+                    ...commonRequest,
+                    method: "TRANSFER"
+                });
+
+                return;
+            }
+
+            throw new Error(
+                "지원하지 않는 토스 결제수단입니다."
+            );
+        }
+
         form.addEventListener(
             "change",
             updateState
@@ -95,7 +252,7 @@
 
         form.addEventListener(
             "submit",
-            event => {
+            async event => {
                 if (!allAgreementsChecked()) {
                     event.preventDefault();
 
@@ -107,7 +264,10 @@
                     return;
                 }
 
-                if (!paymentMethodSelected()) {
+                const paymentMethod =
+                    getSelectedPaymentMethod();
+
+                if (!paymentMethod) {
                     event.preventDefault();
 
                     window.alert(
@@ -118,15 +278,103 @@
                     return;
                 }
 
+                /*
+                 * 카카오페이와 신용카드는 기존 폼 제출을 유지한다.
+                 */
+                if (paymentMethod === "KAKAOPAY"
+                        || paymentMethod === "CARD") {
+
+                    processing = true;
+                    submitButton.disabled = true;
+                    submitButton.textContent =
+                        "좌석을 확인하는 중...";
+
+                    return;
+                }
+
+                /*
+                 * 토스페이와 계좌이체는 페이지 이동을 막고
+                 * 현재 화면에서 토스 결제창을 직접 실행한다.
+                 */
+                event.preventDefault();
+
+                if (processing) {
+                    return;
+                }
+
+                processing = true;
+
                 submitButton.disabled = true;
                 submitButton.textContent =
                     "좌석을 확인하는 중...";
+
+                updateState();
+
+                let bookingId = null;
+
+                try {
+                    const holdResult = await postForm(
+                        "/booking/reserve/hold/toss",
+                        new FormData(form)
+                    );
+
+                    bookingId =
+                        Number(holdResult.bookingId);
+
+                    if (!Number.isInteger(bookingId)
+                            || bookingId <= 0) {
+
+                        throw new Error(
+                            "생성된 예약 정보를 확인할 수 없습니다."
+                        );
+                    }
+
+                    submitButton.textContent =
+                        paymentMethod === "TOSSPAY"
+                            ? "토스페이 QR창을 여는 중..."
+                            : "계좌이체창을 여는 중...";
+
+                    await openTossPayment(
+                        bookingId,
+                        paymentMethod
+                    );
+
+                } catch (error) {
+                    console.error(
+                        "토스 결제 실행 오류:",
+                        error
+                    );
+
+                    if (bookingId) {
+                        await releaseHold(bookingId);
+                    }
+
+                    processing = false;
+                    submitButton.textContent =
+                        "결제하기";
+
+                    updateState();
+
+                    window.alert(
+                        error.message
+                        || "결제창을 실행하지 못했습니다."
+                    );
+
+                    if (error.redirectUrl) {
+                        window.location.href =
+                            error.redirectUrl;
+                    }
+                }
             }
         );
 
         window.addEventListener(
             "pageshow",
-            updateState
+            () => {
+                processing = false;
+                submitButton.textContent = "결제하기";
+                updateState();
+            }
         );
 
         updateState();
