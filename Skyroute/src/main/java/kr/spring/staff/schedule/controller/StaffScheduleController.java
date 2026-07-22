@@ -4,6 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import kr.spring.staff.schedule.service.StaffScheduleService;
 import kr.spring.staff.schedule.vo.ScheduleVO;
@@ -94,25 +96,71 @@ public class StaffScheduleController {
 
     @PostMapping("/api/insert")
     @ResponseBody
-    public String insertSchedule(@RequestBody ScheduleVO scheduleVO) {
+    public ResponseEntity<String> insertSchedule(
+            @RequestBody ScheduleVO scheduleVO
+    ) {
+
         try {
             scheduleService.insertSchedule(scheduleVO);
-            return "success";
+
+            return ResponseEntity.ok("success");
+
+        } catch (IllegalStateException e) {
+
+            log.warn(
+                    "스케줄 등록 검증 실패: {}",
+                    e.getMessage()
+            );
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+
         } catch (Exception e) {
+
             log.error("스케줄 등록 오류", e);
-            return "fail";
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                        "시스템 오류가 발생했습니다. "
+                        + "관리자에게 문의하세요."
+                    );
         }
     }
 
     @PostMapping("/api/update")
     @ResponseBody
-    public String updateSchedule(@RequestBody ScheduleVO scheduleVO) {
+    public ResponseEntity<String> updateSchedule(
+            @RequestBody ScheduleVO scheduleVO
+    ) {
+
         try {
             scheduleService.updateSchedule(scheduleVO);
-            return "success";
+
+            return ResponseEntity.ok("success");
+
+        } catch (IllegalStateException e) {
+
+            log.warn(
+                    "스케줄 수정 검증 실패: {}",
+                    e.getMessage()
+            );
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+
         } catch (Exception e) {
+
             log.error("스케줄 수정 오류", e);
-            return "fail";
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                        "시스템 오류가 발생했습니다. "
+                        + "관리자에게 문의하세요."
+                    );
         }
     }
 

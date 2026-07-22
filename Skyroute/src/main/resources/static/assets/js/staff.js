@@ -276,13 +276,39 @@ function saveFlightData() {
     const headers = { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
     headers[csrfHeaderMeta.getAttribute('content')] = csrfMeta.getAttribute('content');
     
-    fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(requestData) })
-    .then(res => res.text())
-    .then(result => { 
-        if(result === 'success') { alert('저장되었습니다.'); location.reload(); } 
-        else { alert('저장에 실패했습니다.'); } 
-    })
-    .catch(err => { console.error(err); alert('서버 통신 중 오류가 발생했습니다.'); });
+	fetch(url, {
+	    method: 'POST',
+	    headers: headers,
+	    body: JSON.stringify(requestData)
+	})
+	.then(async res => {
+
+	    const message = await res.text();
+
+	    if (!res.ok) {
+	        throw new Error(
+	            message || '저장에 실패했습니다.'
+	        );
+	    }
+
+	    return message;
+	})
+	.then(result => {
+
+	    if (result === 'success') {
+	        alert('저장되었습니다.');
+	        location.reload();
+	    }
+	})
+	.catch(err => {
+
+	    console.error(err);
+
+	    alert(
+	        err.message
+	        || '서버 통신 중 오류가 발생했습니다.'
+	    );
+	});
 }
 
 function deleteFlight(flightId) {

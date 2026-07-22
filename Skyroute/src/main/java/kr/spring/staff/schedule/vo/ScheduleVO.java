@@ -24,4 +24,13 @@ public class ScheduleVO {
     private String aircraft_name;       // 예: HL1234 (A320)
     private String dep_gate_code;       // 예: 10A
     private String arr_gate_code;       // 예: 12B
+    
+    // 항공기 로테이션 검증용 조회 필드
+    private int departure_airport_id;
+    private int arrival_airport_id;
+
+    private String departure_airport_code;
+    private String arrival_airport_code;
+
+    private String flight_type; // DOM / INT
 }
