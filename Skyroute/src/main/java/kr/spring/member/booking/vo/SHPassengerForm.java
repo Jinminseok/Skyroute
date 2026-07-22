@@ -40,10 +40,13 @@ public class SHPassengerForm {
 	@Pattern(regexp = "^[MF]$", message = "성별을 선택해 주세요.")
 	private String gender;
 
+	@NotBlank(message = "휴대폰 번호를 입력해 주세요.")
 	private String phone;
 
+	@NotBlank(message = "여권번호를 입력해 주세요.")
 	private String passportNo;
 
+	@NotNull(message = "여권 만료일을 입력해 주세요.")
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 	private LocalDate passportExpiry;
 

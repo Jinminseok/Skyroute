@@ -1,58 +1,568 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout_basic}"
+      lang="ko">
+
 <head>
-	<meta charset="UTF-8"/>
-	<title>예약 완료 | SkyRoute</title>
-	<style>
-		:root{--charcoal:#1A1A1A;--bg:#F5F4F0;--coral:#D85A30;--line:#e3e1da;--muted:#6b6b6b;}
-		body{margin:0;background:var(--bg);color:var(--charcoal);
-			font-family:"Noto Sans KR",system-ui,sans-serif;}
-		.wrap{max-width:560px;margin:48px auto;padding:0 20px;text-align:center;}
-		.check{width:64px;height:64px;border-radius:50%;background:var(--coral);
-			color:#fff;font-size:34px;line-height:64px;margin:0 auto 18px;}
-		h1{font-size:22px;margin:0 0 6px;}
-		.sub{color:var(--muted);font-size:14px;margin-bottom:26px;}
-		.card{background:#fff;border:1px solid var(--line);border-radius:14px;
-			padding:24px;text-align:left;}
-		.row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;}
-		.row .label{color:var(--muted);}
-		.amt{color:var(--coral);font-weight:700;}
-		.btns{margin-top:24px;display:flex;gap:10px;justify-content:center;}
-		a.btn{display:inline-block;padding:13px 22px;border-radius:10px;
-			text-decoration:none;font-size:14px;font-weight:600;}
-		.btn-dark{background:var(--charcoal);color:#fff;}
-		.btn-line{border:1.5px solid var(--line);color:var(--charcoal);}
-	</style>
+    <meta charset="UTF-8">
+    <title>예약 완료 | SkyRoute</title>
+
+    <link rel="stylesheet"
+          th:href="@{/assets/css/member.css}"
+          type="text/css">
+
+    <style>
+        .complete-page {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .complete-hero {
+            position: relative;
+            overflow: hidden;
+            padding: 44px 36px;
+            border: 1px solid #dbeafe;
+            border-radius: 20px;
+            background:
+                radial-gradient(
+                    circle at top right,
+                    rgba(37, 99, 235, 0.12),
+                    transparent 34%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f8fbff 0%,
+                    #eff6ff 100%
+                );
+            text-align: center;
+        }
+
+        .complete-hero::before {
+            content: "";
+            position: absolute;
+            top: -90px;
+            left: -70px;
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .complete-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow:
+                0 12px 30px rgba(37, 99, 235, 0.22);
+            color: #fff;
+            font-size: 34px;
+            font-weight: 700;
+        }
+
+        .complete-eyebrow {
+            position: relative;
+            margin-bottom: 8px;
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+        }
+
+        .complete-title {
+            position: relative;
+            margin: 0;
+            color: var(--ink);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+        }
+
+        .complete-description {
+            position: relative;
+            margin: 12px 0 0;
+            color: var(--mut);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .booking-number-box {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 24px;
+            padding: 11px 17px;
+            border: 1px solid #bfdbfe;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.85);
+            font-size: 13px;
+        }
+
+        .booking-number-label {
+            color: var(--mut);
+        }
+
+        .booking-number-value {
+            color: var(--accent);
+            font-family: var(--mono);
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .complete-content {
+            display: grid;
+            grid-template-columns:
+                minmax(0, 1.55fr)
+                minmax(250px, 0.85fr);
+            gap: 20px;
+            margin-top: 22px;
+        }
+
+        .complete-card {
+            padding: 25px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: #fff;
+        }
+
+        .complete-card-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 0 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--line);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .complete-status {
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .route-box {
+            padding: 22px;
+            border-radius: 14px;
+            background: #f8fafc;
+        }
+
+        .route-label {
+            margin-bottom: 10px;
+            color: var(--mut);
+            font-size: 12px;
+        }
+
+        .route-value {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            color: var(--ink);
+            font-size: 25px;
+            font-weight: 700;
+        }
+
+        .route-arrow {
+            color: var(--accent);
+            font-size: 21px;
+        }
+
+        .summary-list {
+            margin-top: 18px;
+        }
+
+        .summary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 13px 2px;
+            border-bottom: 1px solid var(--line);
+            font-size: 14px;
+        }
+
+        .summary-row:last-child {
+            border-bottom: 0;
+        }
+
+        .summary-label {
+            color: var(--mut);
+        }
+
+        .summary-value {
+            color: var(--ink);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .summary-value.amount {
+            color: var(--accent);
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .guide-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .guide-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .guide-item {
+            display: grid;
+            grid-template-columns: 28px 1fr;
+            gap: 11px;
+            align-items: flex-start;
+        }
+
+        .guide-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .guide-text strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--ink);
+            font-size: 13px;
+        }
+
+        .guide-text span {
+            color: var(--mut);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .complete-notice {
+            margin-top: 20px;
+            padding: 14px 15px;
+            border-radius: 11px;
+            background: #f8fafc;
+            color: var(--mut);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .complete-actions {
+            display: flex;
+            justify-content: center;
+            gap: 11px;
+            margin-top: 28px;
+        }
+
+        .complete-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 170px;
+            height: 50px;
+            padding: 0 24px;
+            border: 0;
+            text-decoration: none;
+        }
+
+        @media (max-width: 760px) {
+            .complete-hero {
+                padding: 36px 20px;
+            }
+
+            .complete-title {
+                font-size: 24px;
+            }
+
+            .complete-content {
+                grid-template-columns: 1fr;
+            }
+
+            .route-value {
+                font-size: 21px;
+            }
+
+            .complete-actions {
+                flex-direction: column;
+            }
+
+            .complete-actions .btn {
+                width: 100%;
+            }
+        }
+        .home-button-border {
+		    border: 1px solid #94a3b8 !important;
+		}
+    </style>
 </head>
+
 <body>
-<div class="wrap">
-	<div class="check">✓</div>
-	<h1>예약이 확정되었습니다</h1>
-	<p class="sub">결제가 정상 처리되어 좌석이 확정 배정되었습니다.</p>
 
-	<div class="card">
-		<div class="row">
-			<span class="label">예약번호</span>
-			<span th:text="${booking.bookingNo}">SH-XXXX</span>
-		</div>
-		<div class="row">
-			<span class="label">여정</span>
-			<span th:text="${booking.outboundDepartureIata} + ' → ' + ${booking.outboundArrivalIata}">ICN → CJU</span>
-		</div>
-		<div class="row">
-			<span class="label">탑승객</span>
-			<span th:text="${booking.passengerCount} + '명'">1명</span>
-		</div>
-		<div class="row">
-			<span class="label">결제금액</span>
-			<span class="amt" th:text="${#numbers.formatInteger(booking.totalAmount,0,'COMMA')} + '원'">0원</span>
-		</div>
-	</div>
+<div layout:fragment="panel">
 
-	<div class="btns">
-		<a class="btn btn-dark" th:href="@{/bookinglist/lookup(bookingNo=${booking.bookingNo})}">예약 내역 보기</a>
-		<a class="btn btn-line" th:href="@{/main/home}">홈으로</a>
-	</div>
+    <div class="wrap"
+         style="padding-top: 40px; padding-bottom: 70px;">
+
+        <main class="complete-page">
+
+            <section class="complete-hero">
+
+                <div class="complete-icon">
+                    ✓
+                </div>
+
+                <div class="complete-eyebrow">
+                    BOOKING COMPLETE
+                </div>
+
+                <h1 class="complete-title">
+                    예약이 확정되었습니다
+                </h1>
+
+                <p class="complete-description">
+                    결제가 정상적으로 처리되었으며,
+                    선택하신 항공편과 좌석이 확정되었습니다.
+                </p>
+
+                <div class="booking-number-box">
+
+                    <span class="booking-number-label">
+                        예약번호
+                    </span>
+
+                    <strong class="booking-number-value"
+                            th:text="${booking.bookingNo}">
+                        SR00000000000000
+                    </strong>
+
+                </div>
+
+            </section>
+
+            <div class="complete-content">
+
+                <section class="complete-card">
+
+                    <h2 class="complete-card-title">
+
+                        <span>예약 정보</span>
+
+                        <span class="complete-status">
+                            예약 확정
+                        </span>
+
+                    </h2>
+
+                    <div class="route-box">
+
+                        <div class="route-label">
+                            여정
+                        </div>
+
+                        <div class="route-value">
+
+                            <span th:text="${booking.outboundDepartureIata}">
+                                ICN
+                            </span>
+
+                            <span class="route-arrow">
+                                →
+                            </span>
+
+                            <span th:text="${booking.outboundArrivalIata}">
+                                FRA
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="summary-list">
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                예약번호
+                            </span>
+
+                            <span class="summary-value"
+                                  style="font-family: var(--mono);"
+                                  th:text="${booking.bookingNo}">
+                                SR00000000000000
+                            </span>
+
+                        </div>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                탑승객
+                            </span>
+
+                            <span class="summary-value"
+                                  th:text="|${booking.passengerCount}명|">
+                                1명
+                            </span>
+
+                        </div>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                예약 상태
+                            </span>
+
+                            <span class="summary-value">
+                                결제 및 좌석 확정
+                            </span>
+
+                        </div>
+
+                        <div class="summary-row">
+
+                            <span class="summary-label">
+                                최종 결제금액
+                            </span>
+
+                            <strong class="summary-value amount"
+                                    th:text="|${#numbers.formatInteger(
+                                        booking.totalAmount,
+                                        0,
+                                        'COMMA'
+                                    )}원|">
+                                0원
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <aside class="complete-card guide-card">
+
+                    <div>
+
+                        <h2 class="complete-card-title">
+                            다음 단계
+                        </h2>
+
+                        <div class="guide-list">
+
+                            <div class="guide-item">
+
+                                <span class="guide-number">
+                                    1
+                                </span>
+
+                                <div class="guide-text">
+
+                                    <strong>
+                                        예약 내역 확인
+                                    </strong>
+
+                                    <span>
+                                        예약 조회 메뉴에서 항공편,
+                                        탑승객과 좌석 정보를 확인할 수 있습니다.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div class="guide-item">
+
+                                <span class="guide-number">
+                                    2
+                                </span>
+
+                                <div class="guide-text">
+
+                                    <strong>
+                                        체크인 진행
+                                    </strong>
+
+                                    <span>
+                                        출발 전 체크인 가능 시간에
+                                        온라인 체크인을 진행해 주세요.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div class="guide-item">
+
+                                <span class="guide-number">
+                                    3
+                                </span>
+
+                                <div class="guide-text">
+
+                                    <strong>
+                                        취소 및 환불
+                                    </strong>
+
+                                    <span>
+                                        예약 취소 시 출발일까지 남은 기간에 따라
+                                        취소 수수료가 적용될 수 있습니다.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="complete-notice">
+                        예약번호는 예약 조회와 문의 시 필요하므로
+                        따로 보관해 주세요.
+                    </div>
+
+                </aside>
+
+            </div>
+
+            <div class="complete-actions">
+
+                <a th:href="@{/bookinglist/lookup(
+                        bookingNo=${booking.bookingNo}
+                   )}"
+                   class="btn">
+                    예약 내역 보기
+                </a>
+
+                <a th:href="@{/main/home}"
+                   class="btn ghost home-button-border">홈으로</a>
+
+            </div>
+
+        </main>
+
+    </div>
+
 </div>
+
 </body>
 </html>

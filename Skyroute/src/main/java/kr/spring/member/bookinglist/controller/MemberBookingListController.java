@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -108,16 +109,13 @@ public class MemberBookingListController {
                 departureDate
         );
 
-        List<Map<String, Object>> bookingList =
-                bookingListService
-                        .selectMyBookingList(
-                                paramMap
-                        );
+        List<Map<String, Object>> bookingRows =
+                bookingListService.selectMyBookingList(paramMap);
 
-        model.addAttribute(
-                "bookingList",
-                bookingList
-        );
+        List<Map<String, Object>> bookingList =
+                groupBookingList(bookingRows);
+
+        model.addAttribute("bookingList", bookingList);
 
         /*
          * 검색 입력값 보존
@@ -381,6 +379,223 @@ public class MemberBookingListController {
         }
     }
 
+    
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> groupBookingList(
+            List<Map<String, Object>> bookingRows) {
+
+        Map<Long, Map<String, Object>> grouped =
+                new LinkedHashMap<>();
+
+        for (Map<String, Object> row : bookingRows) {
+            Number bookingIdNumber =
+                    (Number) row.get("BOOKING_ID");
+
+            if (bookingIdNumber == null) {
+                continue;
+            }
+
+            Long bookingId =
+                    bookingIdNumber.longValue();
+
+            Map<String, Object> booking =
+                    grouped.get(bookingId);
+
+            if (booking == null) {
+                booking = new LinkedHashMap<>();
+                booking.put("BOOKING_ID", bookingId);
+                booking.put("BOOKING_NO", row.get("BOOKING_NO"));
+                booking.put("BOOKING_STATUS", row.get("BOOKING_STATUS"));
+                booking.put("FLIGHTS", new ArrayList<Map<String, Object>>());
+                booking.put("PASSENGERS", new ArrayList<Map<String, Object>>());
+                booking.put("TOTAL_AMOUNT", 0L);
+                booking.put("CANCEL_AVAILABLE", true);
+
+                grouped.put(bookingId, booking);
+            }
+
+            List<Map<String, Object>> flights =
+                    (List<Map<String, Object>>) booking.get("FLIGHTS");
+
+            Map<String, Object> targetFlight = null;
+
+            for (Map<String, Object> flight : flights) {
+                if (sameValue(
+                        flight.get("FLIGHT_ID"),
+                        row.get("FLIGHT_ID"))
+                        && sameValue(
+                        flight.get("LEG_TYPE"),
+                        row.get("LEG_TYPE"))) {
+
+                    targetFlight = flight;
+                    break;
+                }
+            }
+
+            if (targetFlight == null) {
+                targetFlight = new LinkedHashMap<>();
+                targetFlight.put("FLIGHT_ID", row.get("FLIGHT_ID"));
+                targetFlight.put("LEG_TYPE", row.get("LEG_TYPE"));
+                targetFlight.put("FLIGHT_STATUS", row.get("FLIGHT_STATUS"));
+                targetFlight.put("DELAY_MINUTES", row.get("DELAY_MINUTES"));
+                targetFlight.put("IS_DEPARTED", row.get("IS_DEPARTED"));
+                targetFlight.put("FLIGHT_NO", row.get("FLIGHT_NO"));
+                targetFlight.put("DEPARTURE_TIME", row.get("DEPARTURE_TIME"));
+                targetFlight.put("DEP_IATA", row.get("DEP_IATA"));
+                targetFlight.put("DEP_NAME", row.get("DEP_NAME"));
+                targetFlight.put("ARR_IATA", row.get("ARR_IATA"));
+                targetFlight.put("ARR_NAME", row.get("ARR_NAME"));
+                targetFlight.put("TICKETS", new ArrayList<Map<String, Object>>());
+
+                flights.add(targetFlight);
+            }
+
+            List<Map<String, Object>> tickets =
+                    (List<Map<String, Object>>) targetFlight.get("TICKETS");
+
+            Map<String, Object> ticket =
+                    new LinkedHashMap<>();
+
+            ticket.put("TICKET_ID", row.get("TICKET_ID"));
+            ticket.put("BOOKING_PASSENGER_ID", row.get("BOOKING_PASSENGER_ID"));
+            ticket.put("PASSENGER_NAME", row.get("PASSENGER_NAME"));
+            ticket.put("PASSENGER_TYPE", row.get("PASSENGER_TYPE"));
+            ticket.put("CLASS_NAME", row.get("CLASS_NAME"));
+            ticket.put("SEAT_NO", row.get("SEAT_NO"));
+            ticket.put("FARE_AMOUNT", row.get("FARE_AMOUNT"));
+            ticket.put("CHECKIN_STATUS", row.get("CHECKIN_STATUS"));
+            ticket.put("CHECKED_IN_AT", row.get("CHECKED_IN_AT"));
+            ticket.put("BOARDED_AT", row.get("BOARDED_AT"));
+
+            tickets.add(ticket);
+
+            List<Map<String, Object>> passengers =
+                    (List<Map<String, Object>>) booking.get("PASSENGERS");
+
+            boolean passengerExists = false;
+
+            for (Map<String, Object> passenger : passengers) {
+                if (sameValue(
+                        passenger.get("BOOKING_PASSENGER_ID"),
+                        row.get("BOOKING_PASSENGER_ID"))) {
+
+                    passengerExists = true;
+                    break;
+                }
+            }
+
+            if (!passengerExists) {
+                Map<String, Object> passenger =
+                        new LinkedHashMap<>();
+
+                passenger.put(
+                        "BOOKING_PASSENGER_ID",
+                        row.get("BOOKING_PASSENGER_ID")
+                );
+                passenger.put(
+                        "PASSENGER_NAME",
+                        row.get("PASSENGER_NAME")
+                );
+                passenger.put(
+                        "PASSENGER_TYPE",
+                        row.get("PASSENGER_TYPE")
+                );
+
+                passengers.add(passenger);
+            }
+
+            Number fareAmount =
+                    (Number) row.get("FARE_AMOUNT");
+
+            if (fareAmount != null) {
+                long totalAmount =
+                        ((Number) booking.get("TOTAL_AMOUNT"))
+                                .longValue();
+
+                booking.put(
+                        "TOTAL_AMOUNT",
+                        totalAmount + fareAmount.longValue()
+                );
+            }
+
+            String bookingStatus =
+                    String.valueOf(row.get("BOOKING_STATUS"));
+
+            String checkinStatus =
+                    row.get("CHECKIN_STATUS") == null
+                            ? null
+                            : String.valueOf(row.get("CHECKIN_STATUS"));
+
+            String flightStatus =
+                    row.get("FLIGHT_STATUS") == null
+                            ? null
+                            : String.valueOf(row.get("FLIGHT_STATUS"));
+
+            boolean rowCancelable =
+                    "CONFIRMED".equals(bookingStatus)
+                            && (checkinStatus == null
+                            || "NOT_CHECKED_IN".equals(checkinStatus))
+                            && ("SCHEDULED".equals(flightStatus)
+                            || "DELAYED".equals(flightStatus))
+                            && "N".equals(String.valueOf(row.get("IS_DEPARTED")));
+
+            booking.put(
+                    "CANCEL_AVAILABLE",
+                    Boolean.TRUE.equals(
+                            booking.get("CANCEL_AVAILABLE")
+                    ) && rowCancelable
+            );
+        }
+
+        for (Map<String, Object> booking : grouped.values()) {
+            List<Map<String, Object>> flights =
+                    (List<Map<String, Object>>) booking.get("FLIGHTS");
+
+            List<Map<String, Object>> passengers =
+                    (List<Map<String, Object>>) booking.get("PASSENGERS");
+
+            boolean hasInbound = false;
+
+            for (Map<String, Object> flight : flights) {
+                if ("INBOUND".equals(
+                        String.valueOf(flight.get("LEG_TYPE")))) {
+
+                    hasInbound = true;
+                    break;
+                }
+            }
+
+            booking.put(
+                    "TRIP_TYPE",
+                    hasInbound ? "ROUND_TRIP" : "ONE_WAY"
+            );
+
+            booking.put(
+                    "TRIP_TYPE_LABEL",
+                    hasInbound ? "왕복" : "편도"
+            );
+
+            booking.put(
+                    "PASSENGER_COUNT",
+                    passengers.size()
+            );
+        }
+
+        return new ArrayList<>(grouped.values());
+    }
+
+    private boolean sameValue(
+            Object left,
+            Object right) {
+
+        if (left == null || right == null) {
+            return left == right;
+        }
+
+        return String.valueOf(left)
+                .equals(String.valueOf(right));
+    }
+    
 
     private Long getMemberId(
             PrincipalDetails principal) {

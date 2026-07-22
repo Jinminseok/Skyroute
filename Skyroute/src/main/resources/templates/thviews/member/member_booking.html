@@ -52,76 +52,167 @@
                     </div>
                 </form>
             
-                <div style="margin-top:24px" class="results">
-                    
-                    <div th:if="${#lists.isEmpty(bookingList)}" class="trip" style="text-align: left; color: var(--mut); padding: 24px 28px;">
-					    조회된 항공권 예약 내역이 존재하지 않습니다.
-					</div>
-                    
-                    <div class="trip" th:each="b : ${bookingList}" style="margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px; flex-wrap:wrap;">
-                                <span th:text="${b.get('BOOKING_STATUS')}" 
-                                      th:class="|stat ${b.get('BOOKING_STATUS') == 'CONFIRMED' ? 'soon' : 'active'}|" 
-                                      style="padding: 2px 6px; border-radius:4px; font-size:12px;">CONFIRMED</span>
-                                
-                                <span class="pnr" th:text="'PNR ' + ${b.get('BOOKING_NO')}" style="font-weight: 500; font-family: var(--mono);"></span>
-                                
-                                <span th:if="${b.get('CHECKIN_STATUS') == 'CHECKED_IN' or b.get('CHECKIN_STATUS') == 'BOARDED'}" class="stat soon" style="background:#e3f2fd; color:#0d47a1;">
-                                    ✓ 체크인 완료 (<th:block th:text="${b.get('CHECKED_IN_AT')}"></th:block>)
-                                </span>
-                                <span th:unless="${b.get('CHECKIN_STATUS') == 'CHECKED_IN' or b.get('CHECKIN_STATUS') == 'BOARDED'}" class="stat active" style="background:#f5f5f5; color:#616161;">
-                                    미체크인
-                                </span>
-
-                                <span th:if="${b.get('CHECKIN_STATUS') == 'BOARDED'}" class="stat soon" style="background:#e8f5e9; color:#1b5e20;">
-                                    ✈ 탑승 완료 (<th:block th:text="${b.get('BOARDED_AT')}"></th:block>)
-                                </span>
-                            </div>
-                            
-                            <div class="rt" style="font-weight: 500; font-size: 17px;" th:text="|${b.get('DEP_IATA')} ${b.get('DEP_NAME')} ➔ ${b.get('ARR_IATA')} ${b.get('ARR_NAME')}|"></div>
-                            <div class="dt" style="font-weight: 300; font-size: 13px; color: var(--mut);" 
-                                 th:text="|편명: ${b.get('FLIGHT_NO')} · 탑승객: ${b.get('PASSENGER_NAME')} (${b.get('PASSENGER_TYPE')}) · 일시: ${b.get('DEPARTURE_TIME')}|"></div>
-                        </div>
-                        
-                        <div class="actions" style="display: flex; gap: 8px;">
-                            <a href="javascript:void(0);" 
-                               th:attr="data-pnr=${b.get('BOOKING_NO')},
-                                        data-name=${b.get('PASSENGER_NAME')},
-                                        data-flight=${b.get('FLIGHT_NO')},
-                                        data-route=|${b.get('DEP_NAME')} ➔ ${b.get('ARR_NAME')}|,
-                                        data-time=${b.get('DEPARTURE_TIME')},
-                                        data-seat=|${b.get('CLASS_NAME')} · ${b.get('SEAT_NO')}|,
-                                        data-price=${#numbers.formatInteger(b.get('FARE_AMOUNT'), 1, 'COMMA')}"
-                               onclick="openDetailModal(this)" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">상세보기</a>
-                            
-								<button type="button"
-								        th:if="${b.get('BOOKING_STATUS') == 'CONFIRMED' 
-								                 and (b.get('CHECKIN_STATUS') == null or b.get('CHECKIN_STATUS') == 'NOT_CHECKED_IN')
-								                 and (b.get('FLIGHT_STATUS') == 'SCHEDULED' or b.get('FLIGHT_STATUS') == 'DELAYED')
-								                 and b.get('IS_DEPARTED') == 'N'}"
-								        th:attr="
-								            data-booking-id=${b.get('BOOKING_ID')},
-								            data-pnr=${b.get('BOOKING_NO')}
-								        "
-								        onclick="openCancelQuoteModal(this)"
-								        class="btn sm"
-								        style="
-								            display:inline-flex;
-								            align-items:center;
-								            justify-content:center;
-								            border:none;
-								            cursor:pointer;
-								            color:#fff;
-								            background:var(--bad);
-								        ">
-								    예약취소
-								</button>
-
-                        </div>
-                    </div>
-
-                </div>
+                <div class="booking-result-list">
+				    <div th:if="${#lists.isEmpty(bookingList)}" class="booking-empty">
+				        <span class="material-symbols-outlined">flight_takeoff</span>
+				        <strong>조회된 예약 내역이 없습니다.</strong>
+				        <p>예약번호 또는 탑승 정보를 다시 확인해 주세요.</p>
+				    </div>
+				
+				    <article class="booking-card" th:each="b : ${bookingList}">
+				        <div class="booking-card-header">
+				            <div class="booking-card-meta">
+				                <span class="booking-status"
+				                      th:classappend="${b.get('BOOKING_STATUS') == 'CONFIRMED' ? ' confirmed' : ' cancelled'}"
+				                      th:text="${b.get('BOOKING_STATUS') == 'CONFIRMED' ? '예약 확정' : b.get('BOOKING_STATUS') == 'CANCELLED' ? '예약 취소' : b.get('BOOKING_STATUS')}">
+				                    예약 확정
+				                </span>
+				
+				                <span class="booking-trip-type"
+				                      th:text="${b.get('TRIP_TYPE_LABEL')}">
+				                    왕복
+				                </span>
+				            </div>
+				
+				            <div class="booking-pnr">
+				                <span>예약번호</span>
+				                <strong th:text="${b.get('BOOKING_NO')}"></strong>
+				            </div>
+				        </div>
+				
+				        <div class="booking-flight-list">
+				            <div class="booking-flight-row"
+				                 th:each="f : ${b.get('FLIGHTS')}">
+				
+				                <div class="booking-leg-badge"
+				                     th:classappend="${f.get('LEG_TYPE') == 'OUTBOUND' ? ' outbound' : ' inbound'}"
+				                     th:text="${f.get('LEG_TYPE') == 'OUTBOUND' ? '가는 편' : '오는 편'}">
+				                    가는 편
+				                </div>
+				
+				                <div class="booking-route">
+				                    <div class="booking-route-codes">
+				                        <strong th:text="${f.get('DEP_IATA')}">ICN</strong>
+				                        <span class="booking-route-line">
+				                            <span class="material-symbols-outlined">flight</span>
+				                        </span>
+				                        <strong th:text="${f.get('ARR_IATA')}">JNB</strong>
+				                    </div>
+				
+				                    <div class="booking-route-names"
+				                         th:text="|${f.get('DEP_NAME')} → ${f.get('ARR_NAME')}|">
+				                    </div>
+				                </div>
+				
+				                <div class="booking-flight-information">
+				                    <strong th:text="${f.get('DEPARTURE_TIME')}"></strong>
+				                    <span th:text="|${f.get('FLIGHT_NO')} · ${f.get('FLIGHT_STATUS')}|"></span>
+				                </div>
+				            </div>
+				        </div>
+				
+				        <div class="booking-card-footer">
+				            <div class="booking-summary-information">
+				                <span th:text="|탑승객 ${b.get('PASSENGER_COUNT')}명|"></span>
+				                <span class="booking-summary-divider"></span>
+				                <span>
+				                    총 결제금액
+				                    <strong th:text="|${#numbers.formatInteger(b.get('TOTAL_AMOUNT'), 1, 'COMMA')}원|"></strong>
+				                </span>
+				            </div>
+				
+				            <div class="booking-card-actions">
+				                <button type="button"
+				                        class="booking-detail-button"
+				                        onclick="openBookingDetail(this)">
+				                    상세보기
+				                </button>
+				
+				                <button type="button"
+				                        th:if="${b.get('CANCEL_AVAILABLE')}"
+				                        class="booking-cancel-button"
+				                        th:attr="
+				                            data-booking-id=${b.get('BOOKING_ID')},
+				                            data-pnr=${b.get('BOOKING_NO')}
+				                        "
+				                        onclick="openCancelQuoteModal(this)">
+				                    예약취소
+				                </button>
+				
+				                <span class="booking-cancel-unavailable"
+				                      th:unless="${b.get('CANCEL_AVAILABLE')}">
+				                    취소 불가
+				                </span>
+				            </div>
+				        </div>
+				
+				        <div class="booking-detail-source" hidden>
+				            <div class="detail-booking-meta">
+				                <div>
+				                    <span>예약번호</span>
+				                    <strong th:text="${b.get('BOOKING_NO')}"></strong>
+				                </div>
+				                <div>
+				                    <span>예약 유형</span>
+				                    <strong th:text="${b.get('TRIP_TYPE_LABEL')}"></strong>
+				                </div>
+				                <div>
+				                    <span>탑승객</span>
+				                    <strong th:text="|${b.get('PASSENGER_COUNT')}명|"></strong>
+				                </div>
+				                <div>
+				                    <span>총 결제금액</span>
+				                    <strong th:text="|${#numbers.formatInteger(b.get('TOTAL_AMOUNT'), 1, 'COMMA')}원|"></strong>
+				                </div>
+				            </div>
+				
+				            <section class="detail-flight-section"
+				                     th:each="f : ${b.get('FLIGHTS')}">
+				
+				                <div class="detail-flight-header">
+				                    <div>
+				                        <span class="detail-leg-label"
+				                              th:text="${f.get('LEG_TYPE') == 'OUTBOUND' ? '가는 편' : '오는 편'}">
+				                        </span>
+				
+				                        <strong th:text="|${f.get('DEP_IATA')} → ${f.get('ARR_IATA')}|"></strong>
+				                    </div>
+				
+				                    <span th:text="${f.get('DEPARTURE_TIME')}"></span>
+				                </div>
+				
+				                <div class="detail-route-name"
+				                     th:text="|${f.get('DEP_NAME')} → ${f.get('ARR_NAME')}|">
+				                </div>
+				
+				                <div class="detail-flight-number"
+				                     th:text="|편명 ${f.get('FLIGHT_NO')}|">
+				                </div>
+				
+				                <div class="detail-ticket-table">
+				                    <div class="detail-ticket-head">
+				                        <span>탑승객</span>
+				                        <span>구분</span>
+				                        <span>좌석</span>
+				                        <span>운임</span>
+				                    </div>
+				
+				                    <div class="detail-ticket-row"
+				                         th:each="t : ${f.get('TICKETS')}">
+				
+				                        <strong th:text="${t.get('PASSENGER_NAME')}"></strong>
+				
+				                        <span th:text="${t.get('PASSENGER_TYPE')}"></span>
+				
+				                        <span th:text="|${t.get('CLASS_NAME')} ${t.get('SEAT_NO')}|"></span>
+				
+				                        <span th:text="|${#numbers.formatInteger(t.get('FARE_AMOUNT'), 1, 'COMMA')}원|"></span>
+				                    </div>
+				                </div>
+				            </section>
+				        </div>
+				    </article>
+				</div>
 
                 <div class="note" style="margin-top: 24px; width: 100%; display: block; box-sizing: border-box;">
                     💡 <b>안내사항:</b> 예약 내용(날짜/좌석)의 변경이 필요하신 경우, 기존 예약을 완전히 <b>[예약취소]</b> 하신 후 새로운 항공권을 다시 예매해 주셔야 합니다.
@@ -129,23 +220,34 @@
             </div>
         </div>
 
-        <div id="detailModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-            <div class="summary" style="background:#fff; width:500px; padding:30px; border-radius:16px; box-shadow: var(--sh); position:relative;">
-                <h3 style="margin-top:0; border-bottom:1px solid var(--line); padding-bottom:12px; font-size:18px;">항공권 상세 정보</h3>
-                <div style="margin:20px 0; display:flex; flex-direction:column; gap:10px;">
-                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">예약번호</span><b id="dtBookingNo"></b></div>
-                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">탑승객명</span><b id="dtPassengerName"></b></div>
-                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">항공편</span><b id="dtFlightNo"></b></div>
-                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">여정구간</span><b id="dtRoute"></b></div>
-                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">탑승일시</span><b id="dtTime"></b></div>
-                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">선택좌석</span><b id="dtSeat"></b></div>
-                    <div class="sl" style="border:none; padding:2px 0;"><span class="k">결제금액</span><b id="dtPrice" style="color:var(--accent);"></b></div>
-                </div>
-                <div style="display:flex; justify-content:flex-end; margin-top:20px;">
-                    <a href="javascript:void(0);" onclick="closeModal('detailModal')" class="btn ghost sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; width:100px;">닫기</a>
-                </div>
-            </div>
-        </div>
+        <div id="detailModal" class="booking-modal-overlay">
+		    <div class="booking-detail-modal">
+		        <div class="booking-modal-header">
+		            <div>
+		                <span>BOOKING DETAILS</span>
+		                <h3>예약 상세 정보</h3>
+		            </div>
+		
+		            <button type="button"
+		                    class="booking-modal-close"
+		                    onclick="closeModal('detailModal')">
+		                <span class="material-symbols-outlined">close</span>
+		            </button>
+		        </div>
+		
+		        <div id="bookingDetailContent"
+		             class="booking-detail-content">
+		        </div>
+		
+		        <div class="booking-modal-footer">
+		            <button type="button"
+		                    class="booking-modal-confirm"
+		                    onclick="closeModal('detailModal')">
+		                확인
+		            </button>
+		        </div>
+		    </div>
+		</div>
 
         <div id="cancelModal"
 		     style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
@@ -382,79 +484,34 @@
         }
 		
 		
-		    function openDetailModal(element) {
-		
-		        document
-		            .getElementById(
-		                "dtBookingNo"
-		            )
-		            .innerText =
-		                element.getAttribute(
-		                    "data-pnr"
-		                );
-		
-		        document
-		            .getElementById(
-		                "dtPassengerName"
-		            )
-		            .innerText =
-		                element.getAttribute(
-		                    "data-name"
-		                );
-		
-		        document
-		            .getElementById(
-		                "dtFlightNo"
-		            )
-		            .innerText =
-		                element.getAttribute(
-		                    "data-flight"
-		                );
-		
-		        document
-		            .getElementById(
-		                "dtRoute"
-		            )
-		            .innerText =
-		                element.getAttribute(
-		                    "data-route"
-		                );
-		
-		        document
-		            .getElementById(
-		                "dtTime"
-		            )
-		            .innerText =
-		                element.getAttribute(
-		                    "data-time"
-		                );
-		
-		        document
-		            .getElementById(
-		                "dtSeat"
-		            )
-		            .innerText =
-		                element.getAttribute(
-		                    "data-seat"
-		                );
-		
-		        document
-		            .getElementById(
-		                "dtPrice"
-		            )
-		            .innerText =
-		                element.getAttribute(
-		                    "data-price"
-		                )
-		                + " 원";
-		
-		        document
-		            .getElementById(
-		                "detailModal"
-		            )
-		            .style
-		            .display = "flex";
-		    }
+        function openBookingDetail(button) {
+	            const bookingCard =
+	                    button.closest(".booking-card");
+	
+	            const source =
+	                    bookingCard?.querySelector(
+	                        ".booking-detail-source"
+	                    );
+	
+	            const content =
+	                    document.getElementById(
+	                        "bookingDetailContent"
+	                    );
+	
+	            const modal =
+	                    document.getElementById(
+	                        "detailModal"
+	                    );
+	
+	            if (!source || !content || !modal) {
+	                return;
+	            }
+	
+	            content.innerHTML =
+	                    source.innerHTML;
+	
+	            modal.style.display = "flex";
+	        }
 		
 		
 		    function closeModal(modalId) {

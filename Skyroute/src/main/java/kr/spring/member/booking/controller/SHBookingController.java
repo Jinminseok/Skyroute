@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.net.URI;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -111,7 +113,9 @@ public class SHBookingController {
 						@RequestParam(name = "adultCount", defaultValue = "1") int adultCount,
 						@RequestParam(name = "childCount", defaultValue = "0") int childCount,
 						@RequestParam(name = "infantCount", defaultValue = "0") int infantCount,
+						HttpServletRequest request,
 						Model model) {
+		
 
 		log.warn(
 			    "[예약 시작] tripType={}, outboundFlightId={}, inboundFlightId={}, seatClassId={}",
@@ -130,6 +134,7 @@ public class SHBookingController {
 		reserveForm.setAdultCount(adultCount);
 		reserveForm.setChildCount(childCount);
 		reserveForm.setInfantCount(infantCount);
+		reserveForm.setSearchReturnUrl(resolveSearchReturnUrl(request));
 
 		/*
 		 * 승객 유형은 사용자가 고르는 값이 아니다.
@@ -1193,5 +1198,18 @@ public class SHBookingController {
 						.getBirthDate()
 						.isAfter(ageCutoff)
 				);
+	}
+	
+	private String resolveSearchReturnUrl(HttpServletRequest request) {
+		String referer = request.getHeader("Referer");
+		if (referer == null || referer.isBlank()) return "/booking/flights/search";
+
+		try {
+			URI uri = URI.create(referer);
+			if (!"/booking/flights/search".equals(uri.getPath())) return "/booking/flights/search";
+			return uri.getRawQuery() == null ? uri.getPath() : uri.getPath() + "?" + uri.getRawQuery();
+		} catch (IllegalArgumentException e) {
+			return "/booking/flights/search";
+		}
 	}
 }

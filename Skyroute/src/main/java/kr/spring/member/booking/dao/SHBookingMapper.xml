@@ -7,16 +7,19 @@
 
 
 	<resultMap id="seatMapHeaderResultMap" type="kr.spring.member.booking.vo.SHSeatMapVO">
-		<id     property="flightId"          column="flight_id"/>
-		<result property="flightNo"          column="flight_no"/>
+		<id property="flightId" column="flight_id"/>
+		<result property="flightNo" column="flight_no"/>
+		<result property="aircraftModelName" column="aircraft_model_name"/>
 		<result property="departureIataCode" column="departure_iata_code"/>
-		<result property="arrivalIataCode"   column="arrival_iata_code"/>
-		<result property="departureTime"     column="departure_time"/>
-		<result property="arrivalTime"       column="arrival_time"/>
-		<result property="seatClassId"       column="seat_class_id"/>
-		<result property="seatClassName"     column="seat_class_name"/>
-		<result property="price"             column="price"/>
-		<result property="maxSeatColumns"    column="max_seat_columns"/>
+		<result property="arrivalIataCode" column="arrival_iata_code"/>
+		<result property="departureTimezone" column="departure_timezone"/>
+		<result property="arrivalTimezone" column="arrival_timezone"/>
+		<result property="departureTime" column="departure_time"/>
+		<result property="arrivalTime" column="arrival_time"/>
+		<result property="seatClassId" column="seat_class_id"/>
+		<result property="seatClassName" column="seat_class_name"/>
+		<result property="price" column="price"/>
+		<result property="maxSeatColumns" column="max_seat_columns"/>
 	</resultMap>
 
 	<resultMap id="seatResultMap" type="kr.spring.member.booking.vo.SHSeatVO">
@@ -122,29 +125,30 @@
 	<!-- ===================== 좌석 선택 ===================== -->
 
 	<select id="selectSeatMapHeader" resultMap="seatMapHeaderResultMap">
-
 		SELECT
 			f.flight_id,
 			f.flight_no,
+			a.model_name AS aircraft_model_name,
 			TRIM(dep.iata_code) AS departure_iata_code,
 			TRIM(arr.iata_code) AS arrival_iata_code,
+			dep.timezone AS departure_timezone,
+			arr.timezone AS arrival_timezone,
 			f.departure_time,
 			f.arrival_time,
 			sc.seat_class_id,
-			sc.class_name       AS seat_class_name,
+			sc.class_name AS seat_class_name,
 			ff.price
 		FROM FLIGHT f
-		JOIN ROUTE r        ON r.route_id = f.route_id
-		JOIN AIRPORT dep    ON dep.airport_id = r.departure_airport_id
-		JOIN AIRPORT arr    ON arr.airport_id = r.arrival_airport_id
-		JOIN FLIGHT_FARE ff ON ff.flight_id = f.flight_id
-		                   AND ff.seat_class_id = #{seatClassId}
-		JOIN SEAT_CLASS sc  ON sc.seat_class_id = ff.seat_class_id
+		JOIN AIRCRAFT a ON a.aircraft_id = f.aircraft_id
+		JOIN ROUTE r ON r.route_id = f.route_id
+		JOIN AIRPORT dep ON dep.airport_id = r.departure_airport_id
+		JOIN AIRPORT arr ON arr.airport_id = r.arrival_airport_id
+		JOIN FLIGHT_FARE ff ON ff.flight_id = f.flight_id AND ff.seat_class_id = #{seatClassId}
+		JOIN SEAT_CLASS sc ON sc.seat_class_id = ff.seat_class_id
 		WHERE f.flight_id = #{flightId}
 		  AND f.is_deleted = 'N'
 		  AND f.flight_status IN ('SCHEDULED', 'DELAYED')
-		  AND f.departure_time &gt; SYSTIMESTAMP
-
+		  AND f.departure_time > SYSTIMESTAMP
 	</select>
 
 

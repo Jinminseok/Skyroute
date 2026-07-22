@@ -349,37 +349,38 @@
             <div class="htitle"
                  style="margin-bottom: 22px;">
 
-                <div>
-
-                    <div class="eyebrow">
-                        SEAT SELECTION
-                    </div>
-
-                    <h2 style="
-                        margin-top: 5px;
-                        font-size: 22px;
-                        font-weight: 600;
-                    ">
-                        좌석 선택
-                    </h2>
-
-                    <p style="
-                        margin-top: 7px;
-                        color: var(--mut);
-                        font-size: 13px;
-                    ">
-                        성인과 소아 승객에게 구간별 좌석을 배정해 주세요.
-                    </p>
-
-                </div>
+                
+                
+                <header class="booking-page-header">
+				    <div>
+				        <div class="eyebrow">SEAT SELECTION</div>
+				        <h2 style="margin-top: 5px;font-size: 22px;font-weight: 600;">좌석 선택</h2>
+				        <p style="margin-top: 7px;color: var(--mut);font-size: 13px;">탑승객별 좌석을 선택해 주세요.</p>
+				    </div>
+				
+				    <div class="booking-progress">
+				        <div class="progress-item completed">
+				            <span class="progress-circle">✓</span>
+				            <span>항공편</span>
+				        </div>
+				        <div class="progress-item completed">
+				            <span class="progress-circle">✓</span>
+				            <span>탑승객</span>
+				        </div>
+				        <div class="progress-item active">
+				            <span class="progress-circle">3</span>
+				            <span>좌석</span>
+				        </div>
+				        <div class="progress-item">
+				            <span class="progress-circle">4</span>
+				            <span>확인·결제</span>
+				        </div>
+				    </div>
+				</header>
 
             </div>
 
-            <div class="seat-guide">
-                현재 화면에서 선택한 좌석은 아직 확보된 좌석이 아닙니다.
-                예약 확인 후 결제하기 버튼을 누르는 순간 서버에서 좌석을 다시 확인하고
-                10분 동안 임시 점유합니다.
-            </div>
+           
 
             <div class="seat-error"
                  th:if="${error != null}"
@@ -663,9 +664,7 @@
                     <div class="seat-actions">
 
                         <a th:href="@{/booking/reserve/passenger}"
-                           class="btn ghost">
-                            이전
-                        </a>
+                           class="btn ghost seat-prev-button">이전</a>
 
                         <button type="submit"
                                 id="seatSubmitButton"

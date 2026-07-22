@@ -28,19 +28,7 @@
             line-height: 1.65;
         }
 
-        .passenger-error {
-            margin-bottom: 20px;
-            padding: 14px 16px;
-            border: 1px solid #fecaca;
-            border-radius: 12px;
-            background: #fef2f2;
-            color: #b91c1c;
-            font-size: 13px;
-        }
-
-        .passenger-error p {
-            margin: 4px 0;
-        }
+   
 
         .passenger-card {
             margin-bottom: 24px;
@@ -210,6 +198,13 @@
 			    background: var(--accent-soft);
 			}
         }
+        .passenger-prev-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-decoration: none;
+}
     </style>
 </head>
 
@@ -225,29 +220,35 @@
             <div class="htitle"
                  style="margin-bottom: 22px;">
 
-                <div>
-
-                    <div class="eyebrow">
-                        PASSENGER INFO
-                    </div>
-
-                    <h2 style="
-                        margin-top: 5px;
-                        font-size: 22px;
-                        font-weight: 600;
-                    ">
-                        탑승객 정보 입력
-                    </h2>
-
-                    <p style="
-                        margin-top: 7px;
-                        color: var(--mut);
-                        font-size: 13px;
-                    ">
-                        검색 시 선택한 승객 구성에 맞춰 정보를 입력해 주세요.
-                    </p>
-
-                </div>
+                
+                <header class="booking-page-header">
+				    <div>
+				        <div class="eyebrow">PASSENGER INFORMATION</div>
+				        <h2 style="margin-top: 5px;font-size: 22px; font-weight: 600; ">
+				                        탑승객 정보 입력
+				                    </h2>
+				        <p style="margin-top: 7px;color: var(--mut);font-size: 13px;">탑승객의 정보를 정확하게 입력해 주세요.</p>
+				    </div>
+				
+				    <div class="booking-progress">
+				        <div class="progress-item completed">
+				            <span class="progress-circle">✓</span>
+				            <span>항공편</span>
+				        </div>
+				        <div class="progress-item active">
+				            <span class="progress-circle">2</span>
+				            <span>탑승객</span>
+				        </div>
+				        <div class="progress-item">
+				            <span class="progress-circle">3</span>
+				            <span>좌석</span>
+				        </div>
+				        <div class="progress-item">
+				            <span class="progress-circle">4</span>
+				            <span>확인·결제</span>
+				        </div>
+				    </div>
+				</header>
 
             </div>
 
@@ -288,19 +289,7 @@
                   method="post"
                   id="passengerForm">
 
-                <div class="passenger-error"
-                     th:if="${#fields.hasAnyErrors()}">
-
-                    <strong>
-                        입력 내용을 확인해 주세요.
-                    </strong>
-
-                    <p th:each="error : ${#fields.allErrors()}"
-                       th:text="${error}">
-                        입력 오류입니다.
-                    </p>
-
-                </div>
+              
 
                 <div class="passenger-card"
                      th:each="passenger, stat : *{passengers}">
@@ -442,43 +431,46 @@
                         </label>
 
                         <label class="passenger-field full">
-
-                            <span>
-                                휴대폰 번호
-                            </span>
-
-                            <input type="text"
-                                   th:field="*{passengers[__${stat.index}__].phone}"
-                                   maxlength="20"
-                                   inputmode="tel"
-                                   placeholder="01012345678">
-
-                        </label>
-
-                        <label class="passenger-field">
-
-                            <span>
-                                여권번호
-                            </span>
-
-                            <input type="text"
-                                   th:field="*{passengers[__${stat.index}__].passportNo}"
-                                   maxlength="20"
-                                   placeholder="국제선 이용 시 입력">
-
-                        </label>
+						    <span>휴대폰 번호</span>
+						
+						    <input type="text"
+						           th:field="*{passengers[__${stat.index}__].phone}"
+						           maxlength="20"
+						           inputmode="tel"
+						           placeholder="01012345678">
+						
+						    <small class="field-error"
+						           th:errors="*{passengers[__${stat.index}__].phone}">
+						        휴대폰 번호 오류
+						    </small>
+						</label>
 
                         <label class="passenger-field">
+						    <span>여권번호</span>
+						
+						    <input type="text"
+						           th:field="*{passengers[__${stat.index}__].passportNo}"
+						           maxlength="20"
+						           placeholder="여권번호 입력">
+						
+						    <small class="field-error"
+						           th:errors="*{passengers[__${stat.index}__].passportNo}">
+						        여권번호 오류
+						    </small>
+						</label>
 
-                            <span>
-                                여권 만료일
-                            </span>
-
-                            <input type="date"
-                                   th:field="*{passengers[__${stat.index}__].passportExpiry}"
-                                   th:attr="min=${today}">
-
-                        </label>
+                        <label class="passenger-field">
+						    <span>여권 만료일</span>
+						
+						    <input type="date"
+						           th:field="*{passengers[__${stat.index}__].passportExpiry}"
+						           th:attr="min=${today}">
+						
+						    <small class="field-error"
+						           th:errors="*{passengers[__${stat.index}__].passportExpiry}">
+						        여권 만료일 오류
+						    </small>
+						</label>
 
                     </div>
 
@@ -486,13 +478,10 @@
 
                 <div class="passenger-actions">
 
-                    <button type="submit"
-                            id="passengerSubmitButton"
-                            class="btn passenger-submit">
-
-                        좌석 선택하기
-
-                    </button>
+                    <div class="passenger-action-buttons">
+					    <a th:href="${shReserveForm.searchReturnUrl}" class="btn ghost passenger-prev-button" >이전</a>
+					    <button type="submit" class="btn passenger-next-button">좌석 선택하기</button>
+					</div>
 
                 </div>
 

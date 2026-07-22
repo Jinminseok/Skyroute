@@ -6,6 +6,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -25,9 +30,15 @@ public class SHSeatMapVO {
 
 	private String flightNo;
 
+	private String aircraftModelName;
+
 	private String departureIataCode;
 
 	private String arrivalIataCode;
+	
+	private String departureTimezone;
+
+	private String arrivalTimezone;
 
 	private LocalDateTime departureTime;
 
@@ -149,5 +160,113 @@ public class SHSeatMapVO {
 		return seatList.stream()
 				.filter(seat -> !seat.isOccupied())
 				.count();
+	}
+	
+	
+	
+	// 총 여정시간 분 단위로 계산
+	public long getJourneyDurationMinutes() {
+
+	    if (departureTime == null
+	            || arrivalTime == null) {
+
+	        return 0L;
+	    }
+
+	    try {
+
+	        if (departureTimezone != null
+	                && !departureTimezone.isBlank()
+	                && arrivalTimezone != null
+	                && !arrivalTimezone.isBlank()) {
+
+	            ZonedDateTime departure =
+	                    departureTime.atZone(
+	                            ZoneId.of(
+	                                    departureTimezone
+	                            )
+	                    );
+
+	            ZonedDateTime arrival =
+	                    arrivalTime.atZone(
+	                            ZoneId.of(
+	                                    arrivalTimezone
+	                            )
+	                    );
+
+	            return Math.max(
+	                    0L,
+	                    Duration.between(
+	                            departure,
+	                            arrival
+	                    ).toMinutes()
+	            );
+	        }
+
+	    } catch (Exception e) {
+
+	        
+	    }
+
+	    return Math.max(
+	            0L,
+	            Duration.between(
+	                    departureTime,
+	                    arrivalTime
+	            ).toMinutes()
+	    );
+	}
+
+
+	// 총 여정시간
+	public String getJourneyDurationText() {
+
+	    long totalMinutes =
+	            getJourneyDurationMinutes();
+
+	    long hours =
+	            totalMinutes / 60;
+
+	    long minutes =
+	            totalMinutes % 60;
+
+	    if (hours == 0) {
+	        return minutes + "분";
+	    }
+
+	    if (minutes == 0) {
+	        return hours + "시간";
+	    }
+
+	    return hours
+	            + "시간 "
+	            + minutes
+	            + "분";
+	}
+	
+	
+	// 오늘부터 출발일까지 남은 날짜를 계산
+	public long getDaysBeforeDeparture() {
+
+	    if (departureTime == null) {
+	        return 0L;
+	    }
+
+	    return ChronoUnit.DAYS.between(
+	            LocalDate.now(),
+	            departureTime.toLocalDate()
+	    );
+	}
+
+
+	/*
+	 * 출발 91일 이상 전인지 확인해야 함
+	 *
+	 * true  : 위약금 없음 표시
+	 * false : 위약금 있음 표시
+	 */
+	public boolean isRefundPenaltyFree() {
+
+	    return getDaysBeforeDeparture() >= 91L;
 	}
 }

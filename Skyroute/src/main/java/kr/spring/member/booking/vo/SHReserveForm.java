@@ -45,6 +45,8 @@ public class SHReserveForm implements Serializable {
 	private int childCount;
 
 	private int infantCount;
+	
+	private String searchReturnUrl;
 
 
 	/* ===== 2단계 : 탑승객 정보 ===== */
