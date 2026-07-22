@@ -353,12 +353,46 @@ function changeFlightStatus(flightId, newStatus) {
     });
 }
 
+/* =========================================================
+   실시간 검색 기능 (운항 스케줄 등)
+========================================================= */
+function initFlightSearch() {
+    const searchInput = $('searchFlightNo'); // 미리 만들어둔 공통 유틸 $() 사용
+    const tableBody = $('flightScheduleTable');
+
+    if (searchInput && tableBody) {
+        searchInput.addEventListener('input', function() {
+            const keyword = this.value.toUpperCase().trim();
+            const rows = tableBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const firstCell = row.querySelector('td:first-child');
+
+                // '등록된 운항 스케줄이 없습니다' 줄은 제외
+                if (firstCell && firstCell.hasAttribute('colspan')) return;
+
+                if (firstCell) {
+                    const flightNo = firstCell.textContent.toUpperCase();
+                    if (flightNo.includes(keyword)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
+    }
+}
+
 /* ==================== 초기 실행 ==================== */
 function initStaffPage() {
-  // 지연/결항 입력 폼 초기 제어
+  // 1. 지연/결항 입력 폼 초기 제어
   toggleNoticeField();
   
-  // 상단 시계 구동
+  // 2. 실시간 검색 기능 활성화
+  initFlightSearch();
+  
+  // 3. 상단 시계 구동
   const clock = $('clock');
   if (clock) {
     clock.textContent = new Date().toTimeString().slice(0, 8);
