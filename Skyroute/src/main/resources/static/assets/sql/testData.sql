@@ -1664,3 +1664,279 @@ WHERE REGEXP_LIKE(
 )
 AND F.IS_DELETED = 'N';
 COMMIT;
+
+-- ============================================
+-- FLIGHT_NOTICE 테이블 데이터 추가
+-- ============================================
+SAVEPOINT BEFORE_FLIGHT_NOTICE_DUMMY;
+
+MERGE INTO FLIGHT_NOTICE FN
+USING (
+    WITH STAFF_ACCOUNT AS (
+        SELECT MIN(MEMBER_ID) AS CREATED_BY
+        FROM MEMBER
+        WHERE ROLE = 'STAFF'
+          AND STATUS = 'ACTIVE'
+        HAVING COUNT(*) > 0
+    ),
+
+    NOTICE_PLAN AS (
+        SELECT
+            'SR101' AS FLIGHT_NO,
+            'DELAY' AS NOTICE_TYPE,
+            '연결 항공편 도착 지연으로 출발 시간이 조정되었습니다.' AS REASON,
+            20 AS DELAY_MINUTES,
+            TIMESTAMP '2026-07-24 05:50:00' AS CREATED_AT
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'SR107',
+            'DELAY',
+            '출발 공항 혼잡 및 운항 슬롯 조정으로 출발이 지연됩니다.',
+            45,
+            TIMESTAMP '2026-07-24 06:30:00'
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'SR111',
+            'DELAY',
+            '현지 공항 기상 악화로 항공편 출발이 지연됩니다.',
+            60,
+            TIMESTAMP '2026-07-24 06:40:00'
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'SR123',
+            'DELAY',
+            '항공기 추가 안전 점검으로 출발 예정 시각이 변경되었습니다.',
+            90,
+            TIMESTAMP '2026-07-24 08:00:00'
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'SR133',
+            'CANCEL',
+            '현지 공항의 기상 악화 및 운항 제한으로 항공편이 결항되었습니다.',
+            CAST(NULL AS NUMBER),
+            TIMESTAMP '2026-07-27 20:00:00'
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'SR136',
+            'CANCEL',
+            '항공기 정비 점검이 필요하여 해당 항공편이 결항되었습니다.',
+            CAST(NULL AS NUMBER),
+            TIMESTAMP '2026-07-30 07:00:00'
+        FROM DUAL
+    ),
+
+    TARGET_FLIGHT AS (
+        SELECT
+            F.FLIGHT_ID,
+            F.FLIGHT_NO
+        FROM FLIGHT F
+        WHERE F.IS_DELETED = 'N'
+          AND F.FLIGHT_NO IN (
+              'SR101',
+              'SR107',
+              'SR111',
+              'SR123',
+              'SR133',
+              'SR136'
+          )
+    )
+
+    SELECT
+        TF.FLIGHT_ID,
+        NP.NOTICE_TYPE,
+        NP.REASON,
+        NP.DELAY_MINUTES,
+        SA.CREATED_BY,
+        NP.CREATED_AT
+
+    FROM NOTICE_PLAN NP
+
+    JOIN TARGET_FLIGHT TF
+      ON TF.FLIGHT_NO = NP.FLIGHT_NO
+
+    CROSS JOIN STAFF_ACCOUNT SA
+
+    /*
+     * 지연 안내는 그대로 추가한다.
+     * 결항 안내는 확정 예약이 없는 항공편만 추가한다.
+     */
+    WHERE NP.NOTICE_TYPE = 'DELAY'
+
+       OR NOT EXISTS (
+            SELECT 1
+            FROM BOOKING B
+            WHERE B.STATUS = 'CONFIRMED'
+              AND (
+                     B.OUTBOUND_FLIGHT_ID = TF.FLIGHT_ID
+                  OR B.INBOUND_FLIGHT_ID  = TF.FLIGHT_ID
+              )
+       )
+) SRC
+
+ON (
+       FN.FLIGHT_ID  = SRC.FLIGHT_ID
+   AND FN.NOTICE_TYPE = SRC.NOTICE_TYPE
+   AND FN.REASON      = SRC.REASON
+)
+
+WHEN MATCHED THEN
+    UPDATE SET
+        FN.DELAY_MINUTES = SRC.DELAY_MINUTES,
+        FN.CREATED_BY    = SRC.CREATED_BY
+
+WHEN NOT MATCHED THEN
+    INSERT (
+        FLIGHT_ID,
+        NOTICE_TYPE,
+        REASON,
+        DELAY_MINUTES,
+        CREATED_BY,
+        CREATED_AT
+    )
+    VALUES (
+        SRC.FLIGHT_ID,
+        SRC.NOTICE_TYPE,
+        SRC.REASON,
+        SRC.DELAY_MINUTES,
+        SRC.CREATED_BY,
+        SRC.CREATED_AT
+    );
+    
+MERGE INTO FLIGHT F
+USING (
+    WITH NOTICE_PLAN AS (
+        SELECT
+            'SR101' AS FLIGHT_NO,
+            'DELAY' AS NOTICE_TYPE,
+            20 AS DELAY_MINUTES
+        FROM DUAL
+
+        UNION ALL
+        SELECT 'SR107', 'DELAY', 45 FROM DUAL
+
+        UNION ALL
+        SELECT 'SR111', 'DELAY', 60 FROM DUAL
+
+        UNION ALL
+        SELECT 'SR123', 'DELAY', 90 FROM DUAL
+
+        UNION ALL
+        SELECT 'SR133', 'CANCEL', CAST(NULL AS NUMBER) FROM DUAL
+
+        UNION ALL
+        SELECT 'SR136', 'CANCEL', CAST(NULL AS NUMBER) FROM DUAL
+    )
+
+    SELECT
+        FL.FLIGHT_ID,
+        NP.NOTICE_TYPE,
+        NP.DELAY_MINUTES
+
+    FROM NOTICE_PLAN NP
+
+    JOIN FLIGHT FL
+      ON FL.FLIGHT_NO = NP.FLIGHT_NO
+     AND FL.IS_DELETED = 'N'
+
+    WHERE NP.NOTICE_TYPE = 'DELAY'
+
+       OR NOT EXISTS (
+            SELECT 1
+            FROM BOOKING B
+            WHERE B.STATUS = 'CONFIRMED'
+              AND (
+                     B.OUTBOUND_FLIGHT_ID = FL.FLIGHT_ID
+                  OR B.INBOUND_FLIGHT_ID  = FL.FLIGHT_ID
+              )
+       )
+) SRC
+
+ON (
+    F.FLIGHT_ID = SRC.FLIGHT_ID
+)
+
+WHEN MATCHED THEN
+    UPDATE SET
+        F.FLIGHT_STATUS =
+            CASE
+                WHEN SRC.NOTICE_TYPE = 'DELAY'
+                    THEN 'DELAYED'
+
+                WHEN SRC.NOTICE_TYPE = 'CANCEL'
+                    THEN 'CANCELLED'
+            END,
+
+        F.DELAY_MINUTES =
+            CASE
+                WHEN SRC.NOTICE_TYPE = 'DELAY'
+                    THEN SRC.DELAY_MINUTES
+
+                WHEN SRC.NOTICE_TYPE = 'CANCEL'
+                    THEN 0
+            END,
+
+        F.UPDATED_AT = SYSTIMESTAMP;
+        
+COMMIT;
+
+-- ============================================
+-- SAVED_PASSENGER 테이블 데이터 추가
+-- ============================================
+INSERT INTO SAVED_PASSENGER (
+    MEMBER_ID,
+    NAME,
+    BIRTH_DATE,
+    PHONE,
+    GENDER,
+    PASSPORT_NO,
+    PASSPORT_EXPIRY
+)
+SELECT
+    M.MEMBER_ID,
+    M.NAME,
+    CASE M.MEMBER_ID
+        WHEN 101 THEN DATE '1995-03-12'
+        WHEN 102 THEN DATE '1998-05-17'
+        WHEN 103 THEN DATE '1994-09-26'
+        WHEN 104 THEN DATE '1999-07-08'
+    END AS BIRTH_DATE,
+    M.PHONE,
+    CASE M.MEMBER_ID
+        WHEN 101 THEN 'M'
+        WHEN 102 THEN 'F'
+        WHEN 103 THEN 'M'
+        WHEN 104 THEN 'F'
+    END AS GENDER,
+    CASE M.MEMBER_ID
+        WHEN 101 THEN 'M10100001'
+        WHEN 102 THEN 'M10200001'
+        WHEN 103 THEN 'M10300001'
+        WHEN 104 THEN 'M10400001'
+    END AS PASSPORT_NO,
+    CASE M.MEMBER_ID
+        WHEN 101 THEN DATE '2031-03-11'
+        WHEN 102 THEN DATE '2030-05-16'
+        WHEN 103 THEN DATE '2033-09-25'
+        WHEN 104 THEN DATE '2034-07-07'
+    END AS PASSPORT_EXPIRY
+FROM MEMBER M
+WHERE M.MEMBER_ID IN (101, 102, 103, 104)
+  AND M.ROLE = 'USER'
+  AND M.STATUS = 'ACTIVE';
+
+COMMIT;
