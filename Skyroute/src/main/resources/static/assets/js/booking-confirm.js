@@ -292,17 +292,36 @@
                     return;
                 }
 
-                /*
-                 * 토스페이와 계좌이체는 페이지 이동을 막고
-                 * 현재 화면에서 토스 결제창을 직접 실행한다.
-                 */
-                event.preventDefault();
+				/*
+				 * 토스페이와 계좌이체는 페이지 이동을 막고
+				 * 현재 화면에서 토스 결제창을 직접 실행한다.
+				 */
+				event.preventDefault();
 
-                if (processing) {
-                    return;
-                }
+				if (processing) {
+				    return;
+				}
 
-                processing = true;
+				const paymentMethodName =
+				    paymentMethod === "TOSSPAY"
+				        ? "토스페이"
+				        : "계좌이체";
+
+				const paymentConfirmed =
+				    window.confirm(
+				        "1. 항공권 결제는 최대 10분 이내애ㅔ 완료하시기 바랍니다. \n"
+				        + "2. 10분이 경과되거나 인증 과정에서 취소하시면,\n"
+				        + "- 예약 취소 후 처음부터 다시 진행합니다.\n"
+				        + "- 이 경우 좌석 상황에 따라 해당 편 예약이 어려울 수 있습니다."
+				        //+ paymentMethodName
+				    );
+					
+
+				if (!paymentConfirmed) {
+				    return;
+				}
+
+				processing = true;
 
                 submitButton.disabled = true;
                 submitButton.textContent =
