@@ -19,6 +19,11 @@
         );
 
         let processing = false;
+		let activeBookingId = null;
+		let activeTossPayment = null;
+		let paymentHistoryGuardActive = false;
+		let ignoreNextPopstate = false;
+		let cancellationInProgress = false;
 
         function allAgreementsChecked() {
             return agreements.length > 0
@@ -158,6 +163,151 @@
                 );
             }
         }
+		
+		
+		function restorePaymentButton() {
+		    processing = false;
+
+		    submitButton.textContent =
+		        "결제하기";
+
+		    updateState();
+		}
+		
+		
+		async function closeActiveTossWindow() {
+		    const payment =
+		        activeTossPayment;
+
+		    activeTossPayment = null;
+
+		    if (!payment) {
+		        return;
+		    }
+
+		    try {
+		        await payment.destroy();
+
+		    } catch (error) {
+		        if (error?.code !== "NO_ACTIVE_PAYMENT_REQUEST") {
+		            console.warn(
+		                "토스 결제창 닫기 오류:",
+		                error
+		            );
+		        }
+		    }
+		}
+
+
+		function addPaymentHistoryGuard() {
+		    if (paymentHistoryGuardActive) {
+		        return;
+		    }
+
+		    window.history.pushState(
+		        {
+		            tossPaymentGuard: true
+		        },
+		        "",
+		        window.location.href
+		    );
+
+		    paymentHistoryGuardActive = true;
+		}
+
+
+		function removePaymentHistoryGuard() {
+		    if (!paymentHistoryGuardActive) {
+		        return;
+		    }
+
+		    paymentHistoryGuardActive = false;
+
+		    ignoreNextPopstate = true;
+
+		    window.history.back();
+		}
+
+
+		async function cancelActiveTossPayment(
+		    shouldRemoveHistoryGuard,
+		    message
+		) {
+		    if (cancellationInProgress) {
+		        return;
+		    }
+
+		    const bookingId =
+		        activeBookingId;
+
+		    if (!Number.isInteger(bookingId)
+		            || bookingId <= 0) {
+
+		        return;
+		    }
+
+		    cancellationInProgress = true;
+
+		    activeBookingId = null;
+			
+			await closeActiveTossWindow();
+
+		    if (shouldRemoveHistoryGuard) {
+		        removePaymentHistoryGuard();
+		    }
+
+		    await releaseHold(bookingId);
+
+		    cancellationInProgress = false;
+
+		    restorePaymentButton();
+
+		    if (message) {
+		        window.alert(message);
+		    }
+		}
+		
+		
+		window.addEventListener(
+		    "popstate",
+		    async () => {
+
+		        if (ignoreNextPopstate) {
+		            ignoreNextPopstate = false;
+		            return;
+		        }
+
+		        if (!paymentHistoryGuardActive
+		                || !activeBookingId
+		                || cancellationInProgress) {
+
+		            return;
+		        }
+
+		        paymentHistoryGuardActive = false;
+
+		        const cancelPayment =
+		            window.confirm(
+		                "결제를 중단하시겠습니까?\n\n"
+		                + "[확인] 결제 중단\n"
+		                + "[취소] 계속 결제"
+		            );
+
+		        if (cancelPayment) {
+
+		            await cancelActiveTossPayment(
+		                false,
+		                "결제가 취소되었습니다.\n"
+		            );
+
+		            return;
+		        }
+
+		        addPaymentHistoryGuard();
+		    }
+		);
+		
+		
 
         async function openTossPayment(
             bookingId,
@@ -194,6 +344,8 @@
                 tossPayments.payment({
                     customerKey: prepare.customerKey
                 });
+			
+			activeTossPayment = payment;
 
             const successUrl =
                 window.location.origin
@@ -347,6 +499,10 @@
                             "생성된 예약 정보를 확인할 수 없습니다."
                         );
                     }
+					
+					activeBookingId = bookingId;
+
+					addPaymentHistoryGuard();
 
                     submitButton.textContent =
                         paymentMethod === "TOSSPAY"
@@ -358,32 +514,40 @@
                         paymentMethod
                     );
 
-                } catch (error) {
-                    console.error(
-                        "토스 결제 실행 오류:",
-                        error
-                    );
+					} catch (error) {
+					    console.error(
+					        "토스 결제 실행 오류:",
+					        error
+					    );
 
-                    if (bookingId) {
-                        await releaseHold(bookingId);
-                    }
+					    if (bookingId
+					            && activeBookingId !== bookingId) {
 
-                    processing = false;
-                    submitButton.textContent =
-                        "결제하기";
+					        return;
+					    }
+						
+						activeTossPayment = null;
 
-                    updateState();
+					    if (bookingId) {
+					        await releaseHold(bookingId);
+					    }
 
-                    window.alert(
-                        error.message
-                        || "결제창을 실행하지 못했습니다."
-                    );
+					    activeBookingId = null;
 
-                    if (error.redirectUrl) {
-                        window.location.href =
-                            error.redirectUrl;
-                    }
-                }
+					    removePaymentHistoryGuard();
+
+					    restorePaymentButton();
+
+					    window.alert(
+					        error.message
+					        || "결제가 취소되었습니다."
+					    );
+
+					    if (error.redirectUrl) {
+					        window.location.href =
+					            error.redirectUrl;
+					    }
+					}
             }
         );
 
