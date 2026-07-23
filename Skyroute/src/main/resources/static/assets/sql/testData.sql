@@ -1940,3 +1940,430 @@ WHERE M.MEMBER_ID IN (101, 102, 103, 104)
   AND M.STATUS = 'ACTIVE';
 
 COMMIT;
+
+-- ============================================
+-- FAVORITE_ROUTE 테이블 데이터 추가
+-- ============================================
+MERGE INTO FAVORITE_ROUTE FR
+USING (
+    SELECT
+        M.MEMBER_ID,
+        DEP.AIRPORT_ID AS DEPARTURE_AIRPORT_ID,
+        ARR.AIRPORT_ID AS ARRIVAL_AIRPORT_ID
+    FROM (
+        SELECT
+            'user01' AS LOGIN_ID,
+            'GMP' AS DEPARTURE_CODE,
+            'CJU' AS ARRIVAL_CODE
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'user02',
+            'ICN',
+            'NRT'
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'user03',
+            'ICN',
+            'JFK'
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'user04',
+            'ICN',
+            'CDG'
+        FROM DUAL
+    ) P
+
+    JOIN MEMBER M
+      ON M.LOGIN_ID = P.LOGIN_ID
+     AND M.ROLE = 'USER'
+     AND M.STATUS = 'ACTIVE'
+
+    JOIN AIRPORT DEP
+      ON TRIM(DEP.IATA_CODE) = P.DEPARTURE_CODE
+     AND DEP.IS_ACTIVE = 'Y'
+
+    JOIN AIRPORT ARR
+      ON TRIM(ARR.IATA_CODE) = P.ARRIVAL_CODE
+     AND ARR.IS_ACTIVE = 'Y'
+) SRC
+
+ON (
+       FR.MEMBER_ID = SRC.MEMBER_ID
+   AND FR.FAVORITE_TYPE = 'ROUTE'
+   AND FR.DEPARTURE_AIRPORT_ID = SRC.DEPARTURE_AIRPORT_ID
+   AND FR.ARRIVAL_AIRPORT_ID = SRC.ARRIVAL_AIRPORT_ID
+   AND FR.FLIGHT_ID IS NULL
+)
+
+WHEN NOT MATCHED THEN
+    INSERT (
+        MEMBER_ID,
+        FAVORITE_TYPE,
+        DEPARTURE_AIRPORT_ID,
+        ARRIVAL_AIRPORT_ID,
+        FLIGHT_ID
+    )
+    VALUES (
+        SRC.MEMBER_ID,
+        'ROUTE',
+        SRC.DEPARTURE_AIRPORT_ID,
+        SRC.ARRIVAL_AIRPORT_ID,
+        NULL
+    );
+    
+ MERGE INTO FAVORITE_ROUTE FR
+USING (
+    WITH FLIGHT_MAP AS (
+        SELECT
+            FLIGHT_ID,
+            FLIGHT_NO
+        FROM (
+            SELECT
+                F.FLIGHT_ID,
+                F.FLIGHT_NO,
+                ROW_NUMBER() OVER (
+                    PARTITION BY F.FLIGHT_NO
+                    ORDER BY F.DEPARTURE_TIME, F.FLIGHT_ID
+                ) AS RN
+            FROM FLIGHT F
+            WHERE F.IS_DELETED = 'N'
+              AND F.FLIGHT_NO IN (
+                  'SR101',
+                  'SR107',
+                  'SR111',
+                  'SR123'
+              )
+        )
+        WHERE RN = 1
+    )
+
+    SELECT
+        M.MEMBER_ID,
+        FM.FLIGHT_ID
+    FROM (
+        SELECT
+            'user01' AS LOGIN_ID,
+            'SR101' AS FLIGHT_NO
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'user02',
+            'SR107'
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'user03',
+            'SR111'
+        FROM DUAL
+
+        UNION ALL
+
+        SELECT
+            'user04',
+            'SR123'
+        FROM DUAL
+    ) P
+
+    JOIN MEMBER M
+      ON M.LOGIN_ID = P.LOGIN_ID
+     AND M.ROLE = 'USER'
+     AND M.STATUS = 'ACTIVE'
+
+    JOIN FLIGHT_MAP FM
+      ON FM.FLIGHT_NO = P.FLIGHT_NO
+) SRC
+
+ON (
+       FR.MEMBER_ID = SRC.MEMBER_ID
+   AND FR.FAVORITE_TYPE = 'FLIGHT'
+   AND FR.FLIGHT_ID = SRC.FLIGHT_ID
+   AND FR.DEPARTURE_AIRPORT_ID IS NULL
+   AND FR.ARRIVAL_AIRPORT_ID IS NULL
+)
+
+WHEN NOT MATCHED THEN
+    INSERT (
+        MEMBER_ID,
+        FAVORITE_TYPE,
+        DEPARTURE_AIRPORT_ID,
+        ARRIVAL_AIRPORT_ID,
+        FLIGHT_ID
+    )
+    VALUES (
+        SRC.MEMBER_ID,
+        'FLIGHT',
+        NULL,
+        NULL,
+        SRC.FLIGHT_ID
+    );
+    
+COMMIT;
+
+-- ============================================
+-- BOOKING 테이블 데이터 추가
+-- ============================================
+SAVEPOINT BEFORE_BOOKING_DUMMY;
+
+MERGE INTO BOOKING B
+USING (
+    WITH BOOKING_PLAN AS (
+        /* 1. user01 편도: PUS → GMP */
+        SELECT
+            'SR260723120001101' AS BOOKING_NO,
+            'user01' AS LOGIN_ID,
+            'ONEWAY' AS TRIP_TYPE,
+            'SR101' AS OUTBOUND_FLIGHT_NO,
+            CAST(NULL AS VARCHAR2(10)) AS INBOUND_FLIGHT_NO
+        FROM DUAL
+
+        UNION ALL
+
+        /* 2. user02 편도: GMP → CJU */
+        SELECT
+            'SR260723120002102',
+            'user02',
+            'ONEWAY',
+            'SR102',
+            CAST(NULL AS VARCHAR2(10))
+        FROM DUAL
+
+        UNION ALL
+
+        /* 3. user03 편도: GMP → PUS */
+        SELECT
+            'SR260723120003103',
+            'user03',
+            'ONEWAY',
+            'SR104',
+            CAST(NULL AS VARCHAR2(10))
+        FROM DUAL
+
+        UNION ALL
+
+        /* 4. user04 편도: ICN → NRT */
+        SELECT
+            'SR260723120004104',
+            'user04',
+            'ONEWAY',
+            'SR107',
+            CAST(NULL AS VARCHAR2(10))
+        FROM DUAL
+
+        UNION ALL
+
+        /* 5. user01 편도: ICN → SIN */
+        SELECT
+            'SR260723120005105',
+            'user01',
+            'ONEWAY',
+            'SR111',
+            CAST(NULL AS VARCHAR2(10))
+        FROM DUAL
+
+        UNION ALL
+
+        /* 6. user02 편도: ICN → CDG */
+        SELECT
+            'SR260723120006106',
+            'user02',
+            'ONEWAY',
+            'SR123',
+            CAST(NULL AS VARCHAR2(10))
+        FROM DUAL
+
+        UNION ALL
+
+        /* 7. user03 왕복: ICN ↔ NRT */
+        SELECT
+            'SR260723120007107',
+            'user03',
+            'ROUNDTRIP',
+            'SR107',
+            'SR108'
+        FROM DUAL
+
+        UNION ALL
+
+        /* 8. user04 왕복: ICN ↔ PEK */
+        SELECT
+            'SR260723120008108',
+            'user04',
+            'ROUNDTRIP',
+            'SR109',
+            'SR110'
+        FROM DUAL
+
+        UNION ALL
+
+        /* 9. user01 왕복: ICN ↔ SIN */
+        SELECT
+            'SR260723120009109',
+            'user01',
+            'ROUNDTRIP',
+            'SR111',
+            'SR112'
+        FROM DUAL
+
+        UNION ALL
+
+        /* 10. user02 왕복: ICN ↔ CDG */
+        SELECT
+            'SR260723120010110',
+            'user02',
+            'ROUNDTRIP',
+            'SR123',
+            'SR124'
+        FROM DUAL
+    ),
+
+    /*
+     * 같은 항공편 번호가 여러 날짜에 존재할 수 있으므로
+     * 현재 예약 가능한 항공편 중 가장 빠른 한 건을 선택한다.
+     */
+    FLIGHT_MAP AS (
+        SELECT
+            FLIGHT_ID,
+            FLIGHT_NO,
+            ROUTE_ID,
+            DEPARTURE_TIME,
+            ARRIVAL_TIME
+        FROM (
+            SELECT
+                F.FLIGHT_ID,
+                F.FLIGHT_NO,
+                F.ROUTE_ID,
+                F.DEPARTURE_TIME,
+                F.ARRIVAL_TIME,
+
+                ROW_NUMBER() OVER (
+                    PARTITION BY F.FLIGHT_NO
+                    ORDER BY
+                        F.DEPARTURE_TIME,
+                        F.FLIGHT_ID
+                ) AS RN
+
+            FROM FLIGHT F
+
+            WHERE F.IS_DELETED = 'N'
+              AND F.FLIGHT_STATUS IN (
+                  'SCHEDULED',
+                  'DELAYED'
+              )
+        )
+        WHERE RN = 1
+    )
+
+    SELECT
+        BP.BOOKING_NO,
+        M.MEMBER_ID,
+        BP.TRIP_TYPE,
+
+        OUT_F.FLIGHT_ID AS OUTBOUND_FLIGHT_ID,
+
+        CASE
+            WHEN BP.TRIP_TYPE = 'ROUNDTRIP'
+            THEN IN_F.FLIGHT_ID
+            ELSE NULL
+        END AS INBOUND_FLIGHT_ID,
+
+        'PENDING' AS STATUS,
+        0 AS TOTAL_AMOUNT
+
+    FROM BOOKING_PLAN BP
+
+    JOIN MEMBER M
+      ON M.LOGIN_ID = BP.LOGIN_ID
+     AND M.ROLE = 'USER'
+     AND M.STATUS = 'ACTIVE'
+
+    JOIN FLIGHT_MAP OUT_F
+      ON OUT_F.FLIGHT_NO = BP.OUTBOUND_FLIGHT_NO
+
+    JOIN ROUTE OUT_R
+      ON OUT_R.ROUTE_ID = OUT_F.ROUTE_ID
+
+    LEFT JOIN FLIGHT_MAP IN_F
+      ON IN_F.FLIGHT_NO = BP.INBOUND_FLIGHT_NO
+     AND BP.TRIP_TYPE = 'ROUNDTRIP'
+
+    LEFT JOIN ROUTE IN_R
+      ON IN_R.ROUTE_ID = IN_F.ROUTE_ID
+
+    WHERE
+        /*
+         * 편도는 INBOUND가 없어야 한다.
+         */
+        (
+            BP.TRIP_TYPE = 'ONEWAY'
+            AND BP.INBOUND_FLIGHT_NO IS NULL
+        )
+
+        OR
+
+        /*
+         * 왕복은 귀국편이 존재하고,
+         * 출발·도착 공항이 서로 반대이며,
+         * 귀국편이 가는 편 도착 후 출발해야 한다.
+         */
+        (
+            BP.TRIP_TYPE = 'ROUNDTRIP'
+
+            AND IN_F.FLIGHT_ID IS NOT NULL
+
+            AND OUT_R.DEPARTURE_AIRPORT_ID
+                = IN_R.ARRIVAL_AIRPORT_ID
+
+            AND OUT_R.ARRIVAL_AIRPORT_ID
+                = IN_R.DEPARTURE_AIRPORT_ID
+
+            AND IN_F.DEPARTURE_TIME
+                > OUT_F.ARRIVAL_TIME
+        )
+) SRC
+
+ON (
+    B.BOOKING_NO = SRC.BOOKING_NO
+)
+
+WHEN MATCHED THEN
+    UPDATE SET
+        B.MEMBER_ID           = SRC.MEMBER_ID,
+        B.TRIP_TYPE           = SRC.TRIP_TYPE,
+        B.OUTBOUND_FLIGHT_ID  = SRC.OUTBOUND_FLIGHT_ID,
+        B.INBOUND_FLIGHT_ID   = SRC.INBOUND_FLIGHT_ID,
+        B.STATUS              = SRC.STATUS,
+        B.TOTAL_AMOUNT        = SRC.TOTAL_AMOUNT,
+        B.CANCELLED_AT        = NULL
+
+WHEN NOT MATCHED THEN
+    INSERT (
+        BOOKING_NO,
+        MEMBER_ID,
+        TRIP_TYPE,
+        OUTBOUND_FLIGHT_ID,
+        INBOUND_FLIGHT_ID,
+        STATUS,
+        TOTAL_AMOUNT
+    )
+    VALUES (
+        SRC.BOOKING_NO,
+        SRC.MEMBER_ID,
+        SRC.TRIP_TYPE,
+        SRC.OUTBOUND_FLIGHT_ID,
+        SRC.INBOUND_FLIGHT_ID,
+        SRC.STATUS,
+        SRC.TOTAL_AMOUNT
+    );
