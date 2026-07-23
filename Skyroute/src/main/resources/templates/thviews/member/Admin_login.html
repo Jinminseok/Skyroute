@@ -97,12 +97,56 @@
       .options { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; font-size: 12.5px; }
       .options label { display: flex; align-items: center; gap: 6px; color: var(--text-gray); font-weight: 500; cursor: pointer; }
       
-      /* 에러 메시지 스타일 세팅 */
-      .error-color { color: #DC2626; font-size: 12px; margin-top: 6px; text-align: left; }
-      .error-invalid { 
-        text-align: center; margin-bottom: 20px; font-weight: 600; padding: 12px; 
-        background: #FEF2F2; border-radius: 8px; border: 1px solid #FCA5A5; font-size: 13px;
-      }
+		/* 에러 메시지 공통 글자 스타일 */
+		.error-color {
+		  color: #DC2626;
+		  font-size: 12px;
+		  text-align: left;
+		}
+		
+		/*
+		 * 아이디·비밀번호 입력 오류 영역의 높이를 항상 유지합니다.
+		 * 메시지가 생기거나 없어져도 로그인 박스 높이가 바뀌지 않습니다.
+		 */
+		#error_id,
+		#error_passwd {
+		  min-height: 18px;
+		  margin-top: 6px;
+		  line-height: 18px;
+		}
+		
+		/* 서버 로그인 실패 메시지 */
+		.error-invalid {
+		  display: flex;
+		  align-items: center;
+		  justify-content: center;
+		
+		  min-height: 46px;
+		  box-sizing: border-box;
+		
+		  text-align: center;
+		  margin: 0 0 20px;
+		  padding: 12px;
+		
+		  color: #DC2626;
+		  font-size: 13px;
+		  font-weight: 600;
+		
+		  background: #FEF2F2;
+		  border: 1px solid #FCA5A5;
+		  border-radius: 8px;
+		
+		  transition: opacity 0.15s ease;
+		}
+		
+		/*
+		 * display:none을 사용하면 로그인 박스 높이가 줄어듭니다.
+		 * visibility:hidden은 기존 공간을 그대로 유지합니다.
+		 */
+		.error-invalid.is-hidden {
+		  visibility: hidden;
+		  opacity: 0;
+		}
 
       /* 푸터 카피라이트 */
       .footer-copy { margin-top: 32px; text-align: center; color: var(--text-light); font-size: 12px; }
@@ -119,9 +163,27 @@
             <p>관리자 전용 시스템</p>
         </div>
 
-        <form th:action="@{/member/login}" id="member_login" method="post">
-            <div class="align-center error-invalid error-color" th:if="${error == 'error'}">아이디 또는 비밀번호 불일치</div>
-            <div class="align-center error-invalid error-color" th:if="${error == 'error_suspended'}">정지회원입니다.</div>
+		<form th:action="@{/member/login}" id="member_login" method="post">
+		
+		    <div class="align-center error-invalid"
+		         th:if="${error == 'error'}">
+		        아이디 또는 비밀번호가 일치하지 않습니다.
+		    </div>
+		
+		    <div class="align-center error-invalid"
+		         th:if="${error == 'error_suspended'}">
+		        정지된 계정입니다.
+		    </div>
+		
+		    <div class="align-center error-invalid"
+		         th:if="${error == 'error_deleted'}">
+		        탈퇴 또는 비활성화된 계정입니다.
+		    </div>
+		
+		    <div class="align-center error-invalid"
+		         th:if="${error == 'error_user_not_allowed'}">
+		        관리자 또는 지상직 계정만 로그인할 수 있습니다.
+		    </div>
             
             <div class="form-group">
                 <label for="id">아이디</label>
@@ -142,12 +204,7 @@
             </div>
 
             <button type="submit" class="btn-submit login-btn">로그인</button>
-
-            <div class="options">
-                <label for="remember-me">
-                    <input type="checkbox" name="remember-me" id="remember-me" style="accent-color: var(--primary);"> 로그인상태유지
-                </label>
-            </div>
+            
         </form>
     </div>
 
