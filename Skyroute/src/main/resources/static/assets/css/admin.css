@@ -146,14 +146,29 @@ h1 {
 	vertical-align: middle;
 }
 
+/* 상태 토글 */
 .toggle {
 	position: relative;
+
 	width: 44px;
 	height: 24px;
-	border-radius: 99px;
-	background: rgba(0, 0, 0, 0.15);
+
 	display: inline-block;
-	cursor: default;
+	flex-shrink: 0;
+
+	padding: 0;
+	border: 0;
+	border-radius: 99px;
+
+	background: rgba(0, 0, 0, 0.15);
+
+	cursor: pointer;
+	appearance: none;
+	vertical-align: middle;
+
+	transition:
+		background-color 0.2s ease,
+		opacity 0.2s ease;
 }
 
 .toggle.on {
@@ -162,19 +177,59 @@ h1 {
 
 .toggle::after {
 	content: "";
+
 	position: absolute;
 	top: 3px;
 	left: 3px;
+
 	width: 18px;
 	height: 18px;
+
 	border-radius: 50%;
-	background: #fff;
+	background: #FFFFFF;
+
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-	transition: 0.2s;
+
+	transition: left 0.2s ease;
 }
 
 .toggle.on::after {
 	left: 23px;
+}
+
+/* 키보드 접근 시 포커스 표시 */
+.toggle:focus-visible {
+	outline: 3px solid rgba(13, 148, 136, 0.25);
+	outline-offset: 2px;
+}
+
+/* 서버 요청 처리 중 */
+.toggle:disabled {
+	opacity: 0.55;
+	cursor: wait;
+}
+
+/* 모달 안에서 토글과 상태 문구를 나란히 배치 */
+.status-toggle-wrap {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+}
+
+.status-text {
+	min-width: 44px;
+
+	font-size: 12px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.status-text.active {
+	color: #0D9488;
+}
+
+.status-text.inactive {
+	color: #9CA3AF;
 }
 
 /* --- 💡 모달 전용 필수 CSS --- */

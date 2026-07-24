@@ -144,14 +144,48 @@ public class AdminController {
 	// ========================
 	@PostMapping("/admin/region/toggleStatus")
 	@ResponseBody
-	public String toggleRegionStatus(int regionId, String isActive) {
+	public String toggleRegionStatus(
+			@RequestParam("regionId") int regionId,
+			@RequestParam("isActive") String isActive) {
+
+		if (!"Y".equals(isActive)
+				&& !"N".equals(isActive)) {
+
+			return "invalid";
+		}
+
 		try {
 
-			regionMapper.updateRegionStatus(regionId, isActive);
-			return "success";
-		} catch (Exception e) { 
-			log.error("권역 상태 토글 변경 중 오류 발생", e);
-			return "fail";
+			/*
+			 * 사용 중인 권역은 미사용으로 변경할 수 없습니다.
+			 * 다시 활성화하는 것은 허용합니다.
+			 */
+			if ("N".equals(isActive)
+					&& regionMapper
+						.countAirportsByRegionId(regionId) > 0) {
+
+				return "in-use";
+			}
+
+			int updatedCount =
+					regionMapper.updateRegionStatus(
+							regionId,
+							isActive
+					);
+
+			return updatedCount == 1
+					? "success"
+					: "not-found";
+
+		} catch (Exception e) {
+
+			log.error(
+				"권역 상태 변경 중 오류 발생. regionId={}",
+				regionId,
+				e
+			);
+
+			return "error";
 		}
 	}
 
@@ -175,19 +209,48 @@ public class AdminController {
 	}
 
 	@PostMapping("/admin/gate/toggleStatus")
-	@ResponseBody // AJAX 요청이므로 값만 반환
-	public String toggleGateStatus(@RequestParam int gateAreaId, @RequestParam String isActive) {
+	@ResponseBody
+	public String toggleGateStatus(
+			@RequestParam("gateAreaId") int gateAreaId,
+			@RequestParam("isActive") String isActive) {
+
+		if (!"Y".equals(isActive)
+				&& !"N".equals(isActive)) {
+
+			return "invalid";
+		}
+
 		try {
-			// 기존 데이터를 불러와서 상태만 변경 후 업데이트
-			GateAreaVO gateArea = gateAreaMapper.selectGateArea(gateAreaId);
-			if (gateArea != null) {
-				gateArea.setIsActive(isActive);
-				gateAreaMapper.updateGateArea(gateArea);
-				return "success";
+
+			/*
+			 * 사용 중인 게이트 구역은
+			 * 미사용으로 변경하지 않습니다.
+			 */
+			if ("N".equals(isActive)
+					&& gateAreaMapper
+						.countGatesByGateAreaId(gateAreaId) > 0) {
+
+				return "in-use";
 			}
-			return "fail";
+
+			int updatedCount =
+					gateAreaMapper.updateGateAreaStatus(
+							gateAreaId,
+							isActive
+					);
+
+			return updatedCount == 1
+					? "success"
+					: "not-found";
+
 		} catch (Exception e) {
-			e.printStackTrace();
+
+			log.error(
+				"게이트 구역 상태 변경 중 오류 발생. gateAreaId={}",
+				gateAreaId,
+				e
+			);
+
 			return "error";
 		}
 	}
@@ -213,17 +276,47 @@ public class AdminController {
 
 	@PostMapping("/admin/routeType/toggleStatus")
 	@ResponseBody
-	public String toggleRouteTypeStatus(@RequestParam int routeTypeId, @RequestParam String isActive) {
+	public String toggleRouteTypeStatus(
+			@RequestParam("routeTypeId") int routeTypeId,
+			@RequestParam("isActive") String isActive) {
+
+		if (!"Y".equals(isActive)
+				&& !"N".equals(isActive)) {
+
+			return "invalid";
+		}
+
 		try {
-			RouteTypeVO routeType = routeTypeMapper.selectRouteType(routeTypeId);
-			if (routeType != null) {
-				routeType.setIsActive(isActive);
-				routeTypeMapper.updateRouteType(routeType);
-				return "success";
+
+			/*
+			 * 사용 중인 노선 유형은
+			 * 미사용으로 변경하지 않습니다.
+			 */
+			if ("N".equals(isActive)
+					&& routeTypeMapper
+						.countRoutesByRouteTypeId(routeTypeId) > 0) {
+
+				return "in-use";
 			}
-			return "fail";
+
+			int updatedCount =
+					routeTypeMapper.updateRouteTypeStatus(
+							routeTypeId,
+							isActive
+					);
+
+			return updatedCount == 1
+					? "success"
+					: "not-found";
+
 		} catch (Exception e) {
-			log.error("노선 유형 상태 토글 중 오류 발생", e);
+
+			log.error(
+				"노선 유형 상태 변경 중 오류 발생. routeTypeId={}",
+				routeTypeId,
+				e
+			);
+
 			return "error";
 		}
 	}

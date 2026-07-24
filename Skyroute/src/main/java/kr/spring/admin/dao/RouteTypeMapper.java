@@ -3,6 +3,7 @@ package kr.spring.admin.dao;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import kr.spring.admin.vo.RouteTypeVO;
 
@@ -22,4 +23,13 @@ public interface RouteTypeMapper {
 	
 	//노선 유형 삭제
 	int deleteRouteType(int routeTypeId);
+	
+	// 해당 유형을 사용하는 노선 수
+	int countRoutesByRouteTypeId(int routeTypeId);
+
+	// 노선 유형 상태 변경
+	int updateRouteTypeStatus(
+		@Param("routeTypeId") int routeTypeId,
+		@Param("isActive") String isActive
+	);
 }

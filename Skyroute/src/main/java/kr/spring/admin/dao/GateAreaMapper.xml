@@ -33,8 +33,7 @@
 	<update id="updateGateArea" parameterType="kr.spring.admin.vo.GateAreaVO">
 		UPDATE GATE_AREA
 		SET
-			area_name = #{areaName},
-			is_active = #{isActive}
+			area_name = #{areaName}
 		WHERE gate_area_id = #{gateAreaId}
 	</update>
 
@@ -43,4 +42,19 @@
 		WHERE gate_area_id = #{gateAreaId}
 	</delete>
 
+	<select id="countGatesByGateAreaId" parameterType="int" resultType="int">
+	
+		SELECT COUNT(*)
+		FROM GATE
+		WHERE gate_area_id = #{gateAreaId}
+	
+	</select>
+	
+	<update id="updateGateAreaStatus">
+	
+		UPDATE GATE_AREA
+		SET is_active = #{isActive}
+		WHERE gate_area_id = #{gateAreaId}
+	
+	</update>
 </mapper>

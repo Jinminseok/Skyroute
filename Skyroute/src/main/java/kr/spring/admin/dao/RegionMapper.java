@@ -25,6 +25,9 @@ public interface RegionMapper {
 	//권역 삭제
 	int deleteRegion(int regionId);
 	
-	//토글
-	void updateRegionStatus(@Param("regionId") int regionId, @Param("isActive") String isActive);
+	// 권역을 사용하는 공항 수
+	int countAirportsByRegionId(int regionId);
+	
+	// 권역 상태 변경
+	int updateRegionStatus(@Param("regionId") int regionId, @Param("isActive") String isActive);
 }

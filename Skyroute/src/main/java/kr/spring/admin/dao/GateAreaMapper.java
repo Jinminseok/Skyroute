@@ -3,6 +3,7 @@ package kr.spring.admin.dao;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import kr.spring.admin.vo.GateAreaVO;
 
@@ -23,4 +24,13 @@ public interface GateAreaMapper {
 
 	//게이트 삭제
 	int deleteGateArea(int gateareaId);
+	
+	// 해당 구역을 사용하는 게이트 수
+	int countGatesByGateAreaId(int gateAreaId);
+
+	// 게이트 구역 상태 변경
+	int updateGateAreaStatus(
+		@Param("gateAreaId") int gateAreaId,
+		@Param("isActive") String isActive
+	);
 }

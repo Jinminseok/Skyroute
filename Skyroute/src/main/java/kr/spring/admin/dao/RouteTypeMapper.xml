@@ -33,7 +33,7 @@
         UPDATE ROUTE_TYPE
         SET
             type_name = #{typeName},
-            route_price = #{routePrice}, is_active = #{isActive}
+            route_price = #{routePrice}
         WHERE route_type_id = #{routeTypeId}
     </update>
 
@@ -42,5 +42,20 @@
         WHERE route_type_id = #{routeTypeId}
     </delete>
 	
+	<select id="countRoutesByRouteTypeId" parameterType="int" resultType="int">
+
+		SELECT COUNT(*)
+		FROM ROUTE
+		WHERE route_type_id = #{routeTypeId}
+
+	</select>
+	
+	<update id="updateRouteTypeStatus">
+	
+		UPDATE ROUTE_TYPE
+		SET is_active = #{isActive}
+		WHERE route_type_id = #{routeTypeId}
+	
+	</update>
 
 </mapper>

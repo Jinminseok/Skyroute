@@ -31,18 +31,28 @@
     )
     </insert>
 
-    <update id="updateRegion" parameterType="kr.spring.admin.vo.RegionVO">
-        UPDATE REGION
-        SET 
-            region_name = #{regionName},
-            is_active = #{isActive}
-        WHERE region_id = #{regionId}
-    </update>
+	<update id="updateRegion"
+		parameterType="kr.spring.admin.vo.RegionVO">
+	
+		UPDATE REGION
+		SET
+			region_name = #{regionName}
+		WHERE region_id = #{regionId}
+	
+	</update>
 
     <delete id="deleteRegion" parameterType="int">
         DELETE FROM REGION
         WHERE region_id = #{regionId}
     </delete>
+    
+    <select id="countAirportsByRegionId" parameterType="int" resultType="int">
+
+		SELECT COUNT(*)
+		FROM AIRPORT
+		WHERE region_id = #{regionId}
+
+	</select>
     
     <update id="updateRegionStatus">
    		 UPDATE REGION
