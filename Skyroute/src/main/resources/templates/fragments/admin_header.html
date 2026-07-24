@@ -36,23 +36,28 @@
 }
 
 .header .nav-link {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding: 0 14px;
-	color: var(--text-gray, #57534E);
-	font-weight: 500;
-	cursor: pointer;
-	height: 100%;
-	border-bottom: 3px solid transparent;
-	text-decoration: none;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 6px;
+
+    height: 100%;
+    padding: 0 14px;
+
+    color: var(--text-gray, #57534E);
+    font-weight: 600;
+    white-space: nowrap;
+
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    text-decoration: none;
 }
 
 .header .nav-link.active {
-	color: var(--text-dark, #1C1917);
-	border-bottom-color: var(--primary, #78716C);
-	font-weight: 700;
-	background: rgba(255, 255, 255, 0.3);
+    color: var(--text-dark, #1C1917);
+    border-bottom-color: var(--primary, #78716C);
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .header .user-menu {

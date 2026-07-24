@@ -19,6 +19,25 @@
 	padding: 0;
 }
 
+/*
+ * 페이지 높이에 따라 스크롤바가 생기거나 없어져도
+ * 관리자 화면의 가로 위치가 움직이지 않도록 공간을 항상 확보한다.
+ */
+html {
+    min-height: 100%;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+
+/*
+ * scrollbar-gutter를 지원하지 않는 구형 브라우저 대응
+ */
+@supports not (scrollbar-gutter: stable) {
+    html {
+        overflow-y: scroll;
+    }
+}
+
 body {
 	background: var(--gradient-bg);
 	background-attachment: fixed;
@@ -43,9 +62,11 @@ h1 {
 }
 
 .main {
-	padding: 40px;
-	max-width: 1440px;
-	margin: 0 auto;
+    width: 100%;
+    max-width: 1440px;
+
+    margin: 0 auto;
+    padding: 40px;
 }
 
 .grid {
