@@ -152,7 +152,7 @@
 							<label>투입 항공기 *</label> 
 							<select id="modalAircraftId" name="aircraft_id" class="select" required>
 								<option value="">항공기를 선택하세요</option>
-								<option th:each="ac : ${aircraftList}" th:value="${ac.aircraft_id}" th:text="|${ac.reg_no} (${ac.model_name}) - ${ac.status_name}|"></option>
+								<option th:each="ac : ${aircraftList}" th:value="${ac.aircraft_id}" th:text="|${ac.reg_no} (${ac.model_name})|"></option>
 							</select>
 						</div>
 
