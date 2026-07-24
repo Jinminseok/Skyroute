@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 
 import kr.spring.member.security.CustomAccessDeniedHandler;
 import kr.spring.member.security.CustomLogoutSuccessHandler;
@@ -47,7 +48,32 @@ public class SecurityConfig{
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {	
+		
+		/*
+	     * Spring Security 6은 CSRF 토큰을 기본적으로 지연 로딩합니다.
+	     *
+	     * 로그아웃 직후 Thymeleaf가 로그인 POST 폼을 렌더링할 때
+	     * CSRF 토큰을 뒤늦게 생성하면 이미 응답이 일부 전송된 상태에서
+	     * 세션을 생성하려고 하여 ERR_INCOMPLETE_CHUNKED_ENCODING이
+	     * 발생할 수 있습니다.
+	     *
+	     * null로 설정하면 CSRF 토큰이 요청 초기에 로딩됩니다.
+	     */
+	    XorCsrfTokenRequestAttributeHandler csrfRequestHandler =
+	            new XorCsrfTokenRequestAttributeHandler();
+
+	    csrfRequestHandler.setCsrfRequestAttributeName(null);
+		
 		return http
+				
+				/*
+				 * CSRF 보호를 끄는 것이 아닐,
+				 * CSRF 토큰의 지연 로딩만 해체합니다.
+				 */
+				
+				.csrf(csrf -> csrf
+						.csrfTokenRequestHandler(csrfRequestHandler)
+				)
 				
 				.authorizeHttpRequests(authorize -> authorize
 				
@@ -64,8 +90,10 @@ public class SecurityConfig{
 						
 						.requestMatchers("/member/findId", "/member/findPw").permitAll()
 						
-						// 관리자 및 스태프 전용 구역 보호
+						// 관리자 전용 경로
 						.requestMatchers("/admin/**").hasAuthority("ADMIN")
+						
+						// 지상직 전용 경로
 						.requestMatchers("/staff/**").hasAuthority("STAFF")
 						
 						// 위 조건 외의 모든 요청은 로그인 필요
@@ -84,12 +112,17 @@ public class SecurityConfig{
 						.logoutUrl("/member/logout")
 						.logoutSuccessHandler(customLogoutSuccessHandler)
 						.invalidateHttpSession(true)
-						.deleteCookies("JSESSIONID"))
+						.clearAuthentication(true)
+						.deleteCookies("JSESSIONID")
+						.permitAll()
+				)
 						
 				// 예외 처리 설정
 				.exceptionHandling(error -> error
 						.authenticationEntryPoint(
-								(req,res,e) -> { req.getRequestDispatcher("/main/resultError").forward(req, res);}
+								(request,response,exception) -> { 
+									request.getRequestDispatcher("/main/resultError").forward(request, response);
+								}
 						)
 						.accessDeniedHandler(customAccessDeniedHandler)
 					)
