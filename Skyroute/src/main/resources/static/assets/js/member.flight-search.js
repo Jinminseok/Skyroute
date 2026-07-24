@@ -438,4 +438,46 @@
 
         syncReserveButton();
     }
+	
+	document.addEventListener("DOMContentLoaded", function () {
+	    const form = document.getElementById("itinerarySelectionForm");
+	    const estimatedTotalAmount = document.getElementById("estimatedTotalAmount");
+
+	    if (!form || !estimatedTotalAmount) return;
+
+	    const tripType = form.querySelector('input[name="tripType"]');
+	    const adultCount = form.querySelector('input[name="adultCount"]');
+	    const childCount = form.querySelector('input[name="childCount"]');
+
+	    function readPrice(input) {
+	        if (!input) return 0;
+	        const price = Number(input.dataset.price);
+	        return Number.isFinite(price) ? price : 0;
+	    }
+
+	    function updateEstimatedTotal() {
+	        const selectedOutbound = form.querySelector('input[name="outboundFlightId"]:checked');
+	        const selectedInbound = form.querySelector('input[name="inboundFlightId"]:checked');
+	        const isRoundTrip = tripType && tripType.value === "ROUNDTRIP";
+	        const payingPassengerCount = Number(adultCount?.value || 0) + Number(childCount?.value || 0);
+
+	        let totalAmount = 0;
+
+	        if (!isRoundTrip && selectedOutbound) {
+	            totalAmount = readPrice(selectedOutbound) * payingPassengerCount;
+	        }
+
+	        if (isRoundTrip && selectedOutbound && selectedInbound) {
+	            totalAmount = (readPrice(selectedOutbound) + readPrice(selectedInbound)) * payingPassengerCount;
+	        }
+
+	        estimatedTotalAmount.textContent = totalAmount.toLocaleString("ko-KR") + "원";
+	    }
+
+	    form.querySelectorAll('input[name="outboundFlightId"], input[name="inboundFlightId"]').forEach(function (input) {
+	        input.addEventListener("change", updateEstimatedTotal);
+	    });
+
+	    updateEstimatedTotal();
+	});
 })();

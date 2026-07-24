@@ -230,10 +230,17 @@ section.block { padding: 56px 0; border-bottom: 1px solid var(--line); }
 .tnode .ap { font-size: 12.5px; color: var(--mut); font-weight: 400; }
 .tnode.r { text-align: right; }
 .leg { text-align: center; color: var(--mut); }
-.leg .dur { font-size: 12px; font-weight: 400; }
+.leg .dur {
+    font-size: 16px;
+    font-weight: 600;
+}
 .leg .bar { height: 1px; background: #CBD5E1; position: relative; margin: 6px 2px; }
 .leg .bar:after { content: "✈"; position: absolute; right: -2px; top: -9px; font-size: 13px; color: var(--accent); }
-.leg .ns { font-size: 11px; color: var(--ok); font-weight: 500; }
+.leg .ns {
+    font-size: 14px;
+    color: var(--ok);
+    font-weight: 600;
+}
 .fare { text-align: right; min-width: 150px; }
 .fare .price { font-size: 24px; font-weight: 600; font-family: var(--sans-eng); letter-spacing: -.5px; color: var(--ink-700); }
 .fare .price small { font-size: 13px; font-weight: 400; color: var(--mut); font-family: 'Pretendard'; }

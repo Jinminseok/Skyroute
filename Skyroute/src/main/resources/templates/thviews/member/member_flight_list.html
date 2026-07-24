@@ -70,18 +70,44 @@
 			margin-top: 10px;
 		}
 
-		.flight-select-control label {
-			display: inline-flex;
-			align-items: center;
-			gap: 6px;
-			cursor: pointer;
-			font-size: 12px;
-			color: var(--accent);
-			font-weight: 600;
+		.flight-select-label {
+		    display: block;
+		    cursor: pointer;
 		}
-
-		.flight-select-control input {
-			accent-color: var(--accent);
+		
+		.flight-select-radio {
+		    position: absolute;
+		    opacity: 0;
+		    pointer-events: none;
+		}
+		
+		.flight-select-label span {
+		    display: inline-flex;
+		    align-items: center;
+		    justify-content: center;
+		    min-width: 90px;
+		    height: 30px;
+		    padding: 0 10px;
+		    border: 1px solid var(--accent);
+		    border-radius: 7px;
+		    background: #fff;
+		    color: var(--accent);
+		    font-size: 11px;
+		    font-weight: 600;
+		}
+		
+		.flight-select-label:hover span {
+		    background: var(--accent-soft);
+		}
+		
+		.flight-select-radio:checked + span {
+		    background: var(--accent);
+		    color: #fff;
+		}
+		
+		.flight-select-radio:checked + span::after {
+		    content: " ✓";
+		    margin-left: 4px;
 		}
 
 		.status-normal {
@@ -433,6 +459,189 @@
 		.btn-favorite-heart .material-symbols-outlined {
 			font-size: 22px;
 		}
+		.estimated-total-box {
+		    display: flex;
+		    flex-direction: row;
+		    align-items: center;
+		    gap: 10px;
+		}
+		
+		.estimated-total-box > span {
+		    color: var(--ink-700);
+		    font-size: 20px;
+		    font-weight: 500;
+		    line-height: 1.3;
+		}
+		
+		.estimated-total-box > strong {
+		    color: var(--accent);
+		    font-size: 20px;
+		    font-weight: 500;
+		    line-height: 1.3;
+		}
+		
+		.estimated-total-box > p {
+		    margin: 0;
+		    color: var(--mut);
+		    font-size: 12px;
+		}
+		.flight {
+		    grid-template-columns: minmax(0, 1fr) 120px auto;
+		    padding: 22px 30px;
+		}
+		.flight .leg {
+		    width: 250px;
+		}
+		.flight .tnode .ap {
+		    margin-top: 4px;
+		    color: var(--ink-700);
+		    font-size: 19px;
+		    font-weight: 500;
+		    line-height: 1.2;
+		}
+		.flight .tnode .t {
+		    font-size: 32px;
+		    font-weight: 500;
+		    line-height: 1.15;
+		}
+		
+
+		.flight-seat-info {
+		    display: flex;
+		    flex-direction: column;
+		    align-items: center;
+		    justify-content: center;
+		    gap: 6px;
+		    min-width: 120px;
+		    transform: translateX(-60px);
+		}
+
+		.flight-seat-info strong {
+		    color: var(--ink-700);
+		    font-size: 18px;
+		    font-weight: 500;
+		}
+
+		.flight-seat-info span {
+		    color: var(--ok);
+		    font-size: 16px;
+		    font-weight: 600;
+		}
+		
+		.flight-detail-link {
+    border: 0;
+    background: none;
+    padding: 0;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.flight-detail-modal[hidden] {
+    display: none;
+}
+
+.flight-detail-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background: rgba(15, 23, 42, 0.58);
+}
+
+.flight-detail-modal-dialog {
+    display: flex;
+    flex-direction: column;
+    width: min(1000px, 100%);
+    max-height: calc(100vh - 60px);
+    overflow: hidden;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 26px 70px rgba(15, 23, 42, 0.24);
+}
+
+.flight-detail-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--line);
+}
+
+.flight-detail-modal-header strong {
+    color: var(--ink-700);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.flight-detail-modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #f8fafc;
+    color: var(--ink-500);
+    cursor: pointer;
+}
+
+.flight-detail-modal-close:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.flight-detail-modal-body {
+    flex: 1;
+    min-height: 300px;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+.flight-detail-modal-body .flight-detail-page {
+    width: 100%;
+    max-width: none;
+    padding: 28px;
+}
+
+.flight-detail-modal-body .detail-actions {
+    display: none;
+}
+
+.flight-detail-loading,
+.flight-detail-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 320px;
+    padding: 40px;
+    color: var(--mut);
+    text-align: center;
+}
+
+.flight-detail-error {
+    color: var(--bad);
+}
+
+@media(max-width: 700px) {
+    .flight-detail-modal {
+        padding: 12px;
+    }
+
+    .flight-detail-modal-dialog {
+        max-height: calc(100vh - 24px);
+    }
+
+    .flight-detail-modal-body .flight-detail-page {
+        padding: 18px;
+    }
+}
+
 	</style>
 </head>
 
@@ -850,15 +1059,6 @@
 
 				</aside>
 
-
-				<div class="note"
-					 style="margin-top: 14px;">
-
-					항공편 검색은 로그인 전에도 가능하지만,
-					예약은 USER 로그인 후 진행할 수 있습니다.
-
-				</div>
-
 			</div>
 
 
@@ -907,17 +1107,9 @@
 							GMP 김포국제공항
 							→
 							CJU 제주국제공항
-						</h2>
+						</h2><br>
 
-						<p style="
-							font-size: 13px;
-							color: var(--mut);
-							margin-top: 5px;
-							">
-
-							선택한 좌석 등급의 1인 운임과
-							현재 예약 가능한 잔여 좌석입니다.
-						</p>
+						
 
 					</div>
 
@@ -986,31 +1178,6 @@
 								 th:each="flight : ${outboundFlightList}">
 
 
-								<div class="carrier">
-
-									<div class="ci">
-										SR
-									</div>
-
-									<div>
-
-										<b>SkyRoute</b>
-
-										<div class="fno"
-											 th:text="${flight.flightNo}">
-											KE101
-										</div>
-
-										<div class="fno"
-											 th:text="${flight.aircraftModel}">
-											B737-800
-										</div>
-
-									</div>
-
-								</div>
-
-
 								<div class="route">
 
 
@@ -1027,15 +1194,10 @@
 										</div>
 
 										<div class="ap"
-											 th:text="|${flight.departureIataCode} ${flight.departureAirportName}|">
-											GMP 김포국제공항
+										     th:text="${flight.departureIataCode}">
+										    GMP
 										</div>
 
-										<div class="fno"
-											 th:if="${flight.departureGateCode != null}"
-											 th:text="|Gate ${flight.departureGateCode}|">
-											Gate G1
-										</div>
 
 									</div>
 
@@ -1074,17 +1236,28 @@
 										</div>
 
 										<div class="ap"
-											 th:text="|${flight.arrivalIataCode} ${flight.arrivalAirportName}|">
-											CJU 제주국제공항
+										     th:text="${flight.arrivalIataCode}">
+										    CJU
 										</div>
 
-										<div class="fno"
-											 th:if="${flight.arrivalGateCode != null}"
-											 th:text="|Gate ${flight.arrivalGateCode}|">
-											Gate C1
-										</div>
 
 									</div>
+
+								</div>
+
+
+								<div class="flight-seat-info">
+
+									<strong th:text="${flight.seatClassName}">
+										이코노미
+									</strong>
+
+									<span th:classappend="${flight.remainingSeats <= 5}
+											? ' seat-warning'
+											: ''"
+										  th:text="|잔여 ${flight.remainingSeats}석|">
+										잔여 8석
+									</span>
 
 								</div>
 
@@ -1117,44 +1290,34 @@
 										<small>원</small>
 
 									</div>
-
-
-									<div class="cls"
-										 th:text="|${flight.seatClassName} · 1인 운임|">
-										이코노미 · 1인 운임
-									</div>
-
-
-									<div class="cls"
-										 th:classappend="${flight.remainingSeats <= 5}
-											? ' seat-warning'
-											: ''"
-										 th:text="|잔여 ${flight.remainingSeats}석|">
-										잔여 8석
-									</div>
+									
 
 
 									<div class="flight-select-control">
 
-									    <label>
+									    <label class="flight-select-label">
+
+										    <input type="radio"
+										           class="flight-select-radio"
+										           name="outboundFlightId"
+										           th:value="${flight.flightId}"
+										           th:attr="data-price=${flight.price}">
+										
+										    <span>가는 편 선택</span>
+										
+										</label>
 									
-									        <input type="radio"
-									               name="outboundFlightId"
-									               th:value="${flight.flightId}">
 									
-									        가는 편 선택
-									
-									    </label>
-									
-									
-									    <a th:href="@{/booking/flights/detail(
-									            flightId=${flight.flightId}
-									        )}"
-									       class="flight-detail-link">
-									
-									        항공편 상세 보기
-									
-									    </a>
+									    <button type="button"
+										        class="flight-detail-link"
+										        th:data-detail-url="@{/booking/flights/detail(
+										            flightId=${flight.flightId}
+										        )}"
+										        onclick="openFlightDetailModal(this)">
+										
+										    항공편 상세 보기
+										
+										</button>
 									
 									</div>
 
@@ -1224,31 +1387,6 @@
 								 th:each="flight : ${inboundFlightList}">
 
 
-								<div class="carrier">
-
-									<div class="ci">
-										SR
-									</div>
-
-									<div>
-
-										<b>SkyRoute</b>
-
-										<div class="fno"
-											 th:text="${flight.flightNo}">
-											KE102
-										</div>
-
-										<div class="fno"
-											 th:text="${flight.aircraftModel}">
-											B737-800
-										</div>
-
-									</div>
-
-								</div>
-
-
 								<div class="route">
 
 
@@ -1265,15 +1403,10 @@
 										</div>
 
 										<div class="ap"
-											 th:text="|${flight.departureIataCode} ${flight.departureAirportName}|">
-											CJU 제주국제공항
+										     th:text="${flight.departureIataCode}">
+										    CJU
 										</div>
 
-										<div class="fno"
-											 th:if="${flight.departureGateCode != null}"
-											 th:text="|Gate ${flight.departureGateCode}|">
-											Gate C1
-										</div>
 
 									</div>
 
@@ -1312,17 +1445,28 @@
 										</div>
 
 										<div class="ap"
-											 th:text="|${flight.arrivalIataCode} ${flight.arrivalAirportName}|">
-											GMP 김포국제공항
+										     th:text="${flight.arrivalIataCode}">
+										    GMP
 										</div>
 
-										<div class="fno"
-											 th:if="${flight.arrivalGateCode != null}"
-											 th:text="|Gate ${flight.arrivalGateCode}|">
-											Gate G1
-										</div>
 
 									</div>
+
+								</div>
+
+
+								<div class="flight-seat-info">
+
+									<strong th:text="${flight.seatClassName}">
+										이코노미
+									</strong>
+
+									<span th:classappend="${flight.remainingSeats <= 5}
+											? ' seat-warning'
+											: ''"
+										  th:text="|잔여 ${flight.remainingSeats}석|">
+										잔여 8석
+									</span>
 
 								</div>
 
@@ -1357,42 +1501,31 @@
 									</div>
 
 
-									<div class="cls"
-										 th:text="|${flight.seatClassName} · 1인 운임|">
-										이코노미 · 1인 운임
-									</div>
-
-
-									<div class="cls"
-										 th:classappend="${flight.remainingSeats <= 5}
-											? ' seat-warning'
-											: ''"
-										 th:text="|잔여 ${flight.remainingSeats}석|">
-										잔여 8석
-									</div>
-
-
 									<div class="flight-select-control">
 
-									    <label>
+									    <label class="flight-select-label">
+
+										    <input type="radio"
+										           class="flight-select-radio"
+										           name="inboundFlightId"
+										           th:value="${flight.flightId}"
+										           th:attr="data-price=${flight.price}">
+										
+										    <span>오는 편 선택</span>
+										
+										</label>
 									
-									        <input type="radio"
-									               name="inboundFlightId"
-									               th:value="${flight.flightId}">
 									
-									        오는 편 선택
-									
-									    </label>
-									
-									
-									    <a th:href="@{/booking/flights/detail(
-									            flightId=${flight.flightId}
-									        )}"
-									       class="flight-detail-link">
-									
-									        항공편 상세 보기
-									
-									    </a>
+									    <button type="button"
+										        class="flight-detail-link"
+										        th:data-detail-url="@{/booking/flights/detail(
+										            flightId=${flight.flightId}
+										        )}"
+										        onclick="openFlightDetailModal(this)">
+										
+										    항공편 상세 보기
+										
+										</button>
 									
 									</div>
 
@@ -1437,20 +1570,9 @@
 							 !#lists.isEmpty(inboundFlightList))}">
 
 
-						<div>
-
-							<b style="
-								display: block;
-								margin-bottom: 3px;
-								">
-								여정을 선택해 주세요.
-							</b>
-
-							<p>
-								예약 단계에서는 선택 항공편의 운항 상태,
-								운임과 잔여 좌석을 서버에서 다시 검증해야 합니다.
-							</p>
-
+						<div class="estimated-total-box">
+						    <span>총 결제 예상금액 : </span>
+						    <strong id="estimatedTotalAmount">0원</strong>
 						</div>
 
 						<!-- USER 로그인 상태 -->
@@ -1497,6 +1619,45 @@
 		</div>
 
 	</div>
+	
+	
+	<div id="flightDetailModal"
+	     class="flight-detail-modal"
+	     hidden
+	     onclick="closeFlightDetailModalByBackground(event)">
+	
+	    <div class="flight-detail-modal-dialog"
+	         role="dialog"
+	         aria-modal="true"
+	         aria-labelledby="flightDetailModalTitle">
+	
+	        <div class="flight-detail-modal-header">
+	
+	            <strong id="flightDetailModalTitle">
+	                항공편 상세 정보
+	            </strong>
+	
+	            <button type="button"
+	                    class="flight-detail-modal-close"
+	                    onclick="closeFlightDetailModal()"
+	                    aria-label="모달 닫기">
+	
+	                <span class="material-symbols-outlined">
+	                    close
+	                </span>
+	
+	            </button>
+	
+	        </div>
+	
+	        <div id="flightDetailModalBody"
+	             class="flight-detail-modal-body">
+	
+	        </div>
+	
+	    </div>
+	
+	</div>
 
 	<!-- 🎯 관심 항공편 비동기 토글 스크립트 -->
 	<script th:inline="javascript">
@@ -1529,13 +1690,11 @@
 			if (!response) return;
 
 			if (response.includes("ADD_SUCCESS") || response.includes("등록")) {
-				btnElement.classList.add('active');
-				alert("관심 항공편으로 등록되었습니다.");
+			    btnElement.classList.add('active');
 			} else if (response.includes("REMOVE_SUCCESS") || response.includes("삭제") || response.includes("해제")) {
-				btnElement.classList.remove('active');
-				alert("관심 항공편 등록이 해제되었습니다.");
+			    btnElement.classList.remove('active');
 			} else {
-				alert(response);
+			    alert(response);
 			}
 		})
 		.catch(function(err) {
@@ -1543,6 +1702,94 @@
 			alert("처리 중 에러가 발생했습니다.");
 		});
 	}
+	
+	async function openFlightDetailModal(button) {
+	    const modal = document.getElementById("flightDetailModal");
+	    const modalBody = document.getElementById("flightDetailModalBody");
+	    const detailUrl = button.dataset.detailUrl;
+
+	    modal.hidden = false;
+	    document.body.style.overflow = "hidden";
+
+	    modalBody.innerHTML = `
+	        <div class="flight-detail-loading">
+	            항공편 상세 정보를 불러오는 중입니다.
+	        </div>
+	    `;
+
+	    try {
+	        const response = await fetch(detailUrl);
+
+	        if (!response.ok) {
+	            throw new Error("상세 정보를 불러오지 못했습니다.");
+	        }
+
+	        const html = await response.text();
+	        const parsedDocument = new DOMParser().parseFromString(
+	            html,
+	            "text/html"
+	        );
+
+	        const detailContent =
+	            parsedDocument.querySelector(".flight-detail-page");
+
+	        if (!detailContent) {
+	            throw new Error("상세 화면을 찾을 수 없습니다.");
+	        }
+
+	        const detailStyleText = Array.from(
+	            parsedDocument.querySelectorAll("style")
+	        )
+	        .map(function(style) {
+	            return style.textContent;
+	        })
+	        .join("\n");
+
+	        let detailStyle =
+	            document.getElementById("flightDetailDynamicStyle");
+
+	        if (!detailStyle) {
+	            detailStyle = document.createElement("style");
+	            detailStyle.id = "flightDetailDynamicStyle";
+	            document.head.appendChild(detailStyle);
+	        }
+
+	        detailStyle.textContent = detailStyleText;
+	        modalBody.innerHTML = "";
+	        modalBody.appendChild(detailContent.cloneNode(true));
+	    } catch (error) {
+	        modalBody.innerHTML = `
+	            <div class="flight-detail-error">
+	                항공편 상세 정보를 불러오지 못했습니다.
+	            </div>
+	        `;
+	    }
+	}
+
+	function closeFlightDetailModal() {
+	    const modal = document.getElementById("flightDetailModal");
+	    const modalBody = document.getElementById("flightDetailModalBody");
+
+	    modal.hidden = true;
+	    modalBody.innerHTML = "";
+	    document.body.style.overflow = "";
+	}
+
+	function closeFlightDetailModalByBackground(event) {
+	    if (event.target.id === "flightDetailModal") {
+	        closeFlightDetailModal();
+	    }
+	}
+
+	document.addEventListener("keydown", function(event) {
+	    if (event.key === "Escape") {
+	        const modal = document.getElementById("flightDetailModal");
+
+	        if (!modal.hidden) {
+	            closeFlightDetailModal();
+	        }
+	    }
+	});
 	</script>
 
 </div>
