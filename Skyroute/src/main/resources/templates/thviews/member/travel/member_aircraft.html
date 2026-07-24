@@ -62,31 +62,76 @@
 			</div>
 
 			<form th:action="@{/member/travel/member_aircraft}"
-				  method="get"
-				  class="airport-search">
+			      method="get"
+			      class="airport-search aircraft-search"
+			      id="aircraftSearchForm">
 
-				<label for="aircraftId">항공기 선택</label>
+			    <label for="aircraftKeyword">항공기 선택</label>
 
-				<select id="aircraftId"
-						name="aircraftId"
-						required>
+			    <div class="airport-searchable">
 
-					<option value="">
-						항공기를 선택해 주세요
-					</option>
+			        <div class="airport-search-input-wrap aircraft-search-input-wrap"
+			             id="aircraftDropdownTrigger"
+			             role="button"
+			             tabindex="0"
+			             aria-expanded="false">
 
-					<option th:each="aircraft : ${aircraftList}"
-							th:value="${aircraft.aircraft_id}"
-							th:text="|${aircraft.model_name} (${aircraft.reg_no})|"
-							th:selected="${selectedAircraft != null
-								and selectedAircraft.aircraft_id
-								== aircraft.aircraft_id}">
-					</option>
-				</select>
+			            <span class="material-symbols-outlined">flight</span>
 
-				<button type="submit">
-					항공기 조회
-				</button>
+			            <input type="text"
+			                   id="aircraftKeyword"
+			                   placeholder="항공기를 선택해 주세요"
+			                   autocomplete="off"
+			                   readonly
+			                   th:value="${selectedAircraft != null
+			                       ? selectedAircraft.model_name + ' (' + selectedAircraft.reg_no + ')'
+			                       : ''}">
+
+			            <span class="material-symbols-outlined aircraft-dropdown-arrow">
+			                expand_more
+			            </span>
+			        </div>
+
+			        <input type="hidden"
+			               id="aircraftId"
+			               name="aircraftId"
+			               th:value="${selectedAircraft != null
+			                   ? selectedAircraft.aircraft_id
+			                   : ''}">
+
+			        <div id="aircraftDropdown"
+			             class="airport-dropdown aircraft-dropdown"
+			             hidden>
+
+			            <div class="airport-dropdown-head">
+			                <span>항공기 목록</span>
+			                <strong>
+			                    <span th:text="${#lists.size(aircraftList)}">0</span>대
+			                </strong>
+			            </div>
+
+			            <button type="button"
+			                    class="airport-option aircraft-option"
+			                    th:each="aircraft : ${aircraftList}"
+			                    th:data-aircraft-id="${aircraft.aircraft_id}"
+			                    th:data-aircraft-label="|${aircraft.model_name} (${aircraft.reg_no})|">
+
+			                <strong th:text="${aircraft.model_name}">
+			                    B777-300
+			                </strong>
+
+			                <span th:text="${aircraft.reg_no}">
+			                    HL8003
+			                </span>
+
+			                <small>선택</small>
+			            </button>
+
+			        </div>
+
+			    </div>
+
+			    <button type="submit">항공기 조회</button>
 			</form>
 
 			<div class="airport-info-empty"
@@ -690,6 +735,75 @@
 				);
 			</script>
 
+		<script>
+		document.addEventListener("DOMContentLoaded", function() {
+		    const form = document.getElementById("aircraftSearchForm");
+		    const trigger = document.getElementById("aircraftDropdownTrigger");
+		    const keywordInput = document.getElementById("aircraftKeyword");
+		    const aircraftIdInput = document.getElementById("aircraftId");
+		    const dropdown = document.getElementById("aircraftDropdown");
+		    const options = Array.from(document.querySelectorAll(".aircraft-option"));
+		
+		    if (!form || !trigger || !keywordInput || !aircraftIdInput || !dropdown) {
+		        return;
+		    }
+		
+		    function openDropdown() {
+		        dropdown.hidden = false;
+		        form.classList.add("is-open");
+		        trigger.setAttribute("aria-expanded", "true");
+		    }
+		
+		    function closeDropdown() {
+		        dropdown.hidden = true;
+		        form.classList.remove("is-open");
+		        trigger.setAttribute("aria-expanded", "false");
+		    }
+		
+		    function toggleDropdown() {
+		        if (dropdown.hidden) {
+		            openDropdown();
+		        } else {
+		            closeDropdown();
+		        }
+		    }
+		
+		    trigger.addEventListener("click", toggleDropdown);
+		
+		    trigger.addEventListener("keydown", function(event) {
+		        if (event.key === "Enter" || event.key === " ") {
+		            event.preventDefault();
+		            toggleDropdown();
+		        }
+		
+		        if (event.key === "Escape") {
+		            closeDropdown();
+		        }
+		    });
+		
+		    options.forEach(function(option) {
+		        option.addEventListener("click", function() {
+		            aircraftIdInput.value = option.dataset.aircraftId;
+		            keywordInput.value = option.dataset.aircraftLabel;
+		            closeDropdown();
+		        });
+		    });
+		
+		    document.addEventListener("click", function(event) {
+		        if (!form.contains(event.target)) {
+		            closeDropdown();
+		        }
+		    });
+		
+		    form.addEventListener("submit", function(event) {
+		        if (!aircraftIdInput.value) {
+		            event.preventDefault();
+		            alert("항공기를 선택해 주세요.");
+		            openDropdown();
+		        }
+		    });
+		});
+		</script>
 		</section>
 
 	</div>
