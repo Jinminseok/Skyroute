@@ -70,6 +70,7 @@
 		flex-direction: column;
 	}
 }
+
 </style>
 </head>
 
@@ -336,7 +337,18 @@
 
 		<div class="card">
 			<div class="table-wrap">
-				<table class="data">
+				<table class="data event-data">
+					<colgroup>
+				        <col style="width:130px">
+				        <col style="width:220px">
+				        <col style="width:180px">
+				        <col style="width:75px">
+				        <col style="width:85px">	
+				        <col style="width:90px">
+				        <col style="width:140px">
+				        <col style="width:80px">
+				        <col style="width:160px">
+				    </colgroup>
 					<thead>
 						<tr>
 							<th>배너 이미지</th>
@@ -369,8 +381,11 @@
 								</span>
 							</td>
 
-							<td>
-								<strong th:text="${event.title}"></strong>
+							<td class="event-title-cell">
+							    <strong class="event-title-text"
+							            th:text="${event.title}"
+							            th:title="${event.title}">
+							    </strong>
 							</td>
 
 							<td class="mono">

@@ -8,6 +8,160 @@
 	<link rel="stylesheet"
 		  th:href="@{/assets/css/travel.css}"
 		  type="text/css">
+
+<style>
+.airport-search {
+    overflow: visible;
+}
+
+.airport-searchable {
+    position: relative;
+    min-width: 0;
+}
+
+.airport-search-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+    min-height: 62px;
+    padding: 0 20px;
+}
+
+.airport-search-input-wrap .material-symbols-outlined {
+    flex-shrink: 0;
+    color: var(--accent);
+    font-size: 21px;
+}
+
+.airport-search-input-wrap input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ink-700);
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.airport-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 310px;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.14);
+}
+
+.airport-dropdown[hidden] {
+    display: none;
+}
+
+.airport-dropdown-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 15px;
+    border-bottom: 1px solid var(--line);
+    background: #fff;
+    color: var(--mut);
+    font-size: 12px;
+}
+
+.airport-dropdown-head strong {
+    color: var(--accent);
+    font-size: 12px;
+}
+
+.airport-option {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 15px;
+    border: 0;
+    border-bottom: 1px solid #eef2f7;
+    background: #fff;
+    color: var(--ink-700);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.airport-option:last-of-type {
+    border-bottom: 0;
+}
+
+.airport-option:hover,
+.airport-option:focus-visible {
+    outline: 0;
+    background: #f4f8ff;
+}
+
+.airport-option.is-hidden {
+    display: none;
+}
+
+.airport-option strong {
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.airport-option span {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.airport-option small {
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.airport-no-result {
+    padding: 32px 16px;
+    color: var(--mut);
+    font-size: 13px;
+    text-align: center;
+}
+
+.airport-no-result[hidden] {
+    display: none;
+}
+
+@media(max-width:700px) {
+    .airport-dropdown {
+        left: -1px;
+        right: -1px;
+    }
+
+    .airport-option {
+        grid-template-columns: 48px minmax(0, 1fr);
+    }
+
+    .airport-option small {
+        display: none;
+    }
+}
+</style>
+
 </head>
 <body>
 
@@ -56,25 +210,72 @@
 			</div>
 
 			<form th:action="@{/member/travel/member_airport}"
-				  method="get"
-				  class="airport-search">
+			      method="get"
+			      class="airport-search"
+			      id="airportSearchForm">
+			
+			    <label for="airportKeyword">
+			        공항 선택
+			    </label>
+			
+			    <div class="airport-searchable">
+			
+			        <div class="airport-search-input-wrap">
+			            <span class="material-symbols-outlined">
+			                search
+			            </span>
+			
+			            <input type="text"
+			                   id="airportKeyword"
+			                   placeholder="공항명 또는 공항 코드를 검색하세요"
+			                   autocomplete="off"
+			                   th:value="${selectedAirport != null ? selectedAirport.iataCode + ' ' + selectedAirport.airportName : ''}">
+			        </div>
+			
+			        <input type="hidden"
+			               id="airportId"
+			               name="airportId"
+			               th:value="${selectedAirport != null ? selectedAirport.airportId : ''}">
+			
+			        <div id="airportDropdown"
+			             class="airport-dropdown"
+			             hidden>
+			
+			            <div class="airport-dropdown-head">
+			                <span>검색 결과</span>
+			                <strong><span id="airportResultCount">0</span>개</strong>
+			            </div>
 
-				<label for="airportId">공항 선택</label>
-
-				<select id="airportId"
-						name="airportId"
-						required>
-					<option value="">공항을 선택해 주세요</option>
-
-					<option th:each="airport : ${airportList}"
-							th:value="${airport.airportId}"
-							th:text="|${airport.airportName} (${airport.iataCode}) · ${airport.flightType == 'DOM' ? '국내선' : '국제선'}|"
-							th:selected="${selectedAirport != null
-								and selectedAirport.airportId == airport.airportId}">
-					</option>
-				</select>
-
-				<button type="submit">공항 조회</button>
+			            <button type="button"
+						        class="airport-option"
+						        th:each="airport : ${airportList}"
+						        th:data-airport-id="${airport.airportId}"
+						        th:data-airport-code="${airport.iataCode}"
+						        th:data-airport-name="${airport.airportName}"
+						        th:data-airport-country="${airport.country}"
+						        th:data-airport-label="|${airport.iataCode} ${airport.airportName}|"
+						        th:data-airport-search="|${airport.iataCode} ${airport.airportName} ${airport.country}|">
+						
+						    <strong th:text="${airport.iataCode}">GMP</strong>
+						    <span th:text="${airport.airportName}">김포국제공항</span>
+						    <small th:text="${airport.flightType == 'DOM' ? '국내선' : '국제선'}">국내선</small>
+						
+						</button>
+			
+			            <div id="airportNoResult"
+			                 class="airport-no-result"
+			                 hidden>
+			                검색 결과가 없습니다.
+			            </div>
+			
+			        </div>
+			
+			    </div>
+			
+			    <button type="submit">
+			        공항 조회
+			    </button>
+			
 			</form>
 
 			<div class="airport-info-empty"
@@ -265,6 +466,109 @@
 
 		</section>
 
+		<script>
+		document.addEventListener("DOMContentLoaded", function() {
+		    const form = document.getElementById("airportSearchForm");
+		    const keywordInput = document.getElementById("airportKeyword");
+		    const airportIdInput = document.getElementById("airportId");
+		    const dropdown = document.getElementById("airportDropdown");
+		    const options = Array.from(document.querySelectorAll(".airport-option"));
+		    const noResult = document.getElementById("airportNoResult");
+		    const resultCount = document.getElementById("airportResultCount");
+		
+		    if (!form || !keywordInput || !airportIdInput || !dropdown || !noResult || !resultCount) {
+		        return;
+		    }
+		
+		    function normalize(value) {
+		        return (value || "").trim().toLowerCase();
+		    }
+		
+		    function closeDropdown() {
+		        dropdown.hidden = true;
+		    }
+		
+		    function findExactAirport(keyword) {
+		        const value = normalize(keyword);
+		
+		        return options.find(function(option) {
+		            return value === normalize(option.dataset.airportCode)
+		                || value === normalize(option.dataset.airportName)
+		                || value === normalize(option.dataset.airportLabel);
+		        });
+		    }
+		
+		    function filterAirports() {
+		        const keyword = normalize(keywordInput.value);
+		        let count = 0;
+		
+		        options.forEach(function(option) {
+		            const visible = normalize(option.dataset.airportSearch).includes(keyword);
+		            option.classList.toggle("is-hidden", !visible);
+		
+		            if (visible) {
+		                count++;
+		            }
+		        });
+		
+		        resultCount.textContent = count;
+		        noResult.hidden = count !== 0;
+		        dropdown.hidden = false;
+		    }
+		
+		    keywordInput.addEventListener("focus", filterAirports);
+		
+		    keywordInput.addEventListener("input", function() {
+		        airportIdInput.value = "";
+		
+		        const exactOption = findExactAirport(keywordInput.value);
+		
+		        if (exactOption) {
+		            airportIdInput.value = exactOption.dataset.airportId;
+		        }
+		
+		        filterAirports();
+		    });
+		
+		    options.forEach(function(option) {
+		        option.addEventListener("click", function() {
+		            keywordInput.value = option.dataset.airportLabel;
+		            airportIdInput.value = option.dataset.airportId;
+		            closeDropdown();
+		        });
+		    });
+		
+		    document.addEventListener("click", function(event) {
+		        if (!form.contains(event.target)) {
+		            closeDropdown();
+		        }
+		    });
+		
+		    keywordInput.addEventListener("keydown", function(event) {
+		        if (event.key === "Escape") {
+		            closeDropdown();
+		        }
+		    });
+		
+		    form.addEventListener("submit", function(event) {
+		        if (!airportIdInput.value) {
+		            const exactOption = findExactAirport(keywordInput.value);
+		
+		            if (exactOption) {
+		                airportIdInput.value = exactOption.dataset.airportId;
+		                keywordInput.value = exactOption.dataset.airportLabel;
+		            }
+		        }
+		
+		        if (!airportIdInput.value) {
+		            event.preventDefault();
+		            alert("검색 결과에서 공항을 선택해 주세요.");
+		            keywordInput.focus();
+		            filterAirports();
+		        }
+		    });
+		});
+		</script>
 	</div>
 </div>
 
