@@ -7,7 +7,7 @@
 	--text-gray: #475569;
 	--text-light: #94A3B8;
 	--gradient-sky: linear-gradient(180deg, #E0F2FE 0%, #F0F7FF 40%, #FFFFFF 100%);
-	--bg-white: rgba(255, 255, 255, 0.8);
+	--bg-white: rgba(255, 255, 255, 0.96);
 	--border: rgba(186, 230, 253, 0.8);
 	--ok: #00B06B;
 	--warn: #F2994A;
@@ -29,7 +29,13 @@ html { scrollbar-gutter: stable; }
 
 body {
 	background: var(--gradient-sky);
-	background-attachment: fixed;
+
+	/* fixed 배경 제거: 스크롤 시 전체 배경 재렌더링 방지 */
+	background-attachment: scroll;
+	background-repeat: no-repeat;
+	background-size: 100% 100vh;
+	background-color: #FFFFFF;
+
 	color: var(--text-dark);
 	font-family: 'Noto Sans KR', sans-serif;
 	font-size: 14px;
@@ -53,7 +59,11 @@ h1 {
 
 .card {
 	background: var(--bg-white);
-	backdrop-filter: blur(10px);
+
+	/* 큰 영역에 적용된 실시간 블러 제거 */
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+
 	border-radius: 12px;
 	padding: 24px;
 	box-shadow: var(--shadow-sm);
@@ -81,8 +91,12 @@ h1 {
 
 /* 헤더 */
 .header {
-	background: rgba(224, 242, 254, 0.9);
-	backdrop-filter: blur(12px);
+	background: rgba(224, 242, 254, 0.98);
+
+	/* sticky 요소와 backdrop-filter 조합 제거 */
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+
 	border-bottom: 1px solid #BAE6FD;
 	display: flex;
 	align-items: center;
@@ -125,7 +139,10 @@ h1 {
 	cursor: pointer;
 	height: 100%;
 	border-bottom: 3px solid transparent;
-	transition: all 0.2s;
+	transition:
+		color 0.2s,
+		background-color 0.2s,
+		border-color 0.2s;
 	font-size: 14px;
 	text-decoration: none;
 }
@@ -273,7 +290,12 @@ h1 {
 	font-weight: 500;
 	cursor: pointer;
 	border: 1px solid transparent;
-	transition: all 0.15s;
+	transition:
+		background-color 0.15s,
+		color 0.15s,
+		border-color 0.15s,
+		box-shadow 0.15s,
+		transform 0.15s;
 	font-family: inherit;
 	white-space: nowrap;
 }
@@ -329,7 +351,10 @@ h1 {
 	font-family: inherit;
 	font-size: 14px;
 	outline: none;
-	transition: all 0.2s;
+	transition:
+		border-color 0.2s,
+		background-color 0.2s,
+		box-shadow 0.2s;
 	background: rgba(255, 255, 255, 0.8);
 	color: var(--text-dark);
 }
@@ -391,7 +416,8 @@ h1 {
 /* 대시보드 스탯 */
 .stat {
 	background: var(--bg-white);
-	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
 	border: 1px solid var(--border);
 	padding: 20px;
 	border-radius: 12px;
@@ -426,7 +452,8 @@ h1 {
 /* 항공편 전광판 전용 */
 .board {
 	background: var(--bg-white);
-	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
 	border-radius: 12px;
 	border: 1px solid var(--border);
 	overflow: hidden;
@@ -503,7 +530,10 @@ h1 {
 	color: var(--text-gray);
 	cursor: pointer;
 	border-bottom: 2px solid transparent;
-	transition: all 0.15s;
+	transition:
+		color 0.15s,
+		background-color 0.15s,
+		border-color 0.15s;
 }
 
 .tabs button:hover {
@@ -554,8 +584,12 @@ h1 {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: rgba(15, 23, 42, 0.4);
-	backdrop-filter: blur(4px);
+
+	/* 블러 대신 배경색을 조금 진하게 처리 */
+	background: rgba(15, 23, 42, 0.52);
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+
 	display: none;
 	align-items: center;
 	justify-content: center;
@@ -1149,5 +1183,17 @@ a.btn, a.btn:hover { text-decoration: none; }
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+/* 운영체제에서 '동작 줄이기'를 선택한 사용자 환경 대응 */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+		transition-duration: 0.01ms !important;
+	}
 }
 

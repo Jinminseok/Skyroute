@@ -186,8 +186,12 @@
 	border-bottom: 2px solid #e2e8f0;
 	position: sticky;
 	top: -24px;
-	background: rgba(255, 255, 255, 0.75);
-	backdrop-filter: blur(12px);
+
+	/* sticky 탭의 실시간 배경 블러 제거 */
+	background: rgba(255, 255, 255, 0.98);
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+
 	z-index: 10;
 }
 
