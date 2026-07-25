@@ -1197,3 +1197,275 @@ a.btn, a.btn:hover { text-decoration: none; }
 	}
 }
 
+/* =========================================================
+   지상직 헤더 반응형 보정
+   - 기존 한 줄 구조와 기존 디자인 유지
+   - 메뉴 줄바꿈 방지
+   - 좁은 화면에서는 메뉴 영역 가로 스크롤
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   기본 헤더 배치 보정
+   --------------------------------------------------------- */
+
+.header {
+	/* 헤더 내부 요소가 다음 줄로 내려가지 않도록 처리 */
+	flex-wrap: nowrap;
+
+	/* flex 자식이 부모 너비보다 커졌을 때 정상 축소되도록 처리 */
+	min-width: 0;
+}
+
+
+/* 로고는 찌그러지거나 줄바꿈되지 않게 유지 */
+.header .logo {
+	flex: 0 0 auto;
+	min-width: max-content;
+
+	white-space: nowrap;
+	word-break: keep-all;
+}
+
+
+/* ---------------------------------------------------------
+   가운데 메뉴 영역
+   --------------------------------------------------------- */
+
+.top-nav {
+	/*
+	 * 로고와 사용자 영역을 제외한 나머지 공간을
+	 * 메뉴 영역이 사용하도록 설정한다.
+	 */
+	flex: 1 1 auto;
+
+	/*
+	 * 이 값이 없으면 메뉴가 자신의 실제 너비만큼
+	 * 계속 공간을 차지하면서 사용자 영역을 밀어낸다.
+	 */
+	min-width: 0;
+
+	/*
+	 * 창이 좁아지면 메뉴를 압축하거나 두 줄로 만들지 않고
+	 * 메뉴 영역 내부에서 가로 스크롤되도록 처리한다.
+	 */
+	overflow-x: auto;
+	overflow-y: hidden;
+
+	white-space: nowrap;
+
+	/* 스크롤바는 보이지 않게 처리 */
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+
+	/* 모바일에서 자연스럽게 좌우 스와이프 */
+	-webkit-overflow-scrolling: touch;
+
+	/* 메뉴 스크롤이 페이지 전체에 전달되는 현상 완화 */
+	overscroll-behavior-x: contain;
+}
+
+
+/* Chrome, Edge, Safari 스크롤바 숨김 */
+.top-nav::-webkit-scrollbar {
+	display: none;
+}
+
+
+/* 각 메뉴가 압축되거나 두 줄로 나뉘지 않도록 처리 */
+.nav-link {
+	flex: 0 0 auto;
+
+	white-space: nowrap;
+	word-break: keep-all;
+}
+
+
+/* ---------------------------------------------------------
+   사용자 영역
+   --------------------------------------------------------- */
+
+.user-menu {
+	/*
+	 * 사용자 정보와 로그아웃 버튼은 압축하지 않는다.
+	 * 대신 화면이 좁아지면 아래 미디어 쿼리에서 단계적으로 숨긴다.
+	 */
+	flex: 0 0 auto;
+	min-width: max-content;
+
+	/* 기존 margin-left:auto 대신 고정 간격 사용 */
+	margin-left: 20px;
+
+	white-space: nowrap;
+}
+
+
+.user-chip,
+.user-menu form,
+.btn-logout {
+	flex: 0 0 auto;
+}
+
+
+.btn-logout {
+	white-space: nowrap;
+}
+
+
+/* =========================================================
+   1400px 이하
+   메뉴와 사용자 영역 간격 축소
+   ========================================================= */
+
+@media (max-width: 1400px) {
+
+	.header {
+		padding-left: 24px;
+		padding-right: 24px;
+	}
+
+	.header .logo {
+		margin-right: 24px;
+	}
+
+	.top-nav {
+		gap: 2px;
+	}
+
+	.nav-link {
+		gap: 5px;
+		padding-left: 10px;
+		padding-right: 10px;
+		font-size: 13px;
+	}
+
+	.nav-link .material-symbols-outlined {
+		font-size: 19px;
+	}
+
+	.user-menu {
+		gap: 12px;
+		margin-left: 12px;
+	}
+
+	/*
+	 * 직책 문구만 먼저 숨긴다.
+	 * 이름과 아바타는 그대로 유지된다.
+	 */
+	.user-chip .meta .r {
+		display: none;
+	}
+
+}
+
+
+/* =========================================================
+   1120px 이하
+   사용자 이름을 숨기고 아바타만 유지
+   ========================================================= */
+
+@media (max-width: 1120px) {
+
+	.header .logo {
+		margin-right: 16px;
+	}
+
+	.nav-link {
+		padding-left: 9px;
+		padding-right: 9px;
+	}
+
+	.user-chip {
+		gap: 0;
+	}
+
+	/*
+	 * 사용자 이름과 직책을 숨기고
+	 * 원형 아바타만 표시한다.
+	 */
+	.user-chip .meta {
+		display: none;
+	}
+
+}
+
+
+/* =========================================================
+   760px 이하
+   사용자 정보 칩을 숨기고 로그아웃은 유지
+   ========================================================= */
+
+@media (max-width: 760px) {
+
+	.header {
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+
+	.header .logo {
+		margin-right: 12px;
+		font-size: 18px;
+	}
+
+	.header .logo .material-symbols-outlined {
+		font-size: 25px;
+	}
+
+	/*
+	 * 매우 좁은 화면에서는 사용자 아바타까지 숨긴다.
+	 * 로그아웃 버튼은 계속 표시된다.
+	 */
+	.user-chip {
+		display: none;
+	}
+
+	.user-menu {
+		gap: 8px;
+		margin-left: 8px;
+	}
+
+	.btn-logout {
+		gap: 3px;
+		font-size: 12px;
+	}
+
+}
+
+
+/* =========================================================
+   520px 이하
+   로그아웃은 아이콘만 표시
+   ========================================================= */
+
+@media (max-width: 520px) {
+
+	.header .logo {
+		margin-right: 8px;
+	}
+
+	.user-menu {
+		margin-left: 6px;
+	}
+
+	/*
+	 * font-size: 0으로 로그아웃 글자만 화면에서 숨긴다.
+	 * 버튼 내부의 텍스트는 DOM에 남아 있으므로
+	 * 스크린리더 접근성은 유지된다.
+	 */
+	.btn-logout {
+		width: 36px;
+		height: 36px;
+		padding: 0;
+
+		justify-content: center;
+
+		font-size: 0;
+		line-height: 1;
+	}
+
+	.btn-logout .material-symbols-outlined {
+		font-size: 21px;
+		line-height: 1;
+	}
+
+}
