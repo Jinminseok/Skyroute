@@ -19,6 +19,8 @@
 	--mono: 'Courier New', Courier, monospace;
 }
 
+html { scrollbar-gutter: stable; }
+
 * {
 	box-sizing: border-box;
 	margin: 0;
