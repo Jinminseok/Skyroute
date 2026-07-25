@@ -33,6 +33,10 @@ public class StaffGateController {
         try {
             staffGateService.modifyGate(gateVO);
             return "success";
+        } catch (IllegalStateException e) {
+            return "in_use";
+        } catch (IllegalArgumentException e) {
+            return "duplicate";
         } catch (Exception e) {
             e.printStackTrace();
             return "fail";
@@ -45,6 +49,8 @@ public class StaffGateController {
         try {
             staffGateService.removeGate(gateId);
             return "success";
+        } catch (IllegalStateException e) {
+            return "in_use";
         } catch (Exception e) {
             e.printStackTrace();
             return "fail";

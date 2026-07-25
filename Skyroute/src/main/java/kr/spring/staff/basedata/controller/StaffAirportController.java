@@ -19,7 +19,7 @@ import kr.spring.staff.basedata.service.StaffSeatService;
 import kr.spring.staff.basedata.service.StaffGateService;
 import kr.spring.staff.basedata.vo.GateVO;
 import kr.spring.staff.basedata.vo.SeatVO;
-
+import kr.spring.admin.dao.GateAreaMapper;
 // 👉 [추가] 운항 노선 및 노선 유형(관리자) 처리를 위한 Import
 import kr.spring.admin.dao.RouteTypeMapper;
 import kr.spring.admin.vo.RouteTypeVO;
@@ -37,6 +37,9 @@ import kr.spring.staff.basedata.vo.FareVO;
 @Controller
 @RequestMapping("/staff/basedata")
 public class StaffAirportController {
+	
+	@Autowired
+	private GateAreaMapper gateAreaMapper;
 
     @Autowired
     private StaffAirportService airportService;
@@ -112,6 +115,9 @@ public class StaffAirportController {
         //10. 권역 리스트 조회 및 모델 추가
         List<Map<String, Object>> regionList = airportService.getRegionList();
         model.addAttribute("regionList", (regionList != null) ? regionList : new java.util.ArrayList<>());
+        
+        // 게이트 구역 리스트 (모달 드롭다운용)
+        model.addAttribute("gateAreaList", gateAreaMapper.selectGateAreaList());
         
         return "thviews/staff_main/basedata/base_list"; 
     }

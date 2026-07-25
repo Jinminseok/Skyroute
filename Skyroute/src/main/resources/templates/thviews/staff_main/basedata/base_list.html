@@ -250,8 +250,35 @@
 	flex-grow: 1;
 	margin: 0 10px;
 }
+.combo { position: relative; }
+.combo-list {
+    list-style: none; margin: 4px 0 0; padding: 4px;
+    position: absolute; z-index: 50; left: 0; right: 0;
+    max-height: 220px; overflow-y: auto;
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(15,23,42,0.12);
+    display: none;
+}
+.combo-list.open { display: block; }
+.combo-list li {
+    padding: 8px 10px; border-radius: 6px; cursor: pointer;
+    font-size: 14px; color: var(--text-dark);
+}
+.combo-list li:hover, .combo-list li.active { background: rgba(2,132,199,0.10); }
+.combo-list li mark { background: #FEF08A; color: inherit; padding: 0 1px; border-radius: 2px; }
+.combo-list li.empty { color: var(--text-light); cursor: default; }
+.combo-list li.empty:hover { background: transparent; }
+html.return-to-gate #tab-b-airport { display: none !important; }
+html.return-to-gate #tab-b-gate    { display: block !important; }
 </style>
 
+
+<script>
+  // 게이트 복귀 플래그를 페인트 전에 감지 (깜빡임 방지)
+  if (sessionStorage.getItem('gateReturnOnce') === '1') {
+    document.documentElement.classList.add('return-to-gate');
+  }
+</script>
 </head>
 
 <body>
@@ -714,6 +741,24 @@
 		</div>
 
 	</main>
+	
+<script>
+(function () {
+    if (sessionStorage.getItem('gateReturnOnce') !== '1') return;
+    sessionStorage.removeItem('gateReturnOnce');
+
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+
+    const gateBtn = document.querySelector('.tabs button[onclick*="\'gate\'"]');
+    if (gateBtn) gateBtn.classList.add('active');
+    const gatePage = document.getElementById('tab-b-gate');
+    if (gatePage) gatePage.classList.add('active');
+
+    // 강제 display 오버라이드 해제 (이후 다른 탭 클릭이 정상 동작하도록)
+    document.documentElement.classList.remove('return-to-gate');
+})();
+</script>
 
 	<div class="modal-overlay" id="globalModal" style="display: none;">
 		<div class="modal">
@@ -798,27 +843,29 @@
 				<form id="gateForm">
 					<input type="hidden" id="modalGateId" name="gateId">
 					<div class="form-grid">
-						<div class="field full">
-							<label>소속 공항 *</label> <select id="modalGateAirportId"
-								name="airportId" class="select" required>
-								<option value="">공항을 선택하세요</option>
-								<option th:each="airport : ${airportList}"
-									th:value="${airport.airportId}"
-									th:text="|${airport.airportName} (${airport.iataCode})|"></option>
-							</select>
-						</div>
+					<div class="field full">
+					    <label>소속 공항 *</label>
+					    <div class="combo" id="gateAirportCombo">
+					        <input type="text" id="gateAirportSearch" class="input" autocomplete="off"
+					               placeholder="공항명·IATA 검색 (미입력 시 전체 목록)"
+					               onfocus="openAirportCombo()" onkeyup="filterAirportCombo(event)"
+					               onblur="setTimeout(closeAirportCombo, 150)">
+					        <input type="hidden" id="modalGateAirportId" name="airportId">
+					        <ul id="gateAirportList" class="combo-list"></ul>
+					    </div>
+					</div>
 						<div class="field">
 							<label>게이트 코드 *</label> <input type="text" id="modalGateCode"
 								name="gateCode" class="input" placeholder="예: A1, 10B" required>
 						</div>
 						<div class="field">
-							<label>게이트 구역 (AREA) *</label> <select id="modalGateAreaId"
-								name="gateAreaId" class="select" required>
-								<option value="">구역을 선택하세요</option>
-								<option value="1">A구역</option>
-								<option value="2">B구역</option>
-								<option value="3">C구역</option>
-								<option value="4">D구역</option>
+							<label>게이트 구역 (AREA) *</label>
+							<select id="modalGateAreaId" name="gateAreaId" class="select" required>
+							    <option value="">구역을 선택하세요</option>
+							    <option th:each="area : ${gateAreaList}"
+							        th:value="${area.gateAreaId}"
+							        th:text="${area.areaName}"
+							        th:attr="data-letter=${#strings.substring(area.areaName,0,1)}"></option>
 							</select>
 						</div>
 						<div class="field full">
@@ -1068,7 +1115,9 @@
 
 
 	<div class="toast-wrap" id="toasts"></div>
-
+	<script th:inline="javascript">
+	  window.GATE_AIRPORTS = /*[[${airportList}]]*/ [];
+	</script>
 	<script>
 	// ----------------------------------------------------
 	// 0. 탭 화면 부드러운 전환 로직
@@ -1088,42 +1137,63 @@
 	        activePage.classList.add('active');
 	        
 	    }
-	    localStorage.setItem('activeTab', tabName);
 	}
 
 	// ====================================================
 	// ★ [게이트] Javascript 로직 추가 (CRUD)
 	// ====================================================
 	function openGateModal(mode, gate = null) {
-    const modal = document.getElementById('gateModal');
-    const title = document.getElementById('gateModalTitle');
-    const form = document.getElementById('gateForm');
-    
-    form.reset();
-    document.getElementById('modalGateId').value = '';
+	    const modal = document.getElementById('gateModal');
+	    const title = document.getElementById('gateModalTitle');
+	    const form = document.getElementById('gateForm');
+	
+	    form.reset();
+	    document.getElementById('modalGateId').value = '';
+	
+	    const gateCodeInput = document.getElementById('modalGateCode');
+	    const airportSearch = document.getElementById('gateAirportSearch');
+	    const airportHidden = document.getElementById('modalGateAirportId');
 
-    const airportSelect = document.getElementById('modalGateAirportId');
-    const gateCodeInput = document.getElementById('modalGateCode');
+	    captureGateAirportOptions();
+	    airportSearch.value = '';
+	    airportHidden.value = '';
+	    closeAirportCombo();
 
-    if (mode === 'register') {
-        title.innerText = '게이트 구성 등록';
-        airportSelect.disabled = false;
-        gateCodeInput.readOnly = false;
-       
-    } else if (mode === 'edit' && gate != null) {
-        title.innerText = '게이트 구성 수정';
-        document.getElementById('modalGateId').value = gate.gateId;
-        
-        airportSelect.value = gate.airportId;
-        gateCodeInput.value = gate.gateCode;
-        document.getElementById('modalGateAreaId').value = gate.gateAreaId;
-        document.getElementById('modalGateFlightType').value = gate.flightType;
+	    if (mode === 'register') {
+	        title.innerText = '게이트 구성 등록';
+	        airportSearch.disabled = false;
+	        gateCodeInput.readOnly = false;
 
-        airportSelect.disabled = true;
-        gateCodeInput.readOnly = true;
-    }
-    modal.style.display = 'flex';
-}
+	    } else if (mode === 'edit' && gate != null) {
+	        title.innerText = '게이트 구성 수정';
+	        document.getElementById('modalGateId').value = gate.gateId;
+
+	        // 소속 공항은 고정 표시 (변경 불가)
+	        const cur = gateAirportOptions.find(o => o.value === String(gate.airportId));
+	        airportHidden.value = String(gate.airportId);
+	        airportSearch.value = cur ? cur.text : '';
+	        airportSearch.disabled = true;
+
+	        gateCodeInput.value = gate.gateCode;
+	        document.getElementById('modalGateAreaId').value = gate.gateAreaId;
+	        document.getElementById('modalGateFlightType').value = gate.flightType;
+	        gateCodeInput.readOnly = false;  // 게이트 코드 수정 가능
+	    }
+	    modal.style.display = 'flex';
+	}
+	
+	function refreshGateTable() {
+	    fetch('/staff/basedata/airport/list')
+	        .then(res => res.text())
+	        .then(html => {
+	            const doc = new DOMParser().parseFromString(html, 'text/html');
+	            const fresh = doc.getElementById('baseGateTable');
+	            if (fresh) document.getElementById('baseGateTable').innerHTML = fresh.innerHTML;
+	            // 콤보박스용 공항 목록도 최신화
+	            const seed = doc.querySelector('script'); // window.GATE_AIRPORTS 재주입은 생략 가능
+	        })
+	        .catch(() => location.reload()); // 실패 시에만 전체 새로고침
+	}
 
 	function closeGateModal() {
 	    document.getElementById('gateModal').style.display = 'none';
@@ -1131,36 +1201,52 @@
 
 	function saveGateData() {
 	    const gateId = document.getElementById('modalGateId').value;
-	    
+	    const airportId = document.getElementById('modalGateAirportId').value;
+	    const gateCode = document.getElementById('modalGateCode').value.trim();
+	    const areaSelect = document.getElementById('modalGateAreaId');
+	    const areaId = parseInt(areaSelect.value);
+
+	    if (!airportId) { alert('소속 공항을 선택하세요.'); return; }
+	    if (!gateCode)  { alert('게이트 코드를 입력하세요.'); return; }
+	    if (!areaId)    { alert('게이트 구역을 선택하세요.'); return; }
+
+	    // 게이트 코드 ↔ 구역 일치 검증 (구역명 첫 글자 기준: 'D구역' → 'D')
+	    const selectedOpt = areaSelect.options[areaSelect.selectedIndex];
+	    const areaLetter = (selectedOpt.getAttribute('data-letter') || selectedOpt.text.charAt(0)).toUpperCase();
+	    const letters = gateCode.toUpperCase().replace(/[^A-Z]/g, '');
+	    if (!letters || letters.split('').some(ch => ch !== areaLetter)) {
+	        alert(`게이트 코드와 구역이 일치하지 않습니다.\n${areaLetter}구역에는 '${areaLetter}'가 포함된 코드만 등록할 수 있습니다. (예: ${areaLetter}1)`);
+	        return;
+	    }
+
 	    const requestData = {
 	        gateId: gateId ? parseInt(gateId) : null,
-	        airportId: parseInt(document.getElementById('modalGateAirportId').value),
-	        gateCode: document.getElementById('modalGateCode').value,
-	        gateAreaId: parseInt(document.getElementById('modalGateAreaId').value),
+	        airportId: parseInt(airportId),
+	        gateCode: gateCode,
+	        gateAreaId: areaId,
 	        flightType: document.getElementById('modalGateFlightType').value
 	    };
 
 	    const url = gateId ? '/staff/basedata/gate/update' : '/staff/basedata/gate/insert';
-
 	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
 	    fetch(url, {
 	        method: 'POST',
-	        headers: {
-	            'Content-Type': 'application/json',
-	            [csrfHeader]: csrfToken
-	        },
+	        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
 	        body: JSON.stringify(requestData)
 	    })
 	    .then(response => response.text())
 	    .then(result => {
-	        if (result === 'success') {
+	    	if (result === 'success') {
 	            alert('정상적으로 저장되었습니다.');
 	            closeGateModal();
-	            location.reload(); 
+	            refreshGateTable();      // 새로고침 대신 테이블만 갱신
 	        } else if (result === 'duplicate') {
 	            alert('해당 공항에 이미 등록된 게이트 코드입니다.');
+	        } else if (result === 'in_use') {
+	            console.debug(`[gate:update] 차단 - 코드 변경 불가(운항 스케줄 사용 중). gateId=${gateId}`);
+	            alert('해당 게이트를 사용하는 운항 스케줄을 먼저 정리해주세요.');
 	        } else {
 	            alert('저장에 실패했습니다. 시스템 오류를 확인해주세요.');
 	        }
@@ -1189,8 +1275,9 @@
 	        if (result === 'success') {
 	            console.log(`게이트 ID ${gateId} 사용 여부 변경 완료: ${isActiveValue}`);
 	        } else if (result === 'in_use') {
+	            console.debug(`[gate:toggle] 차단 - 게이트 ID ${gateId} 은(는) 운항 스케줄 사용 중이라 미사용(N) 불가.`);
 	            alert('해당 게이트를 사용하는 운항 스케줄을 먼저 정리해주세요.');
-	            checkbox.checked = true; 
+	            checkbox.checked = true;
 	        } else {
 	            alert('상태 변경에 실패했습니다.');
 	            checkbox.checked = !checkbox.checked; 
@@ -1461,14 +1548,17 @@
 	        headers: { [csrfHeader]: csrfToken }
 	    })
 	    .then(response => response.text())
-	    .then(result => {
-	        if (result === 'success') {
+		.then(result => {
+			if (result === 'success') {
 	            alert('삭제가 완료되었습니다.');
-	            location.reload(); 
-	        } else {
-	            alert('삭제에 실패했습니다.');
-	        }
-	    })
+	            refreshGateTable();      // 새로고침 대신 테이블만 갱신
+	        } else if (result === 'in_use') {
+		        console.debug(`[gate:delete] 차단 - 게이트 ID ${gateId} 은(는) 운항 스케줄에서 사용 중입니다.`);
+		        alert('해당 게이트를 사용하는 운항 스케줄을 먼저 정리해주세요.');
+		    } else {
+		        alert('삭제에 실패했습니다.');
+		    }
+		})
 	    .catch(error => console.error('Error:', error));
 	}
 	
@@ -1989,16 +2079,7 @@
 	            select.addEventListener('change', fetchCalculatedPrice);
 	        });
 	    }
-	    const savedTab = localStorage.getItem('activeTab');
-	    if (savedTab) {
-	        const tabButtons = document.querySelectorAll('.tabs button');
-	        tabButtons.forEach(btn => {
-	            // 버튼의 onclick 속성에 저장된 탭 이름(예: 'fare', 'route' 등)이 포함되어 있다면
-	            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${savedTab}'`)) {
-	                btn.click(); // 시스템이 해당 탭 버튼을 자동으로 클릭하게 만듭니다.
-	            }
-	        });
-	    }
+
 	});
 
 	function fetchCalculatedPrice() {
@@ -2029,6 +2110,84 @@
 	        priceInput.value = "";
 	        priceInput.placeholder = "항목을 모두 선택하면 자동 계산됩니다.";
 	    }
+	}
+	
+	let gateAirportOptions = [];
+	let comboActiveIndex = -1;
+
+	function captureGateAirportOptions() {
+	    if (gateAirportOptions.length === 0 && Array.isArray(window.GATE_AIRPORTS)) {
+	        gateAirportOptions = window.GATE_AIRPORTS.map(a => ({
+	            value: String(a.airportId),
+	            text: `${a.airportName} (${a.iataCode})`
+	        }));
+	    }
+	}
+
+	function escapeHtml(s) {
+	    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+	}
+	function highlightMatch(text, q) {
+	    if (!q) return escapeHtml(text);
+	    const i = text.toUpperCase().indexOf(q.toUpperCase());
+	    if (i < 0) return escapeHtml(text);
+	    return escapeHtml(text.slice(0, i))
+	        + '<mark>' + escapeHtml(text.slice(i, i + q.length)) + '</mark>'
+	        + escapeHtml(text.slice(i + q.length));
+	}
+
+	function renderAirportCombo(q) {
+	    const list = document.getElementById('gateAirportList');
+	    const query = (q || '').trim();
+	    const matches = gateAirportOptions.filter(o => o.text.toUpperCase().includes(query.toUpperCase()));
+	    comboActiveIndex = -1;
+	    if (matches.length === 0) {
+	        list.innerHTML = '<li class="empty">검색 결과가 없습니다.</li>';
+	    } else {
+	        list.innerHTML = matches.map(o =>
+	            `<li data-value="${o.value}" onmousedown="selectAirportCombo('${o.value}')">${highlightMatch(o.text, query)}</li>`
+	        ).join('');
+	    }
+	    list.classList.add('open');
+	}
+
+	function openAirportCombo() {
+	    const search = document.getElementById('gateAirportSearch');
+	    if (search.disabled) return;                 // 수정 모드에선 열지 않음
+	    renderAirportCombo(search.value);
+	}
+
+	function filterAirportCombo(e) {
+	    if (['ArrowDown', 'ArrowUp', 'Enter'].includes(e.key)) { navigateCombo(e); return; }
+	    renderAirportCombo(document.getElementById('gateAirportSearch').value);
+	    document.getElementById('modalGateAirportId').value = ''; // 타이핑 중엔 선택 해제
+	}
+
+	function selectAirportCombo(value) {
+	    const opt = gateAirportOptions.find(o => o.value === String(value));
+	    if (!opt) return;
+	    document.getElementById('modalGateAirportId').value = opt.value;
+	    document.getElementById('gateAirportSearch').value = opt.text;
+	    closeAirportCombo();
+	}
+
+	function closeAirportCombo() {
+	    const list = document.getElementById('gateAirportList');
+	    if (list) list.classList.remove('open');
+	}
+
+	function navigateCombo(e) {
+	    const items = Array.from(document.querySelectorAll('#gateAirportList li[data-value]'));
+	    if (items.length === 0) return;
+	    if (e.key === 'ArrowDown') { comboActiveIndex = Math.min(comboActiveIndex + 1, items.length - 1); e.preventDefault(); }
+	    else if (e.key === 'ArrowUp') { comboActiveIndex = Math.max(comboActiveIndex - 1, 0); e.preventDefault(); }
+	    else if (e.key === 'Enter') {
+	        e.preventDefault();
+	        if (comboActiveIndex >= 0) selectAirportCombo(items[comboActiveIndex].dataset.value);
+	        return;
+	    }
+	    items.forEach((it, i) => it.classList.toggle('active', i === comboActiveIndex));
+	    if (items[comboActiveIndex]) items[comboActiveIndex].scrollIntoView({ block: 'nearest' });
 	}
 	</script>
 

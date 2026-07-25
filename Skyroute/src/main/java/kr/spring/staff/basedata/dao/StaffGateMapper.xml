@@ -60,20 +60,21 @@
     </select>
 
     <!-- 게이트 수정 -->
-    <update id="updateGate" parameterType="kr.spring.staff.basedata.vo.GateVO">
-        UPDATE GATE
-        SET GATE_AREA_ID = #{gateAreaId},
-            FLIGHT_TYPE = #{flightType}
-        WHERE GATE_ID = #{gateId}
-    </update>
+	<update id="updateGate" parameterType="kr.spring.staff.basedata.vo.GateVO">
+	    UPDATE GATE
+	    SET GATE_CODE = #{gateCode},
+	        GATE_AREA_ID = #{gateAreaId},
+	        FLIGHT_TYPE = #{flightType}
+	    WHERE GATE_ID = #{gateId}
+	</update>
 
     <!-- 스케줄 사용 여부 확인 -->
-    <select id="checkGateUsedInSchedule" resultType="int">
-        SELECT COUNT(*)
-        FROM FLIGHT_SCHEDULE 
-        WHERE (DEPARTURE_GATE_ID = #{gateId} OR ARRIVAL_GATE_ID = #{gateId})
-          AND IS_DELETED = 'N'
-    </select>
+	<select id="checkGateUsedInSchedule" resultType="int">
+	    SELECT COUNT(*)
+	    FROM FLIGHT
+	    WHERE (DEPARTURE_GATE_ID = #{gateId} OR ARRIVAL_GATE_ID = #{gateId})
+	      AND IS_DELETED = 'N'
+	</select>
 
     <!-- 게이트 사용여부 변경 -->
     <update id="updateGateStatus">
