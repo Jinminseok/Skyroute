@@ -19,5 +19,6 @@ public interface StaffAirportService {
     public List<AirportVO> getActiveAirportList();
 
     public AirportVO getActiveAirport(int airportId);
+    public int countAirportUsage(int airportId);
     
 }

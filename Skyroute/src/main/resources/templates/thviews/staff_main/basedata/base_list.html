@@ -325,6 +325,12 @@
 					<span class="material-symbols-outlined" style="font-size: 18px">add</span>
 					공항 등록
 				</button>
+				<div style="margin-left: 15px;">
+				    <input type="text" id="airportSearchInput"
+				        onkeyup="filterTable('airportSearchInput', 'baseAirportTable')"
+				        class="input" placeholder="공항 검색 (공항명, IATA 코드 등)..."
+				        style="width: 250px; padding: 6px 12px; font-size: 14px;">
+				</div>
 				<div class="grow"></div>
 				<span class="badge badge-scheduled"> AIRPORT </span>
 			</div>
@@ -1297,14 +1303,17 @@
 	        headers: { [csrfHeader]: csrfToken }
 	    })
 	    .then(response => response.text())
-	    .then(result => {
-	        if (result === 'success') {
-	            alert('삭제가 완료되었습니다.');
-	            location.reload(); 
-	        } else {
-	            alert('삭제에 실패했습니다.');
-	        }
-	    })
+		.then(result => {
+		    if (result === 'success') {
+		        alert('삭제가 완료되었습니다.');
+		        location.reload();
+		    } else if (result === 'in_use') {
+		        console.debug(`[airport:delete] 차단 - 공항 ID ${airportId} 은(는) 노선/운항 스케줄에서 사용 중입니다.`);
+		        alert('해당 공항을 사용하는 노선/운항 스케줄을 먼저 정리해주세요.');
+		    } else {
+		        alert('삭제에 실패했습니다.');
+		    }
+		})
 	    .catch(error => console.error('Error:', error));
 	}
 
@@ -1322,14 +1331,18 @@
 	        body: JSON.stringify({ airportId: airportId, isActive: isActiveValue })
 	    })
 	    .then(response => response.text())
-	    .then(result => {
-	        if (result === 'success') {
-	            console.log(`공항 ID ${airportId} 사용 여부 변경 완료: ${isActiveValue}`);
-	        } else {
-	            alert('상태 변경에 실패했습니다.');
-	            checkbox.checked = !checkbox.checked;
-	        }
-	    })
+		.then(result => {
+		    if (result === 'success') {
+		        console.log(`공항 ID ${airportId} 사용 여부 변경 완료: ${isActiveValue}`);
+		    } else if (result === 'in_use') {
+		        console.debug(`[airport:toggle] 차단 - 공항 ID ${airportId} 은(는) 노선/운항 스케줄에서 사용 중이라 미사용(N) 처리 불가.`);
+		        alert('해당 공항을 사용하는 노선/운항 스케줄을 먼저 정리해주세요.');
+		        checkbox.checked = !checkbox.checked; // 토글 원복
+		    } else {
+		        alert('상태 변경에 실패했습니다.');
+		        checkbox.checked = !checkbox.checked;
+		    }
+		})
 	    .catch(error => {
 	        console.error('Error:', error);
 	        alert('서버와 통신 중 오류가 발생했습니다.');

@@ -71,4 +71,8 @@ public class StaffAirportServiceImpl implements StaffAirportService{
 		return airportMapper.selectActiveAirport(airportId);
 	}
 
+	@Override
+	public int countAirportUsage(int airportId) {
+	    return airportMapper.countAirportUsage(airportId);
+	}
 }

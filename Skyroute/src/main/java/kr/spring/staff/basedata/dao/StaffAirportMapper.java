@@ -34,4 +34,6 @@ public interface StaffAirportMapper {
 		public List<Map<String,Object>> selectRegionList();
 		
 		public int checkDuplicateAirport(AirportVO airportVO);
+		
+		public int countAirportUsage(int airportId);
 }

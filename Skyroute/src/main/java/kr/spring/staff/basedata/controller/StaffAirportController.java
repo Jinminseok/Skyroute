@@ -161,8 +161,15 @@ public class StaffAirportController {
     @ResponseBody
     public String deleteAirport(@RequestParam("airportId") int airportId) {
         try {
+            // 노선/운항 스케줄에서 사용 중이면 삭제 차단
+            if (airportService.countAirportUsage(airportId) > 0) {
+                return "in_use";
+            }
             airportService.removeAirport(airportId);
             return "success";
+        } catch (DataIntegrityViolationException e) {
+            // 혹시 남은 FK 참조로 삭제 실패한 경우도 사용 중으로 처리
+            return "in_use";
         } catch (Exception e) {
             e.printStackTrace();
             return "fail";
@@ -174,6 +181,11 @@ public class StaffAirportController {
     @ResponseBody
     public String toggleAirport(@RequestBody AirportVO airportVO) {
         try {
+            // 미사용(N) 처리 시, 사용 중이면 차단
+            if ("N".equals(airportVO.getIsActive())
+                    && airportService.countAirportUsage(airportVO.getAirportId()) > 0) {
+                return "in_use";
+            }
             airportService.toggleAirportActive(airportVO);
             return "success";
         } catch (Exception e) {

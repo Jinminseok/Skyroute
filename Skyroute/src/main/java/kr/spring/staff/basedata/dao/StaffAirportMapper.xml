@@ -127,6 +127,13 @@
       AND airport_id != #{airportId}
     </if>
 </select>
+
+	<select id="countAirportUsage" parameterType="int" resultType="int">
+	    SELECT COUNT(*)
+	    FROM ROUTE
+	    WHERE departure_airport_id = #{airportId}
+	       OR arrival_airport_id = #{airportId}
+	</select>
 </mapper>
 
 
