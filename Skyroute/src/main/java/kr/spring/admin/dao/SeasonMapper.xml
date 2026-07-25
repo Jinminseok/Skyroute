@@ -44,7 +44,7 @@
 			season_name = #{seasonName},
 			start_date = TO_DATE(#{startDate}, 'YYYY-MM-DD'),
 			end_date = TO_DATE(#{endDate}, 'YYYY-MM-DD'),
-			season_ratio = #{seasonRatio}, is_active = #{isActive}
+			season_ratio = #{seasonRatio}
 		WHERE season_id = #{seasonId}
 	</update>
 

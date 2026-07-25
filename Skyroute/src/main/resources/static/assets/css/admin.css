@@ -40,7 +40,6 @@ html {
 
 body {
 	background: var(--gradient-bg);
-	background-attachment: fixed;
 	color: var(--text-dark);
 	font-family: 'Noto Sans KR', sans-serif;
 	font-size: 13.5px;
@@ -83,13 +82,22 @@ h1 {
 }
 
 .card {
-	background: var(--bg-white);
-	backdrop-filter: blur(8px);
-	border-radius: 12px;
-	padding: 24px;
-	box-shadow: var(--shadow-sm);
+	/*
+	 * 실시간 backdrop blur 대신
+	 * 조금 더 불투명한 흰색을 사용
+	 */
+	background: rgba(255, 255, 255, 0.94);
+
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+
 	border: 1px solid var(--border);
+	border-radius: 12px;
+
 	margin-bottom: 20px;
+	padding: 24px;
+
+	box-shadow: var(--shadow-sm);
 }
 
 .toolbar {
@@ -267,25 +275,47 @@ h1 {
 	justify-content: center;
 }
 
-/* 전체 리스트 모달창 */
 .modal-content-large {
-	width: 850px; 
-	max-height: 85vh; 
-	background: #fff;
-	padding: 30px;
-	border-radius: 12px;
-	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+	width: 850px;
+	max-width: calc(100vw - 48px);
+
+	max-height: 85vh;
+	max-height: 85dvh;
+
 	display: flex;
-	flex-direction: column; /* 내부 요소 세로 정렬 */
+	flex-direction: column;
+
+	overflow: hidden;
+
+	padding: 30px;
+
+	background: #FFFFFF;
+	border-radius: 12px;
+
+	box-shadow:
+		0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 /* 수정 전용 작은 모달창 */
 .modal-content-small {
 	width: 420px;
-	background: #fff;
+	max-width: calc(100vw - 48px);
+
+	max-height: calc(100vh - 48px);
+	max-height: calc(100dvh - 48px);
+
+	overflow-y: auto;
+	overscroll-behavior: contain;
+
 	padding: 24px;
+
+	background: #FFFFFF;
 	border-radius: 12px;
-	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+
+	box-shadow:
+		0 10px 25px rgba(0, 0, 0, 0.15);
+
+	-webkit-overflow-scrolling: touch;
 }
 
 /* 모달 내부 폼 스타일 */
@@ -346,14 +376,109 @@ h1 {
 
 /* --- 모달창 내부 스크롤 테이블 전용 --- */
 .scrollable-wrap {
+	flex-grow: 1;
+
 	max-height: 400px;
+
+	overflow-x: auto;
 	overflow-y: auto;
-	flex-grow: 1; /* 모달창 크기에 맞춰 테이블 영역이 꽉 차도록 확장 */
+
+	/*
+	 * 모달 테이블의 끝까지 스크롤했을 때
+	 * 뒤쪽 페이지까지 이어서 스크롤되는 현상 방지
+	 */
+	overscroll-behavior: contain;
+
+	/*
+	 * 스크롤바가 생기거나 없어져도
+	 * 테이블 너비가 움직이지 않도록 공간 확보
+	 */
+	scrollbar-gutter: stable;
+
+	/*
+	 * 모바일·터치패드 관성 스크롤 보완
+	 */
+	-webkit-overflow-scrolling: touch;
 }
 
 .scrollable-wrap .data th {
-	position: sticky; /* 스크롤 내려도 제목줄 고정 */
+	position: sticky;
 	top: 0;
 	z-index: 10;
-	background: #F5F5F4; 
+	background: #F5F5F4;
+}
+
+
+/* 항공기 수정·삭제 버튼 정렬 */
+.aircraft-action-group {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+
+/* 일반 읽기 전용 입력칸 */
+.form-input[readonly] {
+	color: #64748B;
+	background: #F8FAFC;
+	cursor: not-allowed;
+}
+
+
+/*
+ * 항공기 등록번호 수정 불가 입력칸
+ * 반투명 회색 배경 + 실선 테두리
+ */
+.form-input.aircraft-reg-readonly,
+.form-input.aircraft-reg-readonly:hover,
+.form-input.aircraft-reg-readonly:focus {
+	color: #64748B !important;
+
+	/* 밝고 투명한 회색 배경 */
+	background-color: rgba(148, 163, 184, 0.22) !important;
+	background-image: none !important;
+
+	/* 점선이 아닌 실선 */
+	border: 1px solid #CBD5E1 !important;
+
+	font-weight: 600;
+
+	cursor: not-allowed !important;
+	caret-color: transparent;
+
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+
+/* 항공기 토글 요청 처리 중 */
+.aircraft-toggle:disabled {
+	opacity: 0.55;
+	cursor: wait;
+}
+
+
+/* 항공기 수정 모달 운영 상태 안내 */
+.aircraft-edit-note {
+	margin: -6px 0 18px;
+	padding: 10px 12px;
+
+	color: #64748B;
+	background: #F8FAFC;
+
+	border: 1px solid #E2E8F0;
+	border-radius: 8px;
+
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+/*
+ * 모달이 열려 있을 때 뒤쪽 관리자 페이지 스크롤 차단
+ */
+html.modal-open,
+body.modal-open {
+	overflow: hidden !important;
+	overscroll-behavior: none;
 }

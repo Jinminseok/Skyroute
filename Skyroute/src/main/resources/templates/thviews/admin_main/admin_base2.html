@@ -14,7 +14,21 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
 
 <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/ko.js"></script>
 
+<style>
+  .flatpickr-calendar { border:1px solid var(--border); box-shadow:var(--shadow-sm); border-radius:12px; font-family:'Noto Sans KR',sans-serif; }
+  .flatpickr-day.selected, .flatpickr-day.selected:hover { background:#0D9488; border-color:#0D9488; }
+  .flatpickr-day:hover { background:rgba(13,148,136,0.12); }
+  .flatpickr-day.today { border-color:#0D9488; }
+  .flatpickr-months .flatpickr-month, span.flatpickr-weekday { color:var(--text-gray); }
+  .flatpickr-current-month input.cur-year, .flatpickr-monthDropdown-months { color:var(--text-dark); }
+  .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover { color:var(--text-light); text-decoration:line-through; }
+  /* flatpickr 날짜 입력을 일반 입력칸과 동일하게 (회색 readonly 무효화) */
+  .form-input.flatpickr-input[readonly] {color: var(--text-dark); background: #fff; cursor: pointer;}
+</style>
 </head>
 <body>
 
@@ -47,10 +61,21 @@
                     </span>
                   </td>
                   <td>
-                    <div class="toggle" 
-                         th:classappend="${aircraft.is_active == 'Y'} ? 'on' : ''"
-                         th:attr="onclick=|toggleAircraftActiveStatus(this, ${aircraft.aircraft_id}, '${aircraft.is_active}')|">
-                    </div>
+					<button type="button"
+					        class="toggle aircraft-toggle"
+					        role="switch"
+					
+					        th:classappend="${aircraft.is_active == 'Y'} ? ' on' : ''"
+					
+					        th:data-aircraft-id="${aircraft.aircraft_id}"
+					        th:data-status="${aircraft.is_active}"
+					
+					        th:attr="
+					            aria-checked=${aircraft.is_active == 'Y'},
+					            aria-label=|${aircraft.reg_no} 사용 여부 변경|"
+					
+					        onclick="toggleAircraftActiveStatus(this)">
+					</button>
                   </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(aircraftList)}">
@@ -77,6 +102,7 @@
                   <td th:text="${season.seasonRatio}"></td>
                   <td>
                     <div class="toggle" 
+                    	 th:id="'dash-season-toggle-' + ${season.seasonId}"
                          th:classappend="${season.isActive == 'Y'} ? 'on' : ''"
                          th:attr="onclick=|toggleSeasonActiveStatus(this, ${season.seasonId}, '${season.isActive}')|">
                     </div>
@@ -153,76 +179,399 @@
       </div>
     </div>
   </main>
-
-  <div id="aircraftModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content-large">
-            <div class="modal-header">
-                <h2 class="modal-title">보유 항공기 통합 관리</h2>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="closeAircraftModal()">닫기 ✕</button>
-            </div>
-            
-            <div style="background:#fff7ed; color:#c2410c; padding:12px; border-radius:6px; font-size:13px; margin-bottom:16px; font-weight:500;">
-                <span class="material-symbols-outlined" style="font-size:16px; vertical-align:-3px;">info</span>
-                신규 기재 등록 시 상태는 '운항가능', 사용여부는 'Y'로 부여됩니다. 매일의 비행 상태 통제는 지상직(STAFF)이 관리합니다.
-            </div>
-
-            <form th:action="@{/admin/aircraft/insert}" method="post" style="display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; align-items: flex-end;">
-                <div style="flex: 1;">
-                    <label class="input-label" style="font-size:12px; margin-bottom:5px; color:#64748b;">등록기호 (예: HL1234)</label>
-                    <input type="text" name="reg_no" class="form-input" required style="margin-bottom:0;">
-                </div>
-                <div style="flex: 1.5;">
-                    <label class="input-label" style="font-size:12px; margin-bottom:5px; color:#64748b;">모델명 (예: Boeing 777-300ER)</label>
-                    <input type="text" name="model_name" class="form-input" required style="margin-bottom:0;">
-                </div>
-                <div style="flex: 1;">
-                    <label class="input-label" style="font-size:12px; margin-bottom:5px; color:#64748b;">총 좌석 수</label>
-                    <input type="number" name="total_seats" class="form-input" min="1" required style="margin-bottom:0;">
-                </div>
-                <button type="submit" class="btn btn-primary" style="white-space: nowrap; height: 42px;">기재 등록</button>
-            </form>
-
-            <div class="table-wrap scrollable-wrap">
-                <table class="data">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>등록번호</th>
-                            <th>모델명</th>
-                            <th>총 좌석</th>
-                            <th>현재 상태 (STAFF 관리)</th>
-                            <th>사용 여부</th>
-                            <th>관리</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="aircraft : ${aircraftList}">
-                            <td th:text="${aircraft.aircraft_id}"></td>
-                            <td th:text="${aircraft.reg_no}" style="font-weight:600; color:#0f172a;"></td>
-                            <td th:text="${aircraft.model_name}"></td>
-                            <td th:text="${aircraft.total_seats}"></td>
-                            <td>
-                                <span th:text="${aircraft.status_name}" 
-                                      th:style="${aircraft.status_name == '정비중'} ? 'color:#ef4444; font-weight:600;' : 'color:#10b981;'">
-                                </span>
-                            </td>
-                            <td th:id="'modal-aircraft-status-' + ${aircraft.aircraft_id}" th:text="${aircraft.is_active == 'Y' ? '사용 (Y)' : '비활성 (N)'}"></td>
-                            <td style="display: flex; gap: 5px;">
-                                <button type="button" class="btn btn-ghost btn-sm" style="color: #ef4444; border-color: #fca5a5;"
-                                    th:attr="onclick=|if(confirm('이 기재를 정말 삭제하시겠습니까? (연결된 스케줄이 있으면 실패합니다)')) location.href='/admin/aircraft/delete?aircraftId=${aircraft.aircraft_id}'|">
-                                    제원 삭제
-                                </button>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(aircraftList)}">
-                          <td colspan="7" style="text-align: center; padding: 30px;">등록된 항공기가 없습니다.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
+	<!-- ==========================================
+	     보유 항공기 전체 관리 모달
+	=========================================== -->
+	<div id="aircraftModal"
+	     class="modal-overlay"
+	     style="display:none;">
+	
+	    <div class="modal-content-large">
+	
+	        <div class="modal-header">
+	
+	            <h2 class="modal-title">
+	                보유 항공기 통합 관리
+	            </h2>
+	
+	            <button type="button"
+	                    class="btn btn-ghost btn-sm"
+	                    onclick="closeAircraftModal()">
+	                닫기 ✕
+	            </button>
+	
+	        </div>
+	
+	
+	        <div style="
+	            background:#fff7ed;
+	            color:#c2410c;
+	            padding:12px;
+	            border-radius:6px;
+	            font-size:13px;
+	            margin-bottom:16px;
+	            font-weight:500;
+	        ">
+	
+	            <span class="material-symbols-outlined"
+	                  style="
+	                      font-size:16px;
+	                      vertical-align:-3px;
+	                  ">
+	                info
+	            </span>
+	
+	            신규 기재는 운항가능·사용 상태로 등록됩니다.
+	            운영 상태는 지상직이 관리하며,
+	            관리자는 제원과 사용 여부를 관리합니다.
+	
+	        </div>
+	
+	
+	        <!-- 항공기 등록 -->
+	        <form th:action="@{/admin/aircraft/insert}"
+	              method="post"
+	              style="
+	                  display:flex;
+	                  gap:10px;
+	                  margin-bottom:20px;
+	                  padding:15px;
+	                  background:#f8fafc;
+	                  border-radius:8px;
+	                  align-items:flex-end;
+	              ">
+	
+	            <div style="flex:1;">
+	
+	                <label class="input-label"
+	                       style="
+	                           font-size:12px;
+	                           margin-bottom:5px;
+	                           color:#64748b;
+	                       ">
+	                    등록기호
+	                </label>
+	
+	                <input type="text"
+	                       name="reg_no"
+	                       class="form-input"
+	                       placeholder="예: HL1234"
+	                       required
+	                       style="margin-bottom:0;">
+	
+	            </div>
+	
+	
+	            <div style="flex:1.5;">
+	
+	                <label class="input-label"
+	                       style="
+	                           font-size:12px;
+	                           margin-bottom:5px;
+	                           color:#64748b;
+	                       ">
+	                    모델명
+	                </label>
+	
+	                <input type="text"
+	                       name="model_name"
+	                       class="form-input"
+	                       placeholder="예: Boeing 777-300ER"
+	                       required
+	                       style="margin-bottom:0;">
+	
+	            </div>
+	
+	
+	            <div style="flex:1;">
+	
+	                <label class="input-label"
+	                       style="
+	                           font-size:12px;
+	                           margin-bottom:5px;
+	                           color:#64748b;
+	                       ">
+	                    총 좌석 수
+	                </label>
+	
+	                <input type="number"
+	                       name="total_seats"
+	                       class="form-input"
+	                       min="1"
+	                       required
+	                       style="margin-bottom:0;">
+	
+	            </div>
+	
+	
+	            <button type="submit"
+	                    class="btn btn-primary"
+	                    style="
+	                        white-space:nowrap;
+	                        height:42px;
+	                    ">
+	                기재 등록
+	            </button>
+	
+	        </form>
+	
+	
+	        <!-- 항공기 목록 -->
+	        <div class="table-wrap scrollable-wrap">
+	
+	            <table class="data">
+	
+	                <thead>
+	                    <tr>
+	                        <th>ID</th>
+	                        <th>등록번호</th>
+	                        <th>모델명</th>
+	                        <th>총 좌석</th>
+	                        <th>현재 상태</th>
+	                        <th>사용 여부</th>
+	                        <th>관리</th>
+	                    </tr>
+	                </thead>
+	
+	
+	                <tbody>
+	
+	                    <tr th:each="aircraft : ${aircraftList}">
+	
+	                        <td th:text="${aircraft.aircraft_id}">
+	                        </td>
+	
+	
+	                        <td th:text="${aircraft.reg_no}"
+	                            style="
+	                                font-weight:600;
+	                                color:#0f172a;
+	                            ">
+	                        </td>
+	
+	
+	                        <td th:text="${aircraft.model_name}">
+	                        </td>
+	
+	
+	                        <td th:text="${aircraft.total_seats}">
+	                        </td>
+	
+	
+	                        <td>
+	
+	                            <span th:text="${aircraft.status_name}"
+	                                  th:style="${aircraft.status_name == '정비중'}
+	                                      ? 'color:#ef4444; font-weight:600;'
+	                                      : 'color:#10b981; font-weight:600;'">
+	                            </span>
+	
+	                        </td>
+	
+	
+	                        <!-- 사용 여부 토글 -->
+	                        <td>
+	
+	                            <div class="status-toggle-wrap">
+	
+	                                <button type="button"
+	                                        class="toggle aircraft-toggle"
+	                                        role="switch"
+	
+	                                        th:classappend="${aircraft.is_active == 'Y'}
+	                                            ? ' on'
+	                                            : ''"
+	
+	                                        th:data-aircraft-id="${aircraft.aircraft_id}"
+	                                        th:data-status="${aircraft.is_active}"
+	
+	                                        th:attr="
+	                                            aria-checked=${aircraft.is_active == 'Y'},
+	                                            aria-label=|${aircraft.reg_no} 사용 여부 변경|"
+	
+	                                        onclick="toggleAircraftActiveStatus(this)">
+	                                </button>
+	
+	
+	                                <span class="status-text"
+	
+	                                      th:classappend="${aircraft.is_active == 'Y'}
+	                                          ? ' active'
+	                                          : ' inactive'"
+	
+	                                      th:data-aircraft-status-id="${aircraft.aircraft_id}"
+	
+	                                      th:text="${aircraft.is_active == 'Y'}
+	                                          ? '사용'
+	                                          : '미사용'">
+	                                </span>
+	
+	                            </div>
+	
+	                        </td>
+	
+	
+	                        <!-- 수정·삭제 -->
+	                        <td>
+	
+	                            <div class="aircraft-action-group">
+	
+	                                <button type="button"
+	                                        class="btn btn-ghost btn-sm"
+	
+	                                        th:data-aircraft-id="${aircraft.aircraft_id}"
+	                                        th:data-reg-no="${aircraft.reg_no}"
+	                                        th:data-model-name="${aircraft.model_name}"
+	                                        th:data-total-seats="${aircraft.total_seats}"
+	
+	                                        onclick="openEditAircraftModal(this)">
+	                                    수정
+	                                </button>
+	
+	
+	                                <button type="button"
+	                                        class="btn btn-ghost btn-sm"
+	
+	                                        style="
+	                                            color:#ef4444;
+	                                            border-color:#fca5a5;
+	                                        "
+	
+	                                        th:data-aircraft-id="${aircraft.aircraft_id}"
+	                                        th:data-reg-no="${aircraft.reg_no}"
+	
+	                                        onclick="
+	                                            deleteAircraft(
+	                                                this.dataset.aircraftId,
+	                                                this.dataset.regNo
+	                                            )
+	                                        ">
+	                                    삭제
+	                                </button>
+	
+	                            </div>
+	
+	                        </td>
+	
+	                    </tr>
+	
+	
+	                    <tr th:if="${#lists.isEmpty(aircraftList)}">
+	
+	                        <td colspan="7"
+	                            style="
+	                                text-align:center;
+	                                padding:30px;
+	                            ">
+	                            등록된 항공기가 없습니다.
+	                        </td>
+	
+	                    </tr>
+	
+	                </tbody>
+	
+	            </table>
+	
+	        </div>
+	
+	    </div>
+	
+	</div>
+	
+	
+	<!-- ==========================================
+	     항공기 제원 수정 모달
+	=========================================== -->
+	<div id="editAircraftModal"
+	     class="modal-overlay"
+	     style="display:none;">
+	
+	    <div class="modal-content-small">
+	
+	        <div class="modal-header">
+	
+	            <h2 class="modal-title">
+	                항공기 제원 수정
+	            </h2>
+	
+	            <button type="button"
+	                    class="close-btn"
+	                    onclick="closeEditAircraftModal()">
+	                ✕
+	            </button>
+	
+	        </div>
+	
+	
+	        <form id="editAircraftForm"
+	              onsubmit="updateAircraft(event)">
+	
+	            <input type="hidden"
+	                   id="editAircraftId"
+	                   name="aircraft_id">
+	
+	
+				<label for="editAircraftRegNo"
+				       class="input-label">
+				    등록번호
+				</label>
+				
+				<input type="text"
+				       id="editAircraftRegNo"
+				       class="form-input aircraft-reg-readonly"
+				       readonly
+				       aria-readonly="true"
+				       tabindex="-1">
+	
+	
+	            <label for="editAircraftModelName"
+	                   class="input-label">
+	                모델명
+	            </label>
+	
+	            <input type="text"
+	                   id="editAircraftModelName"
+	                   name="model_name"
+	                   class="form-input"
+	                   required>
+	
+	
+	            <label for="editAircraftTotalSeats"
+	                   class="input-label">
+	                총 좌석 수
+	            </label>
+	
+	            <input type="number"
+	                   id="editAircraftTotalSeats"
+	                   name="total_seats"
+	                   class="form-input"
+	                   min="1"
+	                   required>0
+	
+	            <div class="modal-footer">
+	
+	                <button type="button"
+	                        class="btn btn-ghost"
+	                        onclick="closeEditAircraftModal()">
+	                    취소
+	                </button>
+	
+	                <button type="submit"
+	                        id="editAircraftSaveButton"
+	                        class="btn btn-primary">
+	                    저장
+	                </button>
+	
+	            </div>
+	
+	        </form>
+	
+	    </div>
+	
+	</div>
+<script th:inline="javascript">
+  window.SEASON_RANGES = /*[[${seasonList}]]*/ [];
+</script>
   <div id="seasonModal" class="modal-overlay" style="display: none;">
 		<div class="modal-content-large">
 			<div class="modal-header">
@@ -230,7 +579,7 @@
 				<button type="button" class="btn btn-ghost btn-sm" onclick="closeSeasonModal()">닫기 ✕</button>
 			</div>
 
-			<form th:action="@{/admin/season/insert}" method="post" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px;">
+			<form id="seasonInsertForm" th:action="@{/admin/season/insert}" method="post" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px;" onsubmit="return validateSeasonForm(this)">
 				<div style="display: flex; gap: 10px;">
 					<input type="text" name="seasonName" class="form-input" placeholder="시즌명 입력 (예: 2026 하계 성수기)" required style="flex: 2; margin-bottom: 0;">
 					<input type="date" name="startDate" class="form-input" required style="flex: 1; margin-bottom: 0;">
@@ -258,7 +607,13 @@
 							<td th:text="${season.seasonName}"></td>
 							<td th:text="|${season.startDate} ~ ${season.endDate}|"></td>
                             <td th:text="${season.seasonRatio}"></td>
-							<td th:id="'modal-season-status-' + ${season.seasonId}" th:text="${season.isActive == 'Y' ? '사용 (Y)' : '미사용 (N)'}"></td>
+							<td>
+							  <div class="toggle"
+							       th:id="'modal-season-toggle-' + ${season.seasonId}"
+							       th:classappend="${season.isActive == 'Y'} ? 'on' : ''"
+							       th:attr="onclick=|toggleSeasonActiveStatus(this, ${season.seasonId}, '${season.isActive}')|">
+							  </div>
+							</td>
 							<td style="display: flex; gap: 5px;">
 								<button type="button" class="btn btn-ghost btn-sm"
 									th:id="'modal-season-edit-btn-' + ${season.seasonId}"
@@ -287,7 +642,8 @@
 				<h2 class="modal-title">운임 시즌 정보 수정</h2>
 				<button type="button" class="close-btn" onclick="closeEditSeasonModal()">✕</button>
 			</div>
-			<form th:action="@{/admin/season/update}" method="post">
+			<form id="seasonEditForm" th:action="@{/admin/season/update}" method="post"
+			        onsubmit="return validateSeasonForm(this, document.getElementById('editSeasonId').value)">
 				<input type="hidden" id="editSeasonId" name="seasonId"> 
 				
 				<label for="editSeasonName" class="input-label">시즌명</label> 
@@ -301,12 +657,6 @@
 
                 <label for="editSeasonRatio" class="input-label">운임 비율</label> 
 				<input type="number" step="0.01" id="editSeasonRatio" name="seasonRatio" class="form-input" required> 
-
-				<label for="editSeasonIsActive" class="input-label">사용 여부</label> 
-				<select id="editSeasonIsActive" name="isActive" class="form-input">
-					<option value="Y">사용 (Y)</option>
-					<option value="N">미사용 (N)</option>
-				</select>
 				
 				<div class="modal-footer">
 					<button type="button" class="btn btn-ghost" onclick="closeEditSeasonModal()">취소</button>
@@ -419,67 +769,653 @@
 	</div>
 
 <script>
-	    // ====== 기재(항공기) 모달 제어 함수 ======
-	    function openAircraftModal() { document.getElementById('aircraftModal').style.display = 'flex'; }
-        function closeAircraftModal() { document.getElementById('aircraftModal').style.display = 'none'; }
-        
-        // ====== 항공기 비동기 상태 변경(토글) 함수 ======
-        function toggleAircraftActiveStatus(element, aircraftId, currentStatus) {
-            const newStatus = (currentStatus === 'Y') ? 'N' : 'Y';
-            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-            const formData = new URLSearchParams();
-            
-            formData.append("aircraft_id", aircraftId);
-            formData.append("is_active", newStatus);
 
-            fetch('/admin/aircraft/toggleStatus', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    [csrfHeader]: csrfToken
-                },
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) throw new Error("네트워크 응답 오류");
-                return response.text();
-            })
-            .then(result => {
-                if (result === "success") {
-                    if (newStatus === 'Y') element.classList.add('on');
-                    else element.classList.remove('on');
-                    
-                    element.setAttribute("onclick", `toggleAircraftActiveStatus(this, ${aircraftId}, '${newStatus}')`);
-
-                    const modalStatusTd = document.getElementById('modal-aircraft-status-' + aircraftId);
-                    if (modalStatusTd) modalStatusTd.innerText = (newStatus === 'Y') ? '사용 (Y)' : '비활성 (N)';
-                } else {
-                    alert("상태 변경 처리에 실패했습니다.");
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("통신 중 오류가 발생했습니다.");
-            });
-        }
-        
+		/*
+		 * 현재 열려 있는 모달이 있는지 확인하여
+		 * 뒤쪽 페이지 스크롤을 잠그거나 해제합니다.
+		 */
+		function syncAdminModalScrollLock() {
+			const modals = document.querySelectorAll('.modal-overlay');
+		
+			const hasOpenModal = Array.from(modals).some(modal => {
+				return window.getComputedStyle(modal).display !== 'none';
+			});
+		
+			document.documentElement.classList.toggle(
+				'modal-open',
+				hasOpenModal
+			);
+		
+			document.body.classList.toggle(
+				'modal-open',
+				hasOpenModal
+			);
+		}
+		
+		
+		/*
+		 * 관리자 공통 모달 열기
+		 */
+		function openAdminModal(modalId) {
+			const modal = document.getElementById(modalId);
+		
+			if (!modal) {
+				console.error('모달을 찾을 수 없습니다:', modalId);
+				return;
+			}
+		
+			modal.style.display = 'flex';
+		
+			syncAdminModalScrollLock();
+		}
+		
+		
+		/*
+		 * 관리자 공통 모달 닫기
+		 */
+		function closeAdminModal(modalId) {
+			const modal = document.getElementById(modalId);
+		
+			if (!modal) {
+				console.error('모달을 찾을 수 없습니다:', modalId);
+				return;
+			}
+		
+			modal.style.display = 'none';
+		
+			/*
+			 * 브라우저가 display 변경을 반영한 뒤
+			 * 열려 있는 다른 모달을 다시 확인
+			 */
+			window.requestAnimationFrame(
+				syncAdminModalScrollLock
+			);
+		}
+		//==========================================
+		//항공기 공통 AJAX 요청
+		//==========================================
+		async function postAircraftRequest(url, params) {
+		
+		 const csrfTokenMeta =
+		     document.querySelector('meta[name="_csrf"]');
+		
+		 const csrfHeaderMeta =
+		     document.querySelector(
+		         'meta[name="_csrf_header"]'
+		     );
+		
+		 const headers = {
+		     'Content-Type':
+		         'application/x-www-form-urlencoded;charset=UTF-8'
+		 };
+		
+		 if (csrfTokenMeta && csrfHeaderMeta) {
+		     headers[csrfHeaderMeta.content] =
+		         csrfTokenMeta.content;
+		 }
+		
+		 const response = await fetch(url, {
+		     method: 'POST',
+		     headers: headers,
+		     credentials: 'same-origin',
+		     body: params.toString()
+		 });
+		
+		 if (!response.ok) {
+		     throw new Error(
+		         `HTTP 오류: ${response.status}`
+		     );
+		 }
+		
+		 return (await response.text()).trim();
+		}
+		
+		
+		//==========================================
+		//항공기 전체 관리 모달
+		//==========================================
+		function openAircraftModal() {
+			openAdminModal('aircraftModal');
+		}
+		
+		function closeAircraftModal() {
+			closeAdminModal('aircraftModal');
+		}
+		
+		
+		//==========================================
+		//항공기 수정 모달
+		//==========================================
+		function openEditAircraftModal(button) {
+		
+		 document.getElementById(
+		     'editAircraftId'
+		 ).value = button.dataset.aircraftId;
+		
+		 document.getElementById(
+		     'editAircraftRegNo'
+		 ).value = button.dataset.regNo;
+		
+		 document.getElementById(
+		     'editAircraftModelName'
+		 ).value = button.dataset.modelName;
+		
+		 document.getElementById(
+		     'editAircraftTotalSeats'
+		 ).value = button.dataset.totalSeats;
+		
+		 openAdminModal('editAircraftModal');
+		}
+		
+		
+		function closeEditAircraftModal() {
+			closeAdminModal('editAircraftModal');
+		}
+		
+		
+		//==========================================
+		//동일 항공기 토글 UI 동기화
+		//==========================================
+		function renderAircraftStatus(
+		     aircraftId,
+		     status) {
+		
+		 const isActive = status === 'Y';
+		
+		 /*
+		  * 상단 요약 표와 전체 관리 모달의
+		  * 동일 항공기 토글을 모두 변경
+		  */
+		 const toggles =
+		     document.querySelectorAll(
+		         `.aircraft-toggle[data-aircraft-id="${aircraftId}"]`
+		     );
+		
+		 toggles.forEach(toggle => {
+		
+		     toggle.classList.toggle(
+		         'on',
+		         isActive
+		     );
+		
+		     toggle.dataset.status = status;
+		
+		     toggle.setAttribute(
+		         'aria-checked',
+		         isActive ? 'true' : 'false'
+		     );
+		 });
+		
+		
+		 /*
+		  * 모달의 사용·미사용 문구 변경
+		  */
+		 const labels =
+		     document.querySelectorAll(
+		         `[data-aircraft-status-id="${aircraftId}"]`
+		     );
+		
+		 labels.forEach(label => {
+		
+		     label.textContent =
+		         isActive ? '사용' : '미사용';
+		
+		     label.classList.toggle(
+		         'active',
+		         isActive
+		     );
+		
+		     label.classList.toggle(
+		         'inactive',
+		         !isActive
+		     );
+		 });
+		}
+		
+		
+		//==========================================
+		//동일 항공기 토글 요청 중 잠금
+		//==========================================
+		function setAircraftToggleBusy(
+		     aircraftId,
+		     busy) {
+		
+		 const toggles =
+		     document.querySelectorAll(
+		         `.aircraft-toggle[data-aircraft-id="${aircraftId}"]`
+		     );
+		
+		 toggles.forEach(toggle => {
+		     toggle.disabled = busy;
+		 });
+		}
+		
+		
+		//==========================================
+		//항공기 사용 여부 직접 변경
+		//==========================================
+		async function toggleAircraftActiveStatus(
+		     element) {
+		
+		 const aircraftId =
+		     element.dataset.aircraftId;
+		
+		 const currentStatus =
+		     element.dataset.status;
+		
+		 const newStatus =
+		     currentStatus === 'Y'
+		         ? 'N'
+		         : 'Y';
+		
+		
+		 if (
+		     newStatus === 'N'
+		     && !window.confirm(
+		         '이 항공기를 미사용 상태로 변경하시겠습니까?'
+		     )
+		 ) {
+		     return;
+		 }
+		
+		
+		 const params = new URLSearchParams();
+		
+		 params.append(
+		     'aircraft_id',
+		     aircraftId
+		 );
+		
+		 params.append(
+		     'is_active',
+		     newStatus
+		 );
+		
+		
+		 setAircraftToggleBusy(
+		     aircraftId,
+		     true
+		 );
+		
+		
+		 try {
+		
+		     const result =
+		         await postAircraftRequest(
+		             '/admin/aircraft/toggleStatus',
+		             params
+		         );
+		
+		
+		     if (result === 'success') {
+		
+		         renderAircraftStatus(
+		             aircraftId,
+		             newStatus
+		         );
+		
+		         return;
+		     }
+		
+		
+		     if (result === 'in-use') {
+		
+		         alert(
+		             '진행 중이거나 예정된 운항 스케줄이 있습니다.\n'
+		             + '해당 항공기의 운항 스케줄을 먼저 정리해주세요.'
+		         );
+		
+		         return;
+		     }
+		
+		
+		     if (result === 'not-found') {
+		
+		         alert(
+		             '변경할 항공기 정보를 찾을 수 없습니다.'
+		         );
+		
+		         return;
+		     }
+		
+		
+		     if (result === 'invalid') {
+		
+		         alert(
+		             '올바르지 않은 상태 변경 요청입니다.'
+		         );
+		
+		         return;
+		     }
+		
+		
+		     alert(
+		         '항공기 사용 여부 변경에 실패했습니다.'
+		     );
+		
+		 } catch (error) {
+		
+		     console.error(
+		         '항공기 사용 여부 변경 오류:',
+		         error
+		     );
+		
+		     alert(
+		         '통신 중 오류가 발생했습니다.'
+		     );
+		
+		 } finally {
+		
+		     setAircraftToggleBusy(
+		         aircraftId,
+		         false
+		     );
+		 }
+		}
+		
+		
+		//==========================================
+		//항공기 제원 수정
+		//==========================================
+		async function updateAircraft(event) {
+		
+		 event.preventDefault();
+		
+		
+		 const aircraftId =
+		     document.getElementById(
+		         'editAircraftId'
+		     ).value;
+		
+		 const modelName =
+		     document.getElementById(
+		         'editAircraftModelName'
+		     ).value.trim();
+		
+		 const totalSeats =
+		     Number(
+		         document.getElementById(
+		             'editAircraftTotalSeats'
+		         ).value
+		     );
+		
+		
+		 if (!modelName) {
+		
+		     alert(
+		         '모델명을 입력해주세요.'
+		     );
+		
+		     return;
+		 }
+		
+		
+		 if (
+		     !Number.isInteger(totalSeats)
+		     || totalSeats < 1
+		 ) {
+		
+		     alert(
+		         '총 좌석 수는 1 이상의 정수로 입력해주세요.'
+		     );
+		
+		     return;
+		 }
+		
+		
+		 const params = new URLSearchParams();
+		
+		 params.append(
+		     'aircraft_id',
+		     aircraftId
+		 );
+		
+		 params.append(
+		     'model_name',
+		     modelName
+		 );
+		
+		 params.append(
+		     'total_seats',
+		     totalSeats
+		 );
+		
+		
+		 const saveButton =
+		     document.getElementById(
+		         'editAircraftSaveButton'
+		     );
+		
+		 saveButton.disabled = true;
+		
+		
+		 try {
+		
+		     const result =
+		         await postAircraftRequest(
+		             '/admin/aircraft/update',
+		             params
+		         );
+		
+		
+		     if (result === 'success') {
+		
+		         alert(
+		             '항공기 제원이 수정되었습니다.'
+		         );
+		
+		         window.location.reload();
+		
+		         return;
+		     }
+		
+		
+		     if (
+		         result.startsWith(
+		             'seat-count-mismatch:'
+		         )
+		     ) {
+		
+		         const registeredSeatCount =
+		             result.split(':')[1];
+		
+		         alert(
+		             '이미 등록된 좌석 수와 총 좌석 수가 일치하지 않습니다.\n'
+		             + `현재 등록된 좌석 수: ${registeredSeatCount}석`
+		         );
+		
+		         return;
+		     }
+		
+		
+		     if (result === 'not-found') {
+		
+		         alert(
+		             '수정할 항공기 정보를 찾을 수 없습니다.'
+		         );
+		
+		         return;
+		     }
+		
+		
+		     if (result === 'invalid') {
+		
+		         alert(
+		             '항공기 수정 입력값을 확인해주세요.'
+		         );
+		
+		         return;
+		     }
+		
+		
+		     alert(
+		         '항공기 수정 처리에 실패했습니다.'
+		     );
+		
+		 } catch (error) {
+		
+		     console.error(
+		         '항공기 수정 오류:',
+		         error
+		     );
+		
+		     alert(
+		         '통신 중 오류가 발생했습니다.'
+		     );
+		
+		 } finally {
+		
+		     saveButton.disabled = false;
+		 }
+		}
+		
+		
+		//==========================================
+		//항공기 삭제
+		//==========================================
+		async function deleteAircraft(
+		     aircraftId,
+		     regNo) {
+		
+		 const confirmed =
+		     window.confirm(
+		         `${regNo} 항공기를 삭제하시겠습니까?\n`
+		         + '삭제된 데이터는 복구할 수 없습니다.'
+		     );
+		
+		 if (!confirmed) {
+		     return;
+		 }
+		
+		
+		 const params = new URLSearchParams();
+		
+		 params.append(
+		     'aircraft_id',
+		     aircraftId
+		 );
+		
+		
+		 try {
+		
+		     const result =
+		         await postAircraftRequest(
+		             '/admin/aircraft/delete',
+		             params
+		         );
+		
+		
+		     if (result === 'success') {
+		
+		         alert(
+		             '항공기 정보가 삭제되었습니다.'
+		         );
+		
+		         window.location.reload();
+		
+		         return;
+		     }
+		
+		
+		     if (result === 'flight-in-use') {
+		
+		         alert(
+		             '이 항공기를 참조하는 운항 스케줄이 있어 삭제할 수 없습니다.\n'
+		             + '운항 이력이 있는 항공기는 삭제하지 말고 사용 여부를 미사용으로 관리해주세요.'
+		         );
+		
+		         return;
+		     }
+		
+		
+		     if (result === 'seat-in-use') {
+		
+		         alert(
+		             '이 항공기에 등록된 좌석이 있어 삭제할 수 없습니다.\n'
+		             + '등록 좌석을 먼저 정리해주세요.'
+		         );
+		
+		         return;
+		     }
+		
+		
+		     if (result === 'in-use') {
+		
+		         alert(
+		             '다른 데이터에서 사용 중인 항공기이므로 삭제할 수 없습니다.'
+		         );
+		
+		         return;
+		     }
+		
+		
+		     if (result === 'not-found') {
+		
+		         alert(
+		             '삭제할 항공기 정보를 찾을 수 없습니다.'
+		         );
+		
+		         return;
+		     }
+		
+		
+		     if (result === 'invalid') {
+		
+		         alert(
+		             '올바르지 않은 삭제 요청입니다.'
+		         );
+		
+		         return;
+		     }
+		
+		
+		     alert(
+		         '항공기 삭제 처리에 실패했습니다.'
+		     );
+		
+		 } catch (error) {
+		
+		     console.error(
+		         '항공기 삭제 오류:',
+		         error
+		     );
+		
+		     alert(
+		         '통신 중 오류가 발생했습니다.'
+		     );
+		 }
+		}
 		// ====== 운임 시즌 모달 제어 함수 ======
-		function openSeasonModal() { document.getElementById('seasonModal').style.display = 'flex'; }
-		function closeSeasonModal() { document.getElementById('seasonModal').style.display = 'none'; }
+		function openSeasonModal() {
+			openAdminModal('seasonModal');
+		}
+		
+		function closeSeasonModal() {
+			closeAdminModal('seasonModal');
+		}
 		
         // 인자에 ratio 추가
 		function openEditSeasonModal(id, name, start, end, ratio, isActive) {
-			document.getElementById('editSeasonId').value = id;
-			document.getElementById('editSeasonName').value = name;
-			document.getElementById('editStartDate').value = start;
-			document.getElementById('editEndDate').value = end;
-            // 수정 모달에 ratio 값 세팅
-            document.getElementById('editSeasonRatio').value = ratio;
-			document.getElementById('editSeasonIsActive').value = isActive;
-			document.getElementById('editSeasonModal').style.display = 'flex';
+		    document.getElementById('editSeasonId').value = id;
+		    document.getElementById('editSeasonName').value = name;
+		    document.getElementById('editSeasonRatio').value = ratio;
+		
+		    // 수정 중인 시즌 자신은 제외하고, 나머지 등록 구간만 취소선(비활성) 처리
+		    const ranges = (window.SEASON_RANGES || [])
+		        .filter(s => String(s.seasonId) !== String(id))
+		        .map(s => ({ from: s.startDate, to: s.endDate }));
+		
+		    window.editStartFp.set('disable', ranges);
+		    window.editEndFp.set('disable', ranges);
+		    window.editStartFp.setDate(start, false);   // 캘린더가 해당 월로 열리도록 setDate 사용
+		    window.editEndFp.setDate(end, false);
+		
+		    document.getElementById('editSeasonModal').style.display = 'flex';
 		}
-		function closeEditSeasonModal() { document.getElementById('editSeasonModal').style.display = 'none'; }
+        
+		function closeEditSeasonModal() {
+			closeAdminModal('editSeasonModal');
+		}
 
 		// ====== 운임 시즌 비동기 상태 변경(토글) 함수 ======
 		function toggleSeasonActiveStatus(element, seasonId, currentStatus) {
@@ -505,29 +1441,32 @@
 			})
 			.then(result => {
 				if (result === "success") {
-					// 메인 화면 UI 토글 클래스 변경
-					if (newStatus === 'Y') element.classList.add('on');
-					else element.classList.remove('on');
-					
-					// 메인 화면 함수 인자 업데이트
-					element.setAttribute("onclick", `toggleSeasonActiveStatus(this, ${seasonId}, '${newStatus}')`);
+				    const isOn = (newStatus === 'Y');
 
-					// 관리 대형 모달 내 내부 텍스트 노드 상태 실시간 업데이트
-					const modalStatusTd = document.getElementById('modal-season-status-' + seasonId);
-					if (modalStatusTd) modalStatusTd.innerText = (newStatus === 'Y') ? '사용 (Y)' : '미사용 (N)';
+				    // 클릭한 토글 즉시 반영
+				    element.classList.toggle('on', isOn);
+				    element.setAttribute("onclick", `toggleSeasonActiveStatus(this, ${seasonId}, '${newStatus}')`);
 
-					// 관리 대형 모달 내 수정 버튼 바인딩 파라미터 갱신
-					const modalEditBtn = document.getElementById('modal-season-edit-btn-' + seasonId);
-					if (modalEditBtn) {
-						const name = modalEditBtn.getAttribute('data-name');
-						const start = modalEditBtn.getAttribute('data-start');
-						const end = modalEditBtn.getAttribute('data-end');
-                        // ratio 데이터 함께 처리하도록 갱신
-                        const ratio = modalEditBtn.getAttribute('data-ratio');
-						modalEditBtn.setAttribute('onclick', `openEditSeasonModal('${seasonId}', '${name}', '${start}', '${end}', '${ratio}', '${newStatus}')`);
-					}
+				    // 대시보드 / 모달 양쪽 토글 상태 동기화
+				    ['dash-season-toggle-' + seasonId, 'modal-season-toggle-' + seasonId].forEach(function (id) {
+				        const t = document.getElementById(id);
+				        if (t && t !== element) {
+				            t.classList.toggle('on', isOn);
+				            t.setAttribute("onclick", `toggleSeasonActiveStatus(this, ${seasonId}, '${newStatus}')`);
+				        }
+				    });
+
+				    // 수정 버튼 파라미터 갱신
+				    const modalEditBtn = document.getElementById('modal-season-edit-btn-' + seasonId);
+				    if (modalEditBtn) {
+				        const name  = modalEditBtn.getAttribute('data-name');
+				        const start = modalEditBtn.getAttribute('data-start');
+				        const end   = modalEditBtn.getAttribute('data-end');
+				        const ratio = modalEditBtn.getAttribute('data-ratio');
+				        modalEditBtn.setAttribute('onclick', `openEditSeasonModal('${seasonId}', '${name}', '${start}', '${end}', '${ratio}', '${newStatus}')`);
+				    }
 				} else {
-					alert("상태 변경 처리에 실패했습니다.");
+				    alert("상태 변경 처리에 실패했습니다.");
 				}
 			})
 			.catch(error => {
@@ -648,6 +1587,45 @@
 
 				alert('통신 중 오류가 발생했습니다.');
 			});
+		}
+		
+		document.addEventListener('DOMContentLoaded', function () {
+		    const disabledRanges = (window.SEASON_RANGES || []).map(s => ({ from: s.startDate, to: s.endDate }));
+		    const baseOpts = { dateFormat: "Y-m-d", locale: "ko", disableMobile: true };
+
+		    // 신규 등록: 기존 시즌 구간은 달력에서 선택 불가
+		    flatpickr("#seasonInsertForm input[name='startDate']", { ...baseOpts, disable: disabledRanges });
+		    flatpickr("#seasonInsertForm input[name='endDate']",   { ...baseOpts, disable: disabledRanges });
+
+		    // 수정: 자기 자신 구간까지 막으면 저장 불가 → disable 미적용
+		    window.editStartFp = flatpickr("#editStartDate", baseOpts);
+		    window.editEndFp   = flatpickr("#editEndDate", baseOpts);
+		});
+		
+		function validateSeasonForm(form, excludeId) {
+		    const start = form.querySelector("[name='startDate']").value;
+		    const end   = form.querySelector("[name='endDate']").value;
+		    const ratio = parseFloat(form.querySelector("[name='seasonRatio']").value);
+
+		    // (3) 시작일 > 종료일 → alert (500 방지)
+		    if (start && end && start > end) {
+		        alert("시즌 시작일은 종료일보다 늦을 수 없습니다.");
+		        return false;
+		    }
+		    // (5) 음수 비율 차단
+		    if (isNaN(ratio) || ratio < 0) {
+		        alert("운임 비율은 0 이상으로 입력해야 합니다.");
+		        return false;
+		    }
+		    // (4) 기간 중복 차단  (구간 겹침: start <= 기존종료 && 기존시작 <= end)
+		    for (const s of (window.SEASON_RANGES || [])) {
+		        if (excludeId && String(s.seasonId) === String(excludeId)) continue; // 수정 중인 시즌 자신은 제외
+		        if (start <= s.endDate && s.startDate <= end) {
+		            alert(`이미 등록된 시즌(${s.seasonName}: ${s.startDate} ~ ${s.endDate})과 기간이 겹칩니다.`);
+		            return false;
+		        }
+		    }
+		    return true;
 		}
 	</script>
 

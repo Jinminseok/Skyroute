@@ -1,77 +1,205 @@
-<?xml version="1.0" encoding="UTF-8" ?>  
-<!DOCTYPE mapper   
-    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">    
+<?xml version="1.0" encoding="UTF-8"?>
 
-<mapper namespace="kr.spring.admin.dao.AirCraftMapper"> 
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-    <insert id="insertAircraft" parameterType="kr.spring.admin.vo.AirCraftVO">
-        INSERT INTO aircraft (
-            reg_no, 
-            model_name, 
-            total_seats
-        ) VALUES (
-            #{reg_no}, 
-            #{model_name}, 
-            #{total_seats}
+<mapper namespace="kr.spring.admin.dao.AirCraftMapper">
+
+    <!-- 항공기 등록 -->
+    <insert id="insertAircraft"
+            parameterType="kr.spring.admin.vo.AirCraftVO">
+
+        INSERT INTO AIRCRAFT (
+            reg_no,
+            model_name,
+            total_seats,
+            status_name,
+            is_active
         )
+        VALUES (
+            #{reg_no},
+            #{model_name},
+            #{total_seats},
+            '운항가능',
+            'Y'
+        )
+
     </insert>
-    
-    <select id="selectListAircraft" resultType="kr.spring.admin.vo.AirCraftVO">
-        SELECT * FROM aircraft 
+
+
+    <!-- 항공기 전체 목록 -->
+    <select id="selectListAircraft"
+            resultType="kr.spring.admin.vo.AirCraftVO">
+
+        SELECT
+            aircraft_id,
+            reg_no,
+            model_name,
+            total_seats,
+            status_name,
+            is_active
+        FROM AIRCRAFT
         ORDER BY aircraft_id DESC
+
     </select>
-    
-    <update id="updateAircraftStatus">
-        UPDATE aircraft 
-        SET is_active = #{is_active} 
+
+
+    <!-- 항공기 단건 조회 -->
+    <select id="selectAircraft"
+            resultType="kr.spring.admin.vo.AirCraftVO">
+
+        SELECT
+            aircraft_id,
+            reg_no,
+            model_name,
+            total_seats,
+            status_name,
+            is_active
+        FROM AIRCRAFT
         WHERE aircraft_id = #{aircraft_id}
+
+    </select>
+
+
+    <!--
+        항공기 제원 수정
+
+        등록번호는 식별값이므로 수정하지 않습니다.
+        운영 상태와 사용 여부도 별도 기능에서 변경합니다.
+    -->
+    <update id="updateAircraft"
+            parameterType="kr.spring.admin.vo.AirCraftVO">
+
+        UPDATE AIRCRAFT
+        SET
+            model_name = #{model_name},
+            total_seats = #{total_seats}
+        WHERE aircraft_id = #{aircraft_id}
+
     </update>
 
 
-	<select id="selectActiveAircraftList"
-		resultType="kr.spring.admin.vo.AirCraftVO">
-		SELECT
-			aircraft_id,
-			reg_no,
-			model_name,
-			total_seats,
-			status_name,
-			is_active
-		FROM AIRCRAFT
-		WHERE is_active = 'Y'
-		ORDER BY model_name ASC, reg_no ASC
-	</select>
-	
-	<select id="selectActiveAircraft"
-		resultType="kr.spring.admin.vo.AirCraftVO">
-		SELECT
-			aircraft_id,
-			reg_no,
-			model_name,
-			total_seats,
-			status_name,
-			is_active
-		FROM AIRCRAFT
-		WHERE aircraft_id = #{aircraft_id}
-		  AND is_active = 'Y'
-	</select>
-	
-	<select id="selectSeatClassCountList"
-		resultType="kr.spring.admin.vo.AirCraftSeatClassVO">
-		SELECT
-			SC.seat_class_id,
-			SC.class_name,
-			COUNT(S.seat_id) AS seat_count
-		FROM SEAT S
-		JOIN SEAT_CLASS SC
-			ON S.seat_class_id = SC.seat_class_id
-		WHERE S.aircraft_id = #{aircraft_id}
-		  AND S.is_active = 'Y'
-		GROUP BY
-			SC.seat_class_id,
-			SC.class_name,
-			SC.sort_order
-		ORDER BY SC.sort_order ASC
-	</select>
+    <!-- 항공기 사용 여부 변경 -->
+    <update id="updateAircraftStatus">
+
+        UPDATE AIRCRAFT
+        SET is_active = #{is_active}
+        WHERE aircraft_id = #{aircraft_id}
+
+    </update>
+
+
+    <!-- 항공기 물리 삭제 -->
+    <delete id="deleteAircraft">
+
+        DELETE FROM AIRCRAFT
+        WHERE aircraft_id = #{aircraft_id}
+
+    </delete>
+
+
+    <!-- 항공기에 등록된 전체 좌석 수 -->
+    <select id="countSeatsByAircraftId"
+            resultType="int">
+
+        SELECT COUNT(*)
+        FROM SEAT
+        WHERE aircraft_id = #{aircraft_id}
+
+    </select>
+
+
+    <!-- 항공기를 참조하는 전체 운항 스케줄 수 -->
+    <select id="countFlightsByAircraftId"
+            resultType="int">
+
+        SELECT COUNT(*)
+        FROM FLIGHT
+        WHERE aircraft_id = #{aircraft_id}
+
+    </select>
+
+
+    <!--
+        진행 중이거나 예정된 운항 스케줄 수
+
+        삭제 처리된 스케줄은 제외합니다.
+        결항·도착·완료 스케줄도 비활성화 제한 대상에서 제외합니다.
+    -->
+    <select id="countFutureOrRunningFlightsByAircraftId"
+            resultType="int">
+
+        SELECT COUNT(*)
+        FROM FLIGHT
+        WHERE aircraft_id = #{aircraft_id}
+          AND is_deleted = 'N'
+          AND arrival_time > SYSTIMESTAMP
+          AND flight_status IN (
+              'SCHEDULED',
+              'BOARDING',
+              'DEPARTED',
+              'DELAYED'
+          )
+
+    </select>
+
+
+    <!-- 사용 중인 항공기 목록 -->
+    <select id="selectActiveAircraftList"
+            resultType="kr.spring.admin.vo.AirCraftVO">
+
+        SELECT
+            aircraft_id,
+            reg_no,
+            model_name,
+            total_seats,
+            status_name,
+            is_active
+        FROM AIRCRAFT
+        WHERE is_active = 'Y'
+        ORDER BY model_name ASC, reg_no ASC
+
+    </select>
+
+
+    <!-- 사용 중인 항공기 단건 -->
+    <select id="selectActiveAircraft"
+            resultType="kr.spring.admin.vo.AirCraftVO">
+
+        SELECT
+            aircraft_id,
+            reg_no,
+            model_name,
+            total_seats,
+            status_name,
+            is_active
+        FROM AIRCRAFT
+        WHERE aircraft_id = #{aircraft_id}
+          AND is_active = 'Y'
+
+    </select>
+
+
+    <!-- 항공기 좌석 등급별 사용 좌석 수 -->
+    <select id="selectSeatClassCountList"
+            resultType="kr.spring.admin.vo.AirCraftSeatClassVO">
+
+        SELECT
+            SC.seat_class_id,
+            SC.class_name,
+            COUNT(S.seat_id) AS seat_count
+        FROM SEAT S
+        JOIN SEAT_CLASS SC
+          ON S.seat_class_id = SC.seat_class_id
+        WHERE S.aircraft_id = #{aircraft_id}
+          AND S.is_active = 'Y'
+        GROUP BY
+            SC.seat_class_id,
+            SC.class_name,
+            SC.sort_order
+        ORDER BY SC.sort_order ASC
+
+    </select>
+
 </mapper>

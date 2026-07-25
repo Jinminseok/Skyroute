@@ -5,6 +5,7 @@ import java.util.Map; // 추가: Map import
 import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -321,27 +322,129 @@ public class AdminController {
 		}
 	}
 	
-	// ====== 항공기 처리 ======
+	// ==========================================
+	// 항공기 처리
+	// ==========================================
+
 	@PostMapping("/admin/aircraft/insert")
-	public String insertAircraft(AirCraftVO airCraftVO) {
-		log.debug("<<항공기 등록 시도>> : " + airCraftVO);
-		airCraftService.insertAircraft(airCraftVO);
-		return "redirect:/admin/base2";
+	public String insertAircraft(
+	        AirCraftVO airCraftVO) {
+
+	    log.debug(
+	        "항공기 등록 요청: {}",
+	        airCraftVO
+	    );
+
+	    airCraftService.insertAircraft(
+	        airCraftVO
+	    );
+
+	    return "redirect:/admin/base2";
 	}
-	
-	// ====== 항공기 사용여부 토글 비동기 처리 ======
-	@PostMapping("/admin/aircraft/toggleStatus")
+
+
+	/*
+	 * 항공기 제원 수정
+	 *
+	 * AJAX 요청이므로 처리 결과 문자열만 반환합니다.
+	 */
+	@PostMapping("/admin/aircraft/update")
 	@ResponseBody
-	public String toggleAircraftStatus(@RequestParam("aircraft_id") int aircraft_id, @RequestParam("is_active") String is_active) {
+	public String updateAircraft(
+	        AirCraftVO airCraftVO) {
+
 	    try {
-	        airCraftService.updateAircraftStatus(aircraft_id, is_active);
-	        return "success";
+
+	        return airCraftService
+	                .updateAircraft(airCraftVO);
+
 	    } catch (Exception e) {
-	        log.error("항공기 상태 토글 중 오류 발생", e);
+
+	        log.error(
+	            "항공기 수정 중 오류 발생. aircraftId={}",
+	            airCraftVO.getAircraft_id(),
+	            e
+	        );
+
 	        return "error";
 	    }
 	}
-	
+
+
+	/*
+	 * 항공기 사용 여부 토글
+	 */
+	@PostMapping("/admin/aircraft/toggleStatus")
+	@ResponseBody
+	public String toggleAircraftStatus(
+	        @RequestParam("aircraft_id")
+	        int aircraftId,
+
+	        @RequestParam("is_active")
+	        String isActive) {
+
+	    try {
+
+	        return airCraftService
+	                .updateAircraftStatus(
+	                    aircraftId,
+	                    isActive
+	                );
+
+	    } catch (Exception e) {
+
+	        log.error(
+	            "항공기 사용 여부 변경 중 오류 발생. aircraftId={}",
+	            aircraftId,
+	            e
+	        );
+
+	        return "error";
+	    }
+	}
+
+
+	/*
+	 * 항공기 삭제
+	 *
+	 * GET이 아니라 POST로 처리합니다.
+	 */
+	@PostMapping("/admin/aircraft/delete")
+	@ResponseBody
+	public String deleteAircraft(
+	        @RequestParam("aircraft_id")
+	        int aircraftId) {
+
+	    try {
+
+	        return airCraftService
+	                .deleteAircraft(aircraftId);
+
+	    } catch (DataIntegrityViolationException e) {
+
+	        /*
+	         * 검증 직후 다른 데이터가 등록되는 경쟁 상황 등으로
+	         * FK 오류가 발생한 경우의 최종 방어입니다.
+	         */
+	        log.warn(
+	            "참조 데이터가 있는 항공기 삭제 시도. aircraftId={}",
+	            aircraftId,
+	            e
+	        );
+
+	        return "in-use";
+
+	    } catch (Exception e) {
+
+	        log.error(
+	            "항공기 삭제 중 오류 발생. aircraftId={}",
+	            aircraftId,
+	            e
+	        );
+
+	        return "error";
+	    }
+	}
 	// ====== 시즌 처리 로직 ======
 	@PostMapping("/admin/season/insert")
 	public String insertSeason(SeasonVO seasonVO) {
