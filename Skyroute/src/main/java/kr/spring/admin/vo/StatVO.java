@@ -15,4 +15,5 @@ public class StatVO {
 	//노선 
 	private String routeName; // 노선명
 	private long routeRevenue; //해당 노선 매출액
+	private long routeBookings; // 해당 노선 예약 건수
 }

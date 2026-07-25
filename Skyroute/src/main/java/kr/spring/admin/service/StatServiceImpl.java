@@ -26,10 +26,12 @@ public class StatServiceImpl implements StatService {
         // Mapper의 메서드명과 정확히 일치하도록 수정 (selectTotalBooking)
         long totalBookings = statMapper.selectTotalBooking(statVO);
         List<StatVO> routeRevenues = statMapper.selectRevenueByRoute(statVO);
+        List<StatVO> routeBookings = statMapper.selectBookingByRoute(statVO);
         
         resultMap.put("totalRevenue", totalRevenue);
         resultMap.put("totalBookings", totalBookings);
         resultMap.put("routeRevenues", routeRevenues);
+        resultMap.put("routeBookings", routeBookings);
         
         return resultMap;
     }

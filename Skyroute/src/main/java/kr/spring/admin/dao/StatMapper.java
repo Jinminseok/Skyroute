@@ -16,5 +16,8 @@ public interface StatMapper {
 	
     // 노선별 매출
     List<StatVO> selectRevenueByRoute(StatVO statVO);
+    
+    // 노선별 예약 건수
+    List<StatVO> selectBookingByRoute(StatVO statVO);
 	
 }
