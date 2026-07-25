@@ -158,166 +158,118 @@
 		</div>
 
 		<!-- 회원 상세 및 수정 모달 -->
-		<div id="memberModal"
-			style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
-			<div
-				style="background: #fff; padding: 24px; border-radius: 12px; width: 400px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-				<h3
-					style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 12px;">회원
-					상세 정보</h3>
-
-				<form th:action="@{/admin/member/update}" method="post">
-					<input type="hidden" name="member_id" id="modal_member_id">
-
-					<div style="margin-bottom: 12px;">
-						<strong>아이디:</strong> <span id="modal_id"></span>
-					</div>
-					<div style="margin-bottom: 12px;">
-						<strong>이름:</strong> <span id="modal_name"></span>
-					</div>
-					<div style="margin-bottom: 12px;">
-						<strong>이메일:</strong> <span id="modal_email"></span>
-					</div>
-					<div style="margin-bottom: 12px;">
-						<strong>연락처:</strong> <span id="modal_phone"></span>
-					</div>
-
-					<hr style="border: 0; border-top: 1px solid #eee; margin: 16px 0;">
-
-					<!-- 권한(ROLE) 수정 폼 -->
-					<div style="margin-bottom: 12px;">
-						<label
-							style="display: block; font-weight: bold; margin-bottom: 4px;">권한
-							(Role)</label> <select name="role" id="modal_role"
-							style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-							<option value="USER">일반 회원 (USER)</option>
-							<option value="STAFF">지상직 (STAFF)</option>
-							<option value="ADMIN">총괄 관리자 (ADMIN)</option>
-						</select>
-					</div>
-
-					<!-- 상태(STATUS) 수정 폼 -->
-					<div style="margin-bottom: 12px;">
-						<label
-							style="display: block; font-weight: bold; margin-bottom: 4px;">계정
-							상태 (Status)</label> <select name="status" id="modal_status"
-							style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-							<option value="ACTIVE">정상 (ACTIVE)</option>
-							<option value="SUSPENDED">정지 (SUSPENDED)</option>
-							<option value="INACTIVE">휴면 (INACTIVE)</option>
-							<option value="DELETED">탈퇴 (DELETED)</option>
-						</select>
-					</div>
-
-					<!-- 정지 사유 입력 폼 -->
-					<div style="margin-bottom: 20px;">
-						<label
-							style="display: block; font-weight: bold; margin-bottom: 4px;">정지
-							사유 (선택)</label> <input type="text" name="suspend_reason"
-							id="modal_suspend_reason"
-							style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-							placeholder="계정 정지 시 사유 입력">
-					</div>
-
-					<div style="display: flex; justify-content: flex-end; gap: 8px;">
-						<button type="button" onclick="closeMemberModal()"
-							style="padding: 8px 16px; border: 1px solid #ccc; background: #fff; border-radius: 6px; cursor: pointer;">취소</button>
-						<button type="submit"
-							style="padding: 8px 16px; border: none; background: var(--primary, #0D9488); color: #fff; border-radius: 6px; font-weight: bold; cursor: pointer;">저장하기</button>
-					</div>
-				</form>
-			</div>
+		<div id="memberModal" class="modal-overlay">
+		    <div class="modal-content-small">
+		        <div class="modal-header">
+		            <h3 class="modal-title">회원 상세 정보</h3>
+		            <button type="button" class="close-btn" onclick="closeMemberModal()">✕</button>
+		        </div>
+		
+		        <form th:action="@{/admin/member/update}" method="post">
+		            <input type="hidden" name="member_id" id="modal_member_id">
+		            <input type="hidden" name="tab" id="modal_tab">   <!-- ★ 탭 복원용 -->
+		
+		            <!-- 읽기 전용 기본 정보 -->
+		            <div class="member-info">
+		                <dl>
+		                    <dt>아이디</dt><dd id="modal_id"></dd>
+		                    <dt>이름</dt><dd id="modal_name"></dd>
+		                    <dt>이메일</dt><dd id="modal_email"></dd>
+		                    <dt>연락처</dt><dd id="modal_phone"></dd>
+		                </dl>
+		            </div>
+		
+		            <label class="input-label">권한 (Role)</label>
+		            <select name="role" id="modal_role" class="form-input">
+		                <option value="USER">일반 회원 (USER)</option>
+		                <option value="STAFF">지상직 (STAFF)</option>
+		                <option value="ADMIN">총괄 관리자 (ADMIN)</option>
+		            </select>
+		
+		            <label class="input-label">계정 상태 (Status)</label>
+		            <select name="status" id="modal_status" class="form-input">
+		                <option value="ACTIVE">정상 (ACTIVE)</option>
+		                <option value="SUSPENDED">정지 (SUSPENDED)</option>
+		                <option value="INACTIVE">휴면 (INACTIVE)</option>
+		                <option value="DELETED">탈퇴 (DELETED)</option>
+		            </select>
+		
+		            <label class="input-label">정지 사유 (선택)</label>
+		            <input type="text" name="suspend_reason" id="modal_suspend_reason" class="form-input" placeholder="계정 정지 시 사유 입력">
+		
+		            <div class="modal-footer">
+		                <button type="button" class="btn btn-ghost" onclick="closeMemberModal()">취소</button>
+		                <button type="submit" class="btn btn-primary">저장하기</button>
+		            </div>
+		        </form>
+		    </div>
 		</div>
 
-		<!-- 지상직 계정 생성 모달 추가 -->
-		<div id="staffCreateModal"
-			style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
-			<div
-				style="background: #fff; padding: 24px; border-radius: 12px; width: 450px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-				<h3
-					style="margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 12px;">신규
-					지상직(STAFF) 계정 발급</h3>
-
-				<form th:action="@{/admin/staff/insert}" method="post">
-					<div style="display: flex; gap: 12px; margin-bottom: 12px;">
-						<div style="flex: 1;">
-							<label
-								style="display: block; font-weight: bold; margin-bottom: 4px;">사번(아이디)</label>
-							<input type="text" name="id" required
-								style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-								placeholder="예: STF_002">
-						</div>
-						<div style="flex: 1;">
-							<label
-								style="display: block; font-weight: bold; margin-bottom: 4px;">임시
-								비밀번호</label> <input type="password" name="password" required
-								style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-						</div>
-					</div>
-
-					<div style="display: flex; gap: 12px; margin-bottom: 12px;">
-						<div style="flex: 1;">
-							<label
-								style="display: block; font-weight: bold; margin-bottom: 4px;">성명</label>
-							<input type="text" name="name" required
-								style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-						</div>
-						<div style="flex: 1;">
-							<label
-								style="display: block; font-weight: bold; margin-bottom: 4px;">연락처</label>
-							<input type="text" name="phone" required
-								style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-								placeholder="010-0000-0000">
-						</div>
-					</div>
-
-					<div style="margin-bottom: 12px;">
-						<label
-							style="display: block; font-weight: bold; margin-bottom: 4px;">이메일
-							(선택)</label> <input type="email" name="email"
-							style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-					</div>
-
-					<!-- DB 필수값(NOT NULL) 방어를 위한 기본 정보 입력 -->
-					<div style="display: flex; gap: 12px; margin-bottom: 12px;">
-						<div style="flex: 1;">
-							<label
-								style="display: block; font-weight: bold; margin-bottom: 4px;">우편번호</label>
-							<input type="text" name="zipcode" required
-								style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-								value="00000">
-						</div>
-						<div style="flex: 2;">
-							<label
-								style="display: block; font-weight: bold; margin-bottom: 4px;">기본
-								주소</label> <input type="text" name="address1" required
-								style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-								value="사내 지상직 사무실">
-						</div>
-					</div>
-					<div style="margin-bottom: 20px;">
-						<label
-							style="display: block; font-weight: bold; margin-bottom: 4px;">상세
-							주소</label> <input type="text" name="address2" required
-							style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-							value="-">
-					</div>
-
-					<div style="display: flex; justify-content: flex-end; gap: 8px;">
-						<button type="button" onclick="closeStaffModal()"
-							style="padding: 8px 16px; border: 1px solid #ccc; background: #fff; border-radius: 6px; cursor: pointer;">취소</button>
-						<button type="submit"
-							style="padding: 8px 16px; border: none; background: var(--primary, #0D9488); color: #fff; border-radius: 6px; font-weight: bold; cursor: pointer;">발급하기</button>
-					</div>
-				</form>
-			</div>
+		<!-- 지상직 계정 생성 모달 -->
+		<div id="staffCreateModal" class="modal-overlay">
+		    <div class="modal-content-small" style="width: 460px;">
+		        <div class="modal-header">
+		            <h3 class="modal-title">신규 지상직(STAFF) 계정 발급</h3>
+		            <button type="button" class="close-btn" onclick="closeStaffModal()">✕</button>
+		        </div>
+		
+		        <form th:action="@{/admin/staff/insert}" method="post">
+		            <div class="form-row">
+		                <div>
+		                    <label class="input-label">사번(아이디)</label>
+		                    <input type="text" name="id" required class="form-input" placeholder="예: STF_002">
+		                </div>
+		                <div>
+		                    <label class="input-label">임시 비밀번호</label>
+		                    <input type="password" name="password" required class="form-input">
+		                </div>
+		            </div>
+		
+		            <div class="form-row">
+		                <div>
+		                    <label class="input-label">성명</label>
+		                    <input type="text" name="name" required class="form-input">
+		                </div>
+		                <div>
+		                    <label class="input-label">연락처</label>
+		                    <input type="text" name="phone" required class="form-input" placeholder="010-0000-0000">
+		                </div>
+		            </div>
+		
+		            <label class="input-label">이메일 (선택)</label>
+		            <input type="email" name="email" class="form-input">
+		
+		            <!-- DB 필수값(NOT NULL) 방어 · 고정값이라 수정 잠금 -->
+		            <div class="form-row">
+		                <div>
+		                    <label class="input-label">우편번호</label>
+		                    <input type="text" name="zipcode" required readonly class="form-input" value="00000">
+		                </div>
+		                <div class="grow-2">
+		                    <label class="input-label">기본 주소</label>
+		                    <input type="text" name="address1" required readonly class="form-input" value="사내 지상직 사무실">
+		                </div>
+		            </div>
+		
+		            <label class="input-label">상세 주소</label>
+		            <input type="text" name="address2" required readonly class="form-input" value="-">
+		
+		            <div class="modal-footer">
+		                <button type="button" class="btn btn-ghost" onclick="closeStaffModal()">취소</button>
+		                <button type="submit" class="btn btn-primary">발급하기</button>
+		            </div>
+		        </form>
+		    </div>
 		</div>
 
 	</main>
 
 	<script>
+	let currentTab = 'user';
+	
     // 내부 탭 전환 스크립트
     function switchTab(tabId, el) {
+      currentTab = tabId;
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.style.color = 'var(--text-gray)';
         btn.style.fontWeight = '500';
@@ -349,6 +301,7 @@
                 document.getElementById('modal_role').value = data.role;
                 document.getElementById('modal_status').value = data.status;
                 document.getElementById('modal_suspend_reason').value = data.suspend_reason || '';
+                document.getElementById('modal_tab').value = currentTab;   
 
                 // 모달 화면에 표시
                 const modal = document.getElementById('memberModal');
@@ -380,6 +333,9 @@
             alert('생성 실패: 이미 사용 중인 [아이디], [이메일] 또는 [연락처]입니다.\n중복되지 않는 새로운 정보를 입력해주세요.');
         } else if (urlParams.get('error') === 'true') {
             alert('생성 실패: 입력하신 정보의 형식이 맞지 않거나 알 수 없는 오류가 발생했습니다.\n(아이디는 영문/숫자만 가능 등)');
+        }
+        if (urlParams.get('tab') === 'staff') {
+            switchTab('staff', document.querySelectorAll('.tab-btn')[1]);
         }
     };
   </script>

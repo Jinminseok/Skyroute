@@ -535,25 +535,24 @@ public class AdminController {
 
 	// 회원 정보 수정 (상태 및 권한 변경)
 	@PostMapping("/admin/member/update")
-	public String updateMemberStatusAndRole(MemberVO memberVO) {
-		adminMemberMapper.updateMemberStatusAndRole(memberVO);
-		// 처리가 완료되면 다시 계정 관리 페이지로 리다이렉트
-		return "redirect:/admin/accounts";
+	public String updateMemberStatusAndRole(MemberVO memberVO,
+	        @RequestParam(required = false, defaultValue = "user") String tab) {
+	    adminMemberMapper.updateMemberStatusAndRole(memberVO);
+	    return "redirect:/admin/accounts?tab=" + tab;
 	}
 	
 	//지상직 계정 생성
 	@PostMapping("/admin/staff/insert")
 	public String insertStaff(MemberVO memberVO) {
-		try {
-			adminMemberMapper.insertStaff(memberVO);
-		} catch (org.springframework.dao.DuplicateKeyException e) {
-			log.error("계정 생성 실패 - 중복된 데이터(아이디/이메일/연락처) 존재");
-			return "redirect:/admin/accounts?error=duplicate";
-		} catch (Exception e) {
-			log.error("계정 생성 중 알 수 없는 오류 발생", e);
-			return "redirect:/admin/accounts?error=true";
-		}
-		
-		return "redirect:/admin/accounts";
+	    try {
+	        adminMemberMapper.insertStaff(memberVO);
+	    } catch (org.springframework.dao.DuplicateKeyException e) {
+	        log.error("계정 생성 실패 - 중복된 데이터(아이디/이메일/연락처) 존재");
+	        return "redirect:/admin/accounts?tab=staff&error=duplicate";
+	    } catch (Exception e) {
+	        log.error("계정 생성 중 알 수 없는 오류 발생", e);
+	        return "redirect:/admin/accounts?tab=staff&error=true";
+	    }
+	    return "redirect:/admin/accounts?tab=staff";
 	}
 }

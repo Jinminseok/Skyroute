@@ -482,3 +482,25 @@ body.modal-open {
 	overflow: hidden !important;
 	overscroll-behavior: none;
 }
+
+/* ── 회원 상세 모달 ── */
+.member-info {
+    background: #F8FAFC;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+}
+.form-row { display: flex; gap: 12px; }
+.form-row > * { flex: 1; }
+.form-row > .grow-2 { flex: 2; }
+
+.member-info dl {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    row-gap: 10px;
+    column-gap: 12px;
+    margin: 0;
+}
+.member-info dt { font-size: 13px; font-weight: 600; color: var(--text-gray); }
+.member-info dd { margin: 0; font-size: 14px; color: var(--text-dark); word-break: break-all; }
