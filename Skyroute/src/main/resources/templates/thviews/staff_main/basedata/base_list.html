@@ -252,9 +252,10 @@
 }
 .combo { position: relative; }
 .combo-list {
-    list-style: none; margin: 4px 0 0; padding: 4px;
-    position: absolute; z-index: 50; left: 0; right: 0;
-    max-height: 220px; overflow-y: auto;
+    list-style: none; margin: 0; padding: 4px;
+    position: fixed;            /* 모달 overflow에 안 갇히도록 화면 기준 */
+    z-index: 3000;              /* 모달보다 위 */
+    max-height: 240px; overflow-y: auto;
     background: #fff; border: 1px solid var(--border); border-radius: 8px;
     box-shadow: 0 8px 20px rgba(15,23,42,0.12);
     display: none;
@@ -1016,22 +1017,26 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 					<input type="hidden" id="modalRouteId" name="route_id">
 					<div class="form-grid">
 						<div class="field">
-							<label>출발 공항 *</label> <select id="modalDepAirportId"
-								name="departure_airport_id" class="select" required>
-								<option value="">출발 공항을 선택하세요</option>
-								<option th:each="airport : ${airportList}"
-									th:value="${airport.airportId}"
-									th:text="|${airport.airportName} (${airport.iataCode})|"></option>
-							</select>
+						    <label>출발 공항 *</label>
+						    <div class="combo">
+						        <input type="text" id="depAirportSearch" class="input" autocomplete="off"
+						               placeholder="공항명·IATA 검색 (미입력 시 전체)"
+						               onfocus="openRouteAirportCombo('dep')" onkeyup="filterRouteAirportCombo('dep', event)"
+						               onblur="setTimeout(() => closeRouteAirportCombo('dep'), 150)">
+						        <input type="hidden" id="modalDepAirportId" name="departure_airport_id">
+						        <ul id="depAirportList" class="combo-list"></ul>
+						    </div>
 						</div>
 						<div class="field">
-							<label>도착 공항 *</label> <select id="modalArrAirportId"
-								name="arrival_airport_id" class="select" required>
-								<option value="">도착 공항을 선택하세요</option>
-								<option th:each="airport : ${airportList}"
-									th:value="${airport.airportId}"
-									th:text="|${airport.airportName} (${airport.iataCode})|"></option>
-							</select>
+						    <label>도착 공항 *</label>
+						    <div class="combo">
+						        <input type="text" id="arrAirportSearch" class="input" autocomplete="off"
+						               placeholder="공항명·IATA 검색 (미입력 시 전체)"
+						               onfocus="openRouteAirportCombo('arr')" onkeyup="filterRouteAirportCombo('arr', event)"
+						               onblur="setTimeout(() => closeRouteAirportCombo('arr'), 150)">
+						        <input type="hidden" id="modalArrAirportId" name="arrival_airport_id">
+						        <ul id="arrAirportList" class="combo-list"></ul>
+						    </div>
 						</div>
 						<div class="field">
 							<label>국내/국제선 구분 *</label> <select id="modalRouteFlightType"
@@ -1086,13 +1091,15 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 
 					<div class="form-grid">
 						<div class="field full">
-							<label>적용 노선 *</label> <select id="modalFareRouteId"
-								name="route_id" class="select" required>
-								<option value="">노선을 선택하세요</option>
-								<option th:each="route : ${routeList}"
-									th:value="${route.route_id}"
-									th:text="|${route.dep_airport_name} ➔ ${route.arr_airport_name} (${route.type_name})|"></option>
-							</select>
+							<label>적용 노선 *</label>
+							<div class="combo" id="fareRouteCombo">
+							    <input type="text" id="fareRouteSearch" class="input" autocomplete="off"
+							           placeholder="노선 검색 (출발/도착 공항, 유형)"
+							           onfocus="openFareRouteCombo()" onkeyup="filterFareRouteCombo(event)"
+							           onblur="setTimeout(closeFareRouteCombo, 150)">
+							    <input type="hidden" id="modalFareRouteId" name="route_id">
+							    <ul id="fareRouteList" class="combo-list"></ul>
+							</div>
 						</div>
 
 						<div class="field">
@@ -1220,6 +1227,7 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	            const doc = new DOMParser().parseFromString(html, 'text/html');
 	            const fresh = doc.getElementById('baseRouteTable');
 	            if (fresh) document.getElementById('baseRouteTable').innerHTML = fresh.innerHTML;
+	            buildFareRouteOptions();   // ★ 운임 모달 적용 노선 목록도 최신화
 	        })
 	        .catch(() => location.reload());
 	}
@@ -1283,6 +1291,17 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	    .catch(error => console.error('Error:', error));
 	}
 
+	function refreshFareTable() {
+	    fetch('/staff/basedata/airport/list')
+	        .then(res => res.text())
+	        .then(html => {
+	            const doc = new DOMParser().parseFromString(html, 'text/html');
+	            const fresh = doc.getElementById('baseFareTable');
+	            if (fresh) document.getElementById('baseFareTable').innerHTML = fresh.innerHTML;
+	        })
+	        .catch(() => location.reload());
+	}
+	
 	function toggleGateActive(gateId, checkbox) {
 	    const isActiveValue = checkbox.checked ? 'Y' : 'N';
 	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
@@ -1865,6 +1884,11 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	    const form = document.getElementById('routeForm');
 	    
 	    form.reset();
+	    buildRouteAirportOptions();
+	    document.getElementById('depAirportSearch').value = '';
+	    document.getElementById('arrAirportSearch').value = '';
+	    closeRouteAirportCombo('dep');
+	    closeRouteAirportCombo('arr');
 	    document.getElementById('modalRouteId').value = '';
 
 	    if (mode === 'register') {
@@ -1872,8 +1896,12 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	    } else if (mode === 'edit' && route != null) {
 	        title.innerText = '운항 노선 수정';
 	        document.getElementById('modalRouteId').value = route.route_id;
-	        document.getElementById('modalDepAirportId').value = route.departure_airport_id;
-	        document.getElementById('modalArrAirportId').value = route.arrival_airport_id;
+	        const depOpt = routeAirportOptions.find(o => o.value === String(route.departure_airport_id));
+	        const arrOpt = routeAirportOptions.find(o => o.value === String(route.arrival_airport_id));
+	        document.getElementById('modalDepAirportId').value = String(route.departure_airport_id);
+	        document.getElementById('modalArrAirportId').value = String(route.arrival_airport_id);
+	        document.getElementById('depAirportSearch').value = depOpt ? depOpt.text : '';
+	        document.getElementById('arrAirportSearch').value = arrOpt ? arrOpt.text : '';
 	        document.getElementById('modalRouteFlightType').value = route.flight_type;
 	        document.getElementById('modalRouteTypeId').value = route.route_type_id;
 	    }
@@ -2006,7 +2034,10 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
         title.innerText = '운임 기준 등록';
         notice.style.display = 'none'; 
         
-        routeSelect.disabled = false;
+        buildFareRouteOptions();                 // 최신 노선 목록 반영
+        document.getElementById('fareRouteSearch').value = '';
+        document.getElementById('modalFareRouteId').value = '';
+        closeFareRouteCombo();
         classSelect.disabled = false;
         seasonSelect.disabled = false;
         
@@ -2027,15 +2058,13 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
         document.getElementById('modalFareId').value = fId;
         
 
-        routeSelect.value = rId;
-        classSelect.value = cId;
-        seasonSelect.value = sId;
+        buildFareRouteOptions();
+        const curRoute = fareRouteOptions.find(o => o.value === String(rId));
+        document.getElementById('modalFareRouteId').value = String(rId);
+        document.getElementById('fareRouteSearch').value = curRoute ? curRoute.text : '';
+        closeFareRouteCombo();
         
-        if (!routeSelect.value) routeSelect.value = '';
-        if (!classSelect.value) classSelect.value = '';
-        if (!seasonSelect.value) seasonSelect.value = '';
-
-        routeSelect.disabled = false;
+        
         classSelect.disabled = false;
         seasonSelect.disabled = false;
 
@@ -2080,7 +2109,7 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	        if (result === 'success') {
 	            alert('정상적으로 처리되었습니다.');
 	            closeFareModal();
-	            location.reload(); 
+	            refreshFareTable();      // 새로고침 대신 목록만 갱신 → 탭 유지
 	        } else if (result === 'duplicate') {
 	            alert('이미 등록된 운임 조합(노선+등급+시즌)입니다.');
 	        } else {
@@ -2201,6 +2230,8 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	            `<li data-value="${o.value}" onmousedown="selectAirportCombo('${o.value}')">${highlightMatch(o.text, query)}</li>`
 	        ).join('');
 	    }
+	    
+	    positionComboList(document.getElementById('gateAirportSearch'), list);
 	    list.classList.add('open');
 	}
 
@@ -2241,6 +2272,157 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	    }
 	    items.forEach((it, i) => it.classList.toggle('active', i === comboActiveIndex));
 	    if (items[comboActiveIndex]) items[comboActiveIndex].scrollIntoView({ block: 'nearest' });
+	}
+	
+	let fareRouteOptions = [];
+	let fareComboIndex = -1;
+
+	// 노선 테이블(baseRouteTable)에서 현재 노선 목록을 뽑아 콤보 옵션 생성
+	function buildFareRouteOptions() {
+	    fareRouteOptions = [];
+	    document.querySelectorAll('#baseRouteTable tr').forEach(tr => {
+	        const tds = tr.querySelectorAll('td');
+	        if (tds.length < 5) return; // 빈 행 제외
+	        fareRouteOptions.push({
+	            value: tds[0].textContent.trim(),
+	            text: `${tds[1].textContent.trim()} ➔ ${tds[2].textContent.trim()} (${tds[4].textContent.trim()})`
+	        });
+	    });
+	}
+
+	function renderFareRouteCombo(q) {
+	    const list = document.getElementById('fareRouteList');
+	    const query = (q || '').trim();
+	    const matches = fareRouteOptions.filter(o => o.text.toUpperCase().includes(query.toUpperCase()));
+	    fareComboIndex = -1;
+	    if (matches.length === 0) {
+	        list.innerHTML = '<li class="empty">검색 결과가 없습니다.</li>';
+	    } else {
+	        list.innerHTML = matches.map(o =>
+	            `<li data-value="${o.value}" onmousedown="selectFareRoute('${o.value}')">${highlightMatch(o.text, query)}</li>`
+	        ).join('');
+	    }
+	    positionComboList(document.getElementById('fareRouteSearch'), list);
+	    list.classList.add('open');
+	}
+
+	function openFareRouteCombo() {
+	    renderFareRouteCombo(document.getElementById('fareRouteSearch').value);
+	}
+
+	function filterFareRouteCombo(e) {
+	    if (['ArrowDown', 'ArrowUp', 'Enter'].includes(e.key)) { navigateFareCombo(e); return; }
+	    renderFareRouteCombo(document.getElementById('fareRouteSearch').value);
+	    document.getElementById('modalFareRouteId').value = ''; // 타이핑 중엔 선택 해제
+	    fetchCalculatedPrice();                                 // 가격 초기화
+	}
+
+	function selectFareRoute(value) {
+	    const opt = fareRouteOptions.find(o => o.value === String(value));
+	    if (!opt) return;
+	    document.getElementById('modalFareRouteId').value = opt.value;
+	    document.getElementById('fareRouteSearch').value = opt.text;
+	    closeFareRouteCombo();
+	    fetchCalculatedPrice();                                 // 노선 바뀌면 가격 재계산
+	}
+
+	function closeFareRouteCombo() {
+	    const list = document.getElementById('fareRouteList');
+	    if (list) list.classList.remove('open');
+	}
+
+	function navigateFareCombo(e) {
+	    const items = Array.from(document.querySelectorAll('#fareRouteList li[data-value]'));
+	    if (items.length === 0) return;
+	    if (e.key === 'ArrowDown') { fareComboIndex = Math.min(fareComboIndex + 1, items.length - 1); e.preventDefault(); }
+	    else if (e.key === 'ArrowUp') { fareComboIndex = Math.max(fareComboIndex - 1, 0); e.preventDefault(); }
+	    else if (e.key === 'Enter') {
+	        e.preventDefault();
+	        if (fareComboIndex >= 0) selectFareRoute(items[fareComboIndex].dataset.value);
+	        return;
+	    }
+	    items.forEach((it, i) => it.classList.toggle('active', i === fareComboIndex));
+	    if (items[fareComboIndex]) items[fareComboIndex].scrollIntoView({ block: 'nearest' });
+	}
+	
+	// 출발/도착 공항 콤보 (게이트 공항과 동일 데이터: window.GATE_AIRPORTS)
+	let routeAirportOptions = [];
+	const routeComboIndex = { dep: -1, arr: -1 };
+	const routeComboRef = {
+	    dep: { search: 'depAirportSearch', hidden: 'modalDepAirportId', list: 'depAirportList' },
+	    arr: { search: 'arrAirportSearch', hidden: 'modalArrAirportId', list: 'arrAirportList' }
+	};
+
+	function buildRouteAirportOptions() {
+	    if (routeAirportOptions.length === 0 && Array.isArray(window.GATE_AIRPORTS)) {
+	        routeAirportOptions = window.GATE_AIRPORTS.map(a => ({
+	            value: String(a.airportId),
+	            text: `${a.airportName} (${a.iataCode})`
+	        }));
+	    }
+	}
+
+	function renderRouteAirportCombo(kind, q) {
+	    const ref = routeComboRef[kind];
+	    const list = document.getElementById(ref.list);
+	    const query = (q || '').trim();
+	    const matches = routeAirportOptions.filter(o => o.text.toUpperCase().includes(query.toUpperCase()));
+	    routeComboIndex[kind] = -1;
+	    if (matches.length === 0) {
+	        list.innerHTML = '<li class="empty">검색 결과가 없습니다.</li>';
+	    } else {
+	        list.innerHTML = matches.map(o =>
+	            `<li data-value="${o.value}" onmousedown="selectRouteAirport('${kind}','${o.value}')">${highlightMatch(o.text, query)}</li>`
+	        ).join('');
+	    }
+	    positionComboList(document.getElementById(ref.search), list);
+	    list.classList.add('open');
+	}
+
+	function openRouteAirportCombo(kind) {
+	    renderRouteAirportCombo(kind, document.getElementById(routeComboRef[kind].search).value);
+	}
+
+	function filterRouteAirportCombo(kind, e) {
+	    if (['ArrowDown', 'ArrowUp', 'Enter'].includes(e.key)) { navigateRouteCombo(kind, e); return; }
+	    renderRouteAirportCombo(kind, document.getElementById(routeComboRef[kind].search).value);
+	    document.getElementById(routeComboRef[kind].hidden).value = ''; // 타이핑 중엔 선택 해제
+	}
+
+	function selectRouteAirport(kind, value) {
+	    const opt = routeAirportOptions.find(o => o.value === String(value));
+	    if (!opt) return;
+	    const ref = routeComboRef[kind];
+	    document.getElementById(ref.hidden).value = opt.value;
+	    document.getElementById(ref.search).value = opt.text;
+	    closeRouteAirportCombo(kind);
+	}
+
+	function closeRouteAirportCombo(kind) {
+	    const list = document.getElementById(routeComboRef[kind].list);
+	    if (list) list.classList.remove('open');
+	}
+
+	function navigateRouteCombo(kind, e) {
+	    const items = Array.from(document.querySelectorAll(`#${routeComboRef[kind].list} li[data-value]`));
+	    if (items.length === 0) return;
+	    if (e.key === 'ArrowDown') { routeComboIndex[kind] = Math.min(routeComboIndex[kind] + 1, items.length - 1); e.preventDefault(); }
+	    else if (e.key === 'ArrowUp') { routeComboIndex[kind] = Math.max(routeComboIndex[kind] - 1, 0); e.preventDefault(); }
+	    else if (e.key === 'Enter') {
+	        e.preventDefault();
+	        if (routeComboIndex[kind] >= 0) selectRouteAirport(kind, items[routeComboIndex[kind]].dataset.value);
+	        return;
+	    }
+	    items.forEach((it, i) => it.classList.toggle('active', i === routeComboIndex[kind]));
+	    if (items[routeComboIndex[kind]]) items[routeComboIndex[kind]].scrollIntoView({ block: 'nearest' });
+	}
+	
+	// 리스트를 입력창 바로 아래(화면 기준 좌표)에 배치
+	function positionComboList(inputEl, listEl) {
+	    const r = inputEl.getBoundingClientRect();
+	    listEl.style.left = r.left + 'px';
+	    listEl.style.top = (r.bottom + 4) + 'px';
+	    listEl.style.width = r.width + 'px';
 	}
 	</script>
 
