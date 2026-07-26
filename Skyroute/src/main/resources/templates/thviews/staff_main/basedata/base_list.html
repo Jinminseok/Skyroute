@@ -502,6 +502,12 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 					<span class="material-symbols-outlined" style="font-size: 18px">add</span>
 					운항 노선 등록
 				</button>
+				<div style="margin-left: 15px;">
+				    <input type="text" id="routeSearchInput"
+				        onkeyup="filterTable('routeSearchInput', 'baseRouteTable')"
+				        class="input" placeholder="노선 검색 (출발/도착 공항 등)..."
+				        style="width: 250px; padding: 6px 12px; font-size: 14px;">
+				</div>
 				<div class="grow"></div>
 				<span class="badge badge-scheduled"> ROUTE </span>
 			</div>
@@ -1194,6 +1200,17 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	        })
 	        .catch(() => location.reload()); // 실패 시에만 전체 새로고침
 	}
+	
+	function refreshRouteTable() {
+	    fetch('/staff/basedata/airport/list')
+	        .then(res => res.text())
+	        .then(html => {
+	            const doc = new DOMParser().parseFromString(html, 'text/html');
+	            const fresh = doc.getElementById('baseRouteTable');
+	            if (fresh) document.getElementById('baseRouteTable').innerHTML = fresh.innerHTML;
+	        })
+	        .catch(() => location.reload());
+	}
 
 	function closeGateModal() {
 	    document.getElementById('gateModal').style.display = 'none';
@@ -1872,10 +1889,13 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	    })
 	    .then(response => response.text())
 	    .then(result => {
-	        if (result === 'success') {
+	    	if (result === 'success') {
 	            alert('노선이 정상적으로 저장되었습니다.');
 	            closeRouteModal();
-	            location.reload(); 
+	            refreshRouteTable();
+	        } else if (result === 'in_use') {
+	            console.debug(`[route:update] 차단 - 노선 ID ${routeId} 은(는) 운항 스케줄 사용 중이라 수정 불가.`);
+	            alert('해당 노선을 사용하는 운항 스케줄을 먼저 정리해주세요.');
 	        } else if (result === 'duplicate') {
 	            alert('이미 존재하는 동일한 구간의 노선입니다.');
 	        } else if (result === 'same_airport') {
@@ -1898,12 +1918,17 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	        headers: { [csrfHeader]: csrfToken }
 	    })
 	    .then(response => response.text())
-	    .then(result => {
-	        if (result === 'success') {
-	            alert('삭제가 완료되었습니다.');
-	            location.reload(); 
-	        } else { alert('삭제에 실패했습니다.'); }
-	    })
+		.then(result => {
+		        if (result === 'success') {
+		            alert('삭제가 완료되었습니다.');
+		            refreshRouteTable();
+		        } else if (result === 'in_use') {
+		            console.debug(`[route:delete] 차단 - 노선 ID ${routeId} 은(는) 운항 스케줄에서 사용 중입니다.`);
+		            alert('해당 노선을 사용하는 운항 스케줄을 먼저 정리해주세요.');
+		        } else {
+		            alert('삭제에 실패했습니다.');
+		        }
+		    })
 	    .catch(error => console.error('Error:', error));
 	}
 
@@ -1918,12 +1943,18 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	        body: JSON.stringify({ routeId: routeId, isActive: isActiveValue })
 	    })
 	    .then(response => response.text())
-	    .then(result => {
-	        if (result !== 'success') {
-	            alert('상태 변경에 실패했습니다.');
-	            checkbox.checked = !checkbox.checked;
-	        }
-	    })
+		.then(result => {
+		        if (result === 'success') {
+		            console.log(`노선 ID ${routeId} 사용 여부 변경 완료: ${isActiveValue}`);
+		        } else if (result === 'in_use') {
+		            console.debug(`[route:toggle] 차단 - 노선 ID ${routeId} 은(는) 운항 스케줄 사용 중이라 미사용(N) 불가.`);
+		            alert('해당 노선을 사용하는 운항 스케줄을 먼저 정리해주세요.');
+		            checkbox.checked = true;
+		        } else {
+		            alert('상태 변경에 실패했습니다.');
+		            checkbox.checked = !checkbox.checked;
+		        }
+		    })
 	    .catch(error => {
 	        console.error('Error:', error);
 	        checkbox.checked = !checkbox.checked;

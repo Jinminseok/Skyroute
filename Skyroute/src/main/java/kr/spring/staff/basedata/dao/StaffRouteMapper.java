@@ -25,4 +25,6 @@ public interface StaffRouteMapper {
     
     // 노선 사용 여부 (토글)
     public void updateRouteActive(Map<String, Object> payload);
+    
+    public int checkRouteUsedInFlight(int route_id);
 }

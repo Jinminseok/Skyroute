@@ -43,10 +43,12 @@ public class StaffRouteController {
     @ResponseBody
     public String updateRoute(@RequestBody RouteVO routeVO) {
         try {
-            if(routeVO.getDeparture_airport_id() == routeVO.getArrival_airport_id()) {
-                return "same_airport"; 
+            if (routeVO.getDeparture_airport_id() == routeVO.getArrival_airport_id()) {
+                return "same_airport";
             }
             return staffRouteService.updateRoute(routeVO);
+        } catch (IllegalStateException e) {
+            return "in_use";
         } catch (Exception e) {
             log.error("노선 수정 중 오류 발생", e);
             return "error";
@@ -60,6 +62,8 @@ public class StaffRouteController {
         try {
             staffRouteService.deleteRoute(routeId);
             return "success";
+        } catch (IllegalStateException e) {
+            return "in_use";
         } catch (Exception e) {
             log.error("노선 삭제 중 오류 발생", e);
             return "error";
@@ -73,6 +77,8 @@ public class StaffRouteController {
         try {
             staffRouteService.updateRouteActive(payload);
             return "success";
+        } catch (IllegalStateException e) {
+            return "in_use";
         } catch (Exception e) {
             log.error("노선 토글 중 오류 발생", e);
             return "error";
