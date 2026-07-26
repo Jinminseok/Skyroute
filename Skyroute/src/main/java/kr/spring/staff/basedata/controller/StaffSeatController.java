@@ -27,30 +27,34 @@ public class StaffSeatController {
 	private final StaffSeatService staffSeatService;
 
     // 항공기 사용 여부
-    @PostMapping("/aircraft/toggle")
-    @ResponseBody
-    public String toggleAircraftActive(@RequestBody Map<String, Object> payload) {
-        try {
-            staffSeatService.updateAircraftActive(payload);
-            return "success";
-        } catch (Exception e) {
-            log.error("항공기 상태 변경 중 오류 발생: ", e);
-            return "error";
-        }
-    }
+	@PostMapping("/aircraft/toggle")
+	@ResponseBody
+	public String toggleAircraftActive(@RequestBody Map<String, Object> payload) {
+	    try {
+	        staffSeatService.updateAircraftActive(payload);
+	        return "success";
+	    } catch (IllegalStateException e) {
+	        return "in_use";
+	    } catch (Exception e) {
+	        log.error("항공기 상태 변경 중 오류 발생: ", e);
+	        return "error";
+	    }
+	}
     
     // 항공기 상태(운항가능, 정비중 등) 변경
-    @PostMapping("/aircraft/status")
-    @ResponseBody
-    public String updateAircraftStatus(@RequestBody Map<String, Object> payload) {
-        try {
-            staffSeatService.updateAircraftStatus(payload);
-            return "success";
-        } catch (Exception e) {
-            log.error("항공기 상태 업데이트 중 오류 발생: ", e);
-            return "error";
-        }
-    }
+	@PostMapping("/aircraft/status")
+	@ResponseBody
+	public String updateAircraftStatus(@RequestBody Map<String, Object> payload) {
+	    try {
+	        staffSeatService.updateAircraftStatus(payload);
+	        return "success";
+	    } catch (IllegalStateException e) {
+	        return "in_use";
+	    } catch (Exception e) {
+	        log.error("항공기 상태 업데이트 중 오류 발생: ", e);
+	        return "error";
+	    }
+	}
     
 	// 좌석 자동 생성
     @PostMapping("/generate")

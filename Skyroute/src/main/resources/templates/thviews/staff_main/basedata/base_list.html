@@ -571,8 +571,14 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 
 		<div id="tab-b-aircraft" class="sub-page">
 			<div class="toolbar">
-				<div class="grow"></div>
-				<span class="badge badge-scheduled"> AIRCRAFT </span>
+			    <div style="margin-right: 15px;">
+			        <input type="text" id="aircraftSearchInput"
+			            onkeyup="filterTable('aircraftSearchInput', 'baseAircraftTable')"
+			            class="input" placeholder="항공기 검색 (등록번호, 모델명 등)..."
+			            style="width: 250px; padding: 6px 12px; font-size: 14px;">
+			    </div>
+			    <div class="grow"></div>
+			    <span class="badge badge-scheduled"> AIRCRAFT </span>
 			</div>
 			<div class="card">
 				<div class="table-wrap">
@@ -594,9 +600,11 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 									style="font-weight: 600; color: var(--text-dark);"></td>
 								<td th:text="${aircraft.model_name}"></td>
 								<td th:text="${aircraft.total_seats}"></td>
-								<td><select class="select"
-									style="padding: 4px 8px; font-size: 13px; width: 100px; cursor: pointer;"
-									th:onchange="changeAircraftStatus([[${aircraft.aircraft_id}]], this)">
+								<td>
+									<select class="select"
+									    style="padding: 4px 8px; font-size: 13px; width: 100px; cursor: pointer;"
+									    th:attr="data-current=${aircraft.status_name}"
+									    th:onchange="changeAircraftStatus([[${aircraft.aircraft_id}]], this)">
 										<option value="운항가능"
 											th:selected="${aircraft.status_name == '운항가능'}">운항가능</option>
 										<option value="정비중"
@@ -1542,6 +1550,10 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	    .then(result => {
 	        if (result === 'success') {
 	            console.log(`항공기 ID ${aircraftId} 사용 여부 변경 완료: ${isActiveValue}`);
+	        } else if (result === 'in_use') {
+	            console.debug(`[aircraft:toggle] 차단 - 항공기 ID ${aircraftId} 은(는) 운항 스케줄 사용 중이라 미사용(N) 불가.`);
+	            alert('해당 항공기를 사용하는 운항 스케줄을 먼저 정리해주세요.');
+	            checkbox.checked = true;
 	        } else {
 	            alert('상태 변경에 실패했습니다.');
 	            checkbox.checked = !checkbox.checked;
@@ -1581,14 +1593,16 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	
 	function changeAircraftStatus(aircraftId, selectElement) {
 	    const newStatus = selectElement.value;
+	    const prevStatus = selectElement.dataset.current;   // 서버가 렌더한 현재 상태
+
 	    if (!confirm(`해당 항공기의 상태를 '${newStatus}'(으)로 변경하시겠습니까?`)) {
-	        location.reload(); 
+	        selectElement.value = prevStatus;               // 취소 시 원복
 	        return;
 	    }
 
 	    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 	    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-	    
+
 	    fetch('/staff/basedata/seat/aircraft/status', {
 	        method: 'POST',
 	        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
@@ -1598,19 +1612,23 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	    .then(result => {
 	        if (result === 'success') {
 	            alert('항공기 상태가 성공적으로 변경되었습니다.');
-	            if(newStatus == '운항가능') { selectElement.style.color = '#10b981'; } 
-                else if(newStatus == '정비중') { selectElement.style.color = '#E0B94F'; } 
-                else if(newStatus == '퇴역') { selectElement.style.color = '#ef4444'; } 
-                else { alert('상태 변경에 실패했습니다.'); location.reload(); }
+	            if (newStatus == '운항가능') { selectElement.style.color = '#10b981'; }
+	            else if (newStatus == '정비중') { selectElement.style.color = '#E0B94F'; }
+	            else if (newStatus == '퇴역') { selectElement.style.color = '#ef4444'; }
+	            selectElement.dataset.current = newStatus;   // 성공 시 기준값 갱신
+	        } else if (result === 'in_use') {
+	            console.debug(`[aircraft:status] 차단 - 항공기 ID ${aircraftId} 은(는) 운항 스케줄 사용 중이라 상태 변경 불가.`);
+	            alert('해당 항공기를 사용하는 운항 스케줄을 먼저 정리해주세요.');
+	            selectElement.value = prevStatus;            // 이전 값으로 원복
 	        } else {
 	            alert('상태 변경에 실패했습니다.');
-	            location.reload(); 
+	            selectElement.value = prevStatus;
 	        }
 	    })
 	    .catch(error => {
 	        console.error('Error:', error);
 	        alert('서버와 통신 중 오류가 발생했습니다.');
-	        location.reload();
+	        selectElement.value = prevStatus;
 	    });
 	}
 

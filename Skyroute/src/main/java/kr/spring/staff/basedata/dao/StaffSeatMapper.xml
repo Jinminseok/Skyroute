@@ -106,5 +106,11 @@
         WHERE aircraft_id = #{aircraftId}
     </delete>
     
+    <select id="checkAircraftUsedInFlight" parameterType="int" resultType="int">
+	    SELECT COUNT(*)
+	    FROM FLIGHT
+	    WHERE aircraft_id = #{aircraftId}
+	      AND is_deleted = 'N'
+	</select>
     
 </mapper>

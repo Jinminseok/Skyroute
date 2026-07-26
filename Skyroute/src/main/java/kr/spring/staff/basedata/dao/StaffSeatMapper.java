@@ -42,4 +42,6 @@ public interface StaffSeatMapper {
     
     // 항공기별 좌석 일괄 삭제 (초기화)
     public void deleteSeatsByAircraft(int aircraftId);
+    
+    public int checkAircraftUsedInFlight(int aircraftId);
 }

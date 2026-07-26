@@ -86,13 +86,25 @@ public class StaffSeatServiceImpl implements StaffSeatService {
 
     @Override
     public void updateAircraftActive(Map<String, Object> payload) {
+        String isActive = String.valueOf(payload.get("isActive"));
+        int aircraftId = Integer.parseInt(String.valueOf(payload.get("aircraftId")));
+        // 미사용(N) 처리 시, 사용 중이면 차단
+        if ("N".equals(isActive) && staffSeatMapper.checkAircraftUsedInFlight(aircraftId) > 0) {
+            throw new IllegalStateException("해당 항공기를 사용하는 운항 스케줄이 존재합니다.");
+        }
         staffSeatMapper.updateAircraftActive(payload);
     }
 
-	@Override
-	public void updateAircraftStatus(Map<String, Object> payload) {
-		staffSeatMapper.updateAircraftStatus(payload);
-	}
+    @Override
+    public void updateAircraftStatus(Map<String, Object> payload) {
+        String statusName = String.valueOf(payload.get("statusName"));
+        int aircraftId = Integer.parseInt(String.valueOf(payload.get("aircraftId")));
+        // 사용 중인데 운항불가 상태(정비중/퇴역)로 바꾸려 하면 차단
+        if (!"운항가능".equals(statusName) && staffSeatMapper.checkAircraftUsedInFlight(aircraftId) > 0) {
+            throw new IllegalStateException("해당 항공기를 사용하는 운항 스케줄이 존재합니다.");
+        }
+        staffSeatMapper.updateAircraftStatus(payload);
+    }
 
 	@Override
 	public List<Map<String, Object>> getSeatSummaryList() {
