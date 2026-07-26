@@ -529,10 +529,8 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 						<tbody id="baseRouteTable">
 							<tr th:each="route : ${routeList}">
 								<td th:text="${route.route_id}"></td>
-								<td th:text="${route.dep_airport_name}"
-									style="font-weight: 500;"></td>
-								<td th:text="${route.arr_airport_name}"
-									style="font-weight: 500;"></td>
+								<td th:text="${route.dep_airport_name}"></td>
+								<td th:text="${route.arr_airport_name}"></td>
 								<td><span class="badge"
 									th:classappend="${route.flight_type == 'DOM' ? 'badge-dom' : 'badge-int'}"
 									th:text="${route.flight_type == 'DOM' ? '국내선' : '국제선'}"></span>
@@ -597,15 +595,13 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 						<tbody id="baseAircraftTable">
 							<tr th:each="aircraft : ${aircraftList}">
 								<td th:text="${aircraft.aircraft_id}"></td>
-								<td th:text="${aircraft.reg_no}"
-									style="font-weight: 600; color: var(--text-dark);"></td>
+								<td th:text="${aircraft.reg_no}"></td>
 								<td th:text="${aircraft.model_name}"></td>
 								<td th:text="${aircraft.total_seats}"></td>
-								<td>
-									<select class="select"
-									    style="padding: 4px 8px; font-size: 13px; width: 100px; cursor: pointer;"
-									    th:attr="data-current=${aircraft.status_name}"
-									    th:onchange="changeAircraftStatus([[${aircraft.aircraft_id}]], this)">
+								<td><select class="select"
+								    style="padding: 2px 8px; font-size: 12px; width: 92px; height: 26px; cursor: pointer;"
+								    th:attr="data-current=${aircraft.status_name}"
+								    th:onchange="changeAircraftStatus([[${aircraft.aircraft_id}]], this)">
 										<option value="운항가능"
 											th:selected="${aircraft.status_name == '운항가능'}">운항가능</option>
 										<option value="정비중"
@@ -661,8 +657,7 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 						<tbody id="baseSeatTable">
 							<tr th:each="summary : ${seatSummaryList}">
 								<td th:text="${summary.aircraft_id}"></td>
-								<td th:text="${summary.reg_no}"
-									style="font-weight: bold; color: var(--text-dark);"></td>
+								<td th:text="${summary.reg_no}"></td>
 								<td th:text="${summary.model_name}"></td>
 								<td><span th:if="${summary.total_generated > 0}"
 									style="color: var(--ok); font-weight: bold;"
@@ -729,13 +724,11 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 							<tr th:each="fare : ${fareList}">
 								<td th:text="${fare.fare_id}"></td>
 								<td
-									th:text="|${fare.departure_airport_code} ➔ ${fare.arrival_airport_code}|"
-									style="font-weight: 500;"></td>
+									th:text="|${fare.departure_airport_code} ➔ ${fare.arrival_airport_code}|"></td>
 								<td th:text="${fare.class_name}"></td>
 								<td th:text="${fare.season_name}"></td>
 								<td
-									th:text="${#numbers.formatInteger(fare.price, 3, 'COMMA')} + ' 원'"
-									style="color: var(--primary); font-weight: bold;"></td>
+									th:text="${#numbers.formatInteger(fare.price, 3, 'COMMA')} + ' 원'"></td>
 								<td><label class="toggle-switch"> <input
 										type="checkbox" th:checked="${fare.is_active == 'Y'}"
 										th:onchange="toggleFareActive([[${fare.fare_id}]], this)">
