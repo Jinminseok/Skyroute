@@ -636,6 +636,12 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 					<span class="material-symbols-outlined" style="font-size: 18px">grid_on</span>
 					좌석 등록 및 자동 생성
 				</button>
+				<div style="margin-left: 15px;">
+				    <input type="text" id="seatSearchInput"
+				        onkeyup="filterTable('seatSearchInput', 'baseSeatTable')"
+				        class="input" placeholder="기재 검색 (등록번호, 모델명 등)..."
+				        style="width: 250px; padding: 6px 12px; font-size: 14px;">
+				</div>
 				<div class="grow"></div>
 				<span class="badge badge-scheduled"> SEAT </span>
 			</div>
@@ -1196,17 +1202,15 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
 	    modal.style.display = 'flex';
 	}
 	
-	function refreshGateTable() {
+	function refreshSeatTable() {
 	    fetch('/staff/basedata/airport/list')
 	        .then(res => res.text())
 	        .then(html => {
 	            const doc = new DOMParser().parseFromString(html, 'text/html');
-	            const fresh = doc.getElementById('baseGateTable');
-	            if (fresh) document.getElementById('baseGateTable').innerHTML = fresh.innerHTML;
-	            // 콤보박스용 공항 목록도 최신화
-	            const seed = doc.querySelector('script'); // window.GATE_AIRPORTS 재주입은 생략 가능
+	            const fresh = doc.getElementById('baseSeatTable');
+	            if (fresh) document.getElementById('baseSeatTable').innerHTML = fresh.innerHTML;
 	        })
-	        .catch(() => location.reload()); // 실패 시에만 전체 새로고침
+	        .catch(() => location.reload());
 	}
 	
 	function refreshRouteTable() {
@@ -1522,10 +1526,10 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
         })
         .then(response => response.text())
         .then(result => {
-            if (result === 'success') {
+        	if (result === 'success') {
                 alert('좌석이 성공적으로 생성되었습니다.');
                 closeSeatModal();
-                location.reload(); 
+                refreshSeatTable();      // 새로고침 대신 목록만 갱신 → 탭 유지
             } else {
                 alert('좌석 생성에 실패했습니다. 이미 등록된 등급이거나 오류가 발생했습니다.');
             }
@@ -1843,9 +1847,9 @@ html.return-to-gate #tab-b-gate    { display: block !important; }
         })
         .then(res => res.text())
         .then(result => {
-            if(result === 'success') {
+        	if(result === 'success') {
                 alert('좌석이 모두 초기화되었습니다.');
-                location.reload(); 
+                refreshSeatTable();      // 새로고침 대신 목록만 갱신 → 탭 유지
             } else {
                 alert('초기화에 실패했습니다. 관리자에게 문의하세요.');
             }
