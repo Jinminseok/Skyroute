@@ -51,4 +51,5 @@ public interface StaffEventMapper {
 
 	public List<EventParticipationVO> selectWinnerList(
 			@Param("event_id") long event_id);
+	
 }

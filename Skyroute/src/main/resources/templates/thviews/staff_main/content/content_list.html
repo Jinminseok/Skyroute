@@ -340,9 +340,9 @@
 				<table class="data event-data">
 					<colgroup>
 				        <col style="width:130px">
-				        <col style="width:220px">
-				        <col style="width:180px">
-				        <col style="width:75px">
+				        <col style="width:200px">
+				        <col style="width:200px">
+				        <col style="width:70px">
 				        <col style="width:85px">	
 				        <col style="width:90px">
 				        <col style="width:140px">
@@ -467,28 +467,24 @@
 										수정
 									</a>
 								
-									<form th:if="${event.is_visible == 'Y'
-												  and event.result_status != 'ANNOUNCED'
-												  and event.progress_status != '종료됨'}"
-										  th:action="@{/staff/content/event/hide}"
-										  method="post"
-										  class="inline-action-form event-visibility-form">
-										<input type="hidden" name="event_id" th:value="${event.event_id}">
-										<button type="submit" class="btn btn-ghost btn-sm">
-											비노출
-										</button>
+									<form th:if="${event.is_visible == 'Y'}"
+									      th:action="@{/staff/content/event/hide}"
+									      method="post"
+									      class="inline-action-form event-visibility-form">
+									    <input type="hidden" name="event_id" th:value="${event.event_id}">
+									    <button type="submit" class="btn btn-ghost btn-sm">
+									        비노출
+									    </button>
 									</form>
-								
-									<form th:if="${event.is_visible != 'Y'
-												  and event.result_status != 'ANNOUNCED'
-												  and event.progress_status != '종료됨'}"
-										  th:action="@{/staff/content/event/show}"
-										  method="post"
-										  class="inline-action-form event-visibility-form">
-										<input type="hidden" name="event_id" th:value="${event.event_id}">
-										<button type="submit" class="btn btn-primary btn-sm">
-											노출
-										</button>
+									
+									<form th:if="${event.is_visible != 'Y'}"
+									      th:action="@{/staff/content/event/show}"
+									      method="post"
+									      class="inline-action-form event-visibility-form">
+									    <input type="hidden" name="event_id" th:value="${event.event_id}">
+									    <button type="submit" class="btn btn-primary btn-sm">
+									        노출
+									    </button>
 									</form>
 								</div>
 							</td>

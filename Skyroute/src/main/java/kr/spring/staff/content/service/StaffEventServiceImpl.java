@@ -124,6 +124,8 @@ public class StaffEventServiceImpl implements StaffEventService {
 	public EventVO selectActiveEvent(long event_id) {
 		return staffEventMapper.selectActiveEvent(event_id);
 	}
+	
+
 
 	@Override
 	public boolean isParticipated(long event_id, long member_id) {

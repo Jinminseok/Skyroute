@@ -250,21 +250,17 @@ WINNER_COUNT = #{winner_count},
 	</update>
 	
 	<update id="showEvent"
-			parameterType="long">
-		UPDATE EVENT
-		SET IS_VISIBLE = 'Y'
-		WHERE EVENT_ID = #{event_id}
-		  AND IS_ENDED = 'N'
-		  AND NVL(RESULT_STATUS, 'PENDING') = 'PENDING'
-		  AND SYSDATE &lt; END_DATE + 1
+	        parameterType="long">
+	    UPDATE EVENT
+	    SET IS_VISIBLE = 'Y'
+	    WHERE EVENT_ID = #{event_id}
 	</update>
 	
 	<update id="endEvent"
-			parameterType="long">
-		UPDATE EVENT
-		SET IS_VISIBLE = 'N',
-			IS_ENDED = 'Y'
-		WHERE EVENT_ID = #{event_id}
+	        parameterType="long">
+	    UPDATE EVENT
+	    SET IS_ENDED = 'Y'
+	    WHERE EVENT_ID = #{event_id}
 	</update>
 	
 	
@@ -309,41 +305,25 @@ WINNER_COUNT = #{winner_count},
 	</select>
 	
 	<select id="selectEndedEventList"
-					resultType="kr.spring.staff.content.vo.EventVO">
-				SELECT EVENT_ID,
-					   TITLE,
-					   CONTENT,
-					   START_DATE,
-					   END_DATE,
-					   IMAGE_URL,
-					   DISPLAY_ORDER,
-					   RESULT_STATUS,
-					   RESULT_ANNOUNCED_AT,
-					   'ENDED' AS EVENT_STATUS
-				FROM EVENT
-				WHERE (
-						IS_ENDED = 'Y'
-						OR SYSDATE >= END_DATE + 1
-					  )
-				  AND (
-						IS_VISIBLE = 'Y'
-						OR RESULT_STATUS = 'ANNOUNCED'
-					  )
-				ORDER BY END_DATE DESC,
-						 CREATED_AT DESC
-			</select>
-			
-			<select id="selectWinnerEventRowCount"
-			parameterType="map"
-			resultType="int">
-		SELECT COUNT(*)
-		FROM EVENT E
-		WHERE E.RESULT_STATUS = 'ANNOUNCED'
-	
-		<if test="keyword != null and keyword != ''">
-			AND UPPER(E.TITLE)
-				LIKE '%' || UPPER(#{keyword}) || '%'
-		</if>
+	        resultType="kr.spring.staff.content.vo.EventVO">
+	    SELECT EVENT_ID,
+	           TITLE,
+	           CONTENT,
+	           START_DATE,
+	           END_DATE,
+	           IMAGE_URL,
+	           DISPLAY_ORDER,
+	           RESULT_STATUS,
+	           RESULT_ANNOUNCED_AT,
+	           'ENDED' AS EVENT_STATUS
+	    FROM EVENT
+	    WHERE (
+	        IS_ENDED = 'Y'
+	        OR SYSDATE >= END_DATE + 1
+	    )
+	      AND IS_VISIBLE = 'Y'
+	    ORDER BY END_DATE DESC,
+	             CREATED_AT DESC
 	</select>
 	
 	<select id="selectWinnerEventList"
@@ -477,10 +457,10 @@ e.TITLE,
 	           IMAGE_URL,
 	           IS_VISIBLE,
 	           IS_ENDED,
-DISPLAY_ORDER,
-WINNER_COUNT,
-RESULT_STATUS,
-RESULT_ANNOUNCED_AT
+				DISPLAY_ORDER,
+				WINNER_COUNT,
+				RESULT_STATUS,
+				RESULT_ANNOUNCED_AT
 	    FROM EVENT
 	    WHERE EVENT_ID = #{event_id}
 	      AND IS_VISIBLE = 'Y'
@@ -488,6 +468,8 @@ RESULT_ANNOUNCED_AT
 	      AND SYSDATE >= START_DATE
 	      AND SYSDATE &lt; END_DATE + 1
 	</select>
+	
+
 	
 	<select id="selectEventForDraw"
 		parameterType="long"
@@ -557,15 +539,15 @@ RESULT_ANNOUNCED_AT
 </update>
 
 <update id="announceEventResult"
-		parameterType="long">
-	UPDATE EVENT
-	SET RESULT_STATUS = 'ANNOUNCED',
-		RESULT_ANNOUNCED_AT = SYSTIMESTAMP,
-		IS_VISIBLE = 'N',
-		IS_ENDED = 'Y'
-	WHERE EVENT_ID = #{event_id}
-	  AND RESULT_STATUS = 'PENDING'
+        parameterType="long">
+    UPDATE EVENT
+    SET RESULT_STATUS = 'ANNOUNCED',
+        RESULT_ANNOUNCED_AT = SYSTIMESTAMP,
+        IS_ENDED = 'Y'
+    WHERE EVENT_ID = #{event_id}
+      AND RESULT_STATUS = 'PENDING'
 </update>
+
 <select id="selectMyEventParticipation"
 		resultType="kr.spring.staff.content.vo.EventParticipationVO">
 	SELECT PARTICIPATION_ID,

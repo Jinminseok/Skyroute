@@ -45,10 +45,22 @@
 .event-banner-image {
 	display: block;
 	width: 100%;
-	max-width: 420px;
 	height: 190px;
 	object-fit: cover;
 	border-radius: 8px;
+}
+
+.event-banner-image[hidden],
+.event-banner-placeholder[hidden] {
+	display: none;
+}
+
+.event-banner-placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 190px;
+	color: var(--text-light);
 }
 
 .event-edit-actions {
@@ -166,10 +178,16 @@
 						</div>
 
 						<div class="field full">
-							<label>배너 이미지 *</label>
-
+							<label>배너 이미지 미리보기</label>
+						
 							<div class="event-banner-box">
-								<div style="height:190px; display:flex; align-items:center; justify-content:center; color:var(--text-light);">
+								<img id="eventImagePreview"
+								     class="event-banner-image"
+								     alt="배너 이미지 미리보기"
+								     hidden>
+						
+								<div id="eventImagePlaceholder"
+								     class="event-banner-placeholder">
 									등록할 배너 이미지를 선택하세요.
 								</div>
 							</div>
@@ -180,6 +198,7 @@
 							<input type="file"
 							       class="input"
 							       name="upload"
+							       id="eventImageInput"
 							       accept="image/png,image/jpeg,image/gif,image/webp">
 
 							<p style="margin-top:8px; color:var(--text-light); font-size:12px;">
@@ -206,6 +225,59 @@
 		</div>
 
 	</main>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+	const imageInput = document.getElementById("eventImageInput");
+	const imagePreview = document.getElementById("eventImagePreview");
+	const imagePlaceholder = document.getElementById("eventImagePlaceholder");
+
+	if (!imageInput || !imagePreview || !imagePlaceholder) {
+		return;
+	}
+
+	imageInput.addEventListener("change", function() {
+		const file = imageInput.files[0];
+
+		if (!file) {
+			imagePreview.removeAttribute("src");
+			imagePreview.hidden = true;
+			imagePlaceholder.hidden = false;
+			return;
+		}
+
+		if (!file.type.startsWith("image/")) {
+			alert("이미지 파일만 선택할 수 있습니다.");
+			imageInput.value = "";
+			imagePreview.removeAttribute("src");
+			imagePreview.hidden = true;
+			imagePlaceholder.hidden = false;
+			return;
+		}
+
+		if (file.size > 10 * 1024 * 1024) {
+			alert("이미지는 최대 10MB까지 선택할 수 있습니다.");
+			imageInput.value = "";
+			imagePreview.removeAttribute("src");
+			imagePreview.hidden = true;
+			imagePlaceholder.hidden = false;
+			return;
+		}
+
+		const reader = new FileReader();
+
+		reader.onload = function(event) {
+			imagePreview.src = event.target.result;
+			imagePreview.hidden = false;
+			imagePlaceholder.hidden = true;
+		};
+
+		reader.readAsDataURL(file);
+	});
+});
+</script>
+
 
 </body>
 </html>

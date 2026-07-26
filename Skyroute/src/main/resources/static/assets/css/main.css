@@ -1890,7 +1890,8 @@
 }
 
 .event-slide-copy {
-    max-width: 570px;
+    width: min(100%, 560px);
+    margin-left: 50px;
     color: #ffffff;
 }
 

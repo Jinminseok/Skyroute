@@ -162,12 +162,17 @@ public class MemberEventController {
 				&& today.isBefore(startDate);
 
 		boolean endedPublicEvent =
-				"ANNOUNCED".equals(event.getResult_status())
-				|| (
-					"Y".equals(event.getIs_visible())
-					&& endDate != null
-					&& today.isAfter(endDate)
-				);
+		        "ANNOUNCED".equals(event.getResult_status())
+		        || (
+		            "Y".equals(event.getIs_visible())
+		            && (
+		                "Y".equals(event.getIs_ended())
+		                || (
+		                    endDate != null
+		                    && today.isAfter(endDate)
+		                )
+		            )
+		        );
 
 		if (!activeEvent
 				&& !scheduledEvent
