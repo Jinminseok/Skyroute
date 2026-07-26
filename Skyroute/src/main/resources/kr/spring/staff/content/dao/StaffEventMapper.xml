@@ -326,6 +326,19 @@ WINNER_COUNT = #{winner_count},
 	             CREATED_AT DESC
 	</select>
 	
+	<select id="selectWinnerEventRowCount"
+	        parameterType="map"
+	        resultType="int">
+	    SELECT COUNT(*)
+	    FROM EVENT E
+	    WHERE E.RESULT_STATUS = 'ANNOUNCED'
+	
+	    <if test="keyword != null and keyword != ''">
+	        AND UPPER(E.TITLE)
+	            LIKE '%' || UPPER(#{keyword}) || '%'
+	    </if>
+	</select>
+	
 	<select id="selectWinnerEventList"
 			parameterType="map"
 			resultType="kr.spring.staff.content.vo.EventVO">
