@@ -38,7 +38,7 @@ spring:
       enabled: true
     
     restart: #컨트롤러, 모델단이 바뀌었을 때 프로젝트 재시작 설정 (정확히는 classpath에 있는 모든 파일)
-      enabled: true #재시작 여부 지정   
+      enabled: true #재시작 여부 지정    
       
   servlet:
     multipart:
@@ -47,7 +47,7 @@ spring:
 
 mybatis: #mybatis 설정
   type-aliases-package: kr.spring.**.vo 
-  mapper-locations: kr/spring/**/dao/*.xml 
+  mapper-locations: classpath:/mapper/*.xml 
   
 logging: #로그 지정
   level:
