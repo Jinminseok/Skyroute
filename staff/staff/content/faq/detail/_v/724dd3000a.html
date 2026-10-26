@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><script src="/skyroute/staff/_demo/data.js"></script><script src="/skyroute/_demo/demo.js"></script><link rel="stylesheet" href="/skyroute/_demo/demo.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>에어 - FAQ 상세 보기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
+<link rel="stylesheet" href="/skyroute/assets/css/staff.css">
+</head>
+<body>
+    <header class="header">
+
+	<div class="logo">
+		<span class="material-symbols-outlined">airlines</span>
+		SKYROUTE
+	</div>
+
+	<nav class="top-nav">
+
+		<a href="/skyroute/staff/staff/schedule/today"
+		   class="nav-link">
+			<span class="material-symbols-outlined">flight_takeoff</span>
+			오늘 항공편
+		</a>
+
+		<a href="/skyroute/staff/staff/schedule/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">calendar_month</span>
+			운항 스케줄
+		</a>
+
+		<a href="/skyroute/staff/staff/operation/passenger/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">luggage</span>
+			탑승 관리
+		</a>
+
+		<a href="/skyroute/staff/staff/delay/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">warning</span>
+			지연·결항 관리
+		</a>
+
+		<a href="/skyroute/staff/staff/inquiry/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">forum</span>
+			고객 문의
+		</a>
+
+		<a href="/skyroute/staff/staff/content/notice/list"
+		   class="nav-link  active">
+			<span class="material-symbols-outlined">campaign</span>
+			공지·콘텐츠
+		</a>
+
+		<a href="/skyroute/staff/staff/basedata/airport/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">database</span>
+			운영 기준 정보
+		</a>
+
+	</nav>
+
+	<div class="user-menu">
+
+		<div class="user-chip">
+			<div class="avatar">박</div>
+
+			<div class="meta">
+				<div class="n">박지상</div>
+				<div class="r">운항 현장 지상직 (STAFF)</div>
+			</div>
+		</div>
+
+		<form action="/skyroute/staff/member/logout" method="post" style="margin:0;"><input type="hidden" name="_csrf" value="fA9dtxOV7JNEaDXi-w68Wrtj3JEdUZk9PFAq84TiPuN9eqL2SjprgCX22aNpWQKHyCOIaoNb8fMkaKwQD2hLkrCBWIcbHpLB"/>
+			<input type="hidden"
+			       name="_csrf"
+			       value="fA9dtxOV7JNEaDXi-w68Wrtj3JEdUZk9PFAq84TiPuN9eqL2SjprgCX22aNpWQKHyCOIaoNb8fMkaKwQD2hLkrCBWIcbHpLB">
+
+			<button type="submit" class="btn-logout">
+				<span class="material-symbols-outlined">logout</span>
+				로그아웃
+			</button>
+		</form>
+
+	</div>
+
+</header>
+
+    <main class="main">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <div class="toolbar" style="margin-bottom: 16px;">
+                <a href="/skyroute/staff/staff/content/faq/list" class="btn btn-ghost">
+                    <span class="material-symbols-outlined" style="font-size:18px">arrow_back</span> 목록으로
+                </a>
+                <div class="grow"></div>
+                <a href="/skyroute/staff/staff/content/faq/modify?faq_id=15" class="btn btn-primary">수정</a>
+            </div>
+
+            <div class="card notice-detail-card">
+                <h1>어떤 결제 수단을 사용할 수 있나요?</h1>
+                
+                <div class="notice-detail-meta">
+                    <span>카테고리: <b>결제/환불/취소</b></span>
+                    <span>상태: <b style="color:var(--ok)">공개</b></span>
+                    <span>등록 일시: <b>2026-10-25 21:31:51.527526</b></span>
+                </div>
+
+                <div class="notice-detail-content" style="white-space: pre-wrap;">신용카드와 카카오페이 결제를 지원합니다. 결제 수단별 한도 및 이용 조건은 각 카드사 또는 간편결제사의 정책을 따릅니다.</div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

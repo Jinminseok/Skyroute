@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><script src="/skyroute/staff/_demo/data.js"></script><script src="/skyroute/_demo/demo.js"></script><link rel="stylesheet" href="/skyroute/_demo/demo.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="_csrf" content="L-4kzNTGIYouSHWNx_NnL_I1traPtL0ieaBYmiVSZ8icky23GdsS--KlFLoDeULo9N5TH8oNm9S2jYgPSpg5-xExAaz69x2A" />
+<meta name="_csrf_header" content="X-CSRF-TOKEN" />
+
+<title>에어 - 오늘 항공편</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
+
+<link rel="stylesheet" href="/skyroute/assets/css/staff.css">
+<style>
+  .board-row.imminent {
+      background: rgba(234, 88, 12, 0.10);
+      box-shadow: inset 3px 0 0 var(--warn, #EA580C);
+  }
+</style>
+</head>
+
+<body>
+
+	<header class="header">
+
+	<div class="logo">
+		<span class="material-symbols-outlined">airlines</span>
+		SKYROUTE
+	</div>
+
+	<nav class="top-nav">
+
+		<a href="/skyroute/staff/staff/schedule/today"
+		   class="nav-link  active">
+			<span class="material-symbols-outlined">flight_takeoff</span>
+			오늘 항공편
+		</a>
+
+		<a href="/skyroute/staff/staff/schedule/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">calendar_month</span>
+			운항 스케줄
+		</a>
+
+		<a href="/skyroute/staff/staff/operation/passenger/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">luggage</span>
+			탑승 관리
+		</a>
+
+		<a href="/skyroute/staff/staff/delay/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">warning</span>
+			지연·결항 관리
+		</a>
+
+		<a href="/skyroute/staff/staff/inquiry/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">forum</span>
+			고객 문의
+		</a>
+
+		<a href="/skyroute/staff/staff/content/notice/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">campaign</span>
+			공지·콘텐츠
+		</a>
+
+		<a href="/skyroute/staff/staff/basedata/airport/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">database</span>
+			운영 기준 정보
+		</a>
+
+	</nav>
+
+	<div class="user-menu">
+
+		<div class="user-chip">
+			<div class="avatar">박</div>
+
+			<div class="meta">
+				<div class="n">박지상</div>
+				<div class="r">운항 현장 지상직 (STAFF)</div>
+			</div>
+		</div>
+
+		<form action="/skyroute/staff/member/logout" method="post" style="margin:0;"><input type="hidden" name="_csrf" value="L-4kzNTGIYouSHWNx_NnL_I1traPtL0ieaBYmiVSZ8icky23GdsS--KlFLoDeULo9N5TH8oNm9S2jYgPSpg5-xExAaz69x2A"/>
+			<input type="hidden"
+			       name="_csrf"
+			       value="L-4kzNTGIYouSHWNx_NnL_I1traPtL0ieaBYmiVSZ8icky23GdsS--KlFLoDeULo9N5TH8oNm9S2jYgPSpg5-xExAaz69x2A">
+
+			<button type="submit" class="btn-logout">
+				<span class="material-symbols-outlined">logout</span>
+				로그아웃
+			</button>
+		</form>
+
+	</div>
+
+</header>
+
+	<main class="main">
+
+		<h1>오늘 항공편 실시간 상태 관리</h1>
+		<p class="desc">
+			금일 운항되는 항공편 스케줄의 상태를 수동 변경하여 단계별 전이를 수행합니다.
+		</p>
+
+		<div class="grid grid-4" style="margin-bottom:24px">
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px; color:var(--primary)">
+						flight
+					</span>
+					오늘 전체 항공편
+				</div>
+				<div class="value" style="color:var(--primary)">
+					<span>18</span>
+					<span class="unit">편</span>
+				</div>
+			</div>
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px; color:var(--ok)">
+						flight_takeoff
+					</span>
+					출발 대기 / 탑승중
+				</div>
+				<div class="value" style="color:var(--ok)">
+					<span>14</span><span class="unit">편</span>
+				</div>
+			</div>
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px; color:#475569">
+						flight_land
+					</span>
+					운항 / 도착 완료
+				</div>
+				<div class="value" style="color:#475569">
+					<span>0</span><span class="unit">편</span>
+				</div>
+			</div>
+
+			<div class="stat">
+				<div class="label">
+					<span class="material-symbols-outlined" style="font-size:18px; color:var(--danger)">
+						warning
+					</span>
+					비정상 (지연 / 결항)
+				</div>
+				<div class="value" style="color:var(--danger)">
+					<span>4</span><span class="unit">편</span>
+				</div>
+			</div>
+
+		</div>
+
+		<div class="board">
+
+			<div class="board-head">
+				<div class="t">
+					<span class="material-symbols-outlined" style="color:var(--primary)">
+						display_settings
+					</span>
+					실시간 운항 현황판 제어
+				</div>
+				<div class="clk" id="clock">--:--:--</div>
+			</div>
+
+			<div class="board-row head" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;">
+				<span>항공편명</span>
+				<span>노선구간</span>
+				<span>출발 ➔ 도착 시각</span> <!-- 통합 -->
+				<span>출발 ➔ 도착 게이트</span> <!-- 통합 -->
+				<span>항공기모델</span>
+				<span>현재 상태</span>
+				<span>지연</span> <!-- 신설 -->
+				<span>수동 상태 변경 제어</span>
+			</div>
+
+			<div id="todayBoardRows">
+				<!-- 데이터 행도 (8칸) -->
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T23:20" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR116</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">DOH → ICN</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>23:20</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">09:40</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">D1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A2</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A005 (Airbus A330-200)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(19, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T16:00" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR112</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">SIN → ICN</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>16:00</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">22:30</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">E1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A003 (Airbus A330-300)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(15, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T14:00" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR131</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">ICN → AKL</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>14:00</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">01:30</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A2</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-B005 (Boeing 787-10)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(34, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T13:00" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR127</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">ICN → LHR</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>13:00</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">03:30</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">F1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-B004 (Boeing 777-300ER)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(30, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T12:50" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR110</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">PEK → ICN</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>12:50</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">15:10</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">C1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-B002 (Boeing 737-900ER)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(13, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T12:00" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR108</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">NRT → ICN</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>12:00</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">14:30</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">B1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A2</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-B001 (Boeing 737-800)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(11, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T12:00" data-delay="90">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR123</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">ICN → CDG</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>12:00</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">02:00</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A2</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">B1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A004 (Airbus A350-900)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						
+						
+						<span style="color: var(--warn); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> 지연
+						</span>
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: var(--danger); font-weight: 700; font-size: 14px;" 
+					      class="mono">90분</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(26, this.value)">
+							<option value="SCHEDULED">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							<option value="DELAYED" selected="selected">지연</option>
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T11:10" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR106</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">CJU → GMP</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>11:10</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">12:20</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">C2</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A2</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A002 (Airbus A321neo)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(9, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T11:00" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR119</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">ICN → JFK</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>11:00</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">01:00</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">D1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-B003 (Boeing 787-9)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(22, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T10:50" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR103</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">CJU → PUS</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>10:50</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">11:50</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">C1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">D1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A001 (Airbus A321-200)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(6, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T10:00" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR115</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">ICN → DOH</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>10:00</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">20:20</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A2</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">D1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A005 (Airbus A330-200)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(18, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T09:10" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR105</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">PUS → CJU</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>09:10</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">10:10</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">D2</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">C2</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A002 (Airbus A321neo)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(8, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T09:00" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR109</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">ICN → PEK</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>09:00</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">11:20</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">C1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-B002 (Boeing 737-900ER)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(12, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T08:40" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR102</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">GMP → CJU</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>08:40</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">09:50</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">C1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A001 (Airbus A321-200)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(5, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T08:00" data-delay="45">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR107</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">ICN → NRT</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>08:00</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">10:30</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A2</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">B1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-B001 (Boeing 737-800)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						
+						
+						<span style="color: var(--warn); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> 지연
+						</span>
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: var(--danger); font-weight: 700; font-size: 14px;" 
+					      class="mono">45분</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(10, this.value)">
+							<option value="SCHEDULED">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							<option value="DELAYED" selected="selected">지연</option>
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T07:30" data-delay="60">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR111</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">ICN → SIN</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>07:30</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">14:00</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">E1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A003 (Airbus A330-300)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						
+						
+						<span style="color: var(--warn); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> 지연
+						</span>
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: var(--danger); font-weight: 700; font-size: 14px;" 
+					      class="mono">60분</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(14, this.value)">
+							<option value="SCHEDULED">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							<option value="DELAYED" selected="selected">지연</option>
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T07:00" data-delay="0">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR104</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">GMP → PUS</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>07:00</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">08:10</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A2</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">D2</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A002 (Airbus A321neo)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						<span style="color: var(--ok); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">radio_button_unchecked</span> 
+							<span>정상/예정</span>
+						</span>
+						
+						
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: #94a3b8; font-size: 14px;" 
+					      class="mono">-</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(7, this.value)">
+							<option value="SCHEDULED" selected="selected">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							
+        					
+						</select>
+					</span>
+					
+				</div>
+				<div class="board-row" style="display: grid; grid-template-columns: 1fr 1fr 1.6fr 1.4fr 1fr 1fr 0.8fr 1.2fr; gap: 16px; align-items: center;" data-dep="2026-10-25T06:30" data-delay="20">					
+					<!-- 1. 항공편명 -->
+					<span style="font-weight: 700; color: var(--primary); font-size: 15px;">SR101</span>
+					
+					<!-- 2. 노선구간 -->
+					<span style="color: #475569; font-weight: 500;">PUS → GMP</span>
+					
+					<!-- 3. 출발 ➔ 도착 시각 -->
+					<span style="font-size: 15px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px;">
+						<span>06:30</span>
+						<span style="color: #cbd5e1; font-weight: 400; font-size: 12px;">➔</span>
+						<span style="color: #64748b;">07:40</span>
+					</span>
+					
+					<!-- 4. 출발 ➔ 도착 게이트 -->
+					<span style="display: flex; align-items: center; gap: 6px;">
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">D1</span>
+						<span style="color: #cbd5e1; font-size: 12px;">➔</span>
+						<span style="background-color: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 6px; font-weight: 600; border: 1px solid #e2e8f0; font-size: 12px;">A1</span>
+					</span>
+					
+					<!-- 5. 항공기모델 -->
+					<span style="color: #64748b; font-size: 13px;">SR-A001 (Airbus A321-200)</span>
+					
+					<!-- 6. 현재 상태 -->
+					<span>
+						
+						
+						<span style="color: var(--warn); font-weight: 700; display: flex; align-items: center; gap: 4px; font-size: 13px;">
+							<span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> 지연
+						</span>
+						
+						
+					</span>
+
+					<!-- 7. 지연 -->
+					<span style="color: var(--danger); font-weight: 700; font-size: 14px;" 
+					      class="mono">20분</span>
+					
+					<!-- 8. 수동 상태 변경 제어 -->
+					<span>
+						<select class="input" style="padding: 4px 8px; font-size: 13px; height: 32px; width: 120px; border-radius: 6px; cursor: pointer;" 
+						        onchange="changeFlightStatus(4, this.value)">
+							<option value="SCHEDULED">정상/예정</option>
+							<option value="BOARDING">탑승중</option>
+							<option value="DEPARTED">출발완료</option>
+							<option value="ARRIVED">도착완료</option>
+							<option value="COMPLETED">운항종료</option>
+							<option value="DELAYED" selected="selected">지연</option>
+        					
+						</select>
+					</span>
+					
+				</div>
+				
+				<!-- 데이터가 없을 때 -->
+				
+			</div>
+
+		</div>
+
+	</main>
+
+	<div class="toast-wrap" id="toasts"></div>
+
+	<script src="/skyroute/staff/assets/js/staff.js"></script>
+
+	<script>
+	(function () {
+	    function markImminentFlights() {
+	        const now = new Date();
+	        document.querySelectorAll('.board-row[data-dep]').forEach(function (row) {
+	            const depStr = row.getAttribute('data-dep');
+	            if (!depStr) return;
+	            const dep = new Date(depStr.replace(' ', 'T'));
+	            if (isNaN(dep)) return;
+	
+	            const delay = parseInt(row.getAttribute('data-delay')) || 0;
+	            const windowStart = new Date(dep.getTime() - 60 * 60 * 1000);
+	            const windowEnd   = new Date(dep.getTime() + delay * 60 * 1000);
+	
+	            row.classList.toggle('imminent', now >= windowStart && now <= windowEnd);
+	        });
+	    }
+	    document.addEventListener('DOMContentLoaded', markImminentFlights);
+	    setInterval(markImminentFlights, 60 * 1000);
+	})();
+	</script>
+</body>
+</html>

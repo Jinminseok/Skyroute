@@ -1,0 +1,484 @@
+<div>
+
+	<div id="eventStatsFragment" class="grid grid-4" style="margin-bottom:24px">
+		<div class="stat event-stat-card" data-event-status="">
+			<div class="label">
+				<span class="material-symbols-outlined" style="font-size:18px">local_activity</span>
+				전체 이벤트
+			</div>
+			<div class="value">
+				<span>6</span><span class="unit">건</span>
+			</div>
+		</div>
+
+		<div class="stat event-stat-card" data-event-status="visible">
+			<div class="label">
+				<span class="material-symbols-outlined" style="font-size:18px; color:var(--ok)">visibility</span>
+				메인 노출 중
+			</div>
+			<div class="value" style="color:var(--ok)">
+				<span>4</span><span class="unit">건</span>
+			</div>
+		</div>
+
+		<div class="stat event-stat-card" data-event-status="ongoing">
+			<div class="label">
+				<span class="material-symbols-outlined" style="font-size:18px; color:var(--primary)">play_circle</span>
+				응모 진행 중
+			</div>
+			<div class="value" style="color:var(--primary)">
+				<span>4</span><span class="unit">건</span>
+			</div>
+		</div>
+
+		<div class="stat event-stat-card" data-event-status="draw">
+			<div class="label">
+				<span class="material-symbols-outlined" style="font-size:18px; color:var(--warn)">casino</span>
+				추첨 필요
+			</div>
+			<div class="value" style="color:var(--warn)">
+				<span>0</span><span class="unit">건</span>
+			</div>
+		</div>
+	</div>
+
+	<div id="eventListFragment">
+
+		<div class="toolbar">
+			<a href="/skyroute/staff/staff/content/event/write" class="btn btn-primary">
+				<span class="material-symbols-outlined" style="font-size:18px">add</span>
+				새 이벤트 등록
+			</a>
+
+			<div class="grow"></div>
+
+			<span class="badge badge-scheduled">EVENT</span>
+		</div>
+
+		<form id="eventSearchForm" class="event-filter-bar">
+			<div class="event-filter-left">
+				<input type="hidden"
+					   id="eventStatus"
+					   name="status"
+					   value="ongoing">
+
+				<div class="event-filter-group">
+					<button type="button"
+							class="event-filter-btn"
+							data-status="">
+						전체
+					</button>
+					<button type="button"
+							class="event-filter-btn"
+							data-status="visible">
+						메인 노출 중
+					</button>
+
+					<button type="button"
+							class="event-filter-btn active"
+							data-status="ongoing">
+						진행 중
+					</button>
+
+					<button type="button"
+							class="event-filter-btn"
+							data-status="scheduled">
+						진행 예정
+					</button>
+
+					<button type="button"
+							class="event-filter-btn event-filter-draw"
+							data-status="draw">
+						추첨 필요
+					</button>
+
+					<button type="button"
+							class="event-filter-btn"
+							data-status="ended">
+						종료됨
+					</button>
+				</div>
+
+				<div class="event-search-box">
+					<span class="material-symbols-outlined">search</span>
+
+					<input type="search"
+						   name="keyword"
+						   value=""
+						   placeholder="이벤트명을 검색하세요"
+						   autocomplete="off">
+				</div>
+
+				<button type="submit" class="btn btn-primary btn-sm">
+					검색
+				</button>
+
+				<button type="button"
+						id="eventSearchReset"
+						class="btn btn-ghost btn-sm">
+					초기화
+				</button>
+			</div>
+
+			<div class="event-result-count">
+				검색 결과
+				<strong>4</strong>건
+			</div>
+		</form>
+
+		<div class="card">
+			<div class="table-wrap">
+				<table class="data event-data">
+					<colgroup>
+				        <col style="width:130px">
+				        <col style="width:200px">
+				        <col style="width:200px">
+				        <col style="width:70px">
+				        <col style="width:85px">	
+				        <col style="width:90px">
+				        <col style="width:140px">
+				        <col style="width:80px">
+				        <col style="width:160px">
+				    </colgroup>
+					<thead>
+						<tr>
+							<th>배너 이미지</th>
+							<th>이벤트명</th>
+							<th>진행 기간</th>
+							<th>노출 순서</th>
+							<th>노출 여부</th>
+							<th>진행 여부</th>
+							<th>이벤트 상태</th>
+							<th>참여자 수</th>
+							<th>콘텐츠 편집</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						
+
+						<tr>
+							<td>
+								<img src="/skyroute/assets/upload/b9b81219-17a8-4b83-8ed0-a43c5a097fc8.png"
+									 alt="이벤트 배너"
+									 style="width:120px; height:56px; object-fit:cover; border-radius:6px;">
+
+								
+							</td>
+
+							<td class="event-title-cell">
+							    <strong class="event-title-text"
+							            title="미리 준비하는 나의 특별한 미국 여행">미리 준비하는 나의 특별한 미국 여행</strong>
+							</td>
+
+							<td class="mono">
+								<span>2026-10-15</span>
+								~
+								<span>2026-12-20</span>
+							</td>
+
+							<td class="mono">6</td>
+
+							<td>
+								<span class="badge badge-ok">
+									노출
+								</span>
+							
+								
+							</td>
+							<td>
+								<span class="badge badge-ok">
+									진행 중
+								</span>
+
+								
+
+								
+							</td>
+
+							<td>
+								
+
+								
+
+								<span class="badge badge-scheduled">응모 진행 중</span>
+
+								
+							</td>
+
+							<td class="mono">
+								<span>4</span>명
+							</td>
+
+							<td>
+								<div class="btn-action-group">
+									<a href="/skyroute/staff/staff/content/event/detail?event_id=6"
+									   class="btn btn-ghost btn-sm">
+										상세
+									</a>
+								
+									<a href="/skyroute/staff/staff/content/event/update?event_id=6"
+									   class="btn btn-primary btn-sm">
+										수정
+									</a>
+								
+									<form action="/skyroute/staff/staff/content/event/hide"
+									      method="post"
+									      class="inline-action-form event-visibility-form"><input type="hidden" name="_csrf" value="a7YkI7jWenYfVBX8tkrI91MOMySYb0PobuFvwq_ytSogxADzXYMSFI61T0YyZSKZhWf8x2s2HkahVnbFXdkOo5uR005GoDDE"/>
+									    <input type="hidden" name="event_id" value="6">
+									    <button type="submit" class="btn btn-ghost btn-sm">
+									        비노출
+									    </button>
+									</form>
+									
+									
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td>
+								<img src="/skyroute/assets/upload/9e518ae9-5ad6-44a7-a305-2f2789170418.png"
+									 alt="이벤트 배너"
+									 style="width:120px; height:56px; object-fit:cover; border-radius:6px;">
+
+								
+							</td>
+
+							<td class="event-title-cell">
+							    <strong class="event-title-text"
+							            title="떠나고 싶을 때 가장 먼저 생각나는 일본">떠나고 싶을 때 가장 먼저 생각나는 일본</strong>
+							</td>
+
+							<td class="mono">
+								<span>2026-10-10</span>
+								~
+								<span>2026-12-15</span>
+							</td>
+
+							<td class="mono">2</td>
+
+							<td>
+								<span class="badge badge-ok">
+									노출
+								</span>
+							
+								
+							</td>
+							<td>
+								<span class="badge badge-ok">
+									진행 중
+								</span>
+
+								
+
+								
+							</td>
+
+							<td>
+								
+
+								
+
+								<span class="badge badge-scheduled">응모 진행 중</span>
+
+								
+							</td>
+
+							<td class="mono">
+								<span>4</span>명
+							</td>
+
+							<td>
+								<div class="btn-action-group">
+									<a href="/skyroute/staff/staff/content/event/detail?event_id=2"
+									   class="btn btn-ghost btn-sm">
+										상세
+									</a>
+								
+									<a href="/skyroute/staff/staff/content/event/update?event_id=2"
+									   class="btn btn-primary btn-sm">
+										수정
+									</a>
+								
+									<form action="/skyroute/staff/staff/content/event/hide"
+									      method="post"
+									      class="inline-action-form event-visibility-form"><input type="hidden" name="_csrf" value="a7YkI7jWenYfVBX8tkrI91MOMySYb0PobuFvwq_ytSogxADzXYMSFI61T0YyZSKZhWf8x2s2HkahVnbFXdkOo5uR005GoDDE"/>
+									    <input type="hidden" name="event_id" value="2">
+									    <button type="submit" class="btn btn-ghost btn-sm">
+									        비노출
+									    </button>
+									</form>
+									
+									
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td>
+								<img src="/skyroute/assets/upload/58ff73c4-25dd-43ba-aa2b-f9f83597925f.png"
+									 alt="이벤트 배너"
+									 style="width:120px; height:56px; object-fit:cover; border-radius:6px;">
+
+								
+							</td>
+
+							<td class="event-title-cell">
+							    <strong class="event-title-text"
+							            title="낭만이 시작되는 곳, 유럽으로">낭만이 시작되는 곳, 유럽으로</strong>
+							</td>
+
+							<td class="mono">
+								<span>2026-10-05</span>
+								~
+								<span>2026-12-31</span>
+							</td>
+
+							<td class="mono">3</td>
+
+							<td>
+								<span class="badge badge-ok">
+									노출
+								</span>
+							
+								
+							</td>
+							<td>
+								<span class="badge badge-ok">
+									진행 중
+								</span>
+
+								
+
+								
+							</td>
+
+							<td>
+								
+
+								
+
+								<span class="badge badge-scheduled">응모 진행 중</span>
+
+								
+							</td>
+
+							<td class="mono">
+								<span>4</span>명
+							</td>
+
+							<td>
+								<div class="btn-action-group">
+									<a href="/skyroute/staff/staff/content/event/detail?event_id=3"
+									   class="btn btn-ghost btn-sm">
+										상세
+									</a>
+								
+									<a href="/skyroute/staff/staff/content/event/update?event_id=3"
+									   class="btn btn-primary btn-sm">
+										수정
+									</a>
+								
+									<form action="/skyroute/staff/staff/content/event/hide"
+									      method="post"
+									      class="inline-action-form event-visibility-form"><input type="hidden" name="_csrf" value="a7YkI7jWenYfVBX8tkrI91MOMySYb0PobuFvwq_ytSogxADzXYMSFI61T0YyZSKZhWf8x2s2HkahVnbFXdkOo5uR005GoDDE"/>
+									    <input type="hidden" name="event_id" value="3">
+									    <button type="submit" class="btn btn-ghost btn-sm">
+									        비노출
+									    </button>
+									</form>
+									
+									
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td>
+								<img src="/skyroute/assets/upload/164109ea-5adb-46a6-a02a-81e600daba3b.png"
+									 alt="이벤트 배너"
+									 style="width:120px; height:56px; object-fit:cover; border-radius:6px;">
+
+								
+							</td>
+
+							<td class="event-title-cell">
+							    <strong class="event-title-text"
+							            title="가을 여행 특가 - 국내선 최대 30% 할인">가을 여행 특가 - 국내선 최대 30% 할인</strong>
+							</td>
+
+							<td class="mono">
+								<span>2026-10-01</span>
+								~
+								<span>2026-11-30</span>
+							</td>
+
+							<td class="mono">1</td>
+
+							<td>
+								<span class="badge badge-ok">
+									노출
+								</span>
+							
+								
+							</td>
+							<td>
+								<span class="badge badge-ok">
+									진행 중
+								</span>
+
+								
+
+								
+							</td>
+
+							<td>
+								
+
+								
+
+								<span class="badge badge-scheduled">응모 진행 중</span>
+
+								
+							</td>
+
+							<td class="mono">
+								<span>4</span>명
+							</td>
+
+							<td>
+								<div class="btn-action-group">
+									<a href="/skyroute/staff/staff/content/event/detail?event_id=1"
+									   class="btn btn-ghost btn-sm">
+										상세
+									</a>
+								
+									<a href="/skyroute/staff/staff/content/event/update?event_id=1"
+									   class="btn btn-primary btn-sm">
+										수정
+									</a>
+								
+									<form action="/skyroute/staff/staff/content/event/hide"
+									      method="post"
+									      class="inline-action-form event-visibility-form"><input type="hidden" name="_csrf" value="a7YkI7jWenYfVBX8tkrI91MOMySYb0PobuFvwq_ytSogxADzXYMSFI61T0YyZSKZhWf8x2s2HkahVnbFXdkOo5uR005GoDDE"/>
+									    <input type="hidden" name="event_id" value="1">
+									    <button type="submit" class="btn btn-ghost btn-sm">
+									        비노출
+									    </button>
+									</form>
+									
+									
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			
+		</div>
+
+	</div>
+
+</div>

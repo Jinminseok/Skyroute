@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html>
+<head><script src="/skyroute/user/_demo/data.js"></script><script src="/skyroute/_demo/demo.js"></script><link rel="stylesheet" href="/skyroute/_demo/demo.css">
+	<meta charset="UTF-8">
+	<meta name="csrf-header" content="X-CSRF-TOKEN" />
+	<meta name="csrf-token" content="jzGrXOq5u-wRuprG81FLB6UhvR8rDgTgnH-BU8vyfJHKtU4GuAaYaY-Nit08iv6lw3x_ZJBCkCdJaj3N-Ua4MvOXSqH60C0y">
+	
+	<title>SpringPage > SkyRoute - 탑승객 정보 입력</title>
+	<link rel="stylesheet" href="/skyroute/assets/css/member.css" type="text/css">
+	<link rel="stylesheet" href="/skyroute/assets/css/header.css" type="text/css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+	<meta charset="UTF-8">
+	
+	<link rel="stylesheet"
+          href="/skyroute/assets/css/member.css"
+          type="text/css">
+	<style>
+        .passenger-page {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .passenger-guide {
+            margin-bottom: 24px;
+            padding: 16px 18px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+   
+
+        .passenger-card {
+            margin-bottom: 24px;
+            padding: 24px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .passenger-card-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .passenger-card-title h3 {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .passenger-type {
+            display: inline-flex;
+            align-items: center;
+            min-height: 26px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .passenger-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .passenger-field {
+            display: block;
+            min-width: 0;
+        }
+
+        .passenger-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .passenger-field > span {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--ink-500);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .passenger-field input,
+        .passenger-field select {
+            width: 100%;
+            height: 44px;
+            padding: 0 13px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .passenger-field input:focus,
+        .passenger-field select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        .field-error {
+            display: block;
+            margin-top: 6px;
+            color: var(--bad);
+            font-size: 11px;
+        }
+
+        .passenger-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .passenger-submit {
+            min-width: 280px;
+            height: 50px;
+            border: 0;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        @media(max-width: 720px) {
+            .passenger-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .passenger-field.full {
+                grid-column: auto;
+            }
+
+            .passenger-card {
+                padding: 18px;
+            }
+
+            .passenger-submit {
+                width: 100%;
+                min-width: 0;
+            }
+            
+            .passenger-card-tools {
+			    display: flex;
+			    align-items: center;
+			    gap: 8px;
+			}
+			
+			.load-saved-passenger {
+			    min-height: 32px;
+			    padding: 6px 12px;
+			    border: 1px solid var(--accent);
+			    border-radius: 8px;
+			    background: #fff;
+			    color: var(--accent);
+			    font-family: inherit;
+			    font-size: 12px;
+			    font-weight: 600;
+			    cursor: pointer;
+			}
+			
+			.load-saved-passenger:hover {
+			    background: var(--accent-soft);
+			}
+			
+			.passenger-card-tools {
+			    display: flex;
+			    align-items: center;
+			    gap: 8px;
+			}
+			
+			.load-saved-passenger {
+			    min-height: 32px;
+			    padding: 6px 12px;
+			    border: 1px solid var(--accent);
+			    border-radius: 8px;
+			    background: #fff;
+			    color: var(--accent);
+			    font-family: inherit;
+			    font-size: 12px;
+			    font-weight: 600;
+			    cursor: pointer;
+			}
+			
+			.load-saved-passenger:hover {
+			    background: var(--accent-soft);
+			}
+        }
+        .passenger-prev-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-decoration: none;
+}
+    </style>
+</head>
+<body>
+<div id="main">
+	<!-- header 시작 -->
+	<div id="main_header">
+<style>
+/* 프로필 링크 전체 레이아웃 */
+.sr-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px 5px 6px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    color: #0f172a;
+    font-size: 13.5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+.sr-profile:hover {
+    border-color: #2563eb;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+.sr-profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+</style>
+	<header class="sr-header">
+
+		<!-- ================= 상단 유틸리티 바 ================= -->
+		<div class="sr-topbar">
+			<div class="sr-wrap sr-topbar-inner">
+
+				<a href="/skyroute/user/member/event/list" class="sr-topbar-link">
+					<span class="material-symbols-outlined" aria-hidden="true">celebration</span>
+					이벤트
+				</a>
+			
+				<span class="sr-topbar-divider" aria-hidden="true"></span>
+				
+
+				<!-- 고객센터 드롭다운 -->
+				<div class="sr-topbar-dropdown">
+					<button type="button" class="sr-topbar-link" aria-haspopup="true" aria-expanded="false">
+						<span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
+						고객센터
+						<span class="material-symbols-outlined sr-topbar-arrow" aria-hidden="true">expand_more</span>
+					</button>
+
+					<div class="sr-topbar-menu">
+						<a href="/skyroute/user/member/notice/list">
+							<span class="material-symbols-outlined" aria-hidden="true">campaign</span>
+							<span>
+								<b>공지사항</b>
+								<small>서비스 소식과 이용 안내</small>
+							</span>
+						</a>
+
+						<a href="/skyroute/user/member/faq/list">
+							<span class="material-symbols-outlined" aria-hidden="true">help</span>
+							<span>
+								<b>자주 묻는 질문</b>
+								<small>FAQ 로 빠르게 확인</small>
+							</span>
+						</a>
+
+						<a href="javascript:alert('1:1 문의 페이지는 준비 중입니다.');">
+							<span class="material-symbols-outlined" aria-hidden="true">forum</span>
+							<span>
+								<b>1:1 문의</b>
+								<small>문의 등록 및 답변 확인</small>
+							</span>
+						</a>
+					</div>
+				</div>
+
+				
+				
+
+				
+
+			</div>
+		</div>
+
+		<!-- ================= 메인 바 ================= -->
+		<div class="sr-mainbar">
+			<div class="sr-wrap sr-mainbar-inner">
+
+				<!-- 로고 : 회전하는 지구 위를 나는 항공기 -->
+				<a href="/skyroute/user/main/home" class="sr-brand" aria-label="SkyRoute 홈으로">
+
+					<svg class="sr-brand-mark" viewBox="0 0 56 56" role="img" aria-hidden="true" focusable="false">
+						<defs>
+							<linearGradient id="srGlobeGrad" x1="14" y1="14" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+								<stop offset="0" stop-color="#63CCFF"/>
+								<stop offset="0.55" stop-color="#0F86F0"/>
+								<stop offset="1" stop-color="#0047B3"/>
+							</linearGradient>
+
+							<clipPath id="srGlobeClip">
+								<circle cx="28" cy="28" r="14"/>
+							</clipPath>
+
+							<!-- 자전하는 지표면 타일 (가로 28 = 지구 지름) -->
+							<g id="srGlobeTile">
+								<g fill="#0B2D5E" opacity="0.45">
+									<path d="M2 18 c4 -2.5 8 -1.5 9 1 c1.2 2.6 -1.6 5 -5 4.6 c-3.4 -0.4 -6 -3.4 -4 -5.6 Z"/>
+									<path d="M14 30 c4 -3 9 -1.4 10 2 c1 3.2 -2.6 6.4 -6.4 5.6 c-3.8 -0.8 -6 -5 -3.6 -7.6 Z"/>
+									<path d="M4 33 c2.4 -0.8 4.4 1 3.8 3.2 c-0.6 2.2 -3.8 2.6 -4.8 0.6 c-1 -2 -0.6 -3.2 1 -3.8 Z"/>
+									<path d="M22 15 c2.6 -1.2 5.2 0.4 4.8 2.6 c-0.4 2.2 -3.6 3 -5.2 1.4 c-1.4 -1.4 -1.2 -3.2 0.4 -4 Z"/>
+								</g>
+								<g fill="none" stroke="#ffffff" stroke-width="0.7" opacity="0.35">
+									<path d="M3 13 C 1 21, 1 35, 3 43"/>
+									<path d="M10 13 C 8.6 21, 8.6 35, 10 43"/>
+									<path d="M17 13 C 16 21, 16 35, 17 43"/>
+									<path d="M24 13 C 22.6 21, 22.6 35, 24 43"/>
+								</g>
+							</g>
+
+							<!-- 항공기 -->
+							<g id="srPlane">
+								<path d="M0 -13 C 1.7 -13 2.6 -10.6 2.7 -6.4 L12.6 0.4 L12.6 3.6 L2.7 0.9
+										 L2.7 7.6 L6.1 10.6 L6.1 12.8 L0 11.1 L-6.1 12.8 L-6.1 10.6 L-2.7 7.6
+										 L-2.7 0.9 L-12.6 3.6 L-12.6 0.4 L-2.7 -6.4 C -2.6 -10.6 -1.7 -13 0 -13 Z"
+									  fill="#0F172A" stroke="#ffffff" stroke-width="2.4"
+									  stroke-linejoin="round" paint-order="stroke"/>
+							</g>
+						</defs>
+
+						<!-- ===== 지구 뒤쪽 : 궤도 후반부 + 뒤로 지나가는 항공기 ===== -->
+						<g transform="rotate(-16 28 28)">
+							<path d="M 6,28 A 22,7 0 0,1 50,28" fill="none" stroke="#0066E2"
+								  stroke-width="1.1" opacity="0.28" stroke-dasharray="2 3"/>
+
+							<g class="sr-plane-back">
+								<g transform="rotate(90) scale(0.42)">
+									<use href="#srPlane"/>
+								</g>
+							</g>
+						</g>
+
+						<!-- ===== 지구 ===== -->
+						<circle cx="28" cy="28" r="14" fill="url(#srGlobeGrad)"/>
+
+						<g clip-path="url(#srGlobeClip)">
+							<g class="sr-globe-spin">
+								<use href="#srGlobeTile" x="14"/>
+								<use href="#srGlobeTile" x="42"/>
+							</g>
+						</g>
+
+						<g clip-path="url(#srGlobeClip)" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.4">
+							<line x1="14" y1="28" x2="42" y2="28"/>
+							<path d="M16 21 H40"/>
+							<path d="M16 35 H40"/>
+						</g>
+
+						<circle cx="28" cy="28" r="14" fill="none" stroke="#ffffff" stroke-width="0.9" opacity="0.45"/>
+						<path d="M19 19 a13 13 0 0 1 8 -4" fill="none" stroke="#ffffff"
+							  stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+
+						<!-- ===== 지구 앞쪽 : 궤도 전반부 + 앞으로 지나가는 항공기 ===== -->
+						<g transform="rotate(-16 28 28)">
+							<path d="M 50,28 A 22,7 0 0,1 6,28" fill="none" stroke="#0066E2"
+								  stroke-width="1.1" opacity="0.45" stroke-dasharray="2 3"/>
+
+							<g class="sr-plane-front">
+								<g transform="rotate(90) scale(0.42)">
+									<use href="#srPlane"/>
+								</g>
+							</g>
+						</g>
+					</svg>
+
+					<span class="sr-brand-text">
+						<strong>SkyRoute</strong>
+						<small>FLY YOUR ROUTE</small>
+					</span>
+				</a>
+
+				<!-- 주 메뉴 -->
+				<nav class="sr-nav" aria-label="주 메뉴">
+					
+
+						<!-- 예약 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/main/home" class="sr-nav-link  is-on">예약</a>
+
+							<div class="sr-nav-menu">
+								<a href="/skyroute/user/main/home">
+									<span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>
+									<span>
+										<b>항공권 예약</b>
+										<small>출발지 · 도착지 검색</small>
+									</span>
+								</a>
+								<a href="/skyroute/user/member/member_booking">
+									<span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+									<span>
+										<b>예약 조회 · 취소</b>
+										<small>예약 확인 및 취소</small>
+									</span>
+								</a>
+							</div>
+						</div>
+
+						<!-- 여행 준비 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/member/member_schedule" class="sr-nav-link">여행 준비</a>
+
+							<div class="sr-nav-menu">
+								<a href="/skyroute/user/member/member_schedule">
+									<span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+									<span>
+										<b>출도착 · 스케줄</b>
+										<small>실시간 운항 현황</small>
+									</span>
+								</a>
+								<a href="/skyroute/user/member/member_route">
+									<span class="material-symbols-outlined" aria-hidden="true">route</span>
+									<span>
+										<b>운항 노선</b>
+										<small>취항지 및 노선 안내</small>
+									</span>
+								</a>							
+							</div>
+						</div>
+						
+						<!-- 여행 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/member/travel/member_airport" class="sr-nav-link">여행</a>
+						
+							<div class="sr-nav-menu">
+								<a href="/skyroute/user/member/travel/member_airport">
+									<span class="material-symbols-outlined" aria-hidden="true">connecting_airports</span>
+									<span>
+										<b>공항에서</b>
+										<small>공항 위치와 탑승 안내</small>
+									</span>
+								</a>
+						
+								<a href="/skyroute/user/member/travel/member_cabin">
+									<span class="material-symbols-outlined" aria-hidden="true">airline_seat_recline_normal</span>
+									<span>
+										<b>기내에서</b>
+										<small>좌석 등급과 기내 서비스</small>
+									</span>
+								</a>
+						
+								<a href="/skyroute/user/member/travel/member_aircraft">
+									<span class="material-symbols-outlined" aria-hidden="true">flight</span>
+									<span>
+										<b>항공기 정보</b>
+										<small>운항 항공기와 좌석 구성</small>
+									</span>
+								</a>
+						
+								<a href="/skyroute/user/member/travel/member_service">
+									<span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+									<span>
+										<b>유료 부가서비스</b>
+										<small>좌석 지정과 추가 서비스</small>
+									</span>
+								</a>
+							</div>
+						</div>
+
+						<!-- 스카이클럽 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/member/member_mypage" class="sr-nav-link">스카이클럽</a>
+
+							<div class="sr-nav-menu">
+								
+									<a href="/skyroute/user/member/member_mypage">
+										<span class="material-symbols-outlined" aria-hidden="true">person</span>
+										<span>
+											<b>마이페이지</b>
+											<small>회원 정보 관리</small>
+										</span>
+									</a>
+									<a href="/skyroute/user/member/member_booking">
+										<span class="material-symbols-outlined" aria-hidden="true">luggage</span>
+										<span>
+											<b>나의 여행</b>
+											<small>예약 내역 확인</small>
+										</span>
+									</a>
+								
+
+								
+							</div>
+						</div>
+
+					
+				</nav>
+
+				<!-- 우측 액션 -->
+				<div class="sr-actions">
+
+					<div class="sr-search">
+						<input type="search" id="srGlobalSearch"
+							   placeholder="궁금한 것을 검색해 보세요!"
+							   aria-label="사이트 검색"
+							   autocomplete="off">
+						<button type="button" id="srGlobalSearchButton" aria-label="검색">
+							<span class="material-symbols-outlined" aria-hidden="true">search</span>
+						</button>
+					</div>
+
+					
+
+					
+						<a href="/skyroute/user/member/member_mypage" class="sr-profile">
+						    <span class="sr-profile-avatar">김</span>
+						    <b>김민준</b>
+						</a>
+
+						<button type="button" class="sr-login-button" id="logout">로그아웃</button>
+
+						<form action="/skyroute/user/member/logout" method="post" id="frm_logout" hidden><input type="hidden" name="_csrf" value="jzGrXOq5u-wRuprG81FLB6UhvR8rDgTgnH-BU8vyfJHKtU4GuAaYaY-Nit08iv6lw3x_ZJBCkCdJaj3N-Ua4MvOXSqH60C0y"/></form>
+					
+
+					<button type="button" class="sr-menu-toggle" id="srMenuToggle"
+							aria-label="메뉴 열기" aria-expanded="false">
+						<span class="material-symbols-outlined" aria-hidden="true">menu</span>
+					</button>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- 모바일 메뉴 -->
+		<div class="sr-mobile-nav" id="srMobileNav" hidden>
+			<div class="sr-wrap">
+				
+					<a href="/skyroute/user/main/home">항공권 예약</a>
+					<a href="/skyroute/user/member/member_booking">예약 조회 · 변경</a>
+					<a href="/skyroute/user/member/member_schedule">출도착 · 스케줄</a>
+					<a href="/skyroute/user/member/member_route">운항 노선</a>
+					<a href="/skyroute/user/member/member_functions">기능 한눈에 보기</a>
+					<a href="/skyroute/user/member/travel/member_airport">공항에서</a>
+					<a href="/skyroute/user/member/travel/member_cabin">기내에서</a>
+					<a href="/skyroute/user/member/travel/member_aircraft">항공기 정보</a>
+					<a href="/skyroute/user/member/travel/member_service">유료 부가서비스</a>
+					<a href="/skyroute/user/member/event/list">이벤트</a>
+					<a href="/skyroute/user/member/notice/list">공지사항</a>
+					<a href="/skyroute/user/member/member_mypage">마이페이지</a>
+				
+			</div>
+		</div>
+
+	</header>
+
+	<script>
+		(() => {
+			/* 로그아웃 */
+			const logoutButton = document.getElementById("logout");
+			const logoutForm = document.getElementById("frm_logout");
+
+			if (logoutButton && logoutForm) {
+				logoutButton.addEventListener("click", (event) => {
+					event.preventDefault();
+					logoutForm.submit();
+				});
+			}
+
+			/* 통합 검색 (준비 중) */
+			const searchInput = document.getElementById("srGlobalSearch");
+			const searchButton = document.getElementById("srGlobalSearchButton");
+
+			const runSearch = () => {
+				window.alert("통합 검색은 준비 중입니다.");
+			};
+
+			if (searchButton) {
+				searchButton.addEventListener("click", runSearch);
+			}
+
+			if (searchInput) {
+				searchInput.addEventListener("keydown", (event) => {
+					if (event.key === "Enter") {
+						event.preventDefault();
+						runSearch();
+					}
+				});
+			}
+
+			/* 모바일 메뉴 */
+			const menuToggle = document.getElementById("srMenuToggle");
+			const mobileNav = document.getElementById("srMobileNav");
+
+			if (menuToggle && mobileNav) {
+				menuToggle.addEventListener("click", () => {
+					const willOpen = mobileNav.hidden;
+
+					mobileNav.hidden = !willOpen;
+					menuToggle.setAttribute("aria-expanded", String(willOpen));
+				});
+			}
+		})();
+	</script>
+
+</div>
+	<!-- header 끝 -->
+	<!-- 중앙 컨텐츠 시작 -->
+    <div id="main_body">
+
+    <div class="wrap"
+         style="padding-top: 40px; padding-bottom: 70px;">
+
+        <div class="passenger-page">
+
+            <div class="htitle"
+                 style="margin-bottom: 22px;">
+
+                
+                <header class="booking-page-header">
+				    <div>
+				        <div class="eyebrow">PASSENGER INFORMATION</div>
+				        <h2 style="margin-top: 5px;font-size: 22px; font-weight: 600; ">
+				                        탑승객 정보 입력
+				                    </h2>
+				        <p style="margin-top: 7px;color: var(--mut);font-size: 13px;">탑승객의 정보를 정확하게 입력해 주세요.</p>
+				    </div>
+				
+				    <div class="booking-progress">
+				        <div class="progress-item completed">
+				            <span class="progress-circle">✓</span>
+				            <span>항공편</span>
+				        </div>
+				        <div class="progress-item active">
+				            <span class="progress-circle">2</span>
+				            <span>탑승객</span>
+				        </div>
+				        <div class="progress-item">
+				            <span class="progress-circle">3</span>
+				            <span>좌석</span>
+				        </div>
+				        <div class="progress-item">
+				            <span class="progress-circle">4</span>
+				            <span>확인·결제</span>
+				        </div>
+				    </div>
+				</header>
+
+            </div>
+
+            <div class="passenger-guide">
+
+                만 18세 이상의 탑승자와 동반하지 않는 만 12세 미만 소아/유아 예매는 당사 예약센터에서 가능합니다. (UM 서비스 신청 필요)<br>
+				임신 32주 이상의 임신부 고객은 탑승이 제한될 수 있으니 사전에 확인하시기 바랍니다. (37주 이상은 탑승불가)<br>
+
+            </div>
+           <!--  <p style="
+                        margin-top: 7px;
+                        color: var(--mut);
+                        font-size: 13px;
+                    ">
+                여권과 동일하게 입력해 주세요.<br>
+            </p> -->
+            
+			
+			
+            <form action="/skyroute/user/booking/reserve/passenger"
+                  method="post"
+                  id="passengerForm"><input type="hidden" name="_csrf" value="jzGrXOq5u-wRuprG81FLB6UhvR8rDgTgnH-BU8vyfJHKtU4GuAaYaY-Nit08iv6lw3x_ZJBCkCdJaj3N-Ua4MvOXSqH60C0y"/>
+
+              
+
+                <div class="passenger-card">
+
+                    <input type="hidden" id="passengers0.passengerType" name="passengers[0].passengerType" value="ADULT">
+
+                    <input type="hidden" id="passengers0.savedPassengerId" name="passengers[0].savedPassengerId" value="">
+
+					<div class="passenger-card-title">
+					
+					    <h3>
+					
+					        <span class="material-symbols-outlined"
+					              style="color: var(--accent);">
+					            person
+					        </span>
+					
+					        탑승객
+					
+					        <span>1</span>
+					
+					    </h3>
+					
+					    <div class="passenger-card-tools">
+					
+					        
+					
+					        <span class="passenger-type">성인</span>
+					
+					    </div>
+					
+					</div>
+
+                    <div class="passenger-grid">
+
+                        <label class="passenger-field">
+
+						    <span>
+						        영문 성 (Last Name)
+						    </span>
+						
+						    <input type="text"
+						           maxlength="50"
+						           autocomplete="family-name"
+						           placeholder="여권과 동일하게 입력"
+						           style="text-transform: uppercase;" id="passengers0.lastName" name="passengers[0].lastName" value="">
+						
+						    
+						
+						</label>
+						
+						<label class="passenger-field">
+						
+						    <span>
+						        영문 이름 (First Name)
+						    </span>
+						
+						    <input type="text"
+						           maxlength="50"
+						           autocomplete="given-name"
+						           placeholder="여권과 동일하게 입력"
+						           style="text-transform: uppercase;" id="passengers0.firstName" name="passengers[0].firstName" value="">
+						
+						    
+						
+						</label>
+                        <label class="passenger-field">
+
+                            <span>
+                                생년월일
+                            </span>
+
+                            <input type="date"
+                                   max="2026-10-25" id="passengers0.birthDate" name="passengers[0].birthDate" value="">
+
+                            
+
+                        </label>
+
+                        <label class="passenger-field">
+
+                            <span>
+                                성별
+                            </span>
+
+                            <select id="passengers0.gender" name="passengers[0].gender">
+
+                                <option value="">
+                                    성별 선택
+                                </option>
+
+                                <option value="M">
+                                    남성
+                                </option>
+
+                                <option value="F">
+                                    여성
+                                </option>
+
+                            </select>
+
+                            
+
+                        </label>
+
+                        <label class="passenger-field full">
+						    <span>휴대폰 번호</span>
+						
+						    <input type="text"
+						           maxlength="20"
+						           inputmode="tel"
+						           placeholder="01012345678" id="passengers0.phone" name="passengers[0].phone" value="">
+						
+						    
+						</label>
+
+                        <label class="passenger-field">
+						    <span>여권번호</span>
+						
+						    <input type="text"
+						           maxlength="20"
+						           placeholder="여권번호 입력" id="passengers0.passportNo" name="passengers[0].passportNo" value="">
+						
+						    
+						</label>
+
+                        <label class="passenger-field">
+						    <span>여권 만료일</span>
+						
+						    <input type="date"
+						           min="2026-10-25" id="passengers0.passportExpiry" name="passengers[0].passportExpiry" value="">
+						
+						    
+						</label>
+
+                    </div>
+
+                </div>
+
+                <div class="passenger-actions">
+
+                    <div class="passenger-action-buttons">
+					    <a href="/skyroute/user/booking/flights/search?tripType=ROUNDTRIP&amp;departureAirportId=1&amp;arrivalAirportId=2&amp;departureDate=2026-10-26&amp;returnDate=2026-10-28&amp;adultCount=1&amp;childCount=0&amp;infantCount=0&amp;seatClassId=3" class="btn ghost passenger-prev-button" >이전</a>
+					    <button type="submit" class="btn passenger-next-button">좌석 선택하기</button>
+					</div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+    <!-- 중앙 컨텐츠 끝 -->
+    <!-- footer 시작 -->
+    <div id="main_footer">
+	<footer>
+		<div class="wrap">
+			스카이루트(SKYROUTE) · 항공권 예약 시스템 학습용 프로토타입 · 사용자 화면
+		</div>
+	</footer>
+</div>
+    <!-- footer 끝 -->
+</div>
+</body>
+</html>

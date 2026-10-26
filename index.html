@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkyRoute · 항공권 예매 · 운항 관리 데모</title>
+<meta name="description" content="Spring Boot 기반 항공권 예매 · 공항 운영 관리 웹 서비스 SkyRoute의 체험용 데모">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root {
+    --accent: #0066e2; --accent-700: #004ba3; --accent-soft: #f0f6ff;
+    --ink: #0f172a; --text: #334155; --muted: #64748b; --line: #dbe3ee; --paper: #ffffff; --bg: #f8fafc;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif; color: var(--text); background: var(--bg); line-height: 1.6; }
+  a { color: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  header.top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .brand { display: flex; align-items: baseline; gap: 10px; font-weight: 800; font-size: 22px; color: var(--ink); letter-spacing: -.02em; text-decoration: none; }
+  .brand small { font-size: 10px; font-weight: 600; letter-spacing: .28em; color: var(--muted); }
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border: 1px solid #cfe2ff; border-radius: 999px; padding: 5px 12px; }
+  .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  .hero { padding: 56px 0 40px; display: grid; grid-template-columns: 1.15fr .85fr; gap: 48px; align-items: center; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .22em; color: var(--accent); margin: 0 0 14px; }
+  h1 { font-size: clamp(32px, 5vw, 50px); line-height: 1.15; letter-spacing: -.035em; color: var(--ink); margin: 0 0 18px; font-weight: 800; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .lead { font-size: 17px; color: var(--text); margin: 0 0 28px; max-width: 34em; }
+  .cta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 22px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; border: 1px solid transparent; transition: background .15s, border-color .15s, transform .15s; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.primary:hover { background: var(--accent-700); }
+  .btn.ghost { background: var(--paper); border-color: var(--line); color: var(--ink); }
+  .btn.ghost:hover { border-color: #b8c7dc; }
+  .btn:focus-visible, .role:focus-visible, .step a:focus-visible { outline: 3px solid #8fbaf3; outline-offset: 2px; }
+
+  .ticket { background: var(--paper); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 24px 50px -24px rgba(15, 23, 42, .25); overflow: hidden; }
+  .ticket .t-head { background: var(--accent); color: #fff; padding: 16px 22px; display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; letter-spacing: .14em; }
+  .ticket .t-route { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 24px 22px 8px; }
+  .ticket .code { font-size: 40px; font-weight: 800; color: var(--ink); letter-spacing: -.02em; line-height: 1; }
+  .ticket .city { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .ticket .r { text-align: right; }
+  .ticket .plane { color: var(--accent); font-size: 22px; padding: 0 14px; }
+  .ticket .t-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px 22px 22px; border-top: 1px dashed var(--line); margin-top: 16px; }
+  .ticket .t-meta span { display: block; font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+  .ticket .t-meta b { font-size: 15px; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  section { padding: 44px 0; }
+  h2 { font-size: 26px; letter-spacing: -.02em; color: var(--ink); margin: 0 0 8px; }
+  .sub { margin: 0 0 26px; color: var(--muted); }
+
+  .roles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .role { display: flex; flex-direction: column; gap: 10px; padding: 22px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; text-decoration: none; transition: border-color .15s, box-shadow .15s, transform .15s; }
+  .role:hover { border-color: var(--accent); box-shadow: 0 14px 30px -18px rgba(0, 102, 226, .55); transform: translateY(-2px); }
+  .role .tag { font-size: 12px; font-weight: 700; color: var(--accent); }
+  .role h3 { margin: 0; font-size: 19px; color: var(--ink); }
+  .role p { margin: 0; font-size: 14px; color: var(--text); flex: 1; }
+  .role .acct { font-size: 12px; color: var(--muted); font-family: ui-monospace, "JetBrains Mono", monospace; }
+  .role .go { font-size: 14px; font-weight: 700; color: var(--accent); }
+
+  .tour { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .step { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  .step .who { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
+  .step h3 { margin: 4px 0 12px; font-size: 18px; color: var(--ink); }
+  .step ol { margin: 0; padding-left: 20px; font-size: 14px; }
+  .step li { margin: 4px 0; }
+  .step a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  .step a:hover { text-decoration: underline; }
+
+  .how { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+  .how ul { margin: 0; padding-left: 18px; }
+  .how li { margin: 6px 0; }
+  .note { background: var(--accent-soft); border: 1px solid #cfe2ff; border-radius: 16px; padding: 20px 22px; font-size: 14px; }
+  .note b { color: var(--ink); }
+  .stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .stack span { font-size: 13px; font-weight: 600; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; }
+  footer { padding: 30px 0 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); margin-top: 20px; }
+
+  @media (max-width: 920px) {
+    .hero { grid-template-columns: 1fr; gap: 32px; padding-top: 28px; }
+    .roles { grid-template-columns: repeat(2, 1fr); }
+    .how { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .wrap { padding: 0 16px; }
+    .roles, .tour { grid-template-columns: 1fr; }
+    .ticket .code { font-size: 32px; }
+    .btn { flex: 1 1 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/skyroute/">SkyRoute <small>FLY YOUR ROUTE</small></a>
+    <span class="pill">체험용 정적 데모</span>
+  </header>
+
+  <div class="hero">
+    <div>
+      <p class="eyebrow">FLIGHT BOOKING · AIRPORT OPERATIONS</p>
+      <h1>항공권 예매부터<br><em>공항 운영 관리</em>까지</h1>
+      <p class="lead">SkyRoute는 Spring Boot로 만든 항공 예약 · 운항 관리 웹 서비스입니다. 고객은 항공편을 검색하고 좌석을 골라 결제하고, 지상직은 운항과 체크인을, 관리자는 기준 정보와 통계를 관리합니다. 아래에서 역할을 골라 실제 화면을 직접 눌러 보세요.</p>
+      <div class="cta">
+        <a class="btn primary" href="/skyroute/user/main/home">회원으로 둘러보기</a>
+        <a class="btn ghost" href="/skyroute/guest/main/home">비회원으로 시작</a>
+      </div>
+    </div>
+    <div class="ticket" aria-hidden="true">
+      <div class="t-head"><span>BOARDING PASS</span><span>SR102</span></div>
+      <div class="t-route">
+        <div><div class="code">GMP</div><div class="city">서울 · 김포</div></div>
+        <div class="plane">✈</div>
+        <div class="r"><div class="code">CJU</div><div class="city">제주</div></div>
+      </div>
+      <div class="t-meta">
+        <div><span>DATE</span><b>10.26</b></div>
+        <div><span>DEPART</span><b>08:40</b></div>
+        <div><span>CLASS</span><b>이코노미</b></div>
+      </div>
+    </div>
+  </div>
+
+  <section aria-labelledby="roles-title">
+    <h2 id="roles-title">역할을 골라 들어가 보세요</h2>
+    <p class="sub">로그인 없이 바로 각 역할의 화면으로 이동합니다. 데모 안에서 로그인 화면을 쓸 때는 아래 계정을 입력하면 돼요.</p>
+    <div class="roles">
+      <a class="role" href="/skyroute/guest/main/home">
+        <span class="tag">GUEST</span><h3>비회원</h3>
+        <p>메인, 항공편 검색, 운항 스케줄, 공지 · 이벤트 · FAQ, 여행 정보</p>
+        <span class="acct">로그인 없음</span><span class="go">들어가기 →</span>
+      </a>
+      <a class="role" href="/skyroute/user/main/home">
+        <span class="tag">MEMBER</span><h3>회원</h3>
+        <p>항공권 예매 전 과정(탑승객 · 좌석 · 결제), 마이페이지, 예약 조회</p>
+        <span class="acct">user01 / 1234</span><span class="go">들어가기 →</span>
+      </a>
+      <a class="role" href="/skyroute/staff/staff/schedule/today">
+        <span class="tag">STAFF</span><h3>지상직</h3>
+        <p>오늘의 운항, 탑승객 체크인, 지연 · 결항 안내, 기준 정보, 공지 · 이벤트 관리</p>
+        <span class="acct">staff01 / 1234</span><span class="go">들어가기 →</span>
+      </a>
+      <a class="role" href="/skyroute/admin/admin/base1">
+        <span class="tag">ADMIN</span><h3>관리자</h3>
+        <p>권역 · 게이트 구역 · 노선 유형 · 항공기 · 시즌 · 환불 정책, 통계, 계정 관리</p>
+        <span class="acct">admin01 / 1234</span><span class="go">들어가기 →</span>
+      </a>
+    </div>
+  </section>
+
+  <section aria-labelledby="tour-title">
+    <h2 id="tour-title">추천 둘러보기 코스</h2>
+    <p class="sub">3분이면 서비스의 핵심 흐름을 볼 수 있어요.</p>
+    <div class="tour">
+      <div class="step">
+        <span class="who">회원 · user01</span>
+        <h3>항공권 예매 한 바퀴</h3>
+        <ol>
+          <li><a href="/skyroute/user/booking/flights/search?tripType=ROUNDTRIP&amp;departureAirportId=1&amp;arrivalAirportId=2&amp;departureDate=2026-10-26&amp;returnDate=2026-10-28&amp;adultCount=1&amp;childCount=0&amp;infantCount=0&amp;seatClassId=3">김포 → 제주 왕복 검색 결과</a>에서 항공편 선택</li>
+          <li>탑승객 정보 입력 → 좌석 배치도에서 좌석 선택</li>
+          <li>예약 내용 확인 · 약관 동의 → 데모 결제창에서 결제 승인</li>
+          <li>예약 완료 화면과 <a href="/skyroute/user/member/member_mypage">마이페이지</a>에서 예약 확인</li>
+        </ol>
+      </div>
+      <div class="step">
+        <span class="who">지상직 · staff01</span>
+        <h3>공항 운영 화면</h3>
+        <ol>
+          <li><a href="/skyroute/staff/staff/schedule/today">오늘의 운항 현황</a> 확인</li>
+          <li><a href="/skyroute/staff/staff/operation/passenger/list">탑승객 체크인</a>에서 항공편별 탑승객 조회</li>
+          <li><a href="/skyroute/staff/staff/delay/list">지연 · 결항 안내</a>와 <a href="/skyroute/staff/staff/content/notice/list">공지 · 이벤트 관리</a></li>
+        </ol>
+      </div>
+      <div class="step">
+        <span class="who">관리자 · admin01</span>
+        <h3>기준 정보 · 통계</h3>
+        <ol>
+          <li><a href="/skyroute/admin/admin/base1">권역 · 게이트 구역 · 노선 유형</a> 관리</li>
+          <li><a href="/skyroute/admin/admin/base2">항공기 · 시즌 · 환불 정책</a> 관리</li>
+          <li><a href="/skyroute/admin/admin/statistics">매출 · 예약 통계</a>와 <a href="/skyroute/admin/admin/accounts">계정 관리</a></li>
+        </ol>
+      </div>
+      <div class="step">
+        <span class="who">비회원</span>
+        <h3>정보 탐색</h3>
+        <ol>
+          <li><a href="/skyroute/guest/member/member_schedule">출도착 · 운항 스케줄</a> 조회</li>
+          <li><a href="/skyroute/guest/member/event/list">이벤트</a> · <a href="/skyroute/guest/member/notice/list">공지사항</a> · <a href="/skyroute/guest/member/faq/list">자주 묻는 질문</a></li>
+          <li><a href="/skyroute/guest/member/travel/member_aircraft">보유 항공기</a> · <a href="/skyroute/guest/member/travel/member_cabin">좌석 클래스</a> 안내</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="how-title">
+    <div class="how">
+      <div>
+        <h2 id="how-title">이 데모는 어떻게 동작하나요?</h2>
+        <ul>
+          <li>실제 SkyRoute Spring Boot 애플리케이션을 테스트 데이터로 실행한 뒤, 역할별 화면과 API 응답을 그대로 저장해 만든 사이트입니다.</li>
+          <li>서버와 DB 없이 GitHub Pages에서 동작하며, 링크 · 검색 · 예매 단계 이동 · 화면 안의 조회 요청은 저장된 응답으로 재현됩니다.</li>
+          <li>등록 · 수정 · 삭제 · 결제는 실제로 반영되지 않고 안내 메시지만 표시돼요.</li>
+          <li>데이터 기준일은 2026년 10월 25일입니다. 저장되지 않은 조건으로 검색하면 가장 가까운 조건의 결과를 보여줍니다.</li>
+        </ul>
+      </div>
+      <div class="note">
+        <b>기술 스택</b>
+        <div class="stack">
+          <span>Java 17</span><span>Spring Boot 3.4</span><span>Spring Security 6</span><span>MyBatis</span><span>Thymeleaf</span><span>Oracle DB</span><span>PortOne 결제</span><span>JavaScript</span>
+        </div>
+        <p style="margin:16px 0 0">화면 왼쪽 아래의 <b>DEMO</b> 막대로 언제든 역할을 바꾸거나 이 소개 페이지로 돌아올 수 있어요.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>SkyRoute · Spring Boot 항공 예약 · 운항 관리 프로젝트 · 정적 데모 버전</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><script src="/skyroute/user/_demo/data.js"></script><script src="/skyroute/_demo/demo.js"></script><link rel="stylesheet" href="/skyroute/_demo/demo.css">
+	<meta charset="UTF-8">
+	<meta name="csrf-header" content="X-CSRF-TOKEN" />
+	<meta name="csrf-token" content="ZGD9MCwC8NGaCf86z1BVfLhs0NG1cqt16dob-YLUU4jUmZU9U1fOBUk2weC3OZtZ_31hH40P_enXFpJYjOMimLqxZbjk_PYJ">
+	
+	<title>SpringPage > SkyRoute - 예약 내용 확인</title>
+	<link rel="stylesheet" href="/skyroute/assets/css/member.css" type="text/css">
+	<link rel="stylesheet" href="/skyroute/assets/css/header.css" type="text/css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+	<meta charset="UTF-8">
+	
+	<link rel="stylesheet" href="/skyroute/assets/css/member.css" type="text/css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+	<meta name="_csrf" content="ZGD9MCwC8NGaCf86z1BVfLhs0NG1cqt16dob-YLUU4jUmZU9U1fOBUk2weC3OZtZ_31hH40P_enXFpJYjOMimLqxZbjk_PYJ">
+	<meta name="_csrf_header" content="X-CSRF-TOKEN">
+	
+	<script defer src="/skyroute/user/assets/js/booking-confirm.js"></script>
+	<style>
+        .booking-confirm-page {
+		    width: 100%;
+		    max-width: 1200px;
+		    margin: 0 auto;
+		}
+
+        .confirm-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+
+        .confirm-header h2 {
+            margin: 5px 0 0;
+            color: var(--ink);
+            font-size: 25px;
+            font-weight: 700;
+            letter-spacing: -0.7px;
+        }
+
+        .confirm-header-description {
+            margin: 9px 0 0;
+            color: var(--mut);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .booking-progress {
+            display: flex;
+            align-items: center;
+            min-width: 390px;
+        }
+
+        .progress-item {
+            position: relative;
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            align-items: center;
+            gap: 7px;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .progress-item:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            top: 14px;
+            left: calc(50% + 17px);
+            width: calc(100% - 34px);
+            height: 1px;
+            background: #dbe3ef;
+        }
+
+        .progress-circle {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 29px;
+            height: 29px;
+            border: 1px solid #dbe3ef;
+            border-radius: 50%;
+            background: #fff;
+            font-size: 11px;
+        }
+
+        .progress-item.completed {
+            color: #64748b;
+        }
+
+        .progress-item.completed .progress-circle {
+            border-color: #bfdbfe;
+            background: #eff6ff;
+            color: var(--accent);
+        }
+
+        .progress-item.completed:not(:last-child)::after {
+            background: #bfdbfe;
+        }
+
+        .progress-item.active {
+            color: var(--accent);
+        }
+
+        .progress-item.active .progress-circle {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.22);
+        }
+
+        .confirm-error {
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            background: #fef2f2;
+            color: #b91c1c;
+            font-size: 13px;
+        }
+
+        .confirm-form-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .confirm-main {
+            display: grid;
+            gap: 18px;
+        }
+
+        .confirm-card {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: #fff;
+        }
+
+        .confirm-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 19px 21px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .confirm-card-title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin: 0;
+            color: var(--ink);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .confirm-card-title .material-symbols-outlined {
+            color: var(--accent);
+            font-size: 20px;
+        }
+
+        .confirm-card-caption {
+            color: var(--mut);
+            font-size: 11px;
+        }
+
+        .confirm-card-body {
+            padding: 21px;
+        }
+
+        .journey-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .journey-detail {
+            overflow: hidden;
+            border: 1px solid #dfe7f1;
+            border-radius: 14px;
+            background: #fff;
+        }
+
+        .journey-detail summary {
+            list-style: none;
+        }
+
+        .journey-detail summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .journey-summary {
+            cursor: pointer;
+            background: #f8fafc;
+        }
+
+        .journey-summary:hover {
+            background: #f4f8ff;
+        }
+
+        .journey-summary-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) 28px;
+    gap: 15px;
+    align-items: center;
+    padding: 15px 19px;
+    border-bottom: 1px solid #e5eaf1;
+}
+
+        .journey-direction {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 58px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #eaf2ff;
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .journey-flight-info {
+            color: var(--mut);
+            font-size: 11px;
+        }
+
+       
+
+        .journey-expand-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: transform 0.2s ease;
+        }
+
+        .journey-detail[open] .journey-expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .flight-route-panel {
+            display: grid;
+            grid-template-columns: minmax(120px, 1fr) minmax(170px, 1.5fr) minmax(120px, 1fr);
+            gap: 24px;
+            align-items: center;
+            padding: 22px 24px;
+        }
+
+        .airport-point:last-child {
+            text-align: right;
+        }
+
+        .airport-code {
+            color: var(--ink);
+            font-size: 29px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .airport-time {
+            margin-top: 7px;
+            color: var(--ink);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .airport-date {
+		    margin-top: 4px;
+		    color: #475569;
+		    font-size: 13px;
+		    font-weight: 600;
+		}
+
+        .airport-label {
+            margin-top: 5px;
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+        .route-center {
+            text-align: center;
+        }
+
+        .route-line {
+            position: relative;
+            height: 48px;
+        }
+
+        .route-line::before {
+            content: "";
+            position: absolute;
+            top: 22px;
+            left: 5px;
+            right: 5px;
+            height: 1px;
+            background: #cbd5e1;
+        }
+
+        .route-line::after {
+            content: "flight";
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            padding: 0 8px;
+            background: #f8fafc;
+            color: var(--accent);
+            font-family: "Material Symbols Outlined";
+            font-size: 22px;
+            transform: translateX(-50%) rotate(90deg);
+        }
+
+        .route-dot {
+            position: absolute;
+            top: 18px;
+            width: 9px;
+            height: 9px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            background: #fff;
+        }
+
+        .route-dot.start {
+            left: 0;
+        }
+
+        .route-dot.end {
+            right: 0;
+        }
+
+        .route-center-text {
+		    margin-top: 5px;
+		    color: #475569;
+		    font-size: 15px;
+		    font-weight: 700;
+		}
+
+        .journey-detail[open] .journey-summary {
+            border-bottom: 1px solid #dfe7f1;
+        }
+
+        .journey-detail-body {
+            padding: 20px;
+            background: #fff;
+        }
+
+        .flight-table-wrap {
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .flight-detail-table {
+            width: 100%;
+            min-width: 700px;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .flight-detail-table th {
+            padding: 13px 10px;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .flight-detail-table td {
+            padding: 18px 11px;
+            border-right: 1px solid #e2e8f0;
+            color: var(--ink);
+            font-size: 12px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .flight-detail-table th:last-child,
+        .flight-detail-table td:last-child {
+            border-right: 0;
+        }
+
+        .table-primary {
+            display: block;
+            color: var(--ink);
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .table-secondary {
+            display: block;
+            margin-top: 7px;
+            color: var(--mut);
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+        .seat-number-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 7px;
+        }
+
+        .seat-number-chip {
+            display: inline-flex;
+            padding: 4px 7px;
+            border: 1px solid #bfdbfe;
+            border-radius: 7px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .penalty-mark {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 31px;
+            height: 31px;
+            margin: 0 auto;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .penalty-mark.exists {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .penalty-mark.none {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .passenger-list {
+            display: grid;
+            gap: 11px;
+        }
+
+        .passenger-detail {
+            overflow: hidden;
+            border: 1px solid #e7edf5;
+            border-radius: 13px;
+            background: #fcfdff;
+        }
+
+        .passenger-detail summary {
+            list-style: none;
+        }
+
+        .passenger-detail summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .passenger-summary {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto 28px;
+            gap: 18px;
+            align-items: center;
+            padding: 16px 17px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .passenger-summary:hover {
+            background: #f7faff;
+        }
+
+        .passenger-detail[open] .passenger-summary {
+            border-bottom: 1px solid #e7edf5;
+            background: #f7faff;
+        }
+
+        .passenger-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .passenger-index {
+            display: flex;
+            flex: 0 0 auto;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #eef4ff;
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .passenger-name {
+            color: var(--ink);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .passenger-type {
+            display: block;
+            margin-top: 4px;
+            color: var(--mut);
+            font-size: 11px;
+        }
+
+        .saved-passenger-badge {
+            display: inline-flex;
+            margin-left: 7px;
+            padding: 3px 6px;
+            border-radius: 999px;
+            background: #ecfdf5;
+            color: #047857;
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        .seat-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 7px;
+        }
+
+        .seat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 10px;
+            border: 1px solid #bfdbfe;
+            border-radius: 9px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .seat-chip .material-symbols-outlined {
+            font-size: 15px;
+        }
+
+        .passenger-expand-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: transform 0.2s ease;
+        }
+
+        .passenger-detail[open] .passenger-expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .passenger-detail-body {
+		    padding: 22px;
+		    background: #fff;
+		}
+
+        .passenger-detail-title {
+		    display: flex;
+		    align-items: center;
+		    gap: 8px;
+		    margin-bottom: 18px;
+		    color: var(--ink);
+		    font-size: 16px;
+		    font-weight: 700;
+		}
+
+        .passenger-detail-title .material-symbols-outlined {
+		    color: var(--accent);
+		    font-size: 21px;
+		}
+
+        .passenger-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .passenger-info-item {
+		    padding: 15px 16px;
+		    border-radius: 10px;
+		    background: #f8fafc;
+		}
+
+        .passenger-info-label {
+		    display: block;
+		    margin-bottom: 7px;
+		    color: #64748b;
+		    font-size: 13px;
+		    font-weight: 600;
+		}
+
+        .passenger-info-value {
+		    color: #0f172a;
+		    font-size: 15px;
+		    font-weight: 700;
+		    line-height: 1.5;
+		    word-break: break-all;
+		}
+
+        .infant-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: #f8fafc;
+            color: var(--mut);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .infant-info .material-symbols-outlined {
+            flex: 0 0 auto;
+            font-size: 17px;
+        }
+
+        .agreement-list {
+            display: grid;
+            gap: 11px;
+        }
+
+        .agreement-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            padding: 14px 15px;
+            border: 1px solid #e7edf5;
+            border-radius: 11px;
+            background: #fff;
+            color: var(--ink);
+            font-size: 13px;
+            line-height: 1.55;
+            cursor: pointer;
+        }
+
+        .agreement-item:hover {
+            border-color: #bfdbfe;
+            background: #fbfdff;
+        }
+
+        .agreement-item input {
+            flex: 0 0 auto;
+            width: 17px;
+            height: 17px;
+            margin-top: 1px;
+            accent-color: var(--accent);
+        }
+
+        .agreement-required {
+            margin-left: 5px;
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .payment-guide {
+            margin: 0 0 15px;
+            color: var(--mut);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .payment-method-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 11px;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            min-height: 67px;
+            padding: 15px 16px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fff;
+            color: var(--ink);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .payment-method:hover {
+            border-color: #93c5fd;
+        }
+
+        .payment-method.selected {
+            border-color: var(--accent);
+            background: #f2f7ff;
+            box-shadow: 0 0 0 1px var(--accent);
+            color: var(--accent);
+        }
+
+        .payment-method.disabled {
+            border-color: var(--line);
+            background: #f8fafc;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .payment-method input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+        }
+
+        .payment-method-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .payment-method-description {
+            color: var(--mut);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .confirm-sidebar {
+            position: sticky;
+            top: 105px;
+        }
+
+        .payment-summary-card {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 10px 32px rgba(15, 23, 42, 0.055);
+        }
+
+        .summary-header {
+            padding: 20px 20px 17px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .summary-header h3 {
+            margin: 0;
+            color: var(--ink);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .summary-header p {
+            margin: 7px 0 0;
+            color: var(--mut);
+            font-size: 11px;
+        }
+
+        .summary-body {
+            padding: 18px 20px;
+        }
+
+        .fare-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 9px 0;
+            color: var(--ink);
+            font-size: 13px;
+        }
+
+        .fare-label {
+            color: var(--mut);
+        }
+
+        .fare-detail {
+            display: block;
+            margin-top: 4px;
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+        .fare-value {
+            flex: 0 0 auto;
+            font-weight: 600;
+        }
+
+        .total-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 13px;
+            padding-top: 18px;
+            border-top: 1px solid var(--line);
+        }
+
+        .total-label {
+            color: var(--ink);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .total-label small {
+            display: block;
+            margin-top: 4px;
+            color: var(--mut);
+            font-size: 10px;
+            font-weight: 400;
+        }
+
+        .total-amount {
+            color: var(--accent);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.6px;
+            white-space: nowrap;
+        }
+
+        .hold-guide {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-top: 17px;
+            padding: 12px 13px;
+            border-radius: 10px;
+            background: #fff7ed;
+            color: #9a3412;
+            font-size: 11px;
+            line-height: 1.55;
+        }
+
+        .hold-guide .material-symbols-outlined {
+            flex: 0 0 auto;
+            font-size: 17px;
+        }
+
+        .security-message {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 13px;
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+        .security-message .material-symbols-outlined {
+            font-size: 14px;
+        }
+
+        .summary-actions {
+            display: grid;
+            gap: 9px;
+            padding: 0 20px 20px;
+        }
+
+        .summary-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 50px;
+            padding: 0 20px;
+            border: 0;
+            text-decoration: none;
+        }
+
+        .summary-actions .btn:disabled {
+            opacity: 0.48;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 900px) {
+            .confirm-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .booking-progress {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .confirm-form-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .confirm-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .journey-summary-header {
+                grid-template-columns: auto minmax(0, 1fr) 28px;
+            }
+
+
+            .journey-expand-icon {
+                grid-column: 3;
+                grid-row: 1 / 3;
+            }
+
+            .flight-route-panel {
+                grid-template-columns: 1fr;
+                gap: 13px;
+            }
+
+            .airport-point:last-child {
+                text-align: left;
+            }
+
+            .route-center {
+                display: none;
+            }
+
+            .passenger-summary {
+                grid-template-columns: 1fr 28px;
+            }
+
+            .passenger-summary .seat-list {
+                grid-column: 1 / -1;
+                justify-content: flex-start;
+            }
+
+            .passenger-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-method-list {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-progress {
+                overflow-x: auto;
+            }
+
+            .progress-item {
+                min-width: 75px;
+            }
+        }
+        .seat-reselect-button {
+		    border: 1px solid #94a3b8 !important;
+		}
+    </style>
+</head>
+<body>
+<div id="main">
+	<!-- header 시작 -->
+	<div id="main_header">
+<style>
+/* 프로필 링크 전체 레이아웃 */
+.sr-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px 5px 6px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    color: #0f172a;
+    font-size: 13.5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+.sr-profile:hover {
+    border-color: #2563eb;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+.sr-profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+</style>
+	<header class="sr-header">
+
+		<!-- ================= 상단 유틸리티 바 ================= -->
+		<div class="sr-topbar">
+			<div class="sr-wrap sr-topbar-inner">
+
+				<a href="/skyroute/user/member/event/list" class="sr-topbar-link">
+					<span class="material-symbols-outlined" aria-hidden="true">celebration</span>
+					이벤트
+				</a>
+			
+				<span class="sr-topbar-divider" aria-hidden="true"></span>
+				
+
+				<!-- 고객센터 드롭다운 -->
+				<div class="sr-topbar-dropdown">
+					<button type="button" class="sr-topbar-link" aria-haspopup="true" aria-expanded="false">
+						<span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
+						고객센터
+						<span class="material-symbols-outlined sr-topbar-arrow" aria-hidden="true">expand_more</span>
+					</button>
+
+					<div class="sr-topbar-menu">
+						<a href="/skyroute/user/member/notice/list">
+							<span class="material-symbols-outlined" aria-hidden="true">campaign</span>
+							<span>
+								<b>공지사항</b>
+								<small>서비스 소식과 이용 안내</small>
+							</span>
+						</a>
+
+						<a href="/skyroute/user/member/faq/list">
+							<span class="material-symbols-outlined" aria-hidden="true">help</span>
+							<span>
+								<b>자주 묻는 질문</b>
+								<small>FAQ 로 빠르게 확인</small>
+							</span>
+						</a>
+
+						<a href="javascript:alert('1:1 문의 페이지는 준비 중입니다.');">
+							<span class="material-symbols-outlined" aria-hidden="true">forum</span>
+							<span>
+								<b>1:1 문의</b>
+								<small>문의 등록 및 답변 확인</small>
+							</span>
+						</a>
+					</div>
+				</div>
+
+				
+				
+
+				
+
+			</div>
+		</div>
+
+		<!-- ================= 메인 바 ================= -->
+		<div class="sr-mainbar">
+			<div class="sr-wrap sr-mainbar-inner">
+
+				<!-- 로고 : 회전하는 지구 위를 나는 항공기 -->
+				<a href="/skyroute/user/main/home" class="sr-brand" aria-label="SkyRoute 홈으로">
+
+					<svg class="sr-brand-mark" viewBox="0 0 56 56" role="img" aria-hidden="true" focusable="false">
+						<defs>
+							<linearGradient id="srGlobeGrad" x1="14" y1="14" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+								<stop offset="0" stop-color="#63CCFF"/>
+								<stop offset="0.55" stop-color="#0F86F0"/>
+								<stop offset="1" stop-color="#0047B3"/>
+							</linearGradient>
+
+							<clipPath id="srGlobeClip">
+								<circle cx="28" cy="28" r="14"/>
+							</clipPath>
+
+							<!-- 자전하는 지표면 타일 (가로 28 = 지구 지름) -->
+							<g id="srGlobeTile">
+								<g fill="#0B2D5E" opacity="0.45">
+									<path d="M2 18 c4 -2.5 8 -1.5 9 1 c1.2 2.6 -1.6 5 -5 4.6 c-3.4 -0.4 -6 -3.4 -4 -5.6 Z"/>
+									<path d="M14 30 c4 -3 9 -1.4 10 2 c1 3.2 -2.6 6.4 -6.4 5.6 c-3.8 -0.8 -6 -5 -3.6 -7.6 Z"/>
+									<path d="M4 33 c2.4 -0.8 4.4 1 3.8 3.2 c-0.6 2.2 -3.8 2.6 -4.8 0.6 c-1 -2 -0.6 -3.2 1 -3.8 Z"/>
+									<path d="M22 15 c2.6 -1.2 5.2 0.4 4.8 2.6 c-0.4 2.2 -3.6 3 -5.2 1.4 c-1.4 -1.4 -1.2 -3.2 0.4 -4 Z"/>
+								</g>
+								<g fill="none" stroke="#ffffff" stroke-width="0.7" opacity="0.35">
+									<path d="M3 13 C 1 21, 1 35, 3 43"/>
+									<path d="M10 13 C 8.6 21, 8.6 35, 10 43"/>
+									<path d="M17 13 C 16 21, 16 35, 17 43"/>
+									<path d="M24 13 C 22.6 21, 22.6 35, 24 43"/>
+								</g>
+							</g>
+
+							<!-- 항공기 -->
+							<g id="srPlane">
+								<path d="M0 -13 C 1.7 -13 2.6 -10.6 2.7 -6.4 L12.6 0.4 L12.6 3.6 L2.7 0.9
+										 L2.7 7.6 L6.1 10.6 L6.1 12.8 L0 11.1 L-6.1 12.8 L-6.1 10.6 L-2.7 7.6
+										 L-2.7 0.9 L-12.6 3.6 L-12.6 0.4 L-2.7 -6.4 C -2.6 -10.6 -1.7 -13 0 -13 Z"
+									  fill="#0F172A" stroke="#ffffff" stroke-width="2.4"
+									  stroke-linejoin="round" paint-order="stroke"/>
+							</g>
+						</defs>
+
+						<!-- ===== 지구 뒤쪽 : 궤도 후반부 + 뒤로 지나가는 항공기 ===== -->
+						<g transform="rotate(-16 28 28)">
+							<path d="M 6,28 A 22,7 0 0,1 50,28" fill="none" stroke="#0066E2"
+								  stroke-width="1.1" opacity="0.28" stroke-dasharray="2 3"/>
+
+							<g class="sr-plane-back">
+								<g transform="rotate(90) scale(0.42)">
+									<use href="#srPlane"/>
+								</g>
+							</g>
+						</g>
+
+						<!-- ===== 지구 ===== -->
+						<circle cx="28" cy="28" r="14" fill="url(#srGlobeGrad)"/>
+
+						<g clip-path="url(#srGlobeClip)">
+							<g class="sr-globe-spin">
+								<use href="#srGlobeTile" x="14"/>
+								<use href="#srGlobeTile" x="42"/>
+							</g>
+						</g>
+
+						<g clip-path="url(#srGlobeClip)" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.4">
+							<line x1="14" y1="28" x2="42" y2="28"/>
+							<path d="M16 21 H40"/>
+							<path d="M16 35 H40"/>
+						</g>
+
+						<circle cx="28" cy="28" r="14" fill="none" stroke="#ffffff" stroke-width="0.9" opacity="0.45"/>
+						<path d="M19 19 a13 13 0 0 1 8 -4" fill="none" stroke="#ffffff"
+							  stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+
+						<!-- ===== 지구 앞쪽 : 궤도 전반부 + 앞으로 지나가는 항공기 ===== -->
+						<g transform="rotate(-16 28 28)">
+							<path d="M 50,28 A 22,7 0 0,1 6,28" fill="none" stroke="#0066E2"
+								  stroke-width="1.1" opacity="0.45" stroke-dasharray="2 3"/>
+
+							<g class="sr-plane-front">
+								<g transform="rotate(90) scale(0.42)">
+									<use href="#srPlane"/>
+								</g>
+							</g>
+						</g>
+					</svg>
+
+					<span class="sr-brand-text">
+						<strong>SkyRoute</strong>
+						<small>FLY YOUR ROUTE</small>
+					</span>
+				</a>
+
+				<!-- 주 메뉴 -->
+				<nav class="sr-nav" aria-label="주 메뉴">
+					
+
+						<!-- 예약 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/main/home" class="sr-nav-link  is-on">예약</a>
+
+							<div class="sr-nav-menu">
+								<a href="/skyroute/user/main/home">
+									<span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>
+									<span>
+										<b>항공권 예약</b>
+										<small>출발지 · 도착지 검색</small>
+									</span>
+								</a>
+								<a href="/skyroute/user/member/member_booking">
+									<span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+									<span>
+										<b>예약 조회 · 취소</b>
+										<small>예약 확인 및 취소</small>
+									</span>
+								</a>
+							</div>
+						</div>
+
+						<!-- 여행 준비 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/member/member_schedule" class="sr-nav-link">여행 준비</a>
+
+							<div class="sr-nav-menu">
+								<a href="/skyroute/user/member/member_schedule">
+									<span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+									<span>
+										<b>출도착 · 스케줄</b>
+										<small>실시간 운항 현황</small>
+									</span>
+								</a>
+								<a href="/skyroute/user/member/member_route">
+									<span class="material-symbols-outlined" aria-hidden="true">route</span>
+									<span>
+										<b>운항 노선</b>
+										<small>취항지 및 노선 안내</small>
+									</span>
+								</a>							
+							</div>
+						</div>
+						
+						<!-- 여행 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/member/travel/member_airport" class="sr-nav-link">여행</a>
+						
+							<div class="sr-nav-menu">
+								<a href="/skyroute/user/member/travel/member_airport">
+									<span class="material-symbols-outlined" aria-hidden="true">connecting_airports</span>
+									<span>
+										<b>공항에서</b>
+										<small>공항 위치와 탑승 안내</small>
+									</span>
+								</a>
+						
+								<a href="/skyroute/user/member/travel/member_cabin">
+									<span class="material-symbols-outlined" aria-hidden="true">airline_seat_recline_normal</span>
+									<span>
+										<b>기내에서</b>
+										<small>좌석 등급과 기내 서비스</small>
+									</span>
+								</a>
+						
+								<a href="/skyroute/user/member/travel/member_aircraft">
+									<span class="material-symbols-outlined" aria-hidden="true">flight</span>
+									<span>
+										<b>항공기 정보</b>
+										<small>운항 항공기와 좌석 구성</small>
+									</span>
+								</a>
+						
+								<a href="/skyroute/user/member/travel/member_service">
+									<span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+									<span>
+										<b>유료 부가서비스</b>
+										<small>좌석 지정과 추가 서비스</small>
+									</span>
+								</a>
+							</div>
+						</div>
+
+						<!-- 스카이클럽 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/member/member_mypage" class="sr-nav-link">스카이클럽</a>
+
+							<div class="sr-nav-menu">
+								
+									<a href="/skyroute/user/member/member_mypage">
+										<span class="material-symbols-outlined" aria-hidden="true">person</span>
+										<span>
+											<b>마이페이지</b>
+											<small>회원 정보 관리</small>
+										</span>
+									</a>
+									<a href="/skyroute/user/member/member_booking">
+										<span class="material-symbols-outlined" aria-hidden="true">luggage</span>
+										<span>
+											<b>나의 여행</b>
+											<small>예약 내역 확인</small>
+										</span>
+									</a>
+								
+
+								
+							</div>
+						</div>
+
+					
+				</nav>
+
+				<!-- 우측 액션 -->
+				<div class="sr-actions">
+
+					<div class="sr-search">
+						<input type="search" id="srGlobalSearch"
+							   placeholder="궁금한 것을 검색해 보세요!"
+							   aria-label="사이트 검색"
+							   autocomplete="off">
+						<button type="button" id="srGlobalSearchButton" aria-label="검색">
+							<span class="material-symbols-outlined" aria-hidden="true">search</span>
+						</button>
+					</div>
+
+					
+
+					
+						<a href="/skyroute/user/member/member_mypage" class="sr-profile">
+						    <span class="sr-profile-avatar">김</span>
+						    <b>김민준</b>
+						</a>
+
+						<button type="button" class="sr-login-button" id="logout">로그아웃</button>
+
+						<form action="/skyroute/user/member/logout" method="post" id="frm_logout" hidden><input type="hidden" name="_csrf" value="ZGD9MCwC8NGaCf86z1BVfLhs0NG1cqt16dob-YLUU4jUmZU9U1fOBUk2weC3OZtZ_31hH40P_enXFpJYjOMimLqxZbjk_PYJ"/></form>
+					
+
+					<button type="button" class="sr-menu-toggle" id="srMenuToggle"
+							aria-label="메뉴 열기" aria-expanded="false">
+						<span class="material-symbols-outlined" aria-hidden="true">menu</span>
+					</button>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- 모바일 메뉴 -->
+		<div class="sr-mobile-nav" id="srMobileNav" hidden>
+			<div class="sr-wrap">
+				
+					<a href="/skyroute/user/main/home">항공권 예약</a>
+					<a href="/skyroute/user/member/member_booking">예약 조회 · 변경</a>
+					<a href="/skyroute/user/member/member_schedule">출도착 · 스케줄</a>
+					<a href="/skyroute/user/member/member_route">운항 노선</a>
+					<a href="/skyroute/user/member/member_functions">기능 한눈에 보기</a>
+					<a href="/skyroute/user/member/travel/member_airport">공항에서</a>
+					<a href="/skyroute/user/member/travel/member_cabin">기내에서</a>
+					<a href="/skyroute/user/member/travel/member_aircraft">항공기 정보</a>
+					<a href="/skyroute/user/member/travel/member_service">유료 부가서비스</a>
+					<a href="/skyroute/user/member/event/list">이벤트</a>
+					<a href="/skyroute/user/member/notice/list">공지사항</a>
+					<a href="/skyroute/user/member/member_mypage">마이페이지</a>
+				
+			</div>
+		</div>
+
+	</header>
+
+	<script>
+		(() => {
+			/* 로그아웃 */
+			const logoutButton = document.getElementById("logout");
+			const logoutForm = document.getElementById("frm_logout");
+
+			if (logoutButton && logoutForm) {
+				logoutButton.addEventListener("click", (event) => {
+					event.preventDefault();
+					logoutForm.submit();
+				});
+			}
+
+			/* 통합 검색 (준비 중) */
+			const searchInput = document.getElementById("srGlobalSearch");
+			const searchButton = document.getElementById("srGlobalSearchButton");
+
+			const runSearch = () => {
+				window.alert("통합 검색은 준비 중입니다.");
+			};
+
+			if (searchButton) {
+				searchButton.addEventListener("click", runSearch);
+			}
+
+			if (searchInput) {
+				searchInput.addEventListener("keydown", (event) => {
+					if (event.key === "Enter") {
+						event.preventDefault();
+						runSearch();
+					}
+				});
+			}
+
+			/* 모바일 메뉴 */
+			const menuToggle = document.getElementById("srMenuToggle");
+			const mobileNav = document.getElementById("srMobileNav");
+
+			if (menuToggle && mobileNav) {
+				menuToggle.addEventListener("click", () => {
+					const willOpen = mobileNav.hidden;
+
+					mobileNav.hidden = !willOpen;
+					menuToggle.setAttribute("aria-expanded", String(willOpen));
+				});
+			}
+		})();
+	</script>
+
+</div>
+	<!-- header 끝 -->
+	<!-- 중앙 컨텐츠 시작 -->
+    <div id="main_body">
+    <div class="wrap" style="padding-top:38px; padding-bottom:75px;">
+        <main class="booking-confirm-page">
+            <header class="confirm-header">
+                <div>
+                    <div class="eyebrow">BOOKING CONFIRMATION</div>
+                    <h2>예약 내용 확인</h2>
+                    <br>
+                </div>
+
+                <div class="booking-progress">
+                    <div class="progress-item completed">
+                        <span class="progress-circle">✓</span>
+                        <span>항공편</span>
+                    </div>
+                    <div class="progress-item completed">
+                        <span class="progress-circle">✓</span>
+                        <span>탑승객</span>
+                    </div>
+                    <div class="progress-item completed">
+                        <span class="progress-circle">✓</span>
+                        <span>좌석</span>
+                    </div>
+                    <div class="progress-item active">
+                        <span class="progress-circle">4</span>
+                        <span>확인·결제</span>
+                    </div>
+                </div>
+            </header>
+
+            
+
+            <form action="/skyroute/user/booking/reserve/hold" method="post" id="confirmForm"><input type="hidden" name="_csrf" value="ZGD9MCwC8NGaCf86z1BVfLhs0NG1cqt16dob-YLUU4jUmZU9U1fOBUk2weC3OZtZ_31hH40P_enXFpJYjOMimLqxZbjk_PYJ"/>
+                <div class="confirm-form-layout">
+                    <div class="confirm-main">
+                        <section class="confirm-card">
+                            <div class="confirm-card-header">
+                                <h3 class="confirm-card-title">
+                                    <span class="material-symbols-outlined">flight_takeoff</span>
+                                    여정 정보
+                                </h3>
+                            </div>
+
+                            <div class="confirm-card-body">
+                                <div class="journey-list">
+                                    <details class="journey-detail">
+                                        <summary class="journey-summary">
+                                            <div class="journey-summary-header">
+											    <span class="journey-direction">가는 편</span>
+											    <span class="journey-flight-info">SR102 · Airbus A321-200</span>
+											    <span class="material-symbols-outlined journey-expand-icon">expand_more</span>
+											</div>
+
+                                            <div class="flight-route-panel">
+                                                <div class="airport-point">
+                                                    <div class="airport-code">GMP</div>
+                                                    <div class="airport-time">08:40</div>
+                                                    <div class="airport-date">2026.10.26</div>
+                                                  
+                                                </div>
+
+                                                <div class="route-center">
+                                                    <div class="route-line">
+                                                        <span class="route-dot start"></span>
+                                                        <span class="route-dot end"></span>
+                                                    </div>
+                                                    <div class="route-center-text">1시간 10분</div>
+                                                </div>
+
+                                                <div class="airport-point">
+                                                    <div class="airport-code">CJU</div>
+                                                    <div class="airport-time">09:50</div>
+                                                    <div class="airport-date">2026.10.26</div>
+                                                  
+                                                </div>
+                                            </div>
+                                        </summary>
+
+                                        <div class="journey-detail-body">
+                                            <div class="flight-table-wrap">
+                                                <table class="flight-detail-table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>편명 / 기종</th>
+                                                        <th>좌석</th>
+                                                        <th>환불 위약금</th>
+                                                        <th>항공권 운임</th>
+                                                        <th>총 여정시간</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <span class="table-primary">SR102</span>
+                                                            <span class="table-secondary">Airbus A321-200</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="table-primary">이코노미</span>
+                                                            <div class="seat-number-list">
+                                                                <span class="seat-number-chip">10C</span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            
+                                                            <span class="penalty-mark exists">O</span>
+                                                            <span class="table-secondary">위약금 있음</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="table-primary">100,000원</span>
+                                                            <span class="table-secondary">1명 기준</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="table-primary">1시간 10분</span>
+                                                            <span class="table-secondary">예정 출발부터 도착까지</span>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </details>
+
+                                    <details class="journey-detail">
+                                        <summary class="journey-summary">
+                                            <div class="journey-summary-header">
+                                                <span class="journey-direction">오는 편</span>
+                                                <span class="journey-flight-info">SR106 · Airbus A321neo</span>
+                                                
+                                                <span class="material-symbols-outlined journey-expand-icon">expand_more</span>
+                                            </div>
+
+                                            <div class="flight-route-panel">
+                                                <div class="airport-point">
+                                                    <div class="airport-code">CJU</div>
+                                                    <div class="airport-time">11:10</div>
+                                                    <div class="airport-date">2026.10.28</div>
+                                                
+                                                </div>
+
+                                                <div class="route-center">
+                                                    <div class="route-line">
+                                                        <span class="route-dot start"></span>
+                                                        <span class="route-dot end"></span>
+                                                    </div>
+                                                    <div class="route-center-text">1시간 10분</div>
+                                                </div>
+
+                                                <div class="airport-point">
+                                                    <div class="airport-code">GMP</div>
+                                                    <div class="airport-time">12:20</div>
+                                                    <div class="airport-date">2026.10.28</div>
+                  
+                                                </div>
+                                            </div>
+                                        </summary>
+
+                                        <div class="journey-detail-body">
+                                            <div class="flight-table-wrap">
+                                                <table class="flight-detail-table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>편명 / 기종</th>
+                                                        <th>좌석</th>
+                                                        <th>환불 위약금</th>
+                                                        <th>항공권 운임</th>
+                                                        <th>총 여정시간</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <span class="table-primary">SR106</span>
+                                                            <span class="table-secondary">Airbus A321neo</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="table-primary">이코노미</span>
+                                                            <div class="seat-number-list">
+                                                                <span class="seat-number-chip">10C</span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            
+                                                            <span class="penalty-mark exists">O</span>
+                                                            <span class="table-secondary">위약금 있음</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="table-primary">100,000원</span>
+                                                            <span class="table-secondary">1명 기준</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="table-primary">1시간 10분</span>
+                                                            <span class="table-secondary">예정 출발부터 도착까지</span>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="confirm-card">
+                            <div class="confirm-card-header">
+                                <h3 class="confirm-card-title">
+                                    <span class="material-symbols-outlined">group</span>
+                                    탑승객 및 좌석
+                                </h3>
+                                <span class="confirm-card-caption">총 1명</span>
+                            </div>
+
+                            <div class="confirm-card-body">
+                                <div class="passenger-list">
+                                    <details class="passenger-detail">
+                                        <summary class="passenger-summary">
+                                            <div class="passenger-profile">
+                                                <span class="passenger-index">1</span>
+                                                <div>
+                                                    <div class="passenger-name">
+                                                        <span>KIM MINJUN</span>
+                                                        
+                                                    </div>
+                                                    <span class="passenger-type">성인 탑승객</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="seat-list">
+                                                <span class="seat-chip">
+                                                    <span class="material-symbols-outlined">event_seat</span>
+                                                    <span>가는 편 10C</span>
+                                                </span>
+                                                <span class="seat-chip">
+                                                    <span class="material-symbols-outlined">event_seat</span>
+                                                    <span>오는 편 10C</span>
+                                                </span>
+                                            </div>
+
+                                            <span class="material-symbols-outlined passenger-expand-icon">expand_more</span>
+                                        </summary>
+
+                                        <div class="passenger-detail-body">
+                                            <div class="passenger-detail-title">
+                                                <span class="material-symbols-outlined">badge</span>
+                                                입력한 탑승객 정보
+                                            </div>
+
+                                            <div class="passenger-info-grid">
+                                                <div class="passenger-info-item">
+                                                    <span class="passenger-info-label">영문 성명</span>
+                                                    <span class="passenger-info-value">KIM MINJUN</span>
+                                                </div>
+
+                                                <div class="passenger-info-item">
+                                                    <span class="passenger-info-label">탑승객 구분</span>
+                                                    <span class="passenger-info-value">성인</span>
+                                                </div>
+
+                                                <div class="passenger-info-item">
+                                                    <span class="passenger-info-label">생년월일</span>
+                                                    <span class="passenger-info-value">1995.03.12</span>
+                                                </div>
+
+                                                <div class="passenger-info-item">
+                                                    <span class="passenger-info-label">성별</span>
+                                                    <span class="passenger-info-value">남성</span>
+                                                </div>
+
+                                                <div class="passenger-info-item">
+                                                    <span class="passenger-info-label">연락처</span>
+                                                    <span class="passenger-info-value">010-1111-0001</span>
+                                                </div>
+
+                                                <div class="passenger-info-item">
+                                                    <span class="passenger-info-label">여권번호</span>
+                                                    <span class="passenger-info-value">M10100001</span>
+                                                </div>
+
+                                                <div class="passenger-info-item">
+                                                    <span class="passenger-info-label">여권 만료일</span>
+                                                    <span class="passenger-info-value">2031.03.11</span>
+                                                </div>
+
+                                                <div class="passenger-info-item">
+                                                    <span class="passenger-info-label">배정 좌석</span>
+                                                    <span class="passenger-info-value">
+                                                        <span>가는 편 10C</span>
+                                                        
+                                                            /
+                                                            <span>오는 편 10C</span>
+                                                        
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
+
+                                
+                            </div>
+                        </section>
+
+                        <section class="confirm-card">
+                            <div class="confirm-card-header">
+                                <h3 class="confirm-card-title">
+                                    <span class="material-symbols-outlined">fact_check</span>
+                                    필수 확인 및 동의
+                                </h3>
+                            </div>
+
+                            <div class="confirm-card-body">
+                                <div class="agreement-list">
+                                    <label class="agreement-item">
+                                        <input type="checkbox" name="agreeTerms" value="true" class="required-agreement" required>
+                                        <span>운송 약관 및 개인정보 수집·이용에 동의합니다.<span class="agreement-required">필수</span></span>
+                                    </label>
+
+                                    <label class="agreement-item">
+                                        <input type="checkbox" name="agreeRefund" value="true" class="required-agreement" required>
+                                        <span>취소·환불 규정과 출발일까지 남은 기간에 따른 수수료 기준을 확인했습니다.<span class="agreement-required">필수</span></span>
+                                    </label>
+
+                                    
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="confirm-card">
+                            <div class="confirm-card-header">
+                                <h3 class="confirm-card-title">
+                                    <span class="material-symbols-outlined">payments</span>
+                                    결제수단 선택
+                                </h3>
+                            </div>
+
+                            <div class="confirm-card-body">
+                                <p id="paymentGuide" class="payment-guide">필수 확인 및 동의 후 결제수단을 선택할 수 있습니다.</p>
+
+                                <div class="payment-method-list">
+                                    <label class="payment-method disabled">
+                                        <input type="radio" name="paymentMethod" value="KAKAOPAY" class="payment-method-radio" disabled required>
+                                        <span class="payment-method-text">
+                                            <span>카카오페이</span>
+                                            <span class="payment-method-description">카카오톡 간편결제</span>
+                                        </span>
+                                    </label>
+
+                                    <label class="payment-method disabled">
+                                        <input type="radio" name="paymentMethod" value="CARD" class="payment-method-radio" disabled required>
+                                        <span class="payment-method-text">
+                                            <span>신용·체크카드</span>
+                                            <span class="payment-method-description">국내 카드 결제</span>
+                                        </span>
+                                    </label>
+
+                                    <label class="payment-method disabled">
+                                        <input type="radio" name="paymentMethod" value="TOSSPAY" class="payment-method-radio" disabled required>
+                                        <span class="payment-method-text">
+                                            <span>토스페이</span>
+                                            <span class="payment-method-description">QR 및 토스 앱 결제</span>
+                                        </span>
+                                    </label>
+
+                                    <label class="payment-method disabled">
+                                        <input type="radio" name="paymentMethod" value="TRANSFER" class="payment-method-radio" disabled required>
+                                        <span class="payment-method-text">
+                                            <span>계좌이체</span>
+                                            <span class="payment-method-description">실시간 퀵계좌이체</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <aside class="confirm-sidebar">
+                        <div class="payment-summary-card">
+                            <div class="summary-header">
+                                <h3>결제 금액</h3>
+                                <p>선택한 항공편과 좌석 기준 금액입니다.</p>
+                            </div>
+
+                            <div class="summary-body">
+                                <div class="fare-row">
+                                    <span class="fare-label">
+                                        가는 편 항공운임
+                                        <small class="fare-detail">1명 기준</small>
+                                    </span>
+                                    <span class="fare-value">100,000원</span>
+                                </div>
+
+                                <div class="fare-row">
+                                    <span class="fare-label">
+                                        오는 편 항공운임
+                                        <small class="fare-detail">1명 기준</small>
+                                    </span>
+                                    <span class="fare-value">100,000원</span>
+                                </div>
+
+                                <div class="total-row">
+                                    <span class="total-label">
+                                        총 결제금액
+                                        <small>최종 결제 예정 금액</small>
+                                    </span>
+                                    <strong class="total-amount">200,000원</strong>
+                                </div>
+
+                                <div class="hold-guide">
+                                    <span class="material-symbols-outlined">timer</span>
+                                    <span>결제하기를 누르면 좌석이 임시 확보되며, <strong>10분 이내에 결제를 완료</strong>해야 합니다.</span>
+                                </div>
+
+                                
+                            </div>
+
+                            <div class="summary-actions">
+                                <button type="submit" id="paymentSubmitButton" class="btn" disabled>결제하기</button>
+                                <a href="/skyroute/user/booking/reserve/seat" class="btn ghost seat-reselect-button">좌석 다시 선택</a>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </form>
+        </main>
+    </div>
+</div>
+    <!-- 중앙 컨텐츠 끝 -->
+    <!-- footer 시작 -->
+    <div id="main_footer">
+	<footer>
+		<div class="wrap">
+			스카이루트(SKYROUTE) · 항공권 예약 시스템 학습용 프로토타입 · 사용자 화면
+		</div>
+	</footer>
+</div>
+    <!-- footer 끝 -->
+</div>
+</body>
+</html>

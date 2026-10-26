@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html>
+<head><script src="/skyroute/user/_demo/data.js"></script><script src="/skyroute/_demo/demo.js"></script><link rel="stylesheet" href="/skyroute/_demo/demo.css">
+	<meta charset="UTF-8">
+	<meta name="csrf-header" content="X-CSRF-TOKEN" />
+	<meta name="csrf-token" content="EHrQ3tM_HStmYr15HyuPLYPW8tyt4QHWm0D9EU3HheKeSdIncR60v-UNKhtLAI4cfAa7Hrvu372f02f7-nWZd3r05Nase-dB">
+	
+	<title>SpringPage > 마이페이지</title>
+	<link rel="stylesheet" href="/skyroute/assets/css/member.css" type="text/css">
+	<link rel="stylesheet" href="/skyroute/assets/css/header.css" type="text/css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+	<meta charset="UTF-8">
+	
+	<link rel="stylesheet" href="/skyroute/assets/css/member.css" type="text/css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
+	<style>
+/* 내 정보 수정 모달 전용 스타일 코드 */
+.form-group-edit {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-bottom: 14px;
+	text-align: left;
+}
+.form-group-edit label {
+	font-size: 13px;
+	font-weight: 600;
+	color: #334155;
+}
+.form-control-edit {
+	width: 100%;
+	height: 40px;
+	padding: 0 12px;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	font-size: 14px;
+	box-sizing: border-box;
+	outline: none;
+	transition: border-color 0.2s;
+}
+.form-control-edit:focus {
+	border-color: #000000;
+}
+.mypage-profile-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid var(--line);
+	padding-bottom: 20px;
+	margin-bottom: 15px;
+}
+.profile-actions .btn {
+	display: inline-flex;
+	align-items: center;
+}
+
+/* 예약현황과 여권정보를 좌우로 나란히 밀착 배치하는 그리드 */
+.mypage-dashboard-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 24px;
+	margin-top: 30px;
+	margin-bottom: 46px;
+	align-items: stretch; /* 두 카드의 높이를 일정하게 동기화 */
+}
+.mypage-card-box {
+	background: #fff;
+	border: 1px solid #cbd5e1;
+	border-radius: 12px;
+	padding: 24px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+/* 나의 관심 노선 */
+.mypage-route-section {
+	margin-bottom: 46px;
+}
+.mypage-route-list {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	margin-top: 14px;
+}
+.mypage-route-card {
+	background: #fff;
+	border: 1px solid #cbd5e1;
+	border-radius: 12px;
+	padding: 20px 24px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	box-sizing: border-box;
+	width: 100%;
+	transition: border-color 0.2s, box-shadow 0.2s;
+}
+.mypage-route-card:hover {
+	border-color: #3b82f6;
+	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+}
+.mypage-route-empty {
+	padding: 40px 20px;
+	border: 1px dashed #cbd5e1;
+	border-radius: 12px;
+	color: var(--mut);
+	font-size: 14px;
+	text-align: center;
+	background: #fbfdff;
+	margin-top: 14px;
+}
+
+@media (max-width: 760px) {
+	.mypage-route-card {
+		flex-direction: column;
+		align-items: stretch;
+	}
+}
+
+/* 원본 이벤트 내역 스타일 보존 구역 */
+.mypage-event-list {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+.mypage-event-card {
+	display: grid;
+	grid-template-columns: 180px 1fr auto;
+	gap: 20px;
+	align-items: center;
+	padding: 18px;
+	background: #fff;
+	border: 1px solid #cbd5e1;
+	border-radius: var(--r);
+}
+.mypage-event-image {
+	width: 180px;
+	height: 94px;
+	border-radius: 9px;
+	object-fit: cover;
+	background: #f1f5f9;
+}
+.mypage-event-image-empty {
+	width: 180px;
+	height: 94px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 9px;
+	background: #f1f5f9;
+	color: var(--mut);
+	font-size: 12px;
+}
+.mypage-event-title {
+	margin: 0 0 7px;
+	color: var(--ink-700);
+	font-size: 17px;
+	font-weight: 600;
+}
+.mypage-event-period {
+	display: flex;
+	gap: 7px;
+	margin-bottom: 5px;
+	color: var(--mut);
+	font-family: var(--sans-eng);
+	font-size: 13px;
+}
+.mypage-event-date {
+	color: var(--mut);
+	font-size: 12px;
+}
+.mypage-event-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-bottom: 8px;
+	padding: 4px 10px;
+	border-radius: 999px;
+	background: var(--accent-soft);
+	color: var(--accent);
+	font-size: 12px;
+	font-weight: 600;
+}
+.mypage-empty-event {
+	padding: 44px 20px;
+	border: 1px dashed #cbd5e1;
+	border-radius: var(--r);
+	color: var(--mut);
+	font-size: 14px;
+	text-align: center;
+	background: #fbfdff;
+}
+@media (max-width: 990px) {
+	.mypage-dashboard-grid {
+		grid-template-columns: 1fr;
+	}
+}
+@media (max-width: 760px) {
+	.mypage-event-card {
+		grid-template-columns: 1fr;
+	}
+	.mypage-event-image,
+	.mypage-event-image-empty {
+		width: 100%;
+		height: 170px;
+	}
+	.mypage-event-card .actions {
+		justify-content: flex-end;
+	}
+}
+.mypage-event-status.status-pending {
+	background: #fff7ed;
+	color: #d97706;
+}
+.mypage-event-status.status-winner {
+	background: #ecfdf5;
+	color: #059669;
+}
+.mypage-event-status.status-not-selected {
+	background: #f1f5f9;
+	color: #64748b;
+}
+.mypage-event-result-text {
+	margin-top: 8px;
+	color: var(--mut);
+	font-size: 12px;
+	line-height: 1.5;
+}
+.mypage-event-result-text.winner {
+	color: #059669;
+	font-weight: 500;
+}
+.mypage-event-result-text.not-selected {
+	color: #64748b;
+}
+</style>
+</head>
+<body>
+<div id="main">
+	<!-- header 시작 -->
+	<div id="main_header">
+<style>
+/* 프로필 링크 전체 레이아웃 */
+.sr-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px 5px 6px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    color: #0f172a;
+    font-size: 13.5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+.sr-profile:hover {
+    border-color: #2563eb;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+.sr-profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+</style>
+	<header class="sr-header">
+
+		<!-- ================= 상단 유틸리티 바 ================= -->
+		<div class="sr-topbar">
+			<div class="sr-wrap sr-topbar-inner">
+
+				<a href="/skyroute/user/member/event/list" class="sr-topbar-link">
+					<span class="material-symbols-outlined" aria-hidden="true">celebration</span>
+					이벤트
+				</a>
+			
+				<span class="sr-topbar-divider" aria-hidden="true"></span>
+				
+
+				<!-- 고객센터 드롭다운 -->
+				<div class="sr-topbar-dropdown">
+					<button type="button" class="sr-topbar-link" aria-haspopup="true" aria-expanded="false">
+						<span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
+						고객센터
+						<span class="material-symbols-outlined sr-topbar-arrow" aria-hidden="true">expand_more</span>
+					</button>
+
+					<div class="sr-topbar-menu">
+						<a href="/skyroute/user/member/notice/list">
+							<span class="material-symbols-outlined" aria-hidden="true">campaign</span>
+							<span>
+								<b>공지사항</b>
+								<small>서비스 소식과 이용 안내</small>
+							</span>
+						</a>
+
+						<a href="/skyroute/user/member/faq/list">
+							<span class="material-symbols-outlined" aria-hidden="true">help</span>
+							<span>
+								<b>자주 묻는 질문</b>
+								<small>FAQ 로 빠르게 확인</small>
+							</span>
+						</a>
+
+						<a href="javascript:alert('1:1 문의 페이지는 준비 중입니다.');">
+							<span class="material-symbols-outlined" aria-hidden="true">forum</span>
+							<span>
+								<b>1:1 문의</b>
+								<small>문의 등록 및 답변 확인</small>
+							</span>
+						</a>
+					</div>
+				</div>
+
+				
+				
+
+				
+
+			</div>
+		</div>
+
+		<!-- ================= 메인 바 ================= -->
+		<div class="sr-mainbar">
+			<div class="sr-wrap sr-mainbar-inner">
+
+				<!-- 로고 : 회전하는 지구 위를 나는 항공기 -->
+				<a href="/skyroute/user/main/home" class="sr-brand" aria-label="SkyRoute 홈으로">
+
+					<svg class="sr-brand-mark" viewBox="0 0 56 56" role="img" aria-hidden="true" focusable="false">
+						<defs>
+							<linearGradient id="srGlobeGrad" x1="14" y1="14" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+								<stop offset="0" stop-color="#63CCFF"/>
+								<stop offset="0.55" stop-color="#0F86F0"/>
+								<stop offset="1" stop-color="#0047B3"/>
+							</linearGradient>
+
+							<clipPath id="srGlobeClip">
+								<circle cx="28" cy="28" r="14"/>
+							</clipPath>
+
+							<!-- 자전하는 지표면 타일 (가로 28 = 지구 지름) -->
+							<g id="srGlobeTile">
+								<g fill="#0B2D5E" opacity="0.45">
+									<path d="M2 18 c4 -2.5 8 -1.5 9 1 c1.2 2.6 -1.6 5 -5 4.6 c-3.4 -0.4 -6 -3.4 -4 -5.6 Z"/>
+									<path d="M14 30 c4 -3 9 -1.4 10 2 c1 3.2 -2.6 6.4 -6.4 5.6 c-3.8 -0.8 -6 -5 -3.6 -7.6 Z"/>
+									<path d="M4 33 c2.4 -0.8 4.4 1 3.8 3.2 c-0.6 2.2 -3.8 2.6 -4.8 0.6 c-1 -2 -0.6 -3.2 1 -3.8 Z"/>
+									<path d="M22 15 c2.6 -1.2 5.2 0.4 4.8 2.6 c-0.4 2.2 -3.6 3 -5.2 1.4 c-1.4 -1.4 -1.2 -3.2 0.4 -4 Z"/>
+								</g>
+								<g fill="none" stroke="#ffffff" stroke-width="0.7" opacity="0.35">
+									<path d="M3 13 C 1 21, 1 35, 3 43"/>
+									<path d="M10 13 C 8.6 21, 8.6 35, 10 43"/>
+									<path d="M17 13 C 16 21, 16 35, 17 43"/>
+									<path d="M24 13 C 22.6 21, 22.6 35, 24 43"/>
+								</g>
+							</g>
+
+							<!-- 항공기 -->
+							<g id="srPlane">
+								<path d="M0 -13 C 1.7 -13 2.6 -10.6 2.7 -6.4 L12.6 0.4 L12.6 3.6 L2.7 0.9
+										 L2.7 7.6 L6.1 10.6 L6.1 12.8 L0 11.1 L-6.1 12.8 L-6.1 10.6 L-2.7 7.6
+										 L-2.7 0.9 L-12.6 3.6 L-12.6 0.4 L-2.7 -6.4 C -2.6 -10.6 -1.7 -13 0 -13 Z"
+									  fill="#0F172A" stroke="#ffffff" stroke-width="2.4"
+									  stroke-linejoin="round" paint-order="stroke"/>
+							</g>
+						</defs>
+
+						<!-- ===== 지구 뒤쪽 : 궤도 후반부 + 뒤로 지나가는 항공기 ===== -->
+						<g transform="rotate(-16 28 28)">
+							<path d="M 6,28 A 22,7 0 0,1 50,28" fill="none" stroke="#0066E2"
+								  stroke-width="1.1" opacity="0.28" stroke-dasharray="2 3"/>
+
+							<g class="sr-plane-back">
+								<g transform="rotate(90) scale(0.42)">
+									<use href="#srPlane"/>
+								</g>
+							</g>
+						</g>
+
+						<!-- ===== 지구 ===== -->
+						<circle cx="28" cy="28" r="14" fill="url(#srGlobeGrad)"/>
+
+						<g clip-path="url(#srGlobeClip)">
+							<g class="sr-globe-spin">
+								<use href="#srGlobeTile" x="14"/>
+								<use href="#srGlobeTile" x="42"/>
+							</g>
+						</g>
+
+						<g clip-path="url(#srGlobeClip)" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.4">
+							<line x1="14" y1="28" x2="42" y2="28"/>
+							<path d="M16 21 H40"/>
+							<path d="M16 35 H40"/>
+						</g>
+
+						<circle cx="28" cy="28" r="14" fill="none" stroke="#ffffff" stroke-width="0.9" opacity="0.45"/>
+						<path d="M19 19 a13 13 0 0 1 8 -4" fill="none" stroke="#ffffff"
+							  stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+
+						<!-- ===== 지구 앞쪽 : 궤도 전반부 + 앞으로 지나가는 항공기 ===== -->
+						<g transform="rotate(-16 28 28)">
+							<path d="M 50,28 A 22,7 0 0,1 6,28" fill="none" stroke="#0066E2"
+								  stroke-width="1.1" opacity="0.45" stroke-dasharray="2 3"/>
+
+							<g class="sr-plane-front">
+								<g transform="rotate(90) scale(0.42)">
+									<use href="#srPlane"/>
+								</g>
+							</g>
+						</g>
+					</svg>
+
+					<span class="sr-brand-text">
+						<strong>SkyRoute</strong>
+						<small>FLY YOUR ROUTE</small>
+					</span>
+				</a>
+
+				<!-- 주 메뉴 -->
+				<nav class="sr-nav" aria-label="주 메뉴">
+					
+
+						<!-- 예약 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/main/home" class="sr-nav-link">예약</a>
+
+							<div class="sr-nav-menu">
+								<a href="/skyroute/user/main/home">
+									<span class="material-symbols-outlined" aria-hidden="true">flight_takeoff</span>
+									<span>
+										<b>항공권 예약</b>
+										<small>출발지 · 도착지 검색</small>
+									</span>
+								</a>
+								<a href="/skyroute/user/member/member_booking">
+									<span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+									<span>
+										<b>예약 조회 · 취소</b>
+										<small>예약 확인 및 취소</small>
+									</span>
+								</a>
+							</div>
+						</div>
+
+						<!-- 여행 준비 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/member/member_schedule" class="sr-nav-link">여행 준비</a>
+
+							<div class="sr-nav-menu">
+								<a href="/skyroute/user/member/member_schedule">
+									<span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+									<span>
+										<b>출도착 · 스케줄</b>
+										<small>실시간 운항 현황</small>
+									</span>
+								</a>
+								<a href="/skyroute/user/member/member_route">
+									<span class="material-symbols-outlined" aria-hidden="true">route</span>
+									<span>
+										<b>운항 노선</b>
+										<small>취항지 및 노선 안내</small>
+									</span>
+								</a>							
+							</div>
+						</div>
+						
+						<!-- 여행 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/member/travel/member_airport" class="sr-nav-link">여행</a>
+						
+							<div class="sr-nav-menu">
+								<a href="/skyroute/user/member/travel/member_airport">
+									<span class="material-symbols-outlined" aria-hidden="true">connecting_airports</span>
+									<span>
+										<b>공항에서</b>
+										<small>공항 위치와 탑승 안내</small>
+									</span>
+								</a>
+						
+								<a href="/skyroute/user/member/travel/member_cabin">
+									<span class="material-symbols-outlined" aria-hidden="true">airline_seat_recline_normal</span>
+									<span>
+										<b>기내에서</b>
+										<small>좌석 등급과 기내 서비스</small>
+									</span>
+								</a>
+						
+								<a href="/skyroute/user/member/travel/member_aircraft">
+									<span class="material-symbols-outlined" aria-hidden="true">flight</span>
+									<span>
+										<b>항공기 정보</b>
+										<small>운항 항공기와 좌석 구성</small>
+									</span>
+								</a>
+						
+								<a href="/skyroute/user/member/travel/member_service">
+									<span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+									<span>
+										<b>유료 부가서비스</b>
+										<small>좌석 지정과 추가 서비스</small>
+									</span>
+								</a>
+							</div>
+						</div>
+
+						<!-- 스카이클럽 -->
+						<div class="sr-nav-item">
+							<a href="/skyroute/user/member/member_mypage" class="sr-nav-link">스카이클럽</a>
+
+							<div class="sr-nav-menu">
+								
+									<a href="/skyroute/user/member/member_mypage">
+										<span class="material-symbols-outlined" aria-hidden="true">person</span>
+										<span>
+											<b>마이페이지</b>
+											<small>회원 정보 관리</small>
+										</span>
+									</a>
+									<a href="/skyroute/user/member/member_booking">
+										<span class="material-symbols-outlined" aria-hidden="true">luggage</span>
+										<span>
+											<b>나의 여행</b>
+											<small>예약 내역 확인</small>
+										</span>
+									</a>
+								
+
+								
+							</div>
+						</div>
+
+					
+				</nav>
+
+				<!-- 우측 액션 -->
+				<div class="sr-actions">
+
+					<div class="sr-search">
+						<input type="search" id="srGlobalSearch"
+							   placeholder="궁금한 것을 검색해 보세요!"
+							   aria-label="사이트 검색"
+							   autocomplete="off">
+						<button type="button" id="srGlobalSearchButton" aria-label="검색">
+							<span class="material-symbols-outlined" aria-hidden="true">search</span>
+						</button>
+					</div>
+
+					
+
+					
+						<a href="/skyroute/user/member/member_mypage" class="sr-profile">
+						    <span class="sr-profile-avatar">김</span>
+						    <b>김민준</b>
+						</a>
+
+						<button type="button" class="sr-login-button" id="logout">로그아웃</button>
+
+						<form action="/skyroute/user/member/logout" method="post" id="frm_logout" hidden><input type="hidden" name="_csrf" value="EHrQ3tM_HStmYr15HyuPLYPW8tyt4QHWm0D9EU3HheKeSdIncR60v-UNKhtLAI4cfAa7Hrvu372f02f7-nWZd3r05Nase-dB"/></form>
+					
+
+					<button type="button" class="sr-menu-toggle" id="srMenuToggle"
+							aria-label="메뉴 열기" aria-expanded="false">
+						<span class="material-symbols-outlined" aria-hidden="true">menu</span>
+					</button>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- 모바일 메뉴 -->
+		<div class="sr-mobile-nav" id="srMobileNav" hidden>
+			<div class="sr-wrap">
+				
+					<a href="/skyroute/user/main/home">항공권 예약</a>
+					<a href="/skyroute/user/member/member_booking">예약 조회 · 변경</a>
+					<a href="/skyroute/user/member/member_schedule">출도착 · 스케줄</a>
+					<a href="/skyroute/user/member/member_route">운항 노선</a>
+					<a href="/skyroute/user/member/member_functions">기능 한눈에 보기</a>
+					<a href="/skyroute/user/member/travel/member_airport">공항에서</a>
+					<a href="/skyroute/user/member/travel/member_cabin">기내에서</a>
+					<a href="/skyroute/user/member/travel/member_aircraft">항공기 정보</a>
+					<a href="/skyroute/user/member/travel/member_service">유료 부가서비스</a>
+					<a href="/skyroute/user/member/event/list">이벤트</a>
+					<a href="/skyroute/user/member/notice/list">공지사항</a>
+					<a href="/skyroute/user/member/member_mypage">마이페이지</a>
+				
+			</div>
+		</div>
+
+	</header>
+
+	<script>
+		(() => {
+			/* 로그아웃 */
+			const logoutButton = document.getElementById("logout");
+			const logoutForm = document.getElementById("frm_logout");
+
+			if (logoutButton && logoutForm) {
+				logoutButton.addEventListener("click", (event) => {
+					event.preventDefault();
+					logoutForm.submit();
+				});
+			}
+
+			/* 통합 검색 (준비 중) */
+			const searchInput = document.getElementById("srGlobalSearch");
+			const searchButton = document.getElementById("srGlobalSearchButton");
+
+			const runSearch = () => {
+				window.alert("통합 검색은 준비 중입니다.");
+			};
+
+			if (searchButton) {
+				searchButton.addEventListener("click", runSearch);
+			}
+
+			if (searchInput) {
+				searchInput.addEventListener("keydown", (event) => {
+					if (event.key === "Enter") {
+						event.preventDefault();
+						runSearch();
+					}
+				});
+			}
+
+			/* 모바일 메뉴 */
+			const menuToggle = document.getElementById("srMenuToggle");
+			const mobileNav = document.getElementById("srMobileNav");
+
+			if (menuToggle && mobileNav) {
+				menuToggle.addEventListener("click", () => {
+					const willOpen = mobileNav.hidden;
+
+					mobileNav.hidden = !willOpen;
+					menuToggle.setAttribute("aria-expanded", String(willOpen));
+				});
+			}
+		})();
+	</script>
+
+</div>
+	<!-- header 끝 -->
+	<!-- 중앙 컨텐츠 시작 -->
+    <div id="my" class="panel on">
+
+	<section class="block wrap">
+		<div class="eyebrow">MY PAGE</div>
+
+		<div class="mypage-profile-header">
+			<div>
+				<h2 style="margin:6px 0 4px"><span>김민준</span>님, 반갑습니다</h2>
+			</div>
+			<div class="profile-actions">
+				<a href="javascript:void(0);" id="btnOpenEditProfile" class="btn ghost sm">
+				    <span class="material-symbols-outlined" style="font-size:16px; margin-right:4px;">manage_accounts</span>
+				    내 정보 관리
+				</a>
+			</div>
+		</div>
+
+		<div class="mypage-dashboard-grid">
+			
+			<div class="mypage-card-box" style="padding: 28px;">
+				<div style="flex-grow: 1; display: flex; flex-direction: column;">
+					<h3 style="margin-top: 0; margin-bottom: 20px; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; color: #0052cc;">
+						<span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">confirmation_number</span>
+						나의 항공권 예약 현황
+					</h3>
+					
+					<div style="margin-bottom: 12px;">
+						<span class="stat soon" style="background:#eff6ff; color:#3b82f6; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600;">LIVE TRIP</span>
+					</div>
+					
+					<h4 style="font-size: 17px; font-weight: 600; margin: 0 0 6px; color: #1e293b;">예약 확인 · 변경 · 체크인 및 환불</h4>
+					<p style="font-size: 13px; color: var(--mut); line-height: 1.5; margin: 0 0 24px;">
+						고객님이 예매하신 다가오는 여정을 실시간으로 안전하게 확인하고 일정을 조정해 보십시오.
+					</p>
+
+					<div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-around; margin-bottom: 24px; margin-top: auto;">
+						<div style="text-align: center;">
+							<span style="font-size: 11px; color: #94a3b8; display: block; font-weight: 500;">DEPARTURE</span>
+							<strong style="font-size: 18px; color: #1e293b; font-family: var(--sans-eng); font-weight: 700;">SEL</strong>
+						</div>
+						<div style="display: flex; flex-direction: column; align-items: center; flex-grow: 0.5; position: relative;">
+							<span class="material-symbols-outlined" style="color: #3b82f6; font-size: 18px;">flight_takeoff</span>
+							<div style="width: 100%; border-bottom: 1px dashed #cbd5e1; height: 1px; margin-top: 4px;"></div>
+						</div>
+						<div style="text-align: center;">
+							<span style="font-size: 11px; color: #94a3b8; display: block; font-weight: 500;">DESTINATION</span>
+							<strong style="font-size: 18px; color: #1e293b; font-family: var(--sans-eng); font-weight: 700;">WRLD</strong>
+						</div>
+					</div>
+				</div>
+				
+				<div>
+					<a href="/skyroute/user/bookinglist/lookup" class="btn sm" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 12px 18px; background: #0052cc; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; box-sizing: border-box; height: 42px;">
+						나의 예약 조회하러 가기
+						<span class="material-symbols-outlined" style="font-size:16px; margin-left:6px;">arrow_forward</span>
+					</a>
+				</div>
+			</div>
+
+			<div class="mypage-card-box" style="padding: 28px;">
+				<div style="flex-grow: 1; display: flex; flex-direction: column;">
+					<h3 style="margin-top: 0; margin-bottom: 20px; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; color: #2563eb;">
+						<span style="display: flex; align-items: center; gap: 8px;">
+							<span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">passport</span>
+							나의 여권 정보
+						</span>
+						<button type="button" id="btnOpenPassportModal" class="btn ghost sm" style="padding: 4px 10px; font-size: 12px; height: auto; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+							<span class="material-symbols-outlined" style="font-size: 14px;">edit</span>수정하기
+						</button>
+					</h3>
+					
+					
+
+					<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; font-size: 14px; margin-top: 10px; flex-grow: 1;">
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">영문 성명</span>
+							<strong>KIM MINJUN</strong>
+						</div>
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">생년월일</span>
+							<strong>1995-03-12</strong>
+						</div>
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">성별</span>
+							<strong>남성 (Male)</strong>
+						</div>
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">등록 연락처</span>
+							<strong>010-1111-0001</strong>
+						</div>
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">여권 번호</span>
+							<strong style="font-family: var(--sans-eng); font-weight:600; color:#1e293b;">M10100001</strong>
+						</div>
+						<div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+							<span style="color: var(--mut); font-size: 12px; display:block; margin-bottom: 2px;">여권 만료일</span>
+							<strong>2031-03-11</strong>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+		<!-- 나의 관심 노선 영역 -->
+		<div class="mypage-route-section">
+			<div class="htitle" style="margin-bottom: 0;">
+				<div>
+					<div class="eyebrow">FAVORITE FLIGHT</div>
+					<h2 style="font-size:18px; margin-top:4px; display: flex; align-items: center; gap: 6px;">
+						<span class="material-symbols-outlined" style="color: #e11d48; font-size: 22px;">favorite</span>
+						나의 관심 항공편
+					</h2>
+				</div>
+
+				<div style="font-size:13px; color:var(--mut);">
+					총 <b style="color:var(--accent); font-family:var(--sans-eng);">1</b>개 항공편
+				</div>
+			</div>
+
+			<!-- Case A: 등록된 관심 항공편이 없을 때 -->
+			
+
+			<!-- Case B: 관심 항공편 리스트 출력 -->
+			<div class="mypage-route-list">
+				<div class="mypage-route-card">
+					
+					<!-- 왼쪽: 항공편 뱃지, 편명, 날짜 및 삭제 버튼 -->
+					<div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+						<div style="display: flex; align-items: center; gap: 10px;">
+							
+							<!-- 관심 항공편 전용 배지 (편명 + 날짜) -->
+							<span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; font-family: var(--sans-eng);">FLIGHT SR101 (2026-10-25)</span>
+							
+							<!-- 관심 취소 버튼 -->
+							<a href="/skyroute/user/member/removeFavoriteRoute?favoriteId=5" 
+							   class="btn ghost sm" 
+							   style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; height: auto; font-size: 11px; color: #e11d48; border-color: #fecdd3; background: #fff1f2; text-decoration: none; border-radius: 6px;" 
+							   title="관심 항공편 삭제">
+								<span class="material-symbols-outlined" style="font-size: 13px;">heart_broken</span>
+								관심 취소
+							</a>
+						</div>
+						
+						<!-- 출/도착 공항 및 시간 노드 그래픽 -->
+						<div style="display: flex; align-items: center; max-width: 520px; width: 100%; margin-top: 4px;">
+							
+							<!-- 출발 공항 & 시간 -->
+							<div style="text-align: left; min-width: 110px;">
+								<strong style="font-size: 14px; color: #2563eb; font-weight: 700; display: block;">06:30</strong>
+								<strong style="font-size: 20px; color: #1e293b; font-family: var(--sans-eng); font-weight: 700; display: block;">PUS</strong>
+								<span style="font-size: 13px; color: #64748b;">김해국제공항</span>
+							</div>
+							
+							<!-- 경로선 -->
+							<div style="display: flex; flex-direction: column; align-items: center; flex: 1; margin: 0 20px;">
+								<span class="material-symbols-outlined" style="font-size: 18px; color: #3b82f6;">flight_takeoff</span>
+								<div style="width: 100%; border-bottom: 1px dashed #cbd5e1; margin-top: 4px;"></div>
+							</div>
+							
+							<!-- 도착 공항 & 시간 -->
+							<div style="text-align: right; min-width: 110px;">
+								<strong style="font-size: 14px; color: #2563eb; font-weight: 700; display: block;">07:40</strong>
+								<strong style="font-size: 20px; color: #1e293b; font-family: var(--sans-eng); font-weight: 700; display: block;">GMP</strong>
+								<span style="font-size: 13px; color: #64748b;">김포국제공항</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- 오른쪽: 이동 버튼 -->
+					<div style="display: flex; align-items: center;">
+						<a href="/skyroute/user/main/home" 
+						   class="btn ghost sm" 
+						   style="display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 16px; font-size: 13px; border-color: #cbd5e1; white-space: nowrap;">
+							예매하러 가기
+						</a>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="htitle">
+			<div>
+				<div class="eyebrow">EVENT HISTORY</div>
+				<h2 style="font-size:18px; margin-top:4px;">이벤트 참여 내역</h2>
+			</div>
+
+			<div style="font-size:13px; color:var(--mut);">
+				총
+				<b style="color:var(--accent); font-family:var(--sans-eng);">6</b>건
+			</div>
+		</div>
+
+		
+
+		<div class="mypage-event-list">
+
+			<div class="mypage-event-card">
+
+				<img src="/skyroute/assets/upload/b9b81219-17a8-4b83-8ed0-a43c5a097fc8.png"
+				     alt="미리 준비하는 나의 특별한 미국 여행"
+				     class="mypage-event-image">
+
+				
+
+				<div>
+					<div class="mypage-event-status status-pending">
+						<span class="material-symbols-outlined" style="font-size:15px;">hourglass_top</span>
+						결과 발표 대기
+					</div>
+					
+					
+					
+					
+
+					<h3 class="mypage-event-title">미리 준비하는 나의 특별한 미국 여행</h3>
+					<p class="mypage-event-result-text">
+						이벤트 종료 후 랜덤 추첨 결과가 발표됩니다.
+					</p>
+					
+					
+					
+					
+
+					<div class="mypage-event-date">
+						응모
+						<span>2026.10.15</span>
+					</div>
+				</div>
+
+				<div class="actions">
+					<a href="/skyroute/user/member/event/detail?event_id=6"
+					   class="btn ghost sm">
+						이벤트 보기
+					</a>
+				</div>
+
+			</div>
+
+			<div class="mypage-event-card">
+
+				<img src="/skyroute/assets/upload/9e518ae9-5ad6-44a7-a305-2f2789170418.png"
+				     alt="떠나고 싶을 때 가장 먼저 생각나는 일본"
+				     class="mypage-event-image">
+
+				
+
+				<div>
+					<div class="mypage-event-status status-pending">
+						<span class="material-symbols-outlined" style="font-size:15px;">hourglass_top</span>
+						결과 발표 대기
+					</div>
+					
+					
+					
+					
+
+					<h3 class="mypage-event-title">떠나고 싶을 때 가장 먼저 생각나는 일본</h3>
+					<p class="mypage-event-result-text">
+						이벤트 종료 후 랜덤 추첨 결과가 발표됩니다.
+					</p>
+					
+					
+					
+					
+
+					<div class="mypage-event-date">
+						응모
+						<span>2026.10.10</span>
+					</div>
+				</div>
+
+				<div class="actions">
+					<a href="/skyroute/user/member/event/detail?event_id=2"
+					   class="btn ghost sm">
+						이벤트 보기
+					</a>
+				</div>
+
+			</div>
+
+			<div class="mypage-event-card">
+
+				<img src="/skyroute/assets/upload/58ff73c4-25dd-43ba-aa2b-f9f83597925f.png"
+				     alt="낭만이 시작되는 곳, 유럽으로"
+				     class="mypage-event-image">
+
+				
+
+				<div>
+					<div class="mypage-event-status status-pending">
+						<span class="material-symbols-outlined" style="font-size:15px;">hourglass_top</span>
+						결과 발표 대기
+					</div>
+					
+					
+					
+					
+
+					<h3 class="mypage-event-title">낭만이 시작되는 곳, 유럽으로</h3>
+					<p class="mypage-event-result-text">
+						이벤트 종료 후 랜덤 추첨 결과가 발표됩니다.
+					</p>
+					
+					
+					
+					
+
+					<div class="mypage-event-date">
+						응모
+						<span>2026.10.05</span>
+					</div>
+				</div>
+
+				<div class="actions">
+					<a href="/skyroute/user/member/event/detail?event_id=3"
+					   class="btn ghost sm">
+						이벤트 보기
+					</a>
+				</div>
+
+			</div>
+
+			<div class="mypage-event-card">
+
+				<img src="/skyroute/assets/upload/164109ea-5adb-46a6-a02a-81e600daba3b.png"
+				     alt="가을 여행 특가 - 국내선 최대 30% 할인"
+				     class="mypage-event-image">
+
+				
+
+				<div>
+					<div class="mypage-event-status status-pending">
+						<span class="material-symbols-outlined" style="font-size:15px;">hourglass_top</span>
+						결과 발표 대기
+					</div>
+					
+					
+					
+					
+
+					<h3 class="mypage-event-title">가을 여행 특가 - 국내선 최대 30% 할인</h3>
+					<p class="mypage-event-result-text">
+						이벤트 종료 후 랜덤 추첨 결과가 발표됩니다.
+					</p>
+					
+					
+					
+					
+
+					<div class="mypage-event-date">
+						응모
+						<span>2026.10.01</span>
+					</div>
+				</div>
+
+				<div class="actions">
+					<a href="/skyroute/user/member/event/detail?event_id=1"
+					   class="btn ghost sm">
+						이벤트 보기
+					</a>
+				</div>
+
+			</div>
+
+			<div class="mypage-event-card">
+
+				<img src="/skyroute/assets/upload/15ecfb3e-3382-4491-8502-f402494d85f3.png"
+				     alt="여행의 모든 이유가 있는 곳, 시드니"
+				     class="mypage-event-image">
+
+				
+
+				<div>
+					
+					
+					<div class="mypage-event-status status-winner">
+						<span class="material-symbols-outlined" style="font-size:15px;">emoji_events</span>
+						당첨
+					</div>
+					
+					
+
+					<h3 class="mypage-event-title">여행의 모든 이유가 있는 곳, 시드니</h3>
+					
+					
+					<p class="mypage-event-result-text winner">
+						축하합니다. 이벤트 당첨자로 선정되었습니다.
+					</p>
+					
+					
+
+					<div class="mypage-event-date">
+						응모
+						<span>2026.09.01</span>
+					</div>
+				</div>
+
+				<div class="actions">
+					<a href="/skyroute/user/member/event/detail?event_id=4"
+					   class="btn ghost sm">
+						이벤트 보기
+					</a>
+				</div>
+
+			</div>
+
+			<div class="mypage-event-card">
+
+				<img src="/skyroute/assets/upload/002acc31-bf29-4c6c-9957-8b9ce5154e10.png"
+				     alt="올여름 휴가? 지금 가장 떠나기 좋은 동남아"
+				     class="mypage-event-image">
+
+				
+
+				<div>
+					
+					
+					<div class="mypage-event-status status-winner">
+						<span class="material-symbols-outlined" style="font-size:15px;">emoji_events</span>
+						당첨
+					</div>
+					
+					
+
+					<h3 class="mypage-event-title">올여름 휴가? 지금 가장 떠나기 좋은 동남아</h3>
+					
+					
+					<p class="mypage-event-result-text winner">
+						축하합니다. 이벤트 당첨자로 선정되었습니다.
+					</p>
+					
+					
+
+					<div class="mypage-event-date">
+						응모
+						<span>2026.07.01</span>
+					</div>
+				</div>
+
+				<div class="actions">
+					<a href="/skyroute/user/member/event/detail?event_id=5"
+					   class="btn ghost sm">
+						이벤트 보기
+					</a>
+				</div>
+
+			</div>
+
+		</div>
+
+	</section>
+
+	<input type="hidden" id="csrfParameterName" value="_csrf">
+	<input type="hidden" id="csrfToken" value="EHrQ3tM_HStmYr15HyuPLYPW8tyt4QHWm0D9EU3HheKeSdIncR60v-UNKhtLAI4cfAa7Hrvu372f02f7-nWZd3r05Nase-dB">
+
+	<div class="modal-overlay" id="editProfileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+	  <div class="modal-content" style="width: 460px; max-height: 85vh; overflow-y: auto; background-color: #ffffff !important; padding: 30px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); position: relative; box-sizing: border-box;">
+	    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+	      <h2 style="font-size: 18px; font-weight: 600; margin: 0; color: #000000;">내 정보 관리 / 수정</h2>
+	      <span class="material-symbols-outlined modal-close" id="btnCloseEditProfile" style="cursor: pointer; color: #000000; font-size: 24px;">close</span>
+	    </div>
+	    <div class="modal-body">
+	      <div id="formEditProfile">
+	        
+	        <div class="form-group-edit">
+	          <label>이름</label>
+	          <input type="text" id="editName" class="form-control-edit" value="김민준" readonly style="background:#f1f5f9; color:#64748b; border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editNowPasswd" style="color:var(--accent); font-weight:600;">현재 비밀번호 확인</label>
+	          <input type="password" id="editNowPasswd" class="form-control-edit" placeholder="정보 수정 및 탈퇴 시 현재 비밀번호를 입력하세요" required style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editPassword">새 비밀번호 (변경시에만 입력)</label>
+	          <input type="password" id="editPassword" class="form-control-edit" placeholder="변경할 새 비밀번호를 입력해주세요" style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editPhone">전화번호</label>
+	          <input type="text" id="editPhone" class="form-control-edit" value="010-1111-0001" placeholder="EX) 010-1234-5678" required style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editEmail">이메일</label>
+	          <input type="text" id="editEmail" class="form-control-edit" value="user01@test.com" placeholder="EX) airnuri@sky.com" required style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editZipcode">우편번호</label>
+	          <div style="display:flex; gap:8px;">
+	            <input type="text" id="editZipcode" class="form-control-edit" value="06236" readonly placeholder="우편번호" style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">            
+	            <input type="button" onclick="execDaumPostcode()" value="우편번호 찾기" class="btn ghost sm" style="min-width: 110px; height: 40px; border-radius: 8px; font-size:12px;">
+	          </div>
+	        </div>
+	
+	        <div class="form-group-edit">
+	          <label for="editAddress1">주소</label>
+	          <input type="text" id="editAddress1" class="form-control-edit" value="서울특별시 강남구 테헤란로 123" readonly placeholder="기본 주소" style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">            
+	        </div>
+	
+	        <div class="form-group-edit" style="margin-bottom: 25px;">
+	          <label for="editAddress2">상세 주소</label>
+	          <input type="text" id="editAddress2" class="form-control-edit" value="101동 1001호" placeholder="상세 주소를 입력해주세요" style="border: 1px solid #cbd5e1; height: 40px; padding: 0 12px; border-radius: 8px;">            
+	        </div>
+	
+	        <button type="button" id="btnSubmitEditProfile" class="btn-modal-submit" style="width: 100%; height: 44px; background: #000000; color: #ffffff; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 15px; transition: background 0.2s;">
+	            회원정보 수정 완료
+	        </button>
+
+	        <div style="margin-top: 25px; padding-top: 15px; border-top: 1px dashed #e2e8f0; text-align: right;">
+	          <span style="font-size: 12px; color: #94a3b8; margin-right: 8px;">서비스 이용이 불편하셨나요?</span>
+	          <a href="javascript:void(0);" id="btnSubmitDeleteAccount" style="font-size: 12px; color: #ef4444; font-weight: 600; text-decoration: underline; cursor: pointer;">
+	            회원 탈퇴하기
+	          </a>
+	        </div>
+
+	      </div>
+	      <div class="modal-result" id="editProfileResult" style="display:none; margin-top:15px; padding:10px; border-radius:8px; font-size:13px; text-align:center;"></div>
+	    </div>
+	  </div>
+	</div>
+
+	<div class="modal-overlay" id="editPassportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+	  <div class="modal-content" style="width: 500px; max-height: 85vh; overflow-y: auto; background-color: #ffffff !important; padding: 30px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); position: relative; box-sizing: border-box;">
+	    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+	      <h2 style="font-size: 18px; font-weight: 600; margin: 0; color: #000000; display: flex; align-items: center; gap: 6px;">
+	        <span class="material-symbols-outlined" style="color:#2563eb;">passport</span>
+	        여권 정보 수정
+	      </h2>
+	      <span class="material-symbols-outlined modal-close" id="btnClosePassportModal" style="cursor: pointer; color: #000000; font-size: 24px;">close</span>
+	    </div>
+	    <div class="modal-body">
+	      <form id="passportForm">
+	        
+	        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px;">
+	          <div class="form-group-edit">
+	            <label>영문 성명 (여권 동일)</label>
+	            <input type="text" id="passName" name="name" 
+	                   value="KIM MINJUN" 
+	                   class="form-control-edit" placeholder="EX) HONG GILDONG" 
+	                   oninput="this.value = this.value.toUpperCase().replace(/[^A-Z\s]/g, '');"
+	                   style="font-family: var(--sans-eng); text-transform: uppercase;" required>
+	          </div>
+	          <div class="form-group-edit">
+	            <label>생년월일</label>
+	            <input type="date" id="passBirthDate" name="birthDate" 
+	                   value="1995-03-12" 
+	                   class="form-control-edit" style="font-family: var(--sans-eng);" required>
+	          </div>
+	        </div>
+
+	        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px;">
+	          <div class="form-group-edit">
+	            <label style="margin-bottom: 4px;">성별</label>
+	            <div style="display: flex; gap: 16px; align-items: center; height: 40px;">
+	              <label style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; font-size: 13px;">
+	                <input type="radio" name="gender" value="M" 
+	                       style="accent-color: #2563eb; width: 15px; height: 15px;" checked="checked"> 남성 (M)
+	              </label>
+	              <label style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; font-size: 13px;">
+	                <input type="radio" name="gender" value="F" 
+	                       style="accent-color: #2563eb; width: 15px; height: 15px;"> 여성 (F)
+	              </label>
+	            </div>
+	          </div>
+	          <div class="form-group-edit">
+	            <label>여권 등록 연락처</label>
+	            <input type="text" id="passPhone" name="phone" 
+	                   value="010-1111-0001" 
+	                   class="form-control-edit" placeholder="010-1234-5678" 
+	                   oninput="this.value = this.value.replace(/[^0-9-]/g, '');"
+	                   style="font-family: var(--sans-eng);">
+	          </div>
+	        </div>
+
+	        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px;">
+	          <div class="form-group-edit">
+	            <label>여권 번호</label>
+	            <input type="text" id="passportNo" name="passportNo" 
+	                   value="M10100001" 
+	                   class="form-control-edit" placeholder="M12345678" 
+	                   oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');"
+	                   style="font-family: var(--sans-eng); text-transform: uppercase;">
+	          </div>
+	          <div class="form-group-edit">
+	            <label>여권 만료일</label>
+	            <input type="date" id="passportExpiry" name="passportExpiry" 
+	                   value="2031-03-11" 
+	                   class="form-control-edit" style="font-family: var(--sans-eng);">
+	          </div>
+	        </div>
+
+	        <button type="button" onclick="updatePassportInfo()" class="btn sm" style="width: 100%; height: 44px; background: #2563eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; box-sizing: border-box;">
+	          여권 정보 저장 완료
+	        </button>
+	      </form>
+	    </div>
+	  </div>
+	</div>
+	
+	<div id="layer" style="display:none;position:fixed;overflow:hidden;z-index:10000;align-items:center;justify-content:center;border-radius:12px;box-shadow:var(--sh);background:#fff;">
+	    <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnCloseLayer" style="cursor:pointer;position:absolute;right:10px;top:10px;z-index:1;width:18px;" onclick="closeDaumPostcode()" alt="닫기 버튼">
+	</div>
+
+	<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	
+	<script>
+	  var element_layer = document.getElementById('layer');
+
+	  function closeDaumPostcode() {
+	      element_layer.style.display = 'none';
+	  }
+
+	  document.addEventListener("DOMContentLoaded", function() {
+	    
+	    var mEdit = document.getElementById('editProfileModal');
+	    var btnOpenEdit = document.getElementById('btnOpenEditProfile');
+	    var btnCloseEdit = document.getElementById('btnCloseEditProfile');
+
+	    if(btnOpenEdit) {
+	      btnOpenEdit.onclick = function(e) {
+	        e.preventDefault();
+	        if(mEdit) mEdit.style.display = 'flex';
+	      };
+	    }
+
+	    if(btnCloseEdit) {
+	      btnCloseEdit.onclick = function() {
+	        if(mEdit) {
+	          mEdit.style.display = 'none';
+	          closeDaumPostcode();
+	          document.getElementById('editNowPasswd').value = '';
+	          document.getElementById('editPassword').value = '';
+	          document.getElementById('editProfileResult').style.display = 'none';
+	        }
+	      };
+	    }
+
+	    // 여권 수정 모달 바인딩 엔진
+	    var mPassport = document.getElementById('editPassportModal');
+	    var btnOpenPassport = document.getElementById('btnOpenPassportModal');
+	    var btnClosePassport = document.getElementById('btnClosePassportModal');
+
+	    if(btnOpenPassport) {
+	    	btnOpenPassport.onclick = function(e) {
+	    		e.preventDefault();
+	    		if(mPassport) mPassport.style.display = 'flex';
+	    	};
+	    }
+
+	    if(btnClosePassport) {
+	    	btnClosePassport.onclick = function() {
+	    		if(mPassport) mPassport.style.display = 'none';
+	    	};
+	    }
+
+	    var btnSubmitEdit = document.getElementById('btnSubmitEditProfile');
+	    if(btnSubmitEdit) {
+	      btnSubmitEdit.onclick = function(e) {
+	        e.preventDefault();
+
+	        var nowPasswd = document.getElementById('editNowPasswd').value;
+	        var password = document.getElementById('editPassword').value;
+	        var phone = document.getElementById('editPhone').value;
+	        var email = document.getElementById('editEmail').value;
+	        var zipcode = document.getElementById('editZipcode').value;
+	        var address1 = document.getElementById('editAddress1').value;
+	        var address2 = document.getElementById('editAddress2').value;
+	        var resultBox = document.getElementById('editProfileResult');
+
+	        if(!nowPasswd) {
+	          alert("정보 수정을 위해 현재 비밀번호를 입력해 주세요.");
+	          document.getElementById('editNowPasswd').focus();
+	          return;
+	        }
+	        if(!phone || !email) {
+	          alert("전화번호 and 이메일은 필수 입력 사항입니다.");
+	          return;
+	        }
+
+	        var paramName = document.getElementById('csrfParameterName').value;
+	        var tokenValue = document.getElementById('csrfToken').value;
+
+	        var formData = new URLSearchParams();
+	        formData.append('now_passwd', nowPasswd);
+	        formData.append('password', password);
+	        formData.append('phone', phone);
+	        formData.append('email', email);
+	        formData.append('zipcode', zipcode);
+	        formData.append('address1', address1);
+	        formData.append('address2', address2);
+	        formData.append(paramName, tokenValue);
+
+	        fetch('/skyroute/user/member/updateProfile', {
+	          method: 'POST',
+	          headers: {
+	            'Content-Type': 'application/x-www-form-urlencoded'
+	          },
+	          body: formData.toString()
+	        })
+	        .then(function(res) { return res.text(); })
+	        .then(function(response) {
+	            resultBox.innerText = response;
+	            resultBox.style.display = 'block';
+	            if(response.includes("완료") || response.includes("성공")) {
+	              resultBox.style.background = "#ecfdf5";
+	              resultBox.style.color = "#059669";
+	              alert("회원 정보 수정이 완료되었습니다.");
+	              setTimeout(function() { location.reload(); }, 1000);
+	            } else {
+	              resultBox.style.background = "#fef2f2";
+	              resultBox.style.color = "#dc2626";
+	              alert(response);
+	            }
+	        })
+	        .catch(function() {
+	            alert('수정 처리 중 서버 에러가 발생했습니다.');
+	        });
+	      };
+	    }
+
+	    window.onclick = function(e) {
+	      if (e.target === mEdit) {
+	        mEdit.style.display = 'none';
+	        closeDaumPostcode();
+	        document.getElementById('editNowPasswd').value = '';
+	        document.getElementById('editPassword').value = '';
+	        document.getElementById('editProfileResult').style.display = 'none';
+	      }
+	      if (e.target === mPassport) {
+	    	  mPassport.style.display = 'none';
+	      }
+	    };
+
+	    var btnDeleteAccount = document.getElementById('btnSubmitDeleteAccount');
+	    if(btnDeleteAccount) {
+	      btnDeleteAccount.onclick = function(e) {
+	        e.preventDefault();
+
+	        var nowPasswd = document.getElementById('editNowPasswd').value;
+	        var resultBox = document.getElementById('editProfileResult');
+
+	        if(!nowPasswd) {
+	          alert("회원 탈퇴를 진행하려면 '현재 비밀번호 확인' 칸에 비밀번호를 먼저 입력해 주세요.");
+	          document.getElementById('editNowPasswd').focus();
+	          return;
+	        }
+
+	        if(!confirm("정말로 에어누리 회원 탈퇴를 진행하시겠습니까?\n탈퇴 시 모든 예약 현황 및 회원 정보가 즉시 파기되며 복구가 불가능합니다.")) {
+	          return;
+	        }
+
+	        var paramName = document.getElementById('csrfParameterName').value;
+	        var tokenValue = document.getElementById('csrfToken').value;
+
+	        var formData = new URLSearchParams();
+	        formData.append('now_passwd', nowPasswd);
+	        formData.append(paramName, tokenValue);
+
+	        fetch('/skyroute/user/member/deleteAccount', {
+	          method: 'POST',
+	          headers: {
+	            'Content-Type': 'application/x-www-form-urlencoded'
+	          },
+	          body: formData.toString()
+	        })
+	        .then(function(res) { return res.text(); })
+	        .then(function(response) {
+	            resultBox.innerText = response;
+	            resultBox.style.display = 'block';
+	            
+	            if(response.includes("완료") || response.includes("성공")) {
+	              resultBox.style.background = "#fef2f2";
+	              resultBox.style.color = "#ef4444";
+	              alert("회원 탈퇴가 정상 처리되었습니다. 그동안 에어누리를 이용해 주셔서 감사합니다.");
+	              location.href = "/skyroute/user/main/home";
+	            } else {
+	              resultBox.style.background = "#fef2f2";
+	              resultBox.style.color = "#dc2626";
+	              alert(response);
+	            }
+	        })
+	        .catch(function() {
+	            alert('탈퇴 처리 중 서버 에러가 발생했습니다.');
+	        });
+	      };
+	    }
+	    
+	  });
+
+	  function updatePassportInfo() {
+		  var name = document.getElementById('passName').value.trim();
+		  var birthDate = document.getElementById('passBirthDate').value;
+		  var genderElement = document.querySelector('input[name="gender"]:checked');
+		  var gender = genderElement ? genderElement.value : '';
+		  var phone = document.getElementById('passPhone').value.trim();
+		  var passportNo = document.getElementById('passportNo').value.trim();
+		  var passportExpiry = document.getElementById('passportExpiry').value;
+		  
+		  var nameRegex = /^[A-Z\s]+$/;
+		  if(!name || !nameRegex.test(name)) {
+			  alert("영문 성명은 필수이며, 오직 대문자 영문만 입력할 수 있습니다.");
+			  document.getElementById('passName').focus();
+			  return;
+		  }
+		  
+		  if(!birthDate) {
+			  alert("생년월일을 입력해 주세요.");
+			  document.getElementById('passBirthDate').focus();
+			  return;
+		  }
+		  
+		  if(!gender) {
+			  alert("성별을 선택해 주세요.");
+			  return;
+		  }
+		  
+		  var phoneRegex = /^[0-9-]+$/;
+		  if(phone && !phoneRegex.test(phone)) {
+			  alert("연락처에는 특수문자를 사용할 수 없으며 숫자와 하이픈(-)만 가능합니다.");
+			  document.getElementById('passPhone').focus();
+			  return;
+		  }
+		  
+		  var passportRegex = /^[A-Z0-9]+$/;
+		  if(!passportNo || !passportRegex.test(passportNo)) {
+			  alert("여권 번호는 필수 입력 사항이며, 특수문자 없이 대문자와 숫자만 입력해야 합니다.");
+			  document.getElementById('passportNo').focus();
+			  return;
+		  }
+		  
+		  if(!passportExpiry) {
+			  alert("여권 만료일을 선택해 주세요.");
+			  document.getElementById('passportExpiry').focus();
+			  return;
+		  }
+		  
+		  var paramName = document.getElementById('csrfParameterName').value;
+		  var tokenValue = document.getElementById('csrfToken').value;
+		  
+		  var formData = new URLSearchParams();
+		  formData.append('name', name);
+		  formData.append('birthDate', birthDate);
+		  formData.append('gender', gender);
+		  formData.append('phone', phone);
+		  formData.append('passportNo', passportNo);
+		  formData.append('passportExpiry', passportExpiry);
+		  formData.append(paramName, tokenValue);
+		  
+		  fetch('/skyroute/user/member/updatePassport', {
+			  method: 'POST',
+			  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			  body: formData.toString()
+		  })
+		  .then(function(res) { return res.text(); })
+		  .then(function(response) {
+			  if(response.includes("성공") || response.includes("완료")) {
+				  alert("여권 정보가 성공적으로 업데이트되었습니다.");
+				  location.reload();
+			  } else {
+				  alert(response);
+			  }
+		  })
+		  .catch(function() { alert("정보 변경 중 시스템 에러가 발생했습니다."); });
+	  }
+
+	  function execDaumPostcode() {
+	      new daum.Postcode({
+	          oncomplete: function(data) {
+	              var addr = ''; 
+	              var extraAddr = ''; 
+
+	              if (data.userSelectedType === 'R') { 
+	                  addr = data.roadAddress;
+	              } else { 
+	                  addr = data.jibunAddress;
+	              }
+
+	              if(data.userSelectedType === 'R'){
+	                  if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+	                      extraAddr += data.bname;
+	                  }
+	                  if(data.buildingName !== '' && data.apartment === 'Y'){
+	                      extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+	                  }
+	                  if(extraAddr !== ''){
+	                      extraAddr = ' (' + extraAddr + ')';
+	                  }
+	              } 
+
+	              document.getElementById('editZipcode').value = data.zonecode;
+	              document.getElementById("editAddress1").value = addr + extraAddr;
+	              document.getElementById("editAddress2").focus();
+
+	              element_layer.style.display = 'none';
+	          },
+	          width : '100%',
+	          height : '100%',
+	          maxSuggestItems : 5
+	      }).embed(element_layer);
+
+	      element_layer.style.display = 'block';
+	      initLayerPosition();
+	  }
+
+	  function initLayerPosition(){
+	      var width = 400; 
+	      var height = 480; 
+	      var borderWidth = 1; 
+
+	      element_layer.style.width = width + 'px';
+	      element_layer.style.height = height + 'px';
+	      element_layer.style.border = borderWidth + 'px solid #cbd5e1';
+	      element_layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width)/2 - borderWidth) + 'px';
+	      element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
+	  }
+	</script>
+</div>
+    <!-- 중앙 컨텐츠 끝 -->
+    <!-- footer 시작 -->
+    <div id="main_footer">
+	<footer>
+		<div class="wrap">
+			스카이루트(SKYROUTE) · 항공권 예약 시스템 학습용 프로토타입 · 사용자 화면
+		</div>
+	</footer>
+</div>
+    <!-- footer 끝 -->
+</div>
+</body>
+</html>

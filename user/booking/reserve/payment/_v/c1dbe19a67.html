@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><script src="/skyroute/user/_demo/data.js"></script><script src="/skyroute/_demo/demo.js"></script><link rel="stylesheet" href="/skyroute/_demo/demo.css">
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>결제 | SkyRoute</title>
+
+	<!-- CSRF (Spring Security 사용 시). 사용 안 하면 무시됨 -->
+	<meta name="_csrf" content="KdZ2bl6Nq5NaNAFEXqNLIdvv_VkoHsowRqgVA35mEnhN3csbHuFFWzu5mqJ3BGUnbo5_Qu6M0GFKevMdI5EsYkYDJEh9uKgv"/>
+	<meta name="_csrf_header" content="X-CSRF-TOKEN"/>
+
+	<!-- PortOne(아임포트) V2 SDK -->
+	
+
+	<style>
+		:root{
+			--charcoal:#1A1A1A; --bg:#F5F4F0; --coral:#D85A30;
+			--line:#e3e1da; --muted:#6b6b6b;
+		}
+		*{box-sizing:border-box;}
+		body{margin:0;background:var(--bg);color:var(--charcoal);
+			font-family:"Noto Sans KR",system-ui,sans-serif;}
+		.wrap{max-width:560px;margin:40px auto;padding:0 20px;}
+		h1{font-size:22px;letter-spacing:.02em;margin:0 0 24px;}
+		.card{background:#fff;border:1px solid var(--line);border-radius:14px;
+			padding:24px;margin-bottom:18px;}
+		.row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;}
+		.row .label{color:var(--muted);}
+		.total{border-top:1px solid var(--line);margin-top:10px;padding-top:14px;
+			font-size:18px;font-weight:700;}
+		.total .amt{color:var(--coral);}
+		.methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 4px;}
+		.m-btn{border:1.5px solid var(--line);background:#fff;border-radius:10px;
+			padding:14px;font-size:14px;cursor:pointer;transition:.15s;}
+		.m-btn.on{border-color:var(--coral);background:#fff6f2;font-weight:600;}
+		.m-btn:disabled{opacity:.45;cursor:not-allowed;}
+		.timer{font-size:13px;color:var(--muted);margin:2px 0 18px;text-align:center;}
+		.timer b{color:var(--coral);}
+		.pay{width:100%;background:var(--charcoal);color:#fff;border:none;
+			border-radius:12px;padding:16px;font-size:16px;font-weight:600;cursor:pointer;}
+		.pay:disabled{opacity:.5;cursor:not-allowed;}
+		.hint{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6;}
+	</style>
+</head>
+<body>
+<div class="wrap" data-booking-id="11" data-hold-minutes="10" data-imp-code="test" data-selected-method="CARD">
+
+	<h1>결제하기</h1>
+
+	<div class="card">
+		<div class="row">
+			<span class="label">예약번호</span>
+			<span>SR261025213454914</span>
+		</div>
+		<div class="row">
+			<span class="label">여정</span>
+			<span>GMP → CJU</span>
+		</div>
+		<div class="row">
+			<span class="label">탑승객</span>
+			<span>1명</span>
+		</div>
+		<div class="row total">
+			<span>총 결제금액</span>
+			<span class="amt">200,000원</span>
+		</div>
+	</div>
+
+	<div class="card">
+		<div class="methods">
+			<button type="button" class="m-btn on" data-method="KAKAOPAY">카카오페이</button>
+			<button type="button" class="m-btn" data-method="CARD">신용/체크카드</button>
+		</div>
+		<p class="hint">※ 가상계좌(무통장)는 EC2 배포 후 웹훅 연동과 함께 오픈 예정입니다.</p>
+	</div>
+
+	<p class="timer">좌석 선점 만료까지 <b id="timer">10:00</b> · 시간 초과 시 좌석이 자동 반납됩니다.</p>
+
+	<button type="button" id="payBtn" class="pay">결제하기</button>
+
+	<p class="hint">
+		결제 버튼을 누르면 선택한 수단의 결제창이 열립니다.<br/>
+		결제 완료 후 서버에서 실제 결제 금액을 검증한 뒤 예약이 확정됩니다.
+	</p>
+</div>
+
+<script>
+(function () {
+	const root       = document.querySelector('.wrap');
+	const bookingId  = Number(root.dataset.bookingId);
+	const impCode    = root.dataset.impCode;
+	const holdMin    = Number(root.dataset.holdMinutes || 10);
+
+	const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content || '';
+	const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || '';
+
+	let method = root.dataset.selectedMethod || "KAKAOPAY";
+
+
+	/* --- 결제수단 선택 --- */
+	document.querySelectorAll('.m-btn').forEach(btn => {
+
+		btn.classList.toggle(
+			'on',
+			btn.dataset.method === method
+		);
+	
+		btn.addEventListener('click', () => {
+	
+			document.querySelectorAll('.m-btn').forEach(button => {
+				button.classList.remove('on');
+			});
+	
+			btn.classList.add('on');
+			method = btn.dataset.method;
+		});
+	});
+
+	/* --- 공통 fetch (CSRF 포함) --- */
+	async function postJson(url, body) {
+	
+	    const headers = {
+	        'Content-Type': 'application/json'
+	    };
+	
+	    if (csrfHeader) {
+	        headers[csrfHeader] = csrfToken;
+	    }
+	
+	    const res = await fetch(url, {
+	        method: 'POST',
+	        headers,
+	        body: JSON.stringify(body)
+	    });
+	
+	    const contentType =
+	        res.headers.get('content-type') || '';
+	
+	    let data;
+	
+	    if (contentType.includes('application/json')) {
+	        data = await res.json();
+	    } else {
+	        const text = await res.text();
+	        data = {
+	            message: text
+	        };
+	    }
+	
+	    if (!res.ok) {
+	        throw new Error(
+	            data.message
+	            || `요청 처리에 실패했습니다. (${res.status})`
+	        );
+	    }
+	
+	    return data;
+	}
+
+	/* --- 결제 버튼 --- */
+	const payBtn = document.getElementById('payBtn');
+
+	payBtn.addEventListener('click', async () => {
+		payBtn.disabled = true;
+		try {
+			/* 1) 결제 준비 요청 → paymentId / 금액 / 채널 정보 */
+			const prep = await postJson('/skyroute/user/booking/reserve/pay/prepare',
+				{ bookingId, method });
+
+			if (!prep || !prep.paymentId) {
+				alert('결제 준비에 실패했습니다. 다시 시도해 주세요.');
+				payBtn.disabled = false;
+				return;
+			}
+
+			/* 2) V2 결제창 호출 */
+			const request = {
+				storeId:     prep.storeId,
+				channelKey:  prep.channelKey,
+				paymentId:   prep.paymentId,
+				orderName:   prep.orderName,
+				totalAmount: prep.totalAmount,
+				currency:    'CURRENCY_KRW',
+				payMethod:   prep.payMethod,
+				customer: {
+					fullName:    prep.buyerName,
+					email:       prep.buyerEmail,
+					phoneNumber: prep.buyerTel
+				}
+			};
+			if (prep.easyPayProvider) {
+				request.easyPay = { easyPayProvider: prep.easyPayProvider };
+			}
+			
+			console.log('PortOne 결제 준비 응답:', prep);
+			console.log('PortOne 결제 요청:', request);
+			
+			const rsp = await PortOne.requestPayment(request);
+
+			/*
+				3-A) 한 번의 결제 시도 실패
+				
+				잔액 부족, 카드 승인 거절, 결제창 닫기 등은 예약 전체 실패로 처리하지 않는다.
+				
+				BOOKING-PENDING, PAYMENT-READY, TICKET-HOLDING을 유지하여 좌석 선점 시간 내 재결제를 허용한다.
+			*/
+			if (rsp.code != null) {
+				console.warn('PortOne 결제 미완료 응답:', rsp);
+
+				const failureMessage =
+					rsp.pgMessage || rsp.message || '결제가 완료되지 않았습니다.';
+
+				try {
+					await postJson(
+						'/skyroute/user/booking/reserve/pay/cancel',
+						{ bookingId }
+					);
+				} catch (cancelError) {
+					console.error('좌석 반납 처리 오류:', cancelError);
+				}
+
+				alert(
+					'결제가 취소되었습니다.\n'
+					+ failureMessage
+					+ '\n선택한 좌석이 반납됩니다.'
+				);
+
+				location.href = '/skyroute/user/main/home';
+				return;
+			}
+
+			/* 3-B) 성공 → 서버 검증 (paymentId = merchant_uid) */
+			const result = await postJson('/skyroute/user/booking/reserve/pay/complete', {
+				bookingId,
+				merchantUid: rsp.paymentId,
+				method
+			});
+
+			if (result.result === 'PAID') {
+				location.href = result.redirectUrl;
+			} else if (result.result === 'SEAT_EXPIRED') {
+				alert(result.message || '좌석 선점이 만료되어 결제가 자동 환불되었습니다.');
+				location.href = '/skyroute/user/booking/reserve/start';
+			} else {
+				alert(result.message || '결제 검증에 실패했습니다.');
+				location.href = '/skyroute/user/main/home';
+			}
+
+		} catch (e) {
+			console.error('결제 처리 오류:', e);
+			alert(e.message || '결제 처리 중 오류가 발생했습니다.');
+			payBtn.disabled = false;
+		}
+	});
+
+	/* --- 선점 만료 카운트다운 (표시용) --- */
+	let remain = holdMin * 60;
+	const tEl = document.getElementById('timer');
+	const tick = setInterval(() => {
+		remain--;
+		if (remain <= 0) {
+			clearInterval(tick);
+			tEl.textContent = '00:00';
+			payBtn.disabled = true;
+			alert('좌석 선점 시간이 만료되었습니다. 좌석을 다시 선택해 주세요.');
+			location.href = '/skyroute/user/booking/reserve/start';
+			return;
+		}
+		const m = String(Math.floor(remain / 60)).padStart(2, '0');
+		const s = String(remain % 60).padStart(2, '0');
+		tEl.textContent = m + ':' + s;
+	}, 1000);
+})();
+</script>
+</body>
+</html>

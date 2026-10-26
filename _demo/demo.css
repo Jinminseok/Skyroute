@@ -1,0 +1,57 @@
+/* SkyRoute static demo chrome (banner, toast, fake payment window) */
+#srd-bar {
+  position: fixed; left: 16px; bottom: 16px; z-index: 2147483000;
+  display: flex; align-items: stretch; max-width: calc(100vw - 32px);
+  font: 500 13px/1.2 "Pretendard", "Noto Sans KR", system-ui, sans-serif;
+  color: #0f172a; background: rgba(255, 255, 255, .96);
+  border: 1px solid rgba(15, 23, 42, .12); border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, .16); overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+#srd-bar .srd-handle {
+  all: unset; cursor: pointer; padding: 10px 14px; font-weight: 800; letter-spacing: .12em; font-size: 11px;
+  color: #fff; background: #0066e2;
+}
+#srd-bar .srd-handle:focus-visible { outline: 2px solid #8fbaf3; outline-offset: -4px; }
+#srd-bar .srd-body { display: flex; align-items: center; gap: 10px; padding: 0 14px; white-space: nowrap; overflow-x: auto; }
+#srd-bar.srd-min .srd-body { display: none; }
+#srd-bar .srd-who { font-weight: 700; color: #0066e2; }
+#srd-bar .srd-sep { width: 1px; height: 14px; background: rgba(15, 23, 42, .15); }
+#srd-bar .srd-switch { display: inline-flex; gap: 2px; }
+#srd-bar a { color: #334155; text-decoration: none; padding: 6px 8px; border-radius: 999px; }
+#srd-bar a:hover { background: #f0f6ff; color: #0066e2; }
+#srd-bar a.on { background: #0066e2; color: #fff; }
+#srd-toasts {
+  position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 2147483001;
+  display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none;
+  width: min(92vw, 440px);
+}
+.srd-toast {
+  font: 500 14px/1.45 "Pretendard", "Noto Sans KR", system-ui, sans-serif; color: #fff;
+  background: #0f172a; padding: 12px 18px; border-radius: 12px; box-shadow: 0 12px 30px rgba(15, 23, 42, .3);
+  text-align: center; animation: srd-in .18s ease-out; transition: opacity .4s, transform .4s;
+}
+.srd-toast.srd-out { opacity: 0; transform: translateY(6px); }
+@keyframes srd-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+#srd-pay {
+  position: fixed; inset: 0; z-index: 2147483002; display: grid; place-items: center; padding: 16px;
+  background: rgba(15, 23, 42, .55);
+}
+.srd-pay-card {
+  width: min(400px, 100%); background: #fff; border-radius: 18px; padding: 26px 24px 20px;
+  font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif; color: #0f172a; box-shadow: 0 30px 60px rgba(0, 0, 0, .3);
+}
+.srd-pay-eyebrow { margin: 0 0 6px; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: #0066e2; }
+.srd-pay-card h3 { margin: 0 0 14px; font-size: 18px; }
+.srd-pay-amt { margin: 0 0 12px; font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.srd-pay-note { margin: 0 0 20px; font-size: 13px; line-height: 1.55; color: #475569; }
+.srd-pay-actions { display: flex; gap: 8px; }
+.srd-pay-actions button {
+  flex: 1; padding: 12px; border-radius: 10px; font: 700 15px "Pretendard", system-ui, sans-serif; cursor: pointer;
+  border: 1px solid #cbd5e1; background: #fff; color: #0f172a;
+}
+.srd-pay-actions button[data-a="ok"] { background: #0066e2; border-color: #0066e2; color: #fff; }
+@media (max-width: 560px) {
+  #srd-bar { left: 8px; bottom: 8px; max-width: calc(100vw - 16px); }
+  #srd-bar .srd-who { display: none; }
+}

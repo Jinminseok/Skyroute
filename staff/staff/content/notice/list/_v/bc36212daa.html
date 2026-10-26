@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><script src="/skyroute/staff/_demo/data.js"></script><script src="/skyroute/_demo/demo.js"></script><link rel="stylesheet" href="/skyroute/_demo/demo.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>에어 - 공지사항 관리</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
+
+<link rel="stylesheet" href="/skyroute/assets/css/staff.css">
+</head>
+
+<body>
+
+<header class="header">
+
+	<div class="logo">
+		<span class="material-symbols-outlined">airlines</span>
+		SKYROUTE
+	</div>
+
+	<nav class="top-nav">
+
+		<a href="/skyroute/staff/staff/schedule/today"
+		   class="nav-link">
+			<span class="material-symbols-outlined">flight_takeoff</span>
+			오늘 항공편
+		</a>
+
+		<a href="/skyroute/staff/staff/schedule/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">calendar_month</span>
+			운항 스케줄
+		</a>
+
+		<a href="/skyroute/staff/staff/operation/passenger/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">luggage</span>
+			탑승 관리
+		</a>
+
+		<a href="/skyroute/staff/staff/delay/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">warning</span>
+			지연·결항 관리
+		</a>
+
+		<a href="/skyroute/staff/staff/inquiry/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">forum</span>
+			고객 문의
+		</a>
+
+		<a href="/skyroute/staff/staff/content/notice/list"
+		   class="nav-link  active">
+			<span class="material-symbols-outlined">campaign</span>
+			공지·콘텐츠
+		</a>
+
+		<a href="/skyroute/staff/staff/basedata/airport/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">database</span>
+			운영 기준 정보
+		</a>
+
+	</nav>
+
+	<div class="user-menu">
+
+		<div class="user-chip">
+			<div class="avatar">박</div>
+
+			<div class="meta">
+				<div class="n">박지상</div>
+				<div class="r">운항 현장 지상직 (STAFF)</div>
+			</div>
+		</div>
+
+		<form action="/skyroute/staff/member/logout" method="post" style="margin:0;"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+			<input type="hidden"
+			       name="_csrf"
+			       value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+			<button type="submit" class="btn-logout">
+				<span class="material-symbols-outlined">logout</span>
+				로그아웃
+			</button>
+		</form>
+
+	</div>
+
+</header>
+
+<main class="main">
+
+	<h1 id="contentPageTitle">공지사항 관리</h1>
+	<p id="contentPageDesc" class="desc">
+		사용자 페이지에 노출되는 공지사항을 등록, 수정, 공개/비공개 처리, 삭제합니다.
+		비공개 공지는 사용자 공지사항 목록에 표시되지 않습니다.
+	</p>
+
+	<div id="noticeStats" class="grid notice-category-stats" style="margin-bottom:24px">
+ 
+		<!-- 전체 공지 (히어로 카드) -->
+		<a class="stat notice-category-stat notice-total-stat  is-active"
+		   href="/skyroute/staff/staff/content/notice/list">
+	 
+			<div class="ncs-top">
+				<span class="ncs-icon material-symbols-outlined">article</span>
+				<span class="ncs-label">전체 공지</span>
+			</div>
+	 
+			<div class="ncs-value">
+				<span>30</span><span class="ncs-unit">건</span>
+			</div>
+	 
+			<div class="ncs-bar">
+				<span class="ncs-bar-fill" style="width:100%"></span>
+			</div>
+	 
+			<div class="ncs-code">ALL_NOTICE</div>
+		</a>
+	 
+		<!-- 카테고리별 -->
+		<a class="stat notice-category-stat"
+		   href="/skyroute/staff/staff/content/notice/list?category=SKY_NEWS">
+	 
+			<div class="ncs-top">
+				<span class="ncs-icon material-symbols-outlined">newspaper</span>
+				<span class="ncs-label">스카이 소식</span>
+			</div>
+	 
+			<div class="ncs-value">
+				<span>8</span><span class="ncs-unit">건</span>
+			</div>
+	 
+			<!-- 전체 대비 비율 바 (기존 데이터로 계산, 0건 나눗셈 방지) -->
+			<div class="ncs-bar">
+				<span class="ncs-bar-fill"
+					  style="width:26%"></span>
+			</div>
+	 
+			<div class="ncs-code">SKY_NEWS</div>
+		</a><a class="stat notice-category-stat"
+		   href="/skyroute/staff/staff/content/notice/list?category=FUEL_SURCHARGE">
+	 
+			<div class="ncs-top">
+				<span class="ncs-icon material-symbols-outlined">local_gas_station</span>
+				<span class="ncs-label">유류할증료</span>
+			</div>
+	 
+			<div class="ncs-value">
+				<span>6</span><span class="ncs-unit">건</span>
+			</div>
+	 
+			<!-- 전체 대비 비율 바 (기존 데이터로 계산, 0건 나눗셈 방지) -->
+			<div class="ncs-bar">
+				<span class="ncs-bar-fill"
+					  style="width:20%"></span>
+			</div>
+	 
+			<div class="ncs-code">FUEL_SURCHARGE</div>
+		</a><a class="stat notice-category-stat"
+		   href="/skyroute/staff/staff/content/notice/list?category=MEMBERSHIP_CLUB">
+	 
+			<div class="ncs-top">
+				<span class="ncs-icon material-symbols-outlined">card_membership</span>
+				<span class="ncs-label">멤버십클럽</span>
+			</div>
+	 
+			<div class="ncs-value">
+				<span>6</span><span class="ncs-unit">건</span>
+			</div>
+	 
+			<!-- 전체 대비 비율 바 (기존 데이터로 계산, 0건 나눗셈 방지) -->
+			<div class="ncs-bar">
+				<span class="ncs-bar-fill"
+					  style="width:20%"></span>
+			</div>
+	 
+			<div class="ncs-code">MEMBERSHIP_CLUB</div>
+		</a><a class="stat notice-category-stat"
+		   href="/skyroute/staff/staff/content/notice/list?category=PARTNER_NEWS">
+	 
+			<div class="ncs-top">
+				<span class="ncs-icon material-symbols-outlined">handshake</span>
+				<span class="ncs-label">제휴사 소식</span>
+			</div>
+	 
+			<div class="ncs-value">
+				<span>6</span><span class="ncs-unit">건</span>
+			</div>
+	 
+			<!-- 전체 대비 비율 바 (기존 데이터로 계산, 0건 나눗셈 방지) -->
+			<div class="ncs-bar">
+				<span class="ncs-bar-fill"
+					  style="width:20%"></span>
+			</div>
+	 
+			<div class="ncs-code">PARTNER_NEWS</div>
+		</a><a class="stat notice-category-stat"
+		   href="/skyroute/staff/staff/content/notice/list?category=ETC">
+	 
+			<div class="ncs-top">
+				<span class="ncs-icon material-symbols-outlined">more_horiz</span>
+				<span class="ncs-label">기타</span>
+			</div>
+	 
+			<div class="ncs-value">
+				<span>4</span><span class="ncs-unit">건</span>
+			</div>
+	 
+			<!-- 전체 대비 비율 바 (기존 데이터로 계산, 0건 나눗셈 방지) -->
+			<div class="ncs-bar">
+				<span class="ncs-bar-fill"
+					  style="width:13%"></span>
+			</div>
+	 
+			<div class="ncs-code">ETC</div>
+		</a>
+	</div>
+
+	<div id="eventStats" style="display:none;"></div>
+
+	<div class="tabs">
+		<button id="noticeTabButton"
+				type="button"
+				class="active"
+				onclick="showNoticeTab(this)">
+			공지사항 관리
+		</button>
+
+		<button id="eventTabButton"
+				type="button"
+				onclick="showEventTab(this)">
+			이벤트 관리
+		</button>
+
+		<button type="button"
+				onclick="location.href='/skyroute/staff/staff/content/faq/list'">
+			FAQ 관리
+		</button>
+	</div>
+
+	<div id="noticeTabContent">
+	
+			<!-- 등록 버튼 + NOTICE 배지 (카드 바깥 · 이벤트 탭과 동일) -->
+			<div class="toolbar">
+				<a href="/skyroute/staff/staff/content/notice/write" class="btn btn-primary">
+					<span class="material-symbols-outlined" style="font-size:18px">edit_document</span>
+					공지사항 등록
+				</a>
+	
+				<div class="grow"></div>
+	
+				<span class="badge badge-scheduled">NOTICE</span>
+			</div>
+	
+			<!-- 검색 + 테이블 카드 -->
+			<div class="card notice-card">
+	
+				<!-- 검색 폼 -->
+			<form action="/skyroute/staff/staff/content/notice/list" method="get" class="notice-filter">
+ 
+				<!-- 검색 대상 -->
+				<div class="filter-field">
+					<label class="filter-label">검색 대상</label>
+					<select name="keyfield" class="filter-select">
+						<option value="1" selected="selected">제목</option>
+						<option value="2">등록자</option>
+						<option value="3">본문</option>
+					</select>
+				</div>
+			 
+				<!-- 검색어 (아이콘 내장 · 남는 폭 흡수) -->
+				<div class="filter-field filter-field-grow">
+					<label class="filter-label">검색어</label>
+					<div class="filter-search">
+						<span class="material-symbols-outlined filter-search-icon">search</span>
+						<input type="search"
+							   name="keyword"
+							   class="filter-input"
+							   value=""
+							   placeholder="제목·등록자·본문으로 검색">
+					</div>
+				</div>
+			 
+				<!-- 카테고리 -->
+				<div class="filter-field">
+					<label class="filter-label">카테고리</label>
+					<select name="category" class="filter-select">
+						<option value="" selected="selected">전체</option>
+						<option value="SKY_NEWS">스카이 소식</option>
+						<option value="FUEL_SURCHARGE">유류할증료</option>
+						<option value="MEMBERSHIP_CLUB">멤버십클럽</option>
+						<option value="PARTNER_NEWS">제휴사 소식</option>
+						<option value="ETC">기타</option>
+					</select>
+				</div>
+			 
+				<!-- 공개 상태 -->
+				<div class="filter-field">
+					<label class="filter-label">공개 상태</label>
+					<select name="is_public" class="filter-select">
+						<option value="" selected="selected">전체</option>
+						<option value="Y">공개</option>
+						<option value="N">비공개</option>
+					</select>
+				</div>
+			 
+				<!-- 액션 -->
+				<div class="filter-actions">
+					<button type="submit" class="btn btn-primary">
+						<span class="material-symbols-outlined" style="font-size:18px">search</span>
+						검색
+					</button>
+					<a href="/skyroute/staff/staff/content/notice/list" class="btn btn-ghost">초기화</a>
+				</div>
+			</form>
+
+			<!-- 목록 테이블 -->
+			<div class="table-wrap">
+				<table class="data notice-data">
+					<thead>
+						<tr>
+							<th>공지 ID</th>
+							<th>카테고리</th>
+							<th>제목 / 본문 요약</th>
+							<th>등록자</th>
+							<th>공개 여부</th>
+							<th>등록 일시</th>
+							<th>수정 일시</th>
+							<th>관리</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						
+
+						<tr>
+							<td class="mono">1</td>
+
+							<!-- 카테고리: VO 필드명이 다르면 ${notice.category} 부분만 교체 -->
+							<td>
+								<span class="badge badge-category"
+								  data-category="SKY_NEWS">스카이 소식</span>
+							</td>
+
+							<td class="notice-title-cell">
+								<a class="notice-row-title"
+								   href="/skyroute/staff/staff/content/notice/detail?notice_id=1">2026년 하계 운항 스케줄 일부 조정 안내</a>
+
+								<div class="notice-row-summary">2026년 하계 성수기 기간 동안 일부 국내선 및 국제선 운항 시간이 조정됩니다. 항공권 예매 및 탑승 전 마이페이지 또는 운항정보 화면에서 최신 출도착 시간을 확인해 주시기 바랍니다.</div>
+							</td>
+
+							<td>박지상</td>
+
+							<!-- 공개 여부: 토글 스위치 (.notice-toggle : 기존 .toggle 과 분리) -->
+							<td>
+								<form action="/skyroute/staff/staff/content/notice/public"
+									  method="post"
+									  class="notice-toggle-form"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+									<input type="hidden"
+										   name="_csrf"
+										   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+									<input type="hidden" name="notice_id" value="1">
+									<input type="hidden" name="is_public" value="N">
+
+									<label class="notice-toggle">
+										<input type="checkbox"
+											   onchange="if(confirm('공개 여부를 변경하시겠습니까?')){this.form.submit();}else{this.checked=!this.checked;}" checked="checked">
+										<span class="notice-toggle-track"></span>
+									</label>
+
+									<span class="notice-toggle-label  is-on">공개</span>
+								</form>
+							</td>
+
+							<td class="notice-date">2026-07-08 09:20</td>
+
+							<td class="notice-date">-</td>
+
+							<!-- 관리: 상세 / 수정 / 삭제 (비공개 버튼 제거) -->
+							<td>
+								<div class="btn-action-group">
+									<a class="btn btn-ghost btn-sm"
+									   href="/skyroute/staff/staff/content/notice/detail?notice_id=1">
+										상세
+									</a>
+
+									<a class="btn btn-primary btn-sm"
+									   href="/skyroute/staff/staff/content/notice/modify?notice_id=1">
+										수정
+									</a>
+
+									<form action="/skyroute/staff/staff/content/notice/delete"
+										  method="post"
+										  style="display:inline;"
+										  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+										<input type="hidden"
+											   name="_csrf"
+											   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+										<input type="hidden" name="notice_id" value="1">
+
+										<button type="submit" class="btn btn-danger btn-sm">
+											삭제
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="mono">2</td>
+
+							<!-- 카테고리: VO 필드명이 다르면 ${notice.category} 부분만 교체 -->
+							<td>
+								<span class="badge badge-category"
+								  data-category="SKY_NEWS">스카이 소식</span>
+							</td>
+
+							<td class="notice-title-cell">
+								<a class="notice-row-title"
+								   href="/skyroute/staff/staff/content/notice/detail?notice_id=2">인천공항 탑승수속 카운터 운영 위치 안내</a>
+
+								<div class="notice-row-summary">인천공항 혼잡 완화를 위해 일부 국제선 탑승수속 카운터 운영 위치가 조정됩니다. 공항 도착 후 전광판과 모바일 안내를 확인하시고, 여유 있게 탑승수속을 진행해 주시기 바랍니다.</div>
+							</td>
+
+							<td>박지상</td>
+
+							<!-- 공개 여부: 토글 스위치 (.notice-toggle : 기존 .toggle 과 분리) -->
+							<td>
+								<form action="/skyroute/staff/staff/content/notice/public"
+									  method="post"
+									  class="notice-toggle-form"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+									<input type="hidden"
+										   name="_csrf"
+										   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+									<input type="hidden" name="notice_id" value="2">
+									<input type="hidden" name="is_public" value="N">
+
+									<label class="notice-toggle">
+										<input type="checkbox"
+											   onchange="if(confirm('공개 여부를 변경하시겠습니까?')){this.form.submit();}else{this.checked=!this.checked;}" checked="checked">
+										<span class="notice-toggle-track"></span>
+									</label>
+
+									<span class="notice-toggle-label  is-on">공개</span>
+								</form>
+							</td>
+
+							<td class="notice-date">2026-07-07 16:40</td>
+
+							<td class="notice-date">-</td>
+
+							<!-- 관리: 상세 / 수정 / 삭제 (비공개 버튼 제거) -->
+							<td>
+								<div class="btn-action-group">
+									<a class="btn btn-ghost btn-sm"
+									   href="/skyroute/staff/staff/content/notice/detail?notice_id=2">
+										상세
+									</a>
+
+									<a class="btn btn-primary btn-sm"
+									   href="/skyroute/staff/staff/content/notice/modify?notice_id=2">
+										수정
+									</a>
+
+									<form action="/skyroute/staff/staff/content/notice/delete"
+										  method="post"
+										  style="display:inline;"
+										  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+										<input type="hidden"
+											   name="_csrf"
+											   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+										<input type="hidden" name="notice_id" value="2">
+
+										<button type="submit" class="btn btn-danger btn-sm">
+											삭제
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="mono">3</td>
+
+							<!-- 카테고리: VO 필드명이 다르면 ${notice.category} 부분만 교체 -->
+							<td>
+								<span class="badge badge-category"
+								  data-category="SKY_NEWS">스카이 소식</span>
+							</td>
+
+							<td class="notice-title-cell">
+								<a class="notice-row-title"
+								   href="/skyroute/staff/staff/content/notice/detail?notice_id=3">국내선 모바일 탑승권 이용 가능 시간 변경 안내</a>
+
+								<div class="notice-row-summary">국내선 모바일 탑승권 발급 가능 시간이 일부 변경됩니다. 변경된 이용 시간은 항공편 출발 전 체크인 가능 시간에 맞춰 적용되며, 자세한 내용은 체크인 화면에서 확인하실 수 있습니다.</div>
+							</td>
+
+							<td>박지상</td>
+
+							<!-- 공개 여부: 토글 스위치 (.notice-toggle : 기존 .toggle 과 분리) -->
+							<td>
+								<form action="/skyroute/staff/staff/content/notice/public"
+									  method="post"
+									  class="notice-toggle-form"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+									<input type="hidden"
+										   name="_csrf"
+										   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+									<input type="hidden" name="notice_id" value="3">
+									<input type="hidden" name="is_public" value="N">
+
+									<label class="notice-toggle">
+										<input type="checkbox"
+											   onchange="if(confirm('공개 여부를 변경하시겠습니까?')){this.form.submit();}else{this.checked=!this.checked;}" checked="checked">
+										<span class="notice-toggle-track"></span>
+									</label>
+
+									<span class="notice-toggle-label  is-on">공개</span>
+								</form>
+							</td>
+
+							<td class="notice-date">2026-07-06 11:10</td>
+
+							<td class="notice-date">-</td>
+
+							<!-- 관리: 상세 / 수정 / 삭제 (비공개 버튼 제거) -->
+							<td>
+								<div class="btn-action-group">
+									<a class="btn btn-ghost btn-sm"
+									   href="/skyroute/staff/staff/content/notice/detail?notice_id=3">
+										상세
+									</a>
+
+									<a class="btn btn-primary btn-sm"
+									   href="/skyroute/staff/staff/content/notice/modify?notice_id=3">
+										수정
+									</a>
+
+									<form action="/skyroute/staff/staff/content/notice/delete"
+										  method="post"
+										  style="display:inline;"
+										  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+										<input type="hidden"
+											   name="_csrf"
+											   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+										<input type="hidden" name="notice_id" value="3">
+
+										<button type="submit" class="btn btn-danger btn-sm">
+											삭제
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="mono">4</td>
+
+							<!-- 카테고리: VO 필드명이 다르면 ${notice.category} 부분만 교체 -->
+							<td>
+								<span class="badge badge-category"
+								  data-category="SKY_NEWS">스카이 소식</span>
+							</td>
+
+							<td class="notice-title-cell">
+								<a class="notice-row-title"
+								   href="/skyroute/staff/staff/content/notice/detail?notice_id=4">국제선 사전 체크인 서비스 확대 안내</a>
+
+								<div class="notice-row-summary">국제선 이용 고객 편의를 위해 사전 체크인 가능 노선이 확대됩니다. 대상 노선은 순차적으로 적용되며, 여권 정보 확인이 필요한 경우 공항 카운터 방문이 필요할 수 있습니다.</div>
+							</td>
+
+							<td>박지상</td>
+
+							<!-- 공개 여부: 토글 스위치 (.notice-toggle : 기존 .toggle 과 분리) -->
+							<td>
+								<form action="/skyroute/staff/staff/content/notice/public"
+									  method="post"
+									  class="notice-toggle-form"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+									<input type="hidden"
+										   name="_csrf"
+										   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+									<input type="hidden" name="notice_id" value="4">
+									<input type="hidden" name="is_public" value="N">
+
+									<label class="notice-toggle">
+										<input type="checkbox"
+											   onchange="if(confirm('공개 여부를 변경하시겠습니까?')){this.form.submit();}else{this.checked=!this.checked;}" checked="checked">
+										<span class="notice-toggle-track"></span>
+									</label>
+
+									<span class="notice-toggle-label  is-on">공개</span>
+								</form>
+							</td>
+
+							<td class="notice-date">2026-07-05 10:30</td>
+
+							<td class="notice-date">-</td>
+
+							<!-- 관리: 상세 / 수정 / 삭제 (비공개 버튼 제거) -->
+							<td>
+								<div class="btn-action-group">
+									<a class="btn btn-ghost btn-sm"
+									   href="/skyroute/staff/staff/content/notice/detail?notice_id=4">
+										상세
+									</a>
+
+									<a class="btn btn-primary btn-sm"
+									   href="/skyroute/staff/staff/content/notice/modify?notice_id=4">
+										수정
+									</a>
+
+									<form action="/skyroute/staff/staff/content/notice/delete"
+										  method="post"
+										  style="display:inline;"
+										  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+										<input type="hidden"
+											   name="_csrf"
+											   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+										<input type="hidden" name="notice_id" value="4">
+
+										<button type="submit" class="btn btn-danger btn-sm">
+											삭제
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="mono">5</td>
+
+							<!-- 카테고리: VO 필드명이 다르면 ${notice.category} 부분만 교체 -->
+							<td>
+								<span class="badge badge-category"
+								  data-category="SKY_NEWS">스카이 소식</span>
+							</td>
+
+							<td class="notice-title-cell">
+								<a class="notice-row-title"
+								   href="/skyroute/staff/staff/content/notice/detail?notice_id=5">김포공항 라운지 운영 시간 임시 조정 안내</a>
+
+								<div class="notice-row-summary">김포공항 내 라운지 시설 점검으로 운영 시간이 임시 조정됩니다. 이용 예정 고객께서는 공항 방문 전 운영 시간을 확인해 주시기 바랍니다.</div>
+							</td>
+
+							<td>박지상</td>
+
+							<!-- 공개 여부: 토글 스위치 (.notice-toggle : 기존 .toggle 과 분리) -->
+							<td>
+								<form action="/skyroute/staff/staff/content/notice/public"
+									  method="post"
+									  class="notice-toggle-form"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+									<input type="hidden"
+										   name="_csrf"
+										   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+									<input type="hidden" name="notice_id" value="5">
+									<input type="hidden" name="is_public" value="N">
+
+									<label class="notice-toggle">
+										<input type="checkbox"
+											   onchange="if(confirm('공개 여부를 변경하시겠습니까?')){this.form.submit();}else{this.checked=!this.checked;}" checked="checked">
+										<span class="notice-toggle-track"></span>
+									</label>
+
+									<span class="notice-toggle-label  is-on">공개</span>
+								</form>
+							</td>
+
+							<td class="notice-date">2026-07-04 14:00</td>
+
+							<td class="notice-date">-</td>
+
+							<!-- 관리: 상세 / 수정 / 삭제 (비공개 버튼 제거) -->
+							<td>
+								<div class="btn-action-group">
+									<a class="btn btn-ghost btn-sm"
+									   href="/skyroute/staff/staff/content/notice/detail?notice_id=5">
+										상세
+									</a>
+
+									<a class="btn btn-primary btn-sm"
+									   href="/skyroute/staff/staff/content/notice/modify?notice_id=5">
+										수정
+									</a>
+
+									<form action="/skyroute/staff/staff/content/notice/delete"
+										  method="post"
+										  style="display:inline;"
+										  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+										<input type="hidden"
+											   name="_csrf"
+											   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+										<input type="hidden" name="notice_id" value="5">
+
+										<button type="submit" class="btn btn-danger btn-sm">
+											삭제
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="mono">6</td>
+
+							<!-- 카테고리: VO 필드명이 다르면 ${notice.category} 부분만 교체 -->
+							<td>
+								<span class="badge badge-category"
+								  data-category="SKY_NEWS">스카이 소식</span>
+							</td>
+
+							<td class="notice-title-cell">
+								<a class="notice-row-title"
+								   href="/skyroute/staff/staff/content/notice/detail?notice_id=6">일본 노선 증편 운항 안내</a>
+
+								<div class="notice-row-summary">여름 여행 수요 증가에 따라 일부 일본 노선의 운항 횟수가 확대됩니다. 증편 항공편은 항공권 검색 화면에서 순차적으로 조회 가능하며, 운항 일정은 현지 사정에 따라 변경될 수 있습니다.</div>
+							</td>
+
+							<td>박지상</td>
+
+							<!-- 공개 여부: 토글 스위치 (.notice-toggle : 기존 .toggle 과 분리) -->
+							<td>
+								<form action="/skyroute/staff/staff/content/notice/public"
+									  method="post"
+									  class="notice-toggle-form"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+									<input type="hidden"
+										   name="_csrf"
+										   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+									<input type="hidden" name="notice_id" value="6">
+									<input type="hidden" name="is_public" value="N">
+
+									<label class="notice-toggle">
+										<input type="checkbox"
+											   onchange="if(confirm('공개 여부를 변경하시겠습니까?')){this.form.submit();}else{this.checked=!this.checked;}" checked="checked">
+										<span class="notice-toggle-track"></span>
+									</label>
+
+									<span class="notice-toggle-label  is-on">공개</span>
+								</form>
+							</td>
+
+							<td class="notice-date">2026-07-03 09:50</td>
+
+							<td class="notice-date">-</td>
+
+							<!-- 관리: 상세 / 수정 / 삭제 (비공개 버튼 제거) -->
+							<td>
+								<div class="btn-action-group">
+									<a class="btn btn-ghost btn-sm"
+									   href="/skyroute/staff/staff/content/notice/detail?notice_id=6">
+										상세
+									</a>
+
+									<a class="btn btn-primary btn-sm"
+									   href="/skyroute/staff/staff/content/notice/modify?notice_id=6">
+										수정
+									</a>
+
+									<form action="/skyroute/staff/staff/content/notice/delete"
+										  method="post"
+										  style="display:inline;"
+										  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+										<input type="hidden"
+											   name="_csrf"
+											   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+										<input type="hidden" name="notice_id" value="6">
+
+										<button type="submit" class="btn btn-danger btn-sm">
+											삭제
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="mono">7</td>
+
+							<!-- 카테고리: VO 필드명이 다르면 ${notice.category} 부분만 교체 -->
+							<td>
+								<span class="badge badge-category"
+								  data-category="SKY_NEWS">스카이 소식</span>
+							</td>
+
+							<td class="notice-title-cell">
+								<a class="notice-row-title"
+								   href="/skyroute/staff/staff/content/notice/detail?notice_id=7">기상 악화 시 항공편 운항정보 확인 요청</a>
+
+								<div class="notice-row-summary">태풍, 집중호우 등 기상 상황에 따라 항공편 운항 시간이 변경되거나 지연될 수 있습니다. 공항으로 이동하기 전 홈페이지의 출도착 조회와 알림 내역을 반드시 확인해 주시기 바랍니다.</div>
+							</td>
+
+							<td>박지상</td>
+
+							<!-- 공개 여부: 토글 스위치 (.notice-toggle : 기존 .toggle 과 분리) -->
+							<td>
+								<form action="/skyroute/staff/staff/content/notice/public"
+									  method="post"
+									  class="notice-toggle-form"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+									<input type="hidden"
+										   name="_csrf"
+										   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+									<input type="hidden" name="notice_id" value="7">
+									<input type="hidden" name="is_public" value="N">
+
+									<label class="notice-toggle">
+										<input type="checkbox"
+											   onchange="if(confirm('공개 여부를 변경하시겠습니까?')){this.form.submit();}else{this.checked=!this.checked;}" checked="checked">
+										<span class="notice-toggle-track"></span>
+									</label>
+
+									<span class="notice-toggle-label  is-on">공개</span>
+								</form>
+							</td>
+
+							<td class="notice-date">2026-07-02 18:15</td>
+
+							<td class="notice-date">-</td>
+
+							<!-- 관리: 상세 / 수정 / 삭제 (비공개 버튼 제거) -->
+							<td>
+								<div class="btn-action-group">
+									<a class="btn btn-ghost btn-sm"
+									   href="/skyroute/staff/staff/content/notice/detail?notice_id=7">
+										상세
+									</a>
+
+									<a class="btn btn-primary btn-sm"
+									   href="/skyroute/staff/staff/content/notice/modify?notice_id=7">
+										수정
+									</a>
+
+									<form action="/skyroute/staff/staff/content/notice/delete"
+										  method="post"
+										  style="display:inline;"
+										  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+										<input type="hidden"
+											   name="_csrf"
+											   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+										<input type="hidden" name="notice_id" value="7">
+
+										<button type="submit" class="btn btn-danger btn-sm">
+											삭제
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="mono">8</td>
+
+							<!-- 카테고리: VO 필드명이 다르면 ${notice.category} 부분만 교체 -->
+							<td>
+								<span class="badge badge-category"
+								  data-category="SKY_NEWS">스카이 소식</span>
+							</td>
+
+							<td class="notice-title-cell">
+								<a class="notice-row-title"
+								   href="/skyroute/staff/staff/content/notice/detail?notice_id=8">공항 혼잡 시간대 조기 도착 권고 안내</a>
+
+								<div class="notice-row-summary">성수기 기간 공항 보안검색과 탑승수속 대기 시간이 길어질 수 있습니다. 국내선은 출발 1시간 30분 전, 국제선은 출발 3시간 전까지 공항에 도착하시는 것을 권장드립니다.</div>
+							</td>
+
+							<td>박지상</td>
+
+							<!-- 공개 여부: 토글 스위치 (.notice-toggle : 기존 .toggle 과 분리) -->
+							<td>
+								<form action="/skyroute/staff/staff/content/notice/public"
+									  method="post"
+									  class="notice-toggle-form"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+									<input type="hidden"
+										   name="_csrf"
+										   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+									<input type="hidden" name="notice_id" value="8">
+									<input type="hidden" name="is_public" value="N">
+
+									<label class="notice-toggle">
+										<input type="checkbox"
+											   onchange="if(confirm('공개 여부를 변경하시겠습니까?')){this.form.submit();}else{this.checked=!this.checked;}" checked="checked">
+										<span class="notice-toggle-track"></span>
+									</label>
+
+									<span class="notice-toggle-label  is-on">공개</span>
+								</form>
+							</td>
+
+							<td class="notice-date">2026-07-01 08:40</td>
+
+							<td class="notice-date">-</td>
+
+							<!-- 관리: 상세 / 수정 / 삭제 (비공개 버튼 제거) -->
+							<td>
+								<div class="btn-action-group">
+									<a class="btn btn-ghost btn-sm"
+									   href="/skyroute/staff/staff/content/notice/detail?notice_id=8">
+										상세
+									</a>
+
+									<a class="btn btn-primary btn-sm"
+									   href="/skyroute/staff/staff/content/notice/modify?notice_id=8">
+										수정
+									</a>
+
+									<form action="/skyroute/staff/staff/content/notice/delete"
+										  method="post"
+										  style="display:inline;"
+										  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+										<input type="hidden"
+											   name="_csrf"
+											   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+										<input type="hidden" name="notice_id" value="8">
+
+										<button type="submit" class="btn btn-danger btn-sm">
+											삭제
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="mono">9</td>
+
+							<!-- 카테고리: VO 필드명이 다르면 ${notice.category} 부분만 교체 -->
+							<td>
+								<span class="badge badge-category"
+								  data-category="FUEL_SURCHARGE">유류할증료</span>
+							</td>
+
+							<td class="notice-title-cell">
+								<a class="notice-row-title"
+								   href="/skyroute/staff/staff/content/notice/detail?notice_id=9">2026년 7월 국제선 유류할증료 안내</a>
+
+								<div class="notice-row-summary">2026년 7월 발권분 국제선 항공권에 적용되는 유류할증료를 안내드립니다. 유류할증료는 항공권 구매 시점과 운항 구간에 따라 달라질 수 있으며, 환율 및 유가 변동에 따라 매월 조정될 수 있습니다.</div>
+							</td>
+
+							<td>박지상</td>
+
+							<!-- 공개 여부: 토글 스위치 (.notice-toggle : 기존 .toggle 과 분리) -->
+							<td>
+								<form action="/skyroute/staff/staff/content/notice/public"
+									  method="post"
+									  class="notice-toggle-form"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+									<input type="hidden"
+										   name="_csrf"
+										   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+									<input type="hidden" name="notice_id" value="9">
+									<input type="hidden" name="is_public" value="N">
+
+									<label class="notice-toggle">
+										<input type="checkbox"
+											   onchange="if(confirm('공개 여부를 변경하시겠습니까?')){this.form.submit();}else{this.checked=!this.checked;}" checked="checked">
+										<span class="notice-toggle-track"></span>
+									</label>
+
+									<span class="notice-toggle-label  is-on">공개</span>
+								</form>
+							</td>
+
+							<td class="notice-date">2026-06-30 10:00</td>
+
+							<td class="notice-date">-</td>
+
+							<!-- 관리: 상세 / 수정 / 삭제 (비공개 버튼 제거) -->
+							<td>
+								<div class="btn-action-group">
+									<a class="btn btn-ghost btn-sm"
+									   href="/skyroute/staff/staff/content/notice/detail?notice_id=9">
+										상세
+									</a>
+
+									<a class="btn btn-primary btn-sm"
+									   href="/skyroute/staff/staff/content/notice/modify?notice_id=9">
+										수정
+									</a>
+
+									<form action="/skyroute/staff/staff/content/notice/delete"
+										  method="post"
+										  style="display:inline;"
+										  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+										<input type="hidden"
+											   name="_csrf"
+											   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+										<input type="hidden" name="notice_id" value="9">
+
+										<button type="submit" class="btn btn-danger btn-sm">
+											삭제
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="mono">10</td>
+
+							<!-- 카테고리: VO 필드명이 다르면 ${notice.category} 부분만 교체 -->
+							<td>
+								<span class="badge badge-category"
+								  data-category="FUEL_SURCHARGE">유류할증료</span>
+							</td>
+
+							<td class="notice-title-cell">
+								<a class="notice-row-title"
+								   href="/skyroute/staff/staff/content/notice/detail?notice_id=10">2026년 7월 국내선 유류할증료 안내</a>
+
+								<div class="notice-row-summary">2026년 7월 국내선 항공권 구매 시 적용되는 유류할증료를 안내드립니다. 유류할증료는 항공권 운임과 별도로 부과되며, 구매 이후 환불 시점에 따라 환불 가능 여부가 달라질 수 있습니다.</div>
+							</td>
+
+							<td>박지상</td>
+
+							<!-- 공개 여부: 토글 스위치 (.notice-toggle : 기존 .toggle 과 분리) -->
+							<td>
+								<form action="/skyroute/staff/staff/content/notice/public"
+									  method="post"
+									  class="notice-toggle-form"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+									<input type="hidden"
+										   name="_csrf"
+										   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+									<input type="hidden" name="notice_id" value="10">
+									<input type="hidden" name="is_public" value="N">
+
+									<label class="notice-toggle">
+										<input type="checkbox"
+											   onchange="if(confirm('공개 여부를 변경하시겠습니까?')){this.form.submit();}else{this.checked=!this.checked;}" checked="checked">
+										<span class="notice-toggle-track"></span>
+									</label>
+
+									<span class="notice-toggle-label  is-on">공개</span>
+								</form>
+							</td>
+
+							<td class="notice-date">2026-06-29 10:00</td>
+
+							<td class="notice-date">-</td>
+
+							<!-- 관리: 상세 / 수정 / 삭제 (비공개 버튼 제거) -->
+							<td>
+								<div class="btn-action-group">
+									<a class="btn btn-ghost btn-sm"
+									   href="/skyroute/staff/staff/content/notice/detail?notice_id=10">
+										상세
+									</a>
+
+									<a class="btn btn-primary btn-sm"
+									   href="/skyroute/staff/staff/content/notice/modify?notice_id=10">
+										수정
+									</a>
+
+									<form action="/skyroute/staff/staff/content/notice/delete"
+										  method="post"
+										  style="display:inline;"
+										  onsubmit="return confirm('삭제 시 복구할 수 없습니다. 삭제하시겠습니까?');"><input type="hidden" name="_csrf" value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg"/>
+
+										<input type="hidden"
+											   name="_csrf"
+											   value="EpRqXUqyfazLHKPzj4WUlQM3UjKCZojplNZnp0-vdrw5AcrXJKFcanzRSJzmLZSWvKigpTsPf1C7X73Ep-4GxnvMENhfZfrg">
+
+										<input type="hidden" name="notice_id" value="10">
+
+										<button type="submit" class="btn btn-danger btn-sm">
+											삭제
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="notice-paging">&nbsp;<b><span style='color:red;'>1</span></b>&nbsp;&nbsp;<a href='list?pageNum=2'>2</a>&nbsp;&nbsp;<a href='list?pageNum=3'>3</a>&nbsp;</div>
+
+		</div>
+	</div>
+
+	<div id="eventTabContent" style="display:none;"></div>
+</main>
+
+<script>
+const eventFragmentUrl = "\/staff\/content\/event\/fragment";
+
+function setActiveTab(button) {
+	document.querySelectorAll('.tabs button').forEach(tab => {
+		tab.classList.remove('active');
+	});
+
+	button.classList.add('active');
+}
+
+function showNoticeTab(button) {
+	document.getElementById('contentPageTitle').textContent = '공지사항 관리';
+	document.getElementById('contentPageDesc').textContent =
+		'사용자 페이지에 노출되는 공지사항을 등록, 수정, 공개/비공개 처리, 삭제합니다. 비공개 공지는 사용자 공지사항 목록에 표시되지 않습니다.';
+
+	document.getElementById('noticeStats').style.display = 'grid';
+	document.getElementById('eventStats').style.display = 'none';
+	document.getElementById('noticeTabContent').style.display = 'block';
+	document.getElementById('eventTabContent').style.display = 'none';
+
+	setActiveTab(button);
+}
+
+function renderEventFragment(html) {
+	const temp = document.createElement('div');
+	temp.innerHTML = html;
+
+	const statsFragment = temp.querySelector('#eventStatsFragment');
+	const listFragment = temp.querySelector('#eventListFragment');
+
+	const eventStats = document.getElementById('eventStats');
+	const eventTabContent = document.getElementById('eventTabContent');
+
+	if (!statsFragment || !listFragment) {
+		throw new Error();
+	}
+
+	eventStats.innerHTML = statsFragment.outerHTML;
+	eventTabContent.innerHTML = listFragment.outerHTML;
+	eventTabContent.dataset.loaded = 'true';
+
+	initEventSearch();
+	initEventVisibilityToggle();
+}
+
+function loadEventFragment(params) {
+	const requestParams = new URLSearchParams(params);
+
+	if (!requestParams.get('pageNum')) {
+		requestParams.set('pageNum', '1');
+	}
+
+	return fetch(eventFragmentUrl + '?' + requestParams.toString())
+		.then(response => {
+			if (!response.ok) {
+				throw new Error();
+			}
+
+			return response.text();
+		})
+		.then(renderEventFragment)
+		.catch(() => {
+			document.getElementById('eventStats').innerHTML = '';
+			document.getElementById('eventTabContent').innerHTML = `
+				<div class="card" style="padding:28px; text-align:center;">
+					이벤트 목록을 불러오지 못했습니다.
+				</div>
+			`;
+		});
+}
+
+function initEventSearch() {
+	const eventTabContent = document.getElementById('eventTabContent');
+	const form = eventTabContent.querySelector('#eventSearchForm');
+
+	if (!form) {
+		return;
+	}
+
+	const statusInput = form.querySelector('#eventStatus');
+	const filterButtons = form.querySelectorAll('.event-filter-btn');
+	const resetButton = form.querySelector('#eventSearchReset');
+	const pageButtons = eventTabContent.querySelectorAll('.event-page-btn');
+	const statCards = document.getElementById('eventStats').querySelectorAll('.event-stat-card');
+
+	form.addEventListener('submit', function(event) {
+		event.preventDefault();
+
+		const params = new URLSearchParams(new FormData(form));
+		params.set('pageNum', '1');
+
+		loadEventFragment(params);
+	});
+
+	filterButtons.forEach(button => {
+		button.addEventListener('click', function() {
+			statusInput.value = this.dataset.status;
+
+			const params = new URLSearchParams(new FormData(form));
+			params.set('pageNum', '1');
+
+			loadEventFragment(params);
+		});
+	});
+
+	resetButton.addEventListener('click', function() {
+		form.querySelector('[name="keyword"]').value = '';
+		statusInput.value = '';
+
+		loadEventFragment(new URLSearchParams({
+			pageNum: '1'
+		}));
+	});
+
+	pageButtons.forEach(button => {
+		button.addEventListener('click', function() {
+			if (this.disabled) {
+				return;
+			}
+
+			const params = new URLSearchParams(new FormData(form));
+			params.set('pageNum', this.dataset.page);
+
+			loadEventFragment(params);
+		});
+	});
+	statCards.forEach(card => {
+		card.addEventListener('click', function() {
+			statusInput.value = this.dataset.eventStatus;
+
+			const params = new URLSearchParams(new FormData(form));
+			params.set('pageNum', '1');
+
+			loadEventFragment(params);
+		});
+	});
+}
+
+function getCurrentEventParams() {
+	const eventTabContent = document.getElementById('eventTabContent');
+	const form = eventTabContent.querySelector('#eventSearchForm');
+	const params = new URLSearchParams();
+
+	if (form) {
+		const formParams = new URLSearchParams(new FormData(form));
+
+		formParams.forEach((value, key) => {
+			params.set(key, value);
+		});
+	}
+
+	const activePageButton = eventTabContent.querySelector('.event-page-btn.active');
+
+	if (activePageButton) {
+		params.set('pageNum', activePageButton.dataset.page);
+	} else {
+		params.set('pageNum', '1');
+	}
+
+	return params;
+}
+
+function initEventVisibilityToggle() {
+	const eventTabContent = document.getElementById('eventTabContent');
+	const forms = eventTabContent.querySelectorAll('.event-visibility-form');
+
+	forms.forEach(form => {
+		form.addEventListener('submit', function(event) {
+			event.preventDefault();
+
+			const scrollY = window.scrollY;
+			const params = getCurrentEventParams();
+
+			fetch(this.action, {
+				method: 'POST',
+				body: new FormData(this),
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			})
+				.then(response => {
+					if (!response.ok) {
+						throw new Error();
+					}
+
+					return loadEventFragment(params);
+				})
+				.then(() => {
+					window.scrollTo(0, scrollY);
+				})
+				.catch(() => {
+					alert('상태 변경 중 오류가 발생했습니다.');
+				});
+		});
+	});
+}
+
+function showEventTab(button) {
+	document.getElementById('contentPageTitle').textContent = '이벤트 배너 관리';
+	document.getElementById('contentPageDesc').textContent =
+		'메인 화면에 노출되는 이벤트 배너를 등록하고, 진행 상태와 참여자 현황 및 결과 발표를 관리합니다.';
+
+	document.getElementById('noticeStats').style.display = 'none';
+	document.getElementById('noticeTabContent').style.display = 'none';
+
+	const eventStats = document.getElementById('eventStats');
+	const eventTabContent = document.getElementById('eventTabContent');
+
+	eventStats.style.display = 'block';
+	eventTabContent.style.display = 'block';
+
+	setActiveTab(button);
+
+	if (eventTabContent.dataset.loaded === 'true') {
+		return;
+	}
+
+	loadEventFragment(new URLSearchParams({
+		pageNum: '1'
+	}));
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+	const tab = new URLSearchParams(window.location.search).get('tab');
+
+	if (tab === 'event') {
+		showEventTab(document.getElementById('eventTabButton'));
+	}
+});
+</script>
+</body>
+</html>

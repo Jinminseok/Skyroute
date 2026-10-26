@@ -1,0 +1,506 @@
+@charset "UTF-8";
+
+/* --- 공통 및 기존 테이블 스타일 --- */
+:root {
+	--primary: #78716C;
+	--primary-dark: #57534E;
+	--text-dark: #1C1917;
+	--text-gray: #57534E;
+	--text-light: #A8A29E;
+	--gradient-bg: linear-gradient(180deg, #F5F5F4 0%, #FAF9F6 45%, #FDFDFB 80%, #FFFFFF 100%);
+	--bg-white: rgba(255, 255, 255, 0.85);
+	--border: rgba(120, 113, 108, 0.2);
+	--shadow-sm: 0 4px 14px rgba(120, 113, 108, 0.03);
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+/*
+ * 페이지 높이에 따라 스크롤바가 생기거나 없어져도
+ * 관리자 화면의 가로 위치가 움직이지 않도록 공간을 항상 확보한다.
+ */
+html {
+    min-height: 100%;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+
+/*
+ * scrollbar-gutter를 지원하지 않는 구형 브라우저 대응
+ */
+@supports not (scrollbar-gutter: stable) {
+    html {
+        overflow-y: scroll;
+    }
+}
+
+body {
+	background: var(--gradient-bg);
+	color: var(--text-dark);
+	font-family: 'Noto Sans KR', sans-serif;
+	font-size: 13.5px;
+	line-height: 1.5;
+	min-height: 100vh;
+}
+
+h1 {
+	font-size: 24px;
+	font-weight: 700;
+	margin-bottom: 8px;
+	letter-spacing: -0.5px;
+}
+
+.desc {
+	color: var(--text-gray);
+	margin-bottom: 24px;
+	font-size: 14px;
+}
+
+.main {
+    width: 100%;
+    max-width: 1440px;
+
+    margin: 0 auto;
+    padding: 40px;
+}
+
+.grid {
+	display: grid;
+	gap: 20px;
+}
+
+.grid-2 {
+	grid-template-columns: repeat(2, 1fr);
+}
+
+.grow {
+	flex-grow: 1;
+}
+
+.card {
+	/*
+	 * 실시간 backdrop blur 대신
+	 * 조금 더 불투명한 흰색을 사용
+	 */
+	background: rgba(255, 255, 255, 0.94);
+
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+
+	border: 1px solid var(--border);
+	border-radius: 12px;
+
+	margin-bottom: 20px;
+	padding: 24px;
+
+	box-shadow: var(--shadow-sm);
+}
+
+.toolbar {
+	display: flex;
+	gap: 12px;
+	margin-bottom: 16px;
+	align-items: center;
+}
+
+/* 버튼 스타일 */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px 16px;
+	border-radius: 8px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	border: 1px solid transparent;
+	transition: all 0.2s;
+}
+
+.btn-primary {
+	background: var(--primary);
+	color: #fff;
+}
+
+.btn-primary:hover {
+	background: var(--primary-dark);
+}
+
+.btn-ghost {
+	background: #fff;
+	border-color: var(--border);
+	color: var(--text-dark);
+}
+
+.btn-ghost:hover {
+	background: #f5f5f5;
+}
+
+.btn-sm {
+	padding: 5px 12px;
+	font-size: 12px;
+	border-radius: 6px;
+}
+
+/* 테이블 스타일 */
+.table-wrap {
+	overflow-x: auto;
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.5);
+}
+
+.data {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: left;
+	font-size: 13px;
+}
+
+.data th {
+	padding: 14px 18px;
+	border-bottom: 2px solid var(--border);
+	color: var(--text-gray);
+	font-weight: 600;
+	background: rgba(245, 245, 244, 0.6);
+}
+
+.data td {
+	padding: 14px 18px;
+	border-bottom: 1px solid var(--border);
+	vertical-align: middle;
+}
+
+/* 상태 토글 */
+.toggle {
+	position: relative;
+
+	width: 44px;
+	height: 24px;
+
+	display: inline-block;
+	flex-shrink: 0;
+
+	padding: 0;
+	border: 0;
+	border-radius: 99px;
+
+	background: rgba(0, 0, 0, 0.15);
+
+	cursor: pointer;
+	appearance: none;
+	vertical-align: middle;
+
+	transition:
+		background-color 0.2s ease,
+		opacity 0.2s ease;
+}
+
+.toggle.on {
+	background: #0D9488;
+}
+
+.toggle::after {
+	content: "";
+
+	position: absolute;
+	top: 3px;
+	left: 3px;
+
+	width: 18px;
+	height: 18px;
+
+	border-radius: 50%;
+	background: #FFFFFF;
+
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+	transition: left 0.2s ease;
+}
+
+.toggle.on::after {
+	left: 23px;
+}
+
+/* 키보드 접근 시 포커스 표시 */
+.toggle:focus-visible {
+	outline: 3px solid rgba(13, 148, 136, 0.25);
+	outline-offset: 2px;
+}
+
+/* 서버 요청 처리 중 */
+.toggle:disabled {
+	opacity: 0.55;
+	cursor: wait;
+}
+
+/* 모달 안에서 토글과 상태 문구를 나란히 배치 */
+.status-toggle-wrap {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+}
+
+.status-text {
+	min-width: 44px;
+
+	font-size: 12px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.status-text.active {
+	color: #0D9488;
+}
+
+.status-text.inactive {
+	color: #9CA3AF;
+}
+
+/* --- 💡 모달 전용 필수 CSS --- */
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.4);
+	z-index: 9999;
+	display: none;
+	align-items: center;
+	justify-content: center;
+}
+
+.modal-content-large {
+	width: 850px;
+	max-width: calc(100vw - 48px);
+
+	max-height: 85vh;
+	max-height: 85dvh;
+
+	display: flex;
+	flex-direction: column;
+
+	overflow: hidden;
+
+	padding: 30px;
+
+	background: #FFFFFF;
+	border-radius: 12px;
+
+	box-shadow:
+		0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 수정 전용 작은 모달창 */
+.modal-content-small {
+	width: 420px;
+	max-width: calc(100vw - 48px);
+
+	max-height: calc(100vh - 48px);
+	max-height: calc(100dvh - 48px);
+
+	overflow-y: auto;
+	overscroll-behavior: contain;
+
+	padding: 24px;
+
+	background: #FFFFFF;
+	border-radius: 12px;
+
+	box-shadow:
+		0 10px 25px rgba(0, 0, 0, 0.15);
+
+	-webkit-overflow-scrolling: touch;
+}
+
+/* 모달 내부 폼 스타일 */
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+	flex-shrink: 0; /* 헤더 영역 축소 방지 */
+}
+
+.modal-title {
+	font-size: 18px;
+	font-weight: 700;
+	color: #333;
+}
+
+.close-btn {
+	background: none;
+	border: none;
+	font-size: 20px;
+	color: #888;
+	cursor: pointer;
+}
+
+.close-btn:hover {
+	color: #333;
+}
+
+.input-label {
+	display: block;
+	font-size: 12px;
+	font-weight: 600;
+	color: #555;
+	margin-bottom: 8px;
+}
+
+.form-input {
+	width: 100%;
+	padding: 10px 12px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	font-size: 14px;
+	font-family: inherit;
+	margin-bottom: 20px;
+	outline: none;
+}
+
+.form-input:focus {
+	border-color: var(--primary);
+}
+
+.modal-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+/* --- 모달창 내부 스크롤 테이블 전용 --- */
+.scrollable-wrap {
+	flex-grow: 1;
+
+	max-height: 400px;
+
+	overflow-x: auto;
+	overflow-y: auto;
+
+	/*
+	 * 모달 테이블의 끝까지 스크롤했을 때
+	 * 뒤쪽 페이지까지 이어서 스크롤되는 현상 방지
+	 */
+	overscroll-behavior: contain;
+
+	/*
+	 * 스크롤바가 생기거나 없어져도
+	 * 테이블 너비가 움직이지 않도록 공간 확보
+	 */
+	scrollbar-gutter: stable;
+
+	/*
+	 * 모바일·터치패드 관성 스크롤 보완
+	 */
+	-webkit-overflow-scrolling: touch;
+}
+
+.scrollable-wrap .data th {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: #F5F5F4;
+}
+
+
+/* 항공기 수정·삭제 버튼 정렬 */
+.aircraft-action-group {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+
+/* 일반 읽기 전용 입력칸 */
+.form-input[readonly] {
+	color: #64748B;
+	background: #F8FAFC;
+	cursor: not-allowed;
+}
+
+
+/*
+ * 항공기 등록번호 수정 불가 입력칸
+ * 반투명 회색 배경 + 실선 테두리
+ */
+.form-input.aircraft-reg-readonly,
+.form-input.aircraft-reg-readonly:hover,
+.form-input.aircraft-reg-readonly:focus {
+	color: #64748B !important;
+
+	/* 밝고 투명한 회색 배경 */
+	background-color: rgba(148, 163, 184, 0.22) !important;
+	background-image: none !important;
+
+	/* 점선이 아닌 실선 */
+	border: 1px solid #CBD5E1 !important;
+
+	font-weight: 600;
+
+	cursor: not-allowed !important;
+	caret-color: transparent;
+
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+
+/* 항공기 토글 요청 처리 중 */
+.aircraft-toggle:disabled {
+	opacity: 0.55;
+	cursor: wait;
+}
+
+
+/* 항공기 수정 모달 운영 상태 안내 */
+.aircraft-edit-note {
+	margin: -6px 0 18px;
+	padding: 10px 12px;
+
+	color: #64748B;
+	background: #F8FAFC;
+
+	border: 1px solid #E2E8F0;
+	border-radius: 8px;
+
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+/*
+ * 모달이 열려 있을 때 뒤쪽 관리자 페이지 스크롤 차단
+ */
+html.modal-open,
+body.modal-open {
+	overflow: hidden !important;
+	overscroll-behavior: none;
+}
+
+/* ── 회원 상세 모달 ── */
+.member-info {
+    background: #F8FAFC;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+}
+.form-row { display: flex; gap: 12px; }
+.form-row > * { flex: 1; }
+.form-row > .grow-2 { flex: 2; }
+
+.member-info dl {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    row-gap: 10px;
+    column-gap: 12px;
+    margin: 0;
+}
+.member-info dt { font-size: 13px; font-weight: 600; color: var(--text-gray); }
+.member-info dd { margin: 0; font-size: 14px; color: var(--text-dark); word-break: break-all; }

@@ -1,0 +1,4664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><script src="/skyroute/staff/_demo/data.js"></script><script src="/skyroute/_demo/demo.js"></script><link rel="stylesheet" href="/skyroute/_demo/demo.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>에어 - 지연·결항 안내 관리</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0">
+
+<link rel="stylesheet" href="/skyroute/assets/css/staff.css">
+
+<meta name="_csrf" content="gv1OiPzMHjgBTMUV2nydepuZ9PQiZ581U4Jb3WROaiYduZIhtMh4v8qvKwgsffJw6VGpSqOh2ZYbXqoYYLo6vFAtDEJ73aIW" />
+<meta name="_csrf_header" content="X-CSRF-TOKEN" />
+
+</head>
+
+<body>
+
+	<header class="header">
+
+	<div class="logo">
+		<span class="material-symbols-outlined">airlines</span>
+		SKYROUTE
+	</div>
+
+	<nav class="top-nav">
+
+		<a href="/skyroute/staff/staff/schedule/today"
+		   class="nav-link">
+			<span class="material-symbols-outlined">flight_takeoff</span>
+			오늘 항공편
+		</a>
+
+		<a href="/skyroute/staff/staff/schedule/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">calendar_month</span>
+			운항 스케줄
+		</a>
+
+		<a href="/skyroute/staff/staff/operation/passenger/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">luggage</span>
+			탑승 관리
+		</a>
+
+		<a href="/skyroute/staff/staff/delay/list"
+		   class="nav-link  active">
+			<span class="material-symbols-outlined">warning</span>
+			지연·결항 관리
+		</a>
+
+		<a href="/skyroute/staff/staff/inquiry/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">forum</span>
+			고객 문의
+		</a>
+
+		<a href="/skyroute/staff/staff/content/notice/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">campaign</span>
+			공지·콘텐츠
+		</a>
+
+		<a href="/skyroute/staff/staff/basedata/airport/list"
+		   class="nav-link">
+			<span class="material-symbols-outlined">database</span>
+			운영 기준 정보
+		</a>
+
+	</nav>
+
+	<div class="user-menu">
+
+		<div class="user-chip">
+			<div class="avatar">박</div>
+
+			<div class="meta">
+				<div class="n">박지상</div>
+				<div class="r">운항 현장 지상직 (STAFF)</div>
+			</div>
+		</div>
+
+		<form action="/skyroute/staff/member/logout" method="post" style="margin:0;"><input type="hidden" name="_csrf" value="gv1OiPzMHjgBTMUV2nydepuZ9PQiZ581U4Jb3WROaiYduZIhtMh4v8qvKwgsffJw6VGpSqOh2ZYbXqoYYLo6vFAtDEJ73aIW"/>
+			<input type="hidden"
+			       name="_csrf"
+			       value="gv1OiPzMHjgBTMUV2nydepuZ9PQiZ581U4Jb3WROaiYduZIhtMh4v8qvKwgsffJw6VGpSqOh2ZYbXqoYYLo6vFAtDEJ73aIW">
+
+			<button type="submit" class="btn-logout">
+				<span class="material-symbols-outlined">logout</span>
+				로그아웃
+			</button>
+		</form>
+
+	</div>
+
+</header>
+
+	<main class="main">
+
+		<h1>지연 · 결항 안내 관리</h1>
+		<p class="desc">
+			특정 항공편에 지연 또는 결항이 발생한 경우 사유를 등록합니다.
+			등록 시 항공편 운항 상태가 DELAYED 또는 CANCELLED로 변경되며,
+			추후 SSE 알림과 자동 환불 로직을 연결합니다.
+		</p>
+
+		<div class="grid" style="grid-template-columns:420px minmax(0, 1fr); align-items:start;">
+
+			<!-- 지연/결항 신규 등록 폼 -->
+			<div class="card">
+
+				<h3 style="margin-bottom:16px; font-size:15px; font-weight:700; color:var(--text-dark);">
+					지연/결항 신규 안내 등록
+				</h3>
+
+				<div class="field" style="margin-bottom:14px;">
+					<label style="font-weight:600; font-size:12px; display:block; margin-bottom:4px;">
+						대상 항공편 검색 및 선택
+					</label>
+					<!-- 항공편 리스트 -->
+					<div style="display: flex; gap: 8px;">
+						<input type="hidden" id="noticeFlightId">
+						<input type="text" id="noticeFlightText" class="input" readonly placeholder="우측 돋보기 버튼을 눌러 항공편을 검색하세요" style="flex: 1; background-color: #f8fafc; cursor: default;">
+						<button type="button" class="btn btn-ghost" style="border: 1px solid var(--line); white-space: nowrap;" onclick="openFlightSearchModal()">
+							<span class="material-symbols-outlined" style="font-size:18px;">search</span> 항공편 검색
+						</button>
+					</div>
+				</div>
+
+				<div class="field" style="margin-bottom:14px;">
+					<label style="font-weight:600; font-size:12px; display:block; margin-bottom:4px;">
+						안내 유형
+					</label>
+
+					<select class="select"
+					        id="noticeType"
+					        onchange="toggleNoticeField()">
+						<option value="DELAY">지연</option>
+						<option value="CANCEL">결항</option>
+					</select>
+				</div>
+
+				<div class="field"
+				     style="margin-bottom:14px;"
+				     id="noticeDelayWrapper">
+					<label style="font-weight:600; font-size:12px; display:block; margin-bottom:4px;">
+						예상 지연 시간
+					</label>
+
+					<input class="input"
+					       type="number"
+					       id="noticeDelayMinutes"
+					       min="1"
+					       placeholder="예: 40">
+
+					<p style="font-size:12px; color:var(--text-light); margin-top:6px;">
+						지연 안내 등록 시 1분 이상의 지연 시간을 입력해야 합니다.
+					</p>
+				</div>
+
+				<div class="field" style="margin-bottom:20px;">
+					<label style="font-weight:600; font-size:12px; display:block; margin-bottom:4px;">
+						상세 발생 사유
+					</label>
+
+					<textarea class="textarea"
+					          id="noticeReason"
+					          rows="5"
+					          placeholder="예: 인천공항 기상 악화 및 연결편 지연으로 인한 스케줄 변동"></textarea>
+				</div>
+
+				<button type="button" class="btn btn-primary" style="width:100%;" onclick="stageFlightNotice()">
+					<span class="material-symbols-outlined" style="font-size:18px">playlist_add</span>
+					발송 대기 명단에 추가
+				</button>
+
+			</div>
+
+			<!-- 안내 등록 이력 -->
+			<div class="card">
+
+				<div class="toolbar" style="margin-bottom:16px;">
+					<h3 style="font-size:15px; font-weight:700; color:var(--text-dark); margin:0;">
+						안내 정보 등록 이력
+					</h3>
+
+					<div class="grow"></div>
+
+					<span class="badge badge-scheduled">
+						FLIGHT_NOTICE
+					</span>
+				</div>
+
+				<div class="table-wrap">
+					<table class="data">
+						<thead>
+							<tr>
+								<th>안내 ID</th>
+								<th>항공편</th>
+								<th>안내 유형</th>
+								<th>예상 지연 시간</th>
+								<th>상세 발생 사유</th>
+								<th>등록자 ID</th>
+								<th>등록 일시</th>
+								<th>관리</th>
+							</tr>
+						</thead>
+						
+						<!-- 2차 확인 데이터 (확인/취소) -->
+                        <tbody id="stagedNoticeTable">
+                        </tbody>
+
+						<!-- 안내 이력 테이블 본문 -->
+						<tbody id="noticeHistoryTable">
+							<tr>
+								<td class="mono">6</td>
+								<td style="font-weight: bold; color: var(--primary);" class="mono">SR136</td>
+								<td>
+									
+									<span class="badge badge-cancelled">결항</span>
+								</td>
+								<td class="mono">-</td>
+								<td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">항공기 정비 점검이 필요하여 해당 항공편이 결항되었습니다.</td>
+								<td class="mono">staff01</td>
+								<td class="mono">2026-10-31 07:00</td>
+                                <!-- 관리 칸: 발송완료 뱃지 -->
+								<td><span class="badge badge-ok">발송완료</span></td>
+							</tr>
+							<tr>
+								<td class="mono">5</td>
+								<td style="font-weight: bold; color: var(--primary);" class="mono">SR133</td>
+								<td>
+									
+									<span class="badge badge-cancelled">결항</span>
+								</td>
+								<td class="mono">-</td>
+								<td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">현지 공항의 기상 악화 및 운항 제한으로 항공편이 결항되었습니다.</td>
+								<td class="mono">staff01</td>
+								<td class="mono">2026-10-28 20:00</td>
+                                <!-- 관리 칸: 발송완료 뱃지 -->
+								<td><span class="badge badge-ok">발송완료</span></td>
+							</tr>
+							<tr>
+								<td class="mono">4</td>
+								<td style="font-weight: bold; color: var(--primary);" class="mono">SR123</td>
+								<td>
+									<span class="badge badge-delayed">지연</span>
+									
+								</td>
+								<td class="mono">90분</td>
+								<td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">항공기 추가 안전 점검으로 출발 예정 시각이 변경되었습니다.</td>
+								<td class="mono">staff01</td>
+								<td class="mono">2026-10-25 08:00</td>
+                                <!-- 관리 칸: 발송완료 뱃지 -->
+								<td><span class="badge badge-ok">발송완료</span></td>
+							</tr>
+							<tr>
+								<td class="mono">3</td>
+								<td style="font-weight: bold; color: var(--primary);" class="mono">SR111</td>
+								<td>
+									<span class="badge badge-delayed">지연</span>
+									
+								</td>
+								<td class="mono">60분</td>
+								<td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">현지 공항 기상 악화로 항공편 출발이 지연됩니다.</td>
+								<td class="mono">staff01</td>
+								<td class="mono">2026-10-25 06:40</td>
+                                <!-- 관리 칸: 발송완료 뱃지 -->
+								<td><span class="badge badge-ok">발송완료</span></td>
+							</tr>
+							<tr>
+								<td class="mono">2</td>
+								<td style="font-weight: bold; color: var(--primary);" class="mono">SR107</td>
+								<td>
+									<span class="badge badge-delayed">지연</span>
+									
+								</td>
+								<td class="mono">45분</td>
+								<td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">출발 공항 혼잡 및 운항 슬롯 조정으로 출발이 지연됩니다.</td>
+								<td class="mono">staff01</td>
+								<td class="mono">2026-10-25 06:30</td>
+                                <!-- 관리 칸: 발송완료 뱃지 -->
+								<td><span class="badge badge-ok">발송완료</span></td>
+							</tr>
+							<tr>
+								<td class="mono">1</td>
+								<td style="font-weight: bold; color: var(--primary);" class="mono">SR101</td>
+								<td>
+									<span class="badge badge-delayed">지연</span>
+									
+								</td>
+								<td class="mono">20분</td>
+								<td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">연결 항공편 도착 지연으로 출발 시간이 조정되었습니다.</td>
+								<td class="mono">staff01</td>
+								<td class="mono">2026-10-25 05:50</td>
+                                <!-- 관리 칸: 발송완료 뱃지 -->
+								<td><span class="badge badge-ok">발송완료</span></td>
+							</tr>
+							
+						</tbody>
+					</table>
+				</div>
+
+			</div>
+
+		</div>
+
+	</main>
+
+	<div class="toast-wrap" id="toasts"></div>
+	
+	<!-- 항공편 상세 검색 모달 -->
+	<div class="modal-overlay" id="flightSearchModal" style="display: none;">
+		<div class="modal" style="width: 750px; max-width: 95vw;">
+			<div class="modal-head">
+				<h3>대상 항공편 상세 검색</h3>
+				<button type="button" class="modal-close" onclick="closeFlightSearchModal()">
+					<span class="material-symbols-outlined">close</span>
+				</button>
+			</div>
+			
+			<div class="modal-body">
+				<!-- 검색 필터 영역 -->
+				<div style="display: flex; gap: 12px; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--line);">
+					<div style="flex: 0 0 160px;">
+						<label style="font-size: 11px; font-weight: 600; color: var(--mut); display: block; margin-bottom: 4px;">출발 날짜</label>
+						<input type="date" id="modalSearchDate" class="input" onchange="filterModalFlights()">
+					</div>
+					<div style="flex: 1;">
+						<label style="font-size: 11px; font-weight: 600; color: var(--mut); display: block; margin-bottom: 4px;">항공편명 또는 노선명</label>
+						<input type="text" id="modalSearchKeyword" class="input" placeholder="예: KE201, CJU 등 입력" onkeyup="filterModalFlights()">
+					</div>
+				</div>
+
+				<!-- 검색 결과 표 -->
+				<div style="max-height: 350px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px;">
+					<table class="data">
+						<thead style="position: sticky; top: 0; z-index: 1;">
+							<tr>
+								<th>항공편명</th>
+								<th>노선구간</th>
+								<th>출발 예정 일시</th>
+								<th>현재 상태</th>
+								<th>선택</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">KE201</td>
+								<td class="flight-route">GMP → NRT</td>
+								<td class="mono flight-time">2026-11-08 21:31</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="3" 
+									        data-text="KE201 (GMP → NRT) / 2026-11-08 21:31"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR136</td>
+								<td class="flight-route">GRU → ICN</td>
+								<td class="mono flight-time">2026-11-06 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="255" 
+									        data-text="SR136 (GRU → ICN) / 2026-11-06 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR136</td>
+								<td class="flight-route">GRU → ICN</td>
+								<td class="mono flight-time">2026-11-05 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="254" 
+									        data-text="SR136 (GRU → ICN) / 2026-11-05 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR135</td>
+								<td class="flight-route">ICN → GRU</td>
+								<td class="mono flight-time">2026-11-05 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="249" 
+									        data-text="SR135 (ICN → GRU) / 2026-11-05 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">KE102</td>
+								<td class="flight-route">CJU → GMP</td>
+								<td class="mono flight-time">2026-11-04 21:31</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="2" 
+									        data-text="KE102 (CJU → GMP) / 2026-11-04 21:31"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR136</td>
+								<td class="flight-route">GRU → ICN</td>
+								<td class="mono flight-time">2026-11-04 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="253" 
+									        data-text="SR136 (GRU → ICN) / 2026-11-04 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR135</td>
+								<td class="flight-route">ICN → GRU</td>
+								<td class="mono flight-time">2026-11-04 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="248" 
+									        data-text="SR135 (ICN → GRU) / 2026-11-04 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR130</td>
+								<td class="flight-route">JNB → ICN</td>
+								<td class="mono flight-time">2026-11-04 02:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="219" 
+									        data-text="SR130 (JNB → ICN) / 2026-11-04 02:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR136</td>
+								<td class="flight-route">GRU → ICN</td>
+								<td class="mono flight-time">2026-11-03 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="252" 
+									        data-text="SR136 (GRU → ICN) / 2026-11-03 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR129</td>
+								<td class="flight-route">ICN → JNB</td>
+								<td class="mono flight-time">2026-11-03 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="213" 
+									        data-text="SR129 (ICN → JNB) / 2026-11-03 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR135</td>
+								<td class="flight-route">ICN → GRU</td>
+								<td class="mono flight-time">2026-11-03 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="247" 
+									        data-text="SR135 (ICN → GRU) / 2026-11-03 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR126</td>
+								<td class="flight-route">FRA → ICN</td>
+								<td class="mono flight-time">2026-11-03 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="195" 
+									        data-text="SR126 (FRA → ICN) / 2026-11-03 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR122</td>
+								<td class="flight-route">YYZ → ICN</td>
+								<td class="mono flight-time">2026-11-03 03:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="171" 
+									        data-text="SR122 (YYZ → ICN) / 2026-11-03 03:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR130</td>
+								<td class="flight-route">JNB → ICN</td>
+								<td class="mono flight-time">2026-11-03 02:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="218" 
+									        data-text="SR130 (JNB → ICN) / 2026-11-03 02:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR118</td>
+								<td class="flight-route">SYD → ICN</td>
+								<td class="mono flight-time">2026-11-02 23:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="147" 
+									        data-text="SR118 (SYD → ICN) / 2026-11-02 23:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR134</td>
+								<td class="flight-route">NAN → ICN</td>
+								<td class="mono flight-time">2026-11-02 21:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="243" 
+									        data-text="SR134 (NAN → ICN) / 2026-11-02 21:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR125</td>
+								<td class="flight-route">ICN → FRA</td>
+								<td class="mono flight-time">2026-11-02 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="189" 
+									        data-text="SR125 (ICN → FRA) / 2026-11-02 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR121</td>
+								<td class="flight-route">ICN → YYZ</td>
+								<td class="mono flight-time">2026-11-02 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="165" 
+									        data-text="SR121 (ICN → YYZ) / 2026-11-02 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR136</td>
+								<td class="flight-route">GRU → ICN</td>
+								<td class="mono flight-time">2026-11-02 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="251" 
+									        data-text="SR136 (GRU → ICN) / 2026-11-02 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR117</td>
+								<td class="flight-route">ICN → SYD</td>
+								<td class="mono flight-time">2026-11-02 10:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="141" 
+									        data-text="SR117 (ICN → SYD) / 2026-11-02 10:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR129</td>
+								<td class="flight-route">ICN → JNB</td>
+								<td class="mono flight-time">2026-11-02 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="212" 
+									        data-text="SR129 (ICN → JNB) / 2026-11-02 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR133</td>
+								<td class="flight-route">ICN → NAN</td>
+								<td class="mono flight-time">2026-11-02 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="237" 
+									        data-text="SR133 (ICN → NAN) / 2026-11-02 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR135</td>
+								<td class="flight-route">ICN → GRU</td>
+								<td class="mono flight-time">2026-11-02 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="246" 
+									        data-text="SR135 (ICN → GRU) / 2026-11-02 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR126</td>
+								<td class="flight-route">FRA → ICN</td>
+								<td class="mono flight-time">2026-11-02 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="194" 
+									        data-text="SR126 (FRA → ICN) / 2026-11-02 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR122</td>
+								<td class="flight-route">YYZ → ICN</td>
+								<td class="mono flight-time">2026-11-02 03:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="170" 
+									        data-text="SR122 (YYZ → ICN) / 2026-11-02 03:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR130</td>
+								<td class="flight-route">JNB → ICN</td>
+								<td class="mono flight-time">2026-11-02 02:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="217" 
+									        data-text="SR130 (JNB → ICN) / 2026-11-02 02:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR118</td>
+								<td class="flight-route">SYD → ICN</td>
+								<td class="mono flight-time">2026-11-01 23:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="146" 
+									        data-text="SR118 (SYD → ICN) / 2026-11-01 23:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">KE101</td>
+								<td class="flight-route">GMP → CJU</td>
+								<td class="mono flight-time">2026-11-01 21:31</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="1" 
+									        data-text="KE101 (GMP → CJU) / 2026-11-01 21:31"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR114</td>
+								<td class="flight-route">DXB → ICN</td>
+								<td class="mono flight-time">2026-11-01 21:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="123" 
+									        data-text="SR114 (DXB → ICN) / 2026-11-01 21:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR134</td>
+								<td class="flight-route">NAN → ICN</td>
+								<td class="mono flight-time">2026-11-01 21:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="242" 
+									        data-text="SR134 (NAN → ICN) / 2026-11-01 21:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR125</td>
+								<td class="flight-route">ICN → FRA</td>
+								<td class="mono flight-time">2026-11-01 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="188" 
+									        data-text="SR125 (ICN → FRA) / 2026-11-01 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR121</td>
+								<td class="flight-route">ICN → YYZ</td>
+								<td class="mono flight-time">2026-11-01 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="164" 
+									        data-text="SR121 (ICN → YYZ) / 2026-11-01 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR136</td>
+								<td class="flight-route">GRU → ICN</td>
+								<td class="mono flight-time">2026-11-01 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="250" 
+									        data-text="SR136 (GRU → ICN) / 2026-11-01 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR117</td>
+								<td class="flight-route">ICN → SYD</td>
+								<td class="mono flight-time">2026-11-01 10:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="140" 
+									        data-text="SR117 (ICN → SYD) / 2026-11-01 10:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR129</td>
+								<td class="flight-route">ICN → JNB</td>
+								<td class="mono flight-time">2026-11-01 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="211" 
+									        data-text="SR129 (ICN → JNB) / 2026-11-01 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR113</td>
+								<td class="flight-route">ICN → DXB</td>
+								<td class="mono flight-time">2026-11-01 08:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="117" 
+									        data-text="SR113 (ICN → DXB) / 2026-11-01 08:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR133</td>
+								<td class="flight-route">ICN → NAN</td>
+								<td class="mono flight-time">2026-11-01 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="236" 
+									        data-text="SR133 (ICN → NAN) / 2026-11-01 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR135</td>
+								<td class="flight-route">ICN → GRU</td>
+								<td class="mono flight-time">2026-11-01 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="245" 
+									        data-text="SR135 (ICN → GRU) / 2026-11-01 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR128</td>
+								<td class="flight-route">LHR → ICN</td>
+								<td class="mono flight-time">2026-11-01 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="207" 
+									        data-text="SR128 (LHR → ICN) / 2026-11-01 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR124</td>
+								<td class="flight-route">CDG → ICN</td>
+								<td class="mono flight-time">2026-11-01 05:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="183" 
+									        data-text="SR124 (CDG → ICN) / 2026-11-01 05:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR132</td>
+								<td class="flight-route">AKL → ICN</td>
+								<td class="mono flight-time">2026-11-01 04:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="231" 
+									        data-text="SR132 (AKL → ICN) / 2026-11-01 04:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR126</td>
+								<td class="flight-route">FRA → ICN</td>
+								<td class="mono flight-time">2026-11-01 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="193" 
+									        data-text="SR126 (FRA → ICN) / 2026-11-01 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR120</td>
+								<td class="flight-route">JFK → ICN</td>
+								<td class="mono flight-time">2026-11-01 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="159" 
+									        data-text="SR120 (JFK → ICN) / 2026-11-01 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR122</td>
+								<td class="flight-route">YYZ → ICN</td>
+								<td class="mono flight-time">2026-11-01 03:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="169" 
+									        data-text="SR122 (YYZ → ICN) / 2026-11-01 03:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR130</td>
+								<td class="flight-route">JNB → ICN</td>
+								<td class="mono flight-time">2026-11-01 02:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="216" 
+									        data-text="SR130 (JNB → ICN) / 2026-11-01 02:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR118</td>
+								<td class="flight-route">SYD → ICN</td>
+								<td class="mono flight-time">2026-10-31 23:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="145" 
+									        data-text="SR118 (SYD → ICN) / 2026-10-31 23:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR116</td>
+								<td class="flight-route">DOH → ICN</td>
+								<td class="mono flight-time">2026-10-31 23:20</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="135" 
+									        data-text="SR116 (DOH → ICN) / 2026-10-31 23:20"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR114</td>
+								<td class="flight-route">DXB → ICN</td>
+								<td class="mono flight-time">2026-10-31 21:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="122" 
+									        data-text="SR114 (DXB → ICN) / 2026-10-31 21:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR134</td>
+								<td class="flight-route">NAN → ICN</td>
+								<td class="mono flight-time">2026-10-31 21:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="241" 
+									        data-text="SR134 (NAN → ICN) / 2026-10-31 21:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR112</td>
+								<td class="flight-route">SIN → ICN</td>
+								<td class="mono flight-time">2026-10-31 16:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="111" 
+									        data-text="SR112 (SIN → ICN) / 2026-10-31 16:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR131</td>
+								<td class="flight-route">ICN → AKL</td>
+								<td class="mono flight-time">2026-10-31 14:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="225" 
+									        data-text="SR131 (ICN → AKL) / 2026-10-31 14:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR127</td>
+								<td class="flight-route">ICN → LHR</td>
+								<td class="mono flight-time">2026-10-31 13:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="201" 
+									        data-text="SR127 (ICN → LHR) / 2026-10-31 13:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR110</td>
+								<td class="flight-route">PEK → ICN</td>
+								<td class="mono flight-time">2026-10-31 12:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="99" 
+									        data-text="SR110 (PEK → ICN) / 2026-10-31 12:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR108</td>
+								<td class="flight-route">NRT → ICN</td>
+								<td class="mono flight-time">2026-10-31 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="87" 
+									        data-text="SR108 (NRT → ICN) / 2026-10-31 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR123</td>
+								<td class="flight-route">ICN → CDG</td>
+								<td class="mono flight-time">2026-10-31 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="177" 
+									        data-text="SR123 (ICN → CDG) / 2026-10-31 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR125</td>
+								<td class="flight-route">ICN → FRA</td>
+								<td class="mono flight-time">2026-10-31 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="187" 
+									        data-text="SR125 (ICN → FRA) / 2026-10-31 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR106</td>
+								<td class="flight-route">CJU → GMP</td>
+								<td class="mono flight-time">2026-10-31 11:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="75" 
+									        data-text="SR106 (CJU → GMP) / 2026-10-31 11:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR119</td>
+								<td class="flight-route">ICN → JFK</td>
+								<td class="mono flight-time">2026-10-31 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="153" 
+									        data-text="SR119 (ICN → JFK) / 2026-10-31 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR121</td>
+								<td class="flight-route">ICN → YYZ</td>
+								<td class="mono flight-time">2026-10-31 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="163" 
+									        data-text="SR121 (ICN → YYZ) / 2026-10-31 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR103</td>
+								<td class="flight-route">CJU → PUS</td>
+								<td class="mono flight-time">2026-10-31 10:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="57" 
+									        data-text="SR103 (CJU → PUS) / 2026-10-31 10:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR117</td>
+								<td class="flight-route">ICN → SYD</td>
+								<td class="mono flight-time">2026-10-31 10:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="139" 
+									        data-text="SR117 (ICN → SYD) / 2026-10-31 10:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR115</td>
+								<td class="flight-route">ICN → DOH</td>
+								<td class="mono flight-time">2026-10-31 10:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="129" 
+									        data-text="SR115 (ICN → DOH) / 2026-10-31 10:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR105</td>
+								<td class="flight-route">PUS → CJU</td>
+								<td class="mono flight-time">2026-10-31 09:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="69" 
+									        data-text="SR105 (PUS → CJU) / 2026-10-31 09:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR109</td>
+								<td class="flight-route">ICN → PEK</td>
+								<td class="mono flight-time">2026-10-31 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="93" 
+									        data-text="SR109 (ICN → PEK) / 2026-10-31 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR129</td>
+								<td class="flight-route">ICN → JNB</td>
+								<td class="mono flight-time">2026-10-31 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="210" 
+									        data-text="SR129 (ICN → JNB) / 2026-10-31 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR102</td>
+								<td class="flight-route">GMP → CJU</td>
+								<td class="mono flight-time">2026-10-31 08:40</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="51" 
+									        data-text="SR102 (GMP → CJU) / 2026-10-31 08:40"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR113</td>
+								<td class="flight-route">ICN → DXB</td>
+								<td class="mono flight-time">2026-10-31 08:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="116" 
+									        data-text="SR113 (ICN → DXB) / 2026-10-31 08:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR107</td>
+								<td class="flight-route">ICN → NRT</td>
+								<td class="mono flight-time">2026-10-31 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="81" 
+									        data-text="SR107 (ICN → NRT) / 2026-10-31 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR133</td>
+								<td class="flight-route">ICN → NAN</td>
+								<td class="mono flight-time">2026-10-31 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="235" 
+									        data-text="SR133 (ICN → NAN) / 2026-10-31 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR111</td>
+								<td class="flight-route">ICN → SIN</td>
+								<td class="mono flight-time">2026-10-31 07:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="105" 
+									        data-text="SR111 (ICN → SIN) / 2026-10-31 07:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR104</td>
+								<td class="flight-route">GMP → PUS</td>
+								<td class="mono flight-time">2026-10-31 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="63" 
+									        data-text="SR104 (GMP → PUS) / 2026-10-31 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR135</td>
+								<td class="flight-route">ICN → GRU</td>
+								<td class="mono flight-time">2026-10-31 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="244" 
+									        data-text="SR135 (ICN → GRU) / 2026-10-31 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR101</td>
+								<td class="flight-route">PUS → GMP</td>
+								<td class="mono flight-time">2026-10-31 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="45" 
+									        data-text="SR101 (PUS → GMP) / 2026-10-31 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR128</td>
+								<td class="flight-route">LHR → ICN</td>
+								<td class="mono flight-time">2026-10-31 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="206" 
+									        data-text="SR128 (LHR → ICN) / 2026-10-31 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR124</td>
+								<td class="flight-route">CDG → ICN</td>
+								<td class="mono flight-time">2026-10-31 05:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="182" 
+									        data-text="SR124 (CDG → ICN) / 2026-10-31 05:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR132</td>
+								<td class="flight-route">AKL → ICN</td>
+								<td class="mono flight-time">2026-10-31 04:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="230" 
+									        data-text="SR132 (AKL → ICN) / 2026-10-31 04:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR126</td>
+								<td class="flight-route">FRA → ICN</td>
+								<td class="mono flight-time">2026-10-31 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="192" 
+									        data-text="SR126 (FRA → ICN) / 2026-10-31 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR120</td>
+								<td class="flight-route">JFK → ICN</td>
+								<td class="mono flight-time">2026-10-31 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="158" 
+									        data-text="SR120 (JFK → ICN) / 2026-10-31 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR122</td>
+								<td class="flight-route">YYZ → ICN</td>
+								<td class="mono flight-time">2026-10-31 03:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="168" 
+									        data-text="SR122 (YYZ → ICN) / 2026-10-31 03:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR130</td>
+								<td class="flight-route">JNB → ICN</td>
+								<td class="mono flight-time">2026-10-31 02:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="215" 
+									        data-text="SR130 (JNB → ICN) / 2026-10-31 02:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR118</td>
+								<td class="flight-route">SYD → ICN</td>
+								<td class="mono flight-time">2026-10-30 23:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="144" 
+									        data-text="SR118 (SYD → ICN) / 2026-10-30 23:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR116</td>
+								<td class="flight-route">DOH → ICN</td>
+								<td class="mono flight-time">2026-10-30 23:20</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="134" 
+									        data-text="SR116 (DOH → ICN) / 2026-10-30 23:20"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR114</td>
+								<td class="flight-route">DXB → ICN</td>
+								<td class="mono flight-time">2026-10-30 21:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="121" 
+									        data-text="SR114 (DXB → ICN) / 2026-10-30 21:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR134</td>
+								<td class="flight-route">NAN → ICN</td>
+								<td class="mono flight-time">2026-10-30 21:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="240" 
+									        data-text="SR134 (NAN → ICN) / 2026-10-30 21:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR112</td>
+								<td class="flight-route">SIN → ICN</td>
+								<td class="mono flight-time">2026-10-30 16:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="110" 
+									        data-text="SR112 (SIN → ICN) / 2026-10-30 16:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR131</td>
+								<td class="flight-route">ICN → AKL</td>
+								<td class="mono flight-time">2026-10-30 14:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="224" 
+									        data-text="SR131 (ICN → AKL) / 2026-10-30 14:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR127</td>
+								<td class="flight-route">ICN → LHR</td>
+								<td class="mono flight-time">2026-10-30 13:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="200" 
+									        data-text="SR127 (ICN → LHR) / 2026-10-30 13:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR110</td>
+								<td class="flight-route">PEK → ICN</td>
+								<td class="mono flight-time">2026-10-30 12:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="98" 
+									        data-text="SR110 (PEK → ICN) / 2026-10-30 12:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR108</td>
+								<td class="flight-route">NRT → ICN</td>
+								<td class="mono flight-time">2026-10-30 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="86" 
+									        data-text="SR108 (NRT → ICN) / 2026-10-30 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR123</td>
+								<td class="flight-route">ICN → CDG</td>
+								<td class="mono flight-time">2026-10-30 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="176" 
+									        data-text="SR123 (ICN → CDG) / 2026-10-30 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR125</td>
+								<td class="flight-route">ICN → FRA</td>
+								<td class="mono flight-time">2026-10-30 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="186" 
+									        data-text="SR125 (ICN → FRA) / 2026-10-30 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR106</td>
+								<td class="flight-route">CJU → GMP</td>
+								<td class="mono flight-time">2026-10-30 11:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="74" 
+									        data-text="SR106 (CJU → GMP) / 2026-10-30 11:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR119</td>
+								<td class="flight-route">ICN → JFK</td>
+								<td class="mono flight-time">2026-10-30 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="152" 
+									        data-text="SR119 (ICN → JFK) / 2026-10-30 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR121</td>
+								<td class="flight-route">ICN → YYZ</td>
+								<td class="mono flight-time">2026-10-30 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="162" 
+									        data-text="SR121 (ICN → YYZ) / 2026-10-30 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR103</td>
+								<td class="flight-route">CJU → PUS</td>
+								<td class="mono flight-time">2026-10-30 10:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="56" 
+									        data-text="SR103 (CJU → PUS) / 2026-10-30 10:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR117</td>
+								<td class="flight-route">ICN → SYD</td>
+								<td class="mono flight-time">2026-10-30 10:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="138" 
+									        data-text="SR117 (ICN → SYD) / 2026-10-30 10:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR115</td>
+								<td class="flight-route">ICN → DOH</td>
+								<td class="mono flight-time">2026-10-30 10:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="128" 
+									        data-text="SR115 (ICN → DOH) / 2026-10-30 10:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR105</td>
+								<td class="flight-route">PUS → CJU</td>
+								<td class="mono flight-time">2026-10-30 09:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="68" 
+									        data-text="SR105 (PUS → CJU) / 2026-10-30 09:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR109</td>
+								<td class="flight-route">ICN → PEK</td>
+								<td class="mono flight-time">2026-10-30 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="92" 
+									        data-text="SR109 (ICN → PEK) / 2026-10-30 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR129</td>
+								<td class="flight-route">ICN → JNB</td>
+								<td class="mono flight-time">2026-10-30 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="209" 
+									        data-text="SR129 (ICN → JNB) / 2026-10-30 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR102</td>
+								<td class="flight-route">GMP → CJU</td>
+								<td class="mono flight-time">2026-10-30 08:40</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="50" 
+									        data-text="SR102 (GMP → CJU) / 2026-10-30 08:40"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR113</td>
+								<td class="flight-route">ICN → DXB</td>
+								<td class="mono flight-time">2026-10-30 08:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="115" 
+									        data-text="SR113 (ICN → DXB) / 2026-10-30 08:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR107</td>
+								<td class="flight-route">ICN → NRT</td>
+								<td class="mono flight-time">2026-10-30 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="80" 
+									        data-text="SR107 (ICN → NRT) / 2026-10-30 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR133</td>
+								<td class="flight-route">ICN → NAN</td>
+								<td class="mono flight-time">2026-10-30 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="234" 
+									        data-text="SR133 (ICN → NAN) / 2026-10-30 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR111</td>
+								<td class="flight-route">ICN → SIN</td>
+								<td class="mono flight-time">2026-10-30 07:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="104" 
+									        data-text="SR111 (ICN → SIN) / 2026-10-30 07:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR104</td>
+								<td class="flight-route">GMP → PUS</td>
+								<td class="mono flight-time">2026-10-30 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="62" 
+									        data-text="SR104 (GMP → PUS) / 2026-10-30 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR135</td>
+								<td class="flight-route">ICN → GRU</td>
+								<td class="mono flight-time">2026-10-30 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="38" 
+									        data-text="SR135 (ICN → GRU) / 2026-10-30 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR101</td>
+								<td class="flight-route">PUS → GMP</td>
+								<td class="mono flight-time">2026-10-30 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="44" 
+									        data-text="SR101 (PUS → GMP) / 2026-10-30 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR128</td>
+								<td class="flight-route">LHR → ICN</td>
+								<td class="mono flight-time">2026-10-30 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="205" 
+									        data-text="SR128 (LHR → ICN) / 2026-10-30 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR124</td>
+								<td class="flight-route">CDG → ICN</td>
+								<td class="mono flight-time">2026-10-30 05:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="181" 
+									        data-text="SR124 (CDG → ICN) / 2026-10-30 05:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR132</td>
+								<td class="flight-route">AKL → ICN</td>
+								<td class="mono flight-time">2026-10-30 04:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="229" 
+									        data-text="SR132 (AKL → ICN) / 2026-10-30 04:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR126</td>
+								<td class="flight-route">FRA → ICN</td>
+								<td class="mono flight-time">2026-10-30 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="191" 
+									        data-text="SR126 (FRA → ICN) / 2026-10-30 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR120</td>
+								<td class="flight-route">JFK → ICN</td>
+								<td class="mono flight-time">2026-10-30 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="157" 
+									        data-text="SR120 (JFK → ICN) / 2026-10-30 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR122</td>
+								<td class="flight-route">YYZ → ICN</td>
+								<td class="mono flight-time">2026-10-30 03:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="167" 
+									        data-text="SR122 (YYZ → ICN) / 2026-10-30 03:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR130</td>
+								<td class="flight-route">JNB → ICN</td>
+								<td class="mono flight-time">2026-10-30 02:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="214" 
+									        data-text="SR130 (JNB → ICN) / 2026-10-30 02:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR118</td>
+								<td class="flight-route">SYD → ICN</td>
+								<td class="mono flight-time">2026-10-29 23:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="143" 
+									        data-text="SR118 (SYD → ICN) / 2026-10-29 23:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR116</td>
+								<td class="flight-route">DOH → ICN</td>
+								<td class="mono flight-time">2026-10-29 23:20</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="133" 
+									        data-text="SR116 (DOH → ICN) / 2026-10-29 23:20"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR114</td>
+								<td class="flight-route">DXB → ICN</td>
+								<td class="mono flight-time">2026-10-29 21:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="120" 
+									        data-text="SR114 (DXB → ICN) / 2026-10-29 21:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR134</td>
+								<td class="flight-route">NAN → ICN</td>
+								<td class="mono flight-time">2026-10-29 21:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="239" 
+									        data-text="SR134 (NAN → ICN) / 2026-10-29 21:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR112</td>
+								<td class="flight-route">SIN → ICN</td>
+								<td class="mono flight-time">2026-10-29 16:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="109" 
+									        data-text="SR112 (SIN → ICN) / 2026-10-29 16:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR131</td>
+								<td class="flight-route">ICN → AKL</td>
+								<td class="mono flight-time">2026-10-29 14:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="223" 
+									        data-text="SR131 (ICN → AKL) / 2026-10-29 14:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR127</td>
+								<td class="flight-route">ICN → LHR</td>
+								<td class="mono flight-time">2026-10-29 13:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="199" 
+									        data-text="SR127 (ICN → LHR) / 2026-10-29 13:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR110</td>
+								<td class="flight-route">PEK → ICN</td>
+								<td class="mono flight-time">2026-10-29 12:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="97" 
+									        data-text="SR110 (PEK → ICN) / 2026-10-29 12:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR108</td>
+								<td class="flight-route">NRT → ICN</td>
+								<td class="mono flight-time">2026-10-29 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="85" 
+									        data-text="SR108 (NRT → ICN) / 2026-10-29 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR123</td>
+								<td class="flight-route">ICN → CDG</td>
+								<td class="mono flight-time">2026-10-29 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="175" 
+									        data-text="SR123 (ICN → CDG) / 2026-10-29 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR125</td>
+								<td class="flight-route">ICN → FRA</td>
+								<td class="mono flight-time">2026-10-29 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="185" 
+									        data-text="SR125 (ICN → FRA) / 2026-10-29 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR106</td>
+								<td class="flight-route">CJU → GMP</td>
+								<td class="mono flight-time">2026-10-29 11:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="73" 
+									        data-text="SR106 (CJU → GMP) / 2026-10-29 11:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR119</td>
+								<td class="flight-route">ICN → JFK</td>
+								<td class="mono flight-time">2026-10-29 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="151" 
+									        data-text="SR119 (ICN → JFK) / 2026-10-29 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR121</td>
+								<td class="flight-route">ICN → YYZ</td>
+								<td class="mono flight-time">2026-10-29 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="161" 
+									        data-text="SR121 (ICN → YYZ) / 2026-10-29 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR103</td>
+								<td class="flight-route">CJU → PUS</td>
+								<td class="mono flight-time">2026-10-29 10:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="55" 
+									        data-text="SR103 (CJU → PUS) / 2026-10-29 10:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR117</td>
+								<td class="flight-route">ICN → SYD</td>
+								<td class="mono flight-time">2026-10-29 10:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="137" 
+									        data-text="SR117 (ICN → SYD) / 2026-10-29 10:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR115</td>
+								<td class="flight-route">ICN → DOH</td>
+								<td class="mono flight-time">2026-10-29 10:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="127" 
+									        data-text="SR115 (ICN → DOH) / 2026-10-29 10:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR105</td>
+								<td class="flight-route">PUS → CJU</td>
+								<td class="mono flight-time">2026-10-29 09:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="67" 
+									        data-text="SR105 (PUS → CJU) / 2026-10-29 09:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR109</td>
+								<td class="flight-route">ICN → PEK</td>
+								<td class="mono flight-time">2026-10-29 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="91" 
+									        data-text="SR109 (ICN → PEK) / 2026-10-29 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR129</td>
+								<td class="flight-route">ICN → JNB</td>
+								<td class="mono flight-time">2026-10-29 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="208" 
+									        data-text="SR129 (ICN → JNB) / 2026-10-29 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR102</td>
+								<td class="flight-route">GMP → CJU</td>
+								<td class="mono flight-time">2026-10-29 08:40</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="49" 
+									        data-text="SR102 (GMP → CJU) / 2026-10-29 08:40"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR113</td>
+								<td class="flight-route">ICN → DXB</td>
+								<td class="mono flight-time">2026-10-29 08:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="114" 
+									        data-text="SR113 (ICN → DXB) / 2026-10-29 08:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR107</td>
+								<td class="flight-route">ICN → NRT</td>
+								<td class="mono flight-time">2026-10-29 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="79" 
+									        data-text="SR107 (ICN → NRT) / 2026-10-29 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR133</td>
+								<td class="flight-route">ICN → NAN</td>
+								<td class="mono flight-time">2026-10-29 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="233" 
+									        data-text="SR133 (ICN → NAN) / 2026-10-29 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR111</td>
+								<td class="flight-route">ICN → SIN</td>
+								<td class="mono flight-time">2026-10-29 07:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="103" 
+									        data-text="SR111 (ICN → SIN) / 2026-10-29 07:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR104</td>
+								<td class="flight-route">GMP → PUS</td>
+								<td class="mono flight-time">2026-10-29 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="61" 
+									        data-text="SR104 (GMP → PUS) / 2026-10-29 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR101</td>
+								<td class="flight-route">PUS → GMP</td>
+								<td class="mono flight-time">2026-10-29 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="43" 
+									        data-text="SR101 (PUS → GMP) / 2026-10-29 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR128</td>
+								<td class="flight-route">LHR → ICN</td>
+								<td class="mono flight-time">2026-10-29 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="204" 
+									        data-text="SR128 (LHR → ICN) / 2026-10-29 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR124</td>
+								<td class="flight-route">CDG → ICN</td>
+								<td class="mono flight-time">2026-10-29 05:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="180" 
+									        data-text="SR124 (CDG → ICN) / 2026-10-29 05:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR132</td>
+								<td class="flight-route">AKL → ICN</td>
+								<td class="mono flight-time">2026-10-29 04:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="228" 
+									        data-text="SR132 (AKL → ICN) / 2026-10-29 04:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR126</td>
+								<td class="flight-route">FRA → ICN</td>
+								<td class="mono flight-time">2026-10-29 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="190" 
+									        data-text="SR126 (FRA → ICN) / 2026-10-29 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR120</td>
+								<td class="flight-route">JFK → ICN</td>
+								<td class="mono flight-time">2026-10-29 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="156" 
+									        data-text="SR120 (JFK → ICN) / 2026-10-29 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR122</td>
+								<td class="flight-route">YYZ → ICN</td>
+								<td class="mono flight-time">2026-10-29 03:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="166" 
+									        data-text="SR122 (YYZ → ICN) / 2026-10-29 03:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR130</td>
+								<td class="flight-route">JNB → ICN</td>
+								<td class="mono flight-time">2026-10-29 02:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="33" 
+									        data-text="SR130 (JNB → ICN) / 2026-10-29 02:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR118</td>
+								<td class="flight-route">SYD → ICN</td>
+								<td class="mono flight-time">2026-10-28 23:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="142" 
+									        data-text="SR118 (SYD → ICN) / 2026-10-28 23:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR116</td>
+								<td class="flight-route">DOH → ICN</td>
+								<td class="mono flight-time">2026-10-28 23:20</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="132" 
+									        data-text="SR116 (DOH → ICN) / 2026-10-28 23:20"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR114</td>
+								<td class="flight-route">DXB → ICN</td>
+								<td class="mono flight-time">2026-10-28 21:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="119" 
+									        data-text="SR114 (DXB → ICN) / 2026-10-28 21:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR134</td>
+								<td class="flight-route">NAN → ICN</td>
+								<td class="mono flight-time">2026-10-28 21:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="238" 
+									        data-text="SR134 (NAN → ICN) / 2026-10-28 21:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR112</td>
+								<td class="flight-route">SIN → ICN</td>
+								<td class="mono flight-time">2026-10-28 16:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="108" 
+									        data-text="SR112 (SIN → ICN) / 2026-10-28 16:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR131</td>
+								<td class="flight-route">ICN → AKL</td>
+								<td class="mono flight-time">2026-10-28 14:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="222" 
+									        data-text="SR131 (ICN → AKL) / 2026-10-28 14:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR127</td>
+								<td class="flight-route">ICN → LHR</td>
+								<td class="mono flight-time">2026-10-28 13:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="198" 
+									        data-text="SR127 (ICN → LHR) / 2026-10-28 13:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR110</td>
+								<td class="flight-route">PEK → ICN</td>
+								<td class="mono flight-time">2026-10-28 12:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="96" 
+									        data-text="SR110 (PEK → ICN) / 2026-10-28 12:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR108</td>
+								<td class="flight-route">NRT → ICN</td>
+								<td class="mono flight-time">2026-10-28 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="84" 
+									        data-text="SR108 (NRT → ICN) / 2026-10-28 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR123</td>
+								<td class="flight-route">ICN → CDG</td>
+								<td class="mono flight-time">2026-10-28 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="174" 
+									        data-text="SR123 (ICN → CDG) / 2026-10-28 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR125</td>
+								<td class="flight-route">ICN → FRA</td>
+								<td class="mono flight-time">2026-10-28 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="184" 
+									        data-text="SR125 (ICN → FRA) / 2026-10-28 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR106</td>
+								<td class="flight-route">CJU → GMP</td>
+								<td class="mono flight-time">2026-10-28 11:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="72" 
+									        data-text="SR106 (CJU → GMP) / 2026-10-28 11:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR119</td>
+								<td class="flight-route">ICN → JFK</td>
+								<td class="mono flight-time">2026-10-28 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="150" 
+									        data-text="SR119 (ICN → JFK) / 2026-10-28 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR121</td>
+								<td class="flight-route">ICN → YYZ</td>
+								<td class="mono flight-time">2026-10-28 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="160" 
+									        data-text="SR121 (ICN → YYZ) / 2026-10-28 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR103</td>
+								<td class="flight-route">CJU → PUS</td>
+								<td class="mono flight-time">2026-10-28 10:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="54" 
+									        data-text="SR103 (CJU → PUS) / 2026-10-28 10:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR117</td>
+								<td class="flight-route">ICN → SYD</td>
+								<td class="mono flight-time">2026-10-28 10:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="136" 
+									        data-text="SR117 (ICN → SYD) / 2026-10-28 10:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR115</td>
+								<td class="flight-route">ICN → DOH</td>
+								<td class="mono flight-time">2026-10-28 10:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="126" 
+									        data-text="SR115 (ICN → DOH) / 2026-10-28 10:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR105</td>
+								<td class="flight-route">PUS → CJU</td>
+								<td class="mono flight-time">2026-10-28 09:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="66" 
+									        data-text="SR105 (PUS → CJU) / 2026-10-28 09:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR109</td>
+								<td class="flight-route">ICN → PEK</td>
+								<td class="mono flight-time">2026-10-28 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="90" 
+									        data-text="SR109 (ICN → PEK) / 2026-10-28 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR129</td>
+								<td class="flight-route">ICN → JNB</td>
+								<td class="mono flight-time">2026-10-28 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="32" 
+									        data-text="SR129 (ICN → JNB) / 2026-10-28 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR102</td>
+								<td class="flight-route">GMP → CJU</td>
+								<td class="mono flight-time">2026-10-28 08:40</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="48" 
+									        data-text="SR102 (GMP → CJU) / 2026-10-28 08:40"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR113</td>
+								<td class="flight-route">ICN → DXB</td>
+								<td class="mono flight-time">2026-10-28 08:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="113" 
+									        data-text="SR113 (ICN → DXB) / 2026-10-28 08:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR107</td>
+								<td class="flight-route">ICN → NRT</td>
+								<td class="mono flight-time">2026-10-28 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="78" 
+									        data-text="SR107 (ICN → NRT) / 2026-10-28 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR133</td>
+								<td class="flight-route">ICN → NAN</td>
+								<td class="mono flight-time">2026-10-28 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="232" 
+									        data-text="SR133 (ICN → NAN) / 2026-10-28 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR111</td>
+								<td class="flight-route">ICN → SIN</td>
+								<td class="mono flight-time">2026-10-28 07:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="102" 
+									        data-text="SR111 (ICN → SIN) / 2026-10-28 07:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR104</td>
+								<td class="flight-route">GMP → PUS</td>
+								<td class="mono flight-time">2026-10-28 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="60" 
+									        data-text="SR104 (GMP → PUS) / 2026-10-28 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR101</td>
+								<td class="flight-route">PUS → GMP</td>
+								<td class="mono flight-time">2026-10-28 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="42" 
+									        data-text="SR101 (PUS → GMP) / 2026-10-28 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR128</td>
+								<td class="flight-route">LHR → ICN</td>
+								<td class="mono flight-time">2026-10-28 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="203" 
+									        data-text="SR128 (LHR → ICN) / 2026-10-28 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR124</td>
+								<td class="flight-route">CDG → ICN</td>
+								<td class="mono flight-time">2026-10-28 05:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="179" 
+									        data-text="SR124 (CDG → ICN) / 2026-10-28 05:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR132</td>
+								<td class="flight-route">AKL → ICN</td>
+								<td class="mono flight-time">2026-10-28 04:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="227" 
+									        data-text="SR132 (AKL → ICN) / 2026-10-28 04:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR126</td>
+								<td class="flight-route">FRA → ICN</td>
+								<td class="mono flight-time">2026-10-28 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="29" 
+									        data-text="SR126 (FRA → ICN) / 2026-10-28 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR120</td>
+								<td class="flight-route">JFK → ICN</td>
+								<td class="mono flight-time">2026-10-28 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="155" 
+									        data-text="SR120 (JFK → ICN) / 2026-10-28 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR122</td>
+								<td class="flight-route">YYZ → ICN</td>
+								<td class="mono flight-time">2026-10-28 03:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="25" 
+									        data-text="SR122 (YYZ → ICN) / 2026-10-28 03:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR118</td>
+								<td class="flight-route">SYD → ICN</td>
+								<td class="mono flight-time">2026-10-27 23:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="21" 
+									        data-text="SR118 (SYD → ICN) / 2026-10-27 23:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR116</td>
+								<td class="flight-route">DOH → ICN</td>
+								<td class="mono flight-time">2026-10-27 23:20</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="131" 
+									        data-text="SR116 (DOH → ICN) / 2026-10-27 23:20"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR114</td>
+								<td class="flight-route">DXB → ICN</td>
+								<td class="mono flight-time">2026-10-27 21:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="118" 
+									        data-text="SR114 (DXB → ICN) / 2026-10-27 21:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR134</td>
+								<td class="flight-route">NAN → ICN</td>
+								<td class="mono flight-time">2026-10-27 21:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="37" 
+									        data-text="SR134 (NAN → ICN) / 2026-10-27 21:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR112</td>
+								<td class="flight-route">SIN → ICN</td>
+								<td class="mono flight-time">2026-10-27 16:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="107" 
+									        data-text="SR112 (SIN → ICN) / 2026-10-27 16:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR131</td>
+								<td class="flight-route">ICN → AKL</td>
+								<td class="mono flight-time">2026-10-27 14:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="221" 
+									        data-text="SR131 (ICN → AKL) / 2026-10-27 14:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR127</td>
+								<td class="flight-route">ICN → LHR</td>
+								<td class="mono flight-time">2026-10-27 13:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="197" 
+									        data-text="SR127 (ICN → LHR) / 2026-10-27 13:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR110</td>
+								<td class="flight-route">PEK → ICN</td>
+								<td class="mono flight-time">2026-10-27 12:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="95" 
+									        data-text="SR110 (PEK → ICN) / 2026-10-27 12:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR108</td>
+								<td class="flight-route">NRT → ICN</td>
+								<td class="mono flight-time">2026-10-27 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="83" 
+									        data-text="SR108 (NRT → ICN) / 2026-10-27 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR123</td>
+								<td class="flight-route">ICN → CDG</td>
+								<td class="mono flight-time">2026-10-27 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="173" 
+									        data-text="SR123 (ICN → CDG) / 2026-10-27 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR125</td>
+								<td class="flight-route">ICN → FRA</td>
+								<td class="mono flight-time">2026-10-27 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="28" 
+									        data-text="SR125 (ICN → FRA) / 2026-10-27 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR106</td>
+								<td class="flight-route">CJU → GMP</td>
+								<td class="mono flight-time">2026-10-27 11:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="71" 
+									        data-text="SR106 (CJU → GMP) / 2026-10-27 11:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR119</td>
+								<td class="flight-route">ICN → JFK</td>
+								<td class="mono flight-time">2026-10-27 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="149" 
+									        data-text="SR119 (ICN → JFK) / 2026-10-27 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR121</td>
+								<td class="flight-route">ICN → YYZ</td>
+								<td class="mono flight-time">2026-10-27 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="24" 
+									        data-text="SR121 (ICN → YYZ) / 2026-10-27 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR103</td>
+								<td class="flight-route">CJU → PUS</td>
+								<td class="mono flight-time">2026-10-27 10:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="53" 
+									        data-text="SR103 (CJU → PUS) / 2026-10-27 10:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR117</td>
+								<td class="flight-route">ICN → SYD</td>
+								<td class="mono flight-time">2026-10-27 10:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="20" 
+									        data-text="SR117 (ICN → SYD) / 2026-10-27 10:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR115</td>
+								<td class="flight-route">ICN → DOH</td>
+								<td class="mono flight-time">2026-10-27 10:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="125" 
+									        data-text="SR115 (ICN → DOH) / 2026-10-27 10:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR105</td>
+								<td class="flight-route">PUS → CJU</td>
+								<td class="mono flight-time">2026-10-27 09:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="65" 
+									        data-text="SR105 (PUS → CJU) / 2026-10-27 09:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR109</td>
+								<td class="flight-route">ICN → PEK</td>
+								<td class="mono flight-time">2026-10-27 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="89" 
+									        data-text="SR109 (ICN → PEK) / 2026-10-27 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR102</td>
+								<td class="flight-route">GMP → CJU</td>
+								<td class="mono flight-time">2026-10-27 08:40</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="47" 
+									        data-text="SR102 (GMP → CJU) / 2026-10-27 08:40"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR113</td>
+								<td class="flight-route">ICN → DXB</td>
+								<td class="mono flight-time">2026-10-27 08:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="112" 
+									        data-text="SR113 (ICN → DXB) / 2026-10-27 08:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR107</td>
+								<td class="flight-route">ICN → NRT</td>
+								<td class="mono flight-time">2026-10-27 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="77" 
+									        data-text="SR107 (ICN → NRT) / 2026-10-27 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR111</td>
+								<td class="flight-route">ICN → SIN</td>
+								<td class="mono flight-time">2026-10-27 07:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="101" 
+									        data-text="SR111 (ICN → SIN) / 2026-10-27 07:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR104</td>
+								<td class="flight-route">GMP → PUS</td>
+								<td class="mono flight-time">2026-10-27 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="59" 
+									        data-text="SR104 (GMP → PUS) / 2026-10-27 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR101</td>
+								<td class="flight-route">PUS → GMP</td>
+								<td class="mono flight-time">2026-10-27 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="41" 
+									        data-text="SR101 (PUS → GMP) / 2026-10-27 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR128</td>
+								<td class="flight-route">LHR → ICN</td>
+								<td class="mono flight-time">2026-10-27 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="202" 
+									        data-text="SR128 (LHR → ICN) / 2026-10-27 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR124</td>
+								<td class="flight-route">CDG → ICN</td>
+								<td class="mono flight-time">2026-10-27 05:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="178" 
+									        data-text="SR124 (CDG → ICN) / 2026-10-27 05:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR132</td>
+								<td class="flight-route">AKL → ICN</td>
+								<td class="mono flight-time">2026-10-27 04:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="226" 
+									        data-text="SR132 (AKL → ICN) / 2026-10-27 04:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR120</td>
+								<td class="flight-route">JFK → ICN</td>
+								<td class="mono flight-time">2026-10-27 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="154" 
+									        data-text="SR120 (JFK → ICN) / 2026-10-27 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR116</td>
+								<td class="flight-route">DOH → ICN</td>
+								<td class="mono flight-time">2026-10-26 23:20</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="130" 
+									        data-text="SR116 (DOH → ICN) / 2026-10-26 23:20"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR114</td>
+								<td class="flight-route">DXB → ICN</td>
+								<td class="mono flight-time">2026-10-26 21:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="17" 
+									        data-text="SR114 (DXB → ICN) / 2026-10-26 21:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR112</td>
+								<td class="flight-route">SIN → ICN</td>
+								<td class="mono flight-time">2026-10-26 16:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="106" 
+									        data-text="SR112 (SIN → ICN) / 2026-10-26 16:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR131</td>
+								<td class="flight-route">ICN → AKL</td>
+								<td class="mono flight-time">2026-10-26 14:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="220" 
+									        data-text="SR131 (ICN → AKL) / 2026-10-26 14:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR127</td>
+								<td class="flight-route">ICN → LHR</td>
+								<td class="mono flight-time">2026-10-26 13:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="196" 
+									        data-text="SR127 (ICN → LHR) / 2026-10-26 13:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR110</td>
+								<td class="flight-route">PEK → ICN</td>
+								<td class="mono flight-time">2026-10-26 12:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="94" 
+									        data-text="SR110 (PEK → ICN) / 2026-10-26 12:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR108</td>
+								<td class="flight-route">NRT → ICN</td>
+								<td class="mono flight-time">2026-10-26 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="82" 
+									        data-text="SR108 (NRT → ICN) / 2026-10-26 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR123</td>
+								<td class="flight-route">ICN → CDG</td>
+								<td class="mono flight-time">2026-10-26 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="172" 
+									        data-text="SR123 (ICN → CDG) / 2026-10-26 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR106</td>
+								<td class="flight-route">CJU → GMP</td>
+								<td class="mono flight-time">2026-10-26 11:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="70" 
+									        data-text="SR106 (CJU → GMP) / 2026-10-26 11:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR119</td>
+								<td class="flight-route">ICN → JFK</td>
+								<td class="mono flight-time">2026-10-26 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="148" 
+									        data-text="SR119 (ICN → JFK) / 2026-10-26 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR103</td>
+								<td class="flight-route">CJU → PUS</td>
+								<td class="mono flight-time">2026-10-26 10:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="52" 
+									        data-text="SR103 (CJU → PUS) / 2026-10-26 10:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR115</td>
+								<td class="flight-route">ICN → DOH</td>
+								<td class="mono flight-time">2026-10-26 10:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="124" 
+									        data-text="SR115 (ICN → DOH) / 2026-10-26 10:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR105</td>
+								<td class="flight-route">PUS → CJU</td>
+								<td class="mono flight-time">2026-10-26 09:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="64" 
+									        data-text="SR105 (PUS → CJU) / 2026-10-26 09:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR109</td>
+								<td class="flight-route">ICN → PEK</td>
+								<td class="mono flight-time">2026-10-26 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="88" 
+									        data-text="SR109 (ICN → PEK) / 2026-10-26 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR102</td>
+								<td class="flight-route">GMP → CJU</td>
+								<td class="mono flight-time">2026-10-26 08:40</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="46" 
+									        data-text="SR102 (GMP → CJU) / 2026-10-26 08:40"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR113</td>
+								<td class="flight-route">ICN → DXB</td>
+								<td class="mono flight-time">2026-10-26 08:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="16" 
+									        data-text="SR113 (ICN → DXB) / 2026-10-26 08:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR107</td>
+								<td class="flight-route">ICN → NRT</td>
+								<td class="mono flight-time">2026-10-26 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="76" 
+									        data-text="SR107 (ICN → NRT) / 2026-10-26 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR111</td>
+								<td class="flight-route">ICN → SIN</td>
+								<td class="mono flight-time">2026-10-26 07:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="100" 
+									        data-text="SR111 (ICN → SIN) / 2026-10-26 07:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR104</td>
+								<td class="flight-route">GMP → PUS</td>
+								<td class="mono flight-time">2026-10-26 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="58" 
+									        data-text="SR104 (GMP → PUS) / 2026-10-26 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR101</td>
+								<td class="flight-route">PUS → GMP</td>
+								<td class="mono flight-time">2026-10-26 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="40" 
+									        data-text="SR101 (PUS → GMP) / 2026-10-26 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR128</td>
+								<td class="flight-route">LHR → ICN</td>
+								<td class="mono flight-time">2026-10-26 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="31" 
+									        data-text="SR128 (LHR → ICN) / 2026-10-26 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR124</td>
+								<td class="flight-route">CDG → ICN</td>
+								<td class="mono flight-time">2026-10-26 05:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="27" 
+									        data-text="SR124 (CDG → ICN) / 2026-10-26 05:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR132</td>
+								<td class="flight-route">AKL → ICN</td>
+								<td class="mono flight-time">2026-10-26 04:30</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="35" 
+									        data-text="SR132 (AKL → ICN) / 2026-10-26 04:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR120</td>
+								<td class="flight-route">JFK → ICN</td>
+								<td class="mono flight-time">2026-10-26 04:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="23" 
+									        data-text="SR120 (JFK → ICN) / 2026-10-26 04:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR116</td>
+								<td class="flight-route">DOH → ICN</td>
+								<td class="mono flight-time">2026-10-25 23:20</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="19" 
+									        data-text="SR116 (DOH → ICN) / 2026-10-25 23:20"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR112</td>
+								<td class="flight-route">SIN → ICN</td>
+								<td class="mono flight-time">2026-10-25 16:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="15" 
+									        data-text="SR112 (SIN → ICN) / 2026-10-25 16:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR131</td>
+								<td class="flight-route">ICN → AKL</td>
+								<td class="mono flight-time">2026-10-25 14:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="34" 
+									        data-text="SR131 (ICN → AKL) / 2026-10-25 14:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR127</td>
+								<td class="flight-route">ICN → LHR</td>
+								<td class="mono flight-time">2026-10-25 13:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="30" 
+									        data-text="SR127 (ICN → LHR) / 2026-10-25 13:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR110</td>
+								<td class="flight-route">PEK → ICN</td>
+								<td class="mono flight-time">2026-10-25 12:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="13" 
+									        data-text="SR110 (PEK → ICN) / 2026-10-25 12:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR108</td>
+								<td class="flight-route">NRT → ICN</td>
+								<td class="mono flight-time">2026-10-25 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="11" 
+									        data-text="SR108 (NRT → ICN) / 2026-10-25 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR123</td>
+								<td class="flight-route">ICN → CDG</td>
+								<td class="mono flight-time">2026-10-25 12:00</td>
+								<td>
+									<span class="badge badge-scheduled">DELAYED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="26" 
+									        data-text="SR123 (ICN → CDG) / 2026-10-25 12:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR106</td>
+								<td class="flight-route">CJU → GMP</td>
+								<td class="mono flight-time">2026-10-25 11:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="9" 
+									        data-text="SR106 (CJU → GMP) / 2026-10-25 11:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR119</td>
+								<td class="flight-route">ICN → JFK</td>
+								<td class="mono flight-time">2026-10-25 11:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="22" 
+									        data-text="SR119 (ICN → JFK) / 2026-10-25 11:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR103</td>
+								<td class="flight-route">CJU → PUS</td>
+								<td class="mono flight-time">2026-10-25 10:50</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="6" 
+									        data-text="SR103 (CJU → PUS) / 2026-10-25 10:50"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR115</td>
+								<td class="flight-route">ICN → DOH</td>
+								<td class="mono flight-time">2026-10-25 10:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="18" 
+									        data-text="SR115 (ICN → DOH) / 2026-10-25 10:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR105</td>
+								<td class="flight-route">PUS → CJU</td>
+								<td class="mono flight-time">2026-10-25 09:10</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="8" 
+									        data-text="SR105 (PUS → CJU) / 2026-10-25 09:10"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR109</td>
+								<td class="flight-route">ICN → PEK</td>
+								<td class="mono flight-time">2026-10-25 09:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="12" 
+									        data-text="SR109 (ICN → PEK) / 2026-10-25 09:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR102</td>
+								<td class="flight-route">GMP → CJU</td>
+								<td class="mono flight-time">2026-10-25 08:40</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="5" 
+									        data-text="SR102 (GMP → CJU) / 2026-10-25 08:40"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR107</td>
+								<td class="flight-route">ICN → NRT</td>
+								<td class="mono flight-time">2026-10-25 08:00</td>
+								<td>
+									<span class="badge badge-scheduled">DELAYED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="10" 
+									        data-text="SR107 (ICN → NRT) / 2026-10-25 08:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR111</td>
+								<td class="flight-route">ICN → SIN</td>
+								<td class="mono flight-time">2026-10-25 07:30</td>
+								<td>
+									<span class="badge badge-scheduled">DELAYED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="14" 
+									        data-text="SR111 (ICN → SIN) / 2026-10-25 07:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR104</td>
+								<td class="flight-route">GMP → PUS</td>
+								<td class="mono flight-time">2026-10-25 07:00</td>
+								<td>
+									<span class="badge badge-scheduled">SCHEDULED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="7" 
+									        data-text="SR104 (GMP → PUS) / 2026-10-25 07:00"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							<tr class="modal-flight-row">
+								<td class="mono flight-no" style="font-weight: bold; color: var(--primary);">SR101</td>
+								<td class="flight-route">PUS → GMP</td>
+								<td class="mono flight-time">2026-10-25 06:30</td>
+								<td>
+									<span class="badge badge-scheduled">DELAYED</span>
+								</td>
+								<td>
+									<!-- 선택 시 ID와 텍스트를 모두 전달 -->
+									<button type="button" class="btn btn-primary btn-sm" 
+									        data-id="4" 
+									        data-text="SR101 (PUS → GMP) / 2026-10-25 06:30"
+									        onclick="selectFlightFromModal(this)">
+										선택
+									</button>
+								</td>
+							</tr>
+							
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="/skyroute/staff/assets/js/staff.js"></script>
+
+</body>
+</html>

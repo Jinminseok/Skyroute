@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head><script src="/skyroute/guest/_demo/data.js"></script><script src="/skyroute/_demo/demo.js"></script><link rel="stylesheet" href="/skyroute/_demo/demo.css">
+	<title>회원가입</title>
+	<link rel="stylesheet" href="/skyroute/assets/css/member-login.css"> 
+	<script type="text/javascript" src="/skyroute/guest/assets/js/jquery-3.7.1.min.js"></script>
+	<script type="text/javascript" src="/skyroute/guest/assets/js/member.login.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+	<style>
+		/* 모달 기본 스타일 */
+		.modal-overlay {
+			display: none;
+			position: fixed;
+			top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0, 0, 0, 0.5);
+			z-index: 9999;
+			align-items: center;
+			justify-content: center;
+		}
+		.modal-content {
+			background: #ffffff;
+			width: 400px;
+			padding: 30px;
+			border-radius: 16px;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+			position: relative;
+			box-sizing: border-box;
+		}
+		.modal-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20px;
+		}
+		.modal-header h2 {
+			font-size: 18px;
+			font-weight: 600;
+			margin: 0;
+			color: #000000;
+		}
+		.modal-close {
+			cursor: pointer;
+			color: #000000;
+			font-size: 24px;
+		}
+		.modal-body .form-group {
+			margin-bottom: 15px;
+		}
+		.modal-body label {
+			display: block;
+			font-size: 13px;
+			font-weight: 600;
+			margin-bottom: 6px;
+			color: #000000;
+		}
+		.modal-body .input-wrap {
+			display: flex;
+			align-items: center;
+			border: 1px solid #e2e8f0;
+			border-radius: 8px;
+			padding: 0 12px;
+			height: 42px;
+			background: #ffffff;
+		}
+		.modal-body .input-wrap span {
+			color: #94a3b8;
+			margin-right: 8px;
+		}
+		.modal-body .input {
+			border: none;
+			outline: none;
+			width: 100%;
+			font-size: 14px;
+		}
+		.btn-modal-submit {
+			width: 100%;
+			height: 42px;
+			background: #000000;
+			color: #ffffff;
+			border: none;
+			border-radius: 8px;
+			font-size: 14px;
+			font-weight: 500;
+			cursor: pointer;
+			margin-top: 10px;
+		}
+		.modal-result {
+			margin-top: 15px;
+			padding: 12px;
+			border-radius: 8px;
+			background: #f1f5f9;
+			font-size: 13px;
+			color: #000000;
+			display: none;
+			text-align: center;
+		}
+		/* 에러 박스 디자인 스타일 */
+		.error-box {
+		    display: flex;
+		    align-items: center;
+		    gap: 8px;
+		    background-color: #fef2f2; /* 은은하고 고급스러운 연분홍/빨간 배경 */
+		    border: 1px solid #fecaca;   /* 테두리 선 */
+		    color: #dc2626;             /* 경고 빨간색 폰트 */
+		    padding: 12px 16px;
+		    border-radius: 10px;
+		    font-size: 13px;
+		    font-weight: 500;
+		    margin-bottom: 20px;        /* 아래 input 폼과의 여백 */
+		    line-height: 1.4;
+		    word-break: keep-all;       /* 단어 단위 줄바꿈으로 깔끔함 유지 */
+		    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.05);
+		}
+		
+		.error-box .error-icon {
+		    font-size: 18px;
+		    color: #dc2626;
+		    flex-shrink: 0;             /* 아이콘 찌그러짐 방지 */
+		}
+	</style>
+</head>  
+<body>	
+
+  <div class="login-container">
+    <div class="logo-wrap">
+      <div class="logo-box">SR</div>
+      <h1>SkyRoute 로그인</h1>
+      <p>SkyRoute 하늘을 누리다</p>
+    </div>
+
+	<!-- 🎯 상태/권한별 에러 메시지 출력 구역 -->
+	
+	
+	
+	
+	
+	
+	
+
+    <!-- 🎯 th:action 절대 경로(/member/login) 지정으로 시큐리티 POST 캐치 확실히 보장 -->
+    <form action="/skyroute/guest/member/login" id="member_login" method="post"><input type="hidden" name="_csrf" value="UrDo1QT_Q4p9j5Pwr4Szhioyd1j_qYaMVM404V4WBuG44GxhZdKL4DbJIbpQ7qbCzKmH4xsGWmHMzeChbfpR0WdzMtWIhApT"/>
+      
+      <input type="hidden" id="csrfParameterName" value="_csrf">
+      <input type="hidden" id="csrfToken" value="UrDo1QT_Q4p9j5Pwr4Szhioyd1j_qYaMVM404V4WBuG44GxhZdKL4DbJIbpQ7qbCzKmH4xsGWmHMzeChbfpR0WdzMtWIhApT">
+      
+      <div class="form-group">
+        <label for="id">아이디</label>
+        <div class="input-wrap">
+          <span class="material-symbols-outlined">person</span>
+          <input type="text" id="id" name="id" class="input" placeholder="아이디를 입력하세요" required autocomplete="off">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">비밀번호</label>
+        <div class="input-wrap">
+          <span class="material-symbols-outlined">lock</span>
+          <input type="password" id="password" name="password" class="input" placeholder="비밀번호를 입력하세요" required>
+        </div>
+      </div>
+
+      <div class="options">
+        <div class="find-links">
+          <a href="javascript:void(0);" id="btnOpenFindId">아이디 찾기</a>
+          <span>|</span>
+          <a href="javascript:void(0);" id="btnOpenFindPw">비밀번호 찾기</a>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">로그인 (Login)</button>
+      
+      <div class="join-prompt">
+        아직 계정이 없으신가요?
+        <a href="/skyroute/guest/member/registerUser">회원가입</a>
+      </div>
+    </form>
+  </div>
+
+
+  <!-- 아이디 찾기 모달 -->
+  <div class="modal-overlay" id="findIdModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>아이디 찾기</h2>
+        <span class="material-symbols-outlined modal-close" id="btnCloseFindId">close</span>
+      </div>
+      <div class="modal-body">
+        <div id="formFindId"> 
+          <div class="form-group">
+            <label for="findIdName">이름</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined">person</span>
+              <input type="text" id="findIdName" class="input" placeholder="이름을 입력하세요" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="findIdEmail">이메일</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined">mail</span>
+              <input type="email" id="findIdEmail" class="input" placeholder="이메일을 입력하세요" required>
+            </div>
+          </div>
+          <button type="button" id="btnSubmitFindId" class="btn-modal-submit">확인</button>
+        </div>
+        <div class="modal-result" id="findIdResult"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 비밀번호 찾기 모달 -->
+  <div class="modal-overlay" id="findPwModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>비밀번호 찾기</h2>
+        <span class="material-symbols-outlined modal-close" id="btnCloseFindPw">close</span>
+      </div>
+      <div class="modal-body">
+        <div id="formFindPw">
+          <div class="form-group">
+            <label for="findPwId">아이디</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined">person</span>
+              <input type="text" id="findPwId" class="input" placeholder="아이디를 입력하세요" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="findPwName">이름</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined">badge</span>
+              <input type="text" id="findPwName" class="input" placeholder="이름을 입력하세요" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="findPwEmail">이메일</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined">mail</span>
+              <input type="email" id="findPwEmail" class="input" placeholder="이메일을 입력하세요" required>
+            </div>
+          </div>
+          <button type="button" id="btnSubmitFindPw" class="btn-modal-submit">확인</button>
+        </div>
+        <div class="modal-result" id="findPwResult"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      
+      // 요소 선언
+      var mId = document.getElementById('findIdModal');
+      var mPw = document.getElementById('findPwModal');
+      
+      var btnOpenId = document.getElementById('btnOpenFindId');
+      var btnOpenPw = document.getElementById('btnOpenFindPw');
+      
+      var btnCloseId = document.getElementById('btnCloseFindId');
+      var btnClosePw = document.getElementById('btnCloseFindPw');
+
+      // 아이디 찾기 모달 오픈
+      if(btnOpenId) {
+        btnOpenId.addEventListener('click', function(e) {
+          e.preventDefault();
+          if(mId) mId.style.display = 'flex';
+        });
+      }
+
+      // 비밀번호 찾기 모달 오픈
+      if(btnOpenPw) {
+        btnOpenPw.addEventListener('click', function(e) {
+          e.preventDefault();
+          if(mPw) mPw.style.display = 'flex';
+        });
+      }
+
+      // 아이디 찾기 모달 닫기 및 초기화
+      if(btnCloseId) {
+        btnCloseId.addEventListener('click', function() {
+          if(mId) {
+            mId.style.display = 'none';
+            document.getElementById('findIdName').value = '';
+            document.getElementById('findIdEmail').value = '';
+            document.getElementById('findIdResult').style.display = 'none';
+          }
+        });
+      }
+
+      // 비밀번호 찾기 모달 닫기 및 초기화
+      if(btnClosePw) {
+        btnClosePw.addEventListener('click', function() {
+          if(mPw) {
+            mPw.style.display = 'none';
+            document.getElementById('findPwId').value = '';
+            document.getElementById('findPwName').value = '';
+            document.getElementById('findPwEmail').value = '';
+            document.getElementById('findPwResult').style.display = 'none';
+          }
+        });
+      }
+
+      // 외부 영역 클릭 시 닫기 처리
+      window.addEventListener('click', function(e) {
+        if (e.target === mId) {
+          mId.style.display = 'none';
+          document.getElementById('findIdName').value = '';
+          document.getElementById('findIdEmail').value = '';
+          document.getElementById('findIdResult').style.display = 'none';
+        }
+        if (e.target === mPw) {
+          mPw.style.display = 'none';
+          document.getElementById('findPwId').value = '';
+          document.getElementById('findPwName').value = '';
+          document.getElementById('findPwEmail').value = '';
+          document.getElementById('findPwResult').style.display = 'none';
+        }
+      });
+
+      // 아이디 찾기 버튼 클릭 이벤트 처리 
+      var btnSubmitId = document.getElementById('btnSubmitFindId');
+      if(btnSubmitId) {
+        btnSubmitId.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          var name = document.getElementById('findIdName').value;
+          var email = document.getElementById('findIdEmail').value;
+          var resultBox = document.getElementById('findIdResult');
+
+          if(!name || !email) {
+            alert("이름과 이메일을 모두 입력하세요.");
+            return;
+          }
+
+          var paramName = document.getElementById('csrfParameterName').value;
+          var tokenValue = document.getElementById('csrfToken').value;
+
+          var sendData = { name: name, email: email };
+          sendData[paramName] = tokenValue;
+
+          $.ajax({
+            url: '/skyroute/guest/member/findId',
+            type: 'POST',
+            data: sendData,
+            success: function(response) {
+              resultBox.innerText = response;
+              resultBox.style.display = 'block';
+            },
+            error: function() {
+              resultBox.innerText = '오류가 발생했습니다. 다시 시도하세요.';
+              resultBox.style.display = 'block';
+            }
+          });
+        });
+      }
+
+      // 비밀번호 찾기 버튼 클릭 이벤트 처리 
+      var btnSubmitPw = document.getElementById('btnSubmitFindPw'); 
+      if(btnSubmitPw) {
+        btnSubmitPw.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          var id = document.getElementById('findPwId').value;
+          var name = document.getElementById('findPwName').value;
+          var email = document.getElementById('findPwEmail').value;
+          var resultBox = document.getElementById('findPwResult');
+
+          if(!id || !name || !email) {
+            alert("모든 항목을 입력하세요.");
+            return;
+          }
+
+          var paramName = document.getElementById('csrfParameterName').value;
+          var tokenValue = document.getElementById('csrfToken').value;
+
+          var sendData = { id: id, name: name, email: email };
+          sendData[paramName] = tokenValue;
+
+          $.ajax({
+            url: '/skyroute/guest/member/findPw',
+            type: 'POST',
+            data: sendData,
+            success: function(response) {
+              resultBox.innerText = response;
+              resultBox.style.display = 'block';
+            },
+            error: function() {
+              resultBox.innerText = '오류가 발생했습니다. 다시 시도하세요.';
+              resultBox.style.display = 'block';
+            }
+          });
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
